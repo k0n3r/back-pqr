@@ -52,9 +52,9 @@ final class Version20191224165528 extends AbstractMigration
                 'pertenece_nucleo' => 0,
                 'nombre' => 'formulario_pqr',
                 'tipo' => 1,
-                'imagen' => 'pg pg-form',
+                'imagen' => 'fa fa-bars',
                 'etiqueta' => 'Formulario',
-                'enlace' => '#',
+                'enlace' => 'views/modules/pqr/index.php',
                 'cod_padre' => $id,
                 'orden' => 1
             ]

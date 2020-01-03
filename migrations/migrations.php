@@ -3,7 +3,7 @@
 return [
     'name' => 'SAIA Migrations',
     'migrations_namespace' => 'Saia\Pqr\Migrations',
-    'table_name' => 'migrations_pqr',
+    'table_name' => 'pqr_migrations',
     'column_name' => 'version',
     'column_length' => 14,
     'executed_at_column_name' => 'executed_at',
