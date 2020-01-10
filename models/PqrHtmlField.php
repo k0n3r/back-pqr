@@ -10,7 +10,7 @@ class PqrHtmlField extends \Model
         parent::__construct($id);
     }
 
-    protected function defineAttributes()
+    protected function defineAttributes(): void
     {
         $this->dbAttributes = (object) [
             'safe' => [
