@@ -3,9 +3,10 @@
 require '../../../vendor/autoload.php';
 
 use Doctrine\DBAL\Tools\Console\Helper\ConnectionHelper;
+use Saia\core\DatabaseConnection;
 use Symfony\Component\Console\Helper\HelperSet;
 
-$Connection = Connection::getInstance();
+$Connection = DatabaseConnection::getInstance();
 
 return new HelperSet([
     'db' => new ConnectionHelper($Connection)

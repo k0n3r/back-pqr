@@ -2,7 +2,9 @@
 
 namespace Saia\Pqr\Models;
 
-class PqrHtmlField extends \Model
+use Saia\core\model\Model;
+
+class PqrHtmlField extends Model
 {
 
     public function __construct($id = null)

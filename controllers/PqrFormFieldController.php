@@ -2,6 +2,8 @@
 
 namespace Saia\Pqr\Controllers;
 
+use Exception;
+use Saia\core\DatabaseConnection;
 use Saia\Pqr\Models\PqrFormField;
 
 class PqrFormFieldController
@@ -52,7 +54,7 @@ class PqrFormFieldController
         ];
 
         try {
-            $conn = \Connection::beginTransaction();
+            $conn = DatabaseConnection::beginTransaction();
 
             $attributes = array_merge($params, $defaultFields);
 
@@ -63,9 +65,9 @@ class PqrFormFieldController
                 $conn->commit();
                 $Response->data = $PqrFormField->getDataAttributes();
             } else {
-                throw new \Exception("No fue posible guardar", 1);
+                throw new Exception("No fue posible guardar", 1);
             }
-        } catch (\Exception $th) {
+        } catch (Exception $th) {
             $conn->rollBack();
             $Response->success = 0;
             $Response->message = $th->getMessage();
