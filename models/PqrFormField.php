@@ -3,6 +3,7 @@
 namespace Saia\Pqr\Models;
 
 use Saia\core\model\Model;
+use Saia\Pqr\Models\PqrHtmlField;
 
 class PqrFormField extends Model
 {

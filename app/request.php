@@ -14,6 +14,8 @@ while ($max_salida > 0) {
 
 include_once $rootPath . 'app/vendor/autoload.php';
 
+use Exception;
+use ReflectionClass;
 use Saia\controllers\JwtController;
 use Saia\controllers\UtilitiesController;
 use Saia\controllers\notificaciones\NotifierController;
@@ -36,7 +38,7 @@ try {
     $Reflection = new ReflectionClass("Saia\\Pqr\\Controllers\\$class");
     if ($Reflection->hasMethod($method)) {
 
-        $Instancia = $Reflection->newInstanceArgs([$newData]);
+        $Instancia = $Reflection->newInstanceArgs($newData);
         $Response = $Instancia->$method();
         $Response->notifications = NotifierController::prepare();
     } else {

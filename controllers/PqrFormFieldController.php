@@ -47,6 +47,14 @@ class PqrFormFieldController
         $cadena = implode('_', array_filter(explode('_', $cadena)));
         $name = trim(substr($cadena, 0, 20), '_');
 
+        if (PqrFormField::findAllByAttributes([
+            'name' => $name
+        ])) {
+            $caracterFinal = substr($name, -1);
+            $consecutivo = is_numeric($caracterFinal) ? (int) $caracterFinal++ : 1;
+            $name = $name . '_' . $consecutivo;
+        }
+
         $defaultFields = [
             'name' => $name,
             'active' => 1,
@@ -66,6 +74,63 @@ class PqrFormFieldController
                 $Response->data = $PqrFormField->getDataAttributes();
             } else {
                 throw new Exception("No fue posible guardar", 1);
+            }
+        } catch (Exception $th) {
+            $conn->rollBack();
+            $Response->success = 0;
+            $Response->message = $th->getMessage();
+        }
+
+        return $Response;
+    }
+
+    public function destroy(): object
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+
+        try {
+            $conn = DatabaseConnection::beginTransaction();
+
+            $PqrFormField = new PqrFormField($this->request['id']);
+            if ($PqrFormField->delete()) {
+                $conn->commit();
+                $Response->success = 1;
+            } else {
+                throw new Exception("No fue posible eliminar", 1);
+            }
+        } catch (Exception $th) {
+            $conn->rollBack();
+            $Response->success = 0;
+            $Response->message = $th->getMessage();
+        }
+
+        return $Response;
+    }
+
+    public function update()
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+        $params = $this->request['params']['dataField'];
+        $id = $this->request['params']['id'];
+
+        $params['setting'] = json_encode($params['setting']);
+
+        try {
+            $conn = DatabaseConnection::beginTransaction();
+
+            $PqrFormField = new PqrFormField($id);
+            $PqrFormField->setAttributes($params);
+
+            if ($PqrFormField->update()) {
+                $conn->commit();
+                $Response->success = 1;
+                $Response->data = $PqrFormField->getDataAttributes();
+            } else {
+                throw new Exception("No fue posible eliminar", 1);
             }
         } catch (Exception $th) {
             $conn->rollBack();
