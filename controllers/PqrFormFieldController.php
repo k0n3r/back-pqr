@@ -43,20 +43,8 @@ class PqrFormFieldController
         ];
         $params = $this->request['params'];
 
-        $cadena = trim(preg_replace('/[^a-z]/', '_', strtolower($params['label'])));
-        $cadena = implode('_', array_filter(explode('_', $cadena)));
-        $name = trim(substr($cadena, 0, 20), '_');
-
-        if (PqrFormField::findAllByAttributes([
-            'name' => $name
-        ])) {
-            $caracterFinal = substr($name, -1);
-            $consecutivo = is_numeric($caracterFinal) ? (int) $caracterFinal++ : 1;
-            $name = $name . '_' . $consecutivo;
-        }
-
         $defaultFields = [
-            'name' => $name,
+            'name' => $this->generateName($params['label']),
             'active' => 1,
             'setting' => json_encode($params['setting'])
         ];
@@ -82,6 +70,23 @@ class PqrFormFieldController
         }
 
         return $Response;
+    }
+
+    protected function generateName(string $label, int $pref = 0): string
+    {
+        $cadena = trim(preg_replace('/[^a-z]/', '_', strtolower($label)));
+        $cadena = implode('_', array_filter(explode('_', $cadena)));
+        $cadena = trim(substr($cadena, 0, 20), '_');
+
+        $name = $pref ? "{$cadena}_{$pref}" : $cadena;
+
+        if (PqrFormField::findAllByAttributes([
+            'name' => $name
+        ])) {
+            $pref++;
+            $name = $this->generateName($name, $pref);
+        }
+        return $name;
     }
 
     public function destroy(): object
@@ -114,6 +119,7 @@ class PqrFormFieldController
         $Response = (object) [
             'success' => 0
         ];
+
         $params = $this->request['params']['dataField'];
         $id = $this->request['params']['id'];
 

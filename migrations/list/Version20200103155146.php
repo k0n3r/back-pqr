@@ -14,7 +14,7 @@ final class Version20200103155146 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Creacion de tablas de PQR';
+        return 'Creacion de tablas de pqr form field y pqr html field';
     }
 
     public function up(Schema $schema): void
@@ -47,8 +47,15 @@ final class Version20200103155146 extends AbstractMigration
 
         $table->addColumn('fk_pqr_html_field', 'integer');
 
-        $table->addColumn('active', 'integer', [
-            'length' => 1,
+        $table->addColumn('fk_campos_formato', 'integer', [
+            'default' => 0
+        ]);
+
+        $table->addColumn('order', 'integer', [
+            'default' => 0
+        ]);
+
+        $table->addColumn('active', 'boolean', [
             'default' => 1
         ]);
 
@@ -68,8 +75,7 @@ final class Version20200103155146 extends AbstractMigration
             'length' => 50
         ]);
 
-        $table2->addColumn('active', 'integer', [
-            'length' => 1,
+        $table2->addColumn('active', 'boolean', [
             'default' => 1
         ]);
     }
