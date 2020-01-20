@@ -35,6 +35,7 @@ try {
     }
     unset($newData['class'], $newData['method']);
 
+
     $Reflection = new ReflectionClass("Saia\\Pqr\\Controllers\\$class");
     if ($Reflection->hasMethod($method)) {
 

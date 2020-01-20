@@ -30,6 +30,8 @@ final class Version20200115001556 extends AbstractMigration
         $table->setPrimaryKey(['id']);
 
         $table->addColumn('fk_formato', 'integer');
+        $table->addColumn('fk_contador', 'integer');
+        $table->addColumn('label', 'string');
 
         $table->addColumn('active', 'boolean', [
             'default' => 1
