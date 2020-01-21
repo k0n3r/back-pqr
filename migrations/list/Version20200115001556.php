@@ -36,6 +36,9 @@ final class Version20200115001556 extends AbstractMigration
         $table->addColumn('active', 'boolean', [
             'default' => 1
         ]);
+
+        $table2 = $schema->getTable('pqr_form_fields');
+        $table2->addColumn('fk_pqr_form', 'integer');
     }
 
     public function down(Schema $schema): void
@@ -45,5 +48,8 @@ final class Version20200115001556 extends AbstractMigration
         }
 
         $schema->dropTable('pqr_forms');
+
+        $table2 = $schema->getTable('pqr_form_fields');
+        $table2->dropColumn('fk_pqr_form');
     }
 }

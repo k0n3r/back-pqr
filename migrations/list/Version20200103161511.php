@@ -34,26 +34,31 @@ final class Version20200103161511 extends AbstractMigration
             [
                 'label' => 'Cuadro de texto',
                 'type' => 'input',
+                'type_saia' => 'string',
                 'active' => 1
             ],
             [
                 'label' => 'Área de texto',
                 'type' => 'textarea',
+                'type_saia' => 'text',
                 'active' => 1
             ],
             [
                 'label' => 'Lista desplegable',
                 'type' => 'select',
+                'type_saia' => 'string',
                 'active' => 1
             ],
             [
                 'label' => 'Selección Única',
                 'type' => 'radio',
+                'type_saia' => 'string',
                 'active' => 1
             ],
             [
                 'label' => 'Selección múltiple',
                 'type' => 'checkbox',
+                'type_saia' => 'string',
                 'active' => 1
             ]
         ];

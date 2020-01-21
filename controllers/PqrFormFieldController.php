@@ -4,6 +4,7 @@ namespace Saia\Pqr\Controllers;
 
 use Exception;
 use Saia\core\DatabaseConnection;
+use Saia\Pqr\Models\PqrForm;
 use Saia\Pqr\Models\PqrFormField;
 
 class PqrFormFieldController
@@ -46,7 +47,8 @@ class PqrFormFieldController
         $defaultFields = [
             'name' => $this->generateName($params['label']),
             'active' => 1,
-            'setting' => json_encode($params['setting'])
+            'setting' => json_encode($params['setting']),
+            'fk_pqr_form' => $params['fk_pqr_form']
         ];
 
         try {

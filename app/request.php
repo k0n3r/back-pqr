@@ -17,8 +17,8 @@ include_once $rootPath . 'app/vendor/autoload.php';
 use Exception;
 use ReflectionClass;
 use Saia\controllers\JwtController;
-use Saia\controllers\UtilitiesController;
 use Saia\controllers\notificaciones\NotifierController;
+use Saia\controllers\UtilitiesController;
 
 $Response = (object) [
     'message' => '',
@@ -34,7 +34,6 @@ try {
         throw new Exception("Error Processing Request", 1);
     }
     unset($newData['class'], $newData['method']);
-
 
     $Reflection = new ReflectionClass("Saia\\Pqr\\Controllers\\$class");
     if ($Reflection->hasMethod($method)) {

@@ -3,10 +3,12 @@
 namespace Saia\Pqr\Controllers;
 
 use Exception;
-use Saia\Pqr\Models\PqrForm;
-use Saia\core\DatabaseConnection;
-use Saia\models\formatos\Formato;
 use Saia\controllers\SessionController;
+use Saia\core\DatabaseConnection;
+use Saia\models\formatos\CamposFormato;
+use Saia\models\formatos\Formato;
+use Saia\Pqr\Models\PqrForm;
+use Saia\Pqr\Models\PqrFormField;
 
 class PqrFormController
 {
@@ -31,8 +33,8 @@ class PqrFormController
             'data' => []
         ];
 
-        if ($PqrForm = PqrForm::findAllByAttributes()) {
-            $Response->data = $PqrForm[0]->getAttributes();
+        if ($PqrForm = PqrForm::findByAttributes(['active' => 1])) {
+            $Response->data = $PqrForm->getAttributes();
         };
 
         return $Response;
@@ -58,13 +60,10 @@ class PqrFormController
 
             $PqrForm = new PqrForm();
             $PqrForm->setAttributes($attributes);
+            $PqrForm->save();
 
-            if ($PqrForm->save()) {
-                $conn->commit();
-                $Response->data = $PqrForm->getAttributes();
-            } else {
-                throw new Exception("No fue posible guardar", 1);
-            }
+            $conn->commit();
+            $Response->data = $PqrForm->getAttributes();
         } catch (Exception $th) {
             $conn->rollBack();
             $Response->success = 0;
@@ -88,14 +87,11 @@ class PqrFormController
 
             $PqrForm = new PqrForm($id);
             $PqrForm->setAttributes($params);
+            $PqrForm->update();
 
-            if ($PqrForm->update()) {
-                $conn->commit();
-                $Response->success = 1;
-                $Response->data = $PqrForm->getAttributes();
-            } else {
-                throw new Exception("No fue posible eliminar", 1);
-            }
+            $conn->commit();
+            $Response->success = 1;
+            $Response->data = $PqrForm->getAttributes();
         } catch (Exception $th) {
             $conn->rollBack();
             $Response->success = 0;
@@ -115,16 +111,25 @@ class PqrFormController
         try {
             $conn = DatabaseConnection::beginTransaction();
 
-            $id = $this->request['id'] ? $this->request['id'] : null;
+
+
+            $PqrFormField = new PqrFormField(14);
+            $PqrFormField->setAttributes([
+                'fk_campos_formato' => 15
+            ]);
+            $PqrFormField->update();
+            var_dump($PqrFormField, $PqrFormField->getAttributes());
+
+            /*$id = $this->request['id'] ? $this->request['id'] : null;
             $this->PqrForm = new PqrForm($id);
 
-            if ($id) {
+            if ($this->PqrForm->fk_formato) {
                 $this->updateForm();
             } else {
                 $this->createForm();
             }
 
-            $Response->data = $this->PqrForm->getAttributes();
+            $Response->data = $this->PqrForm->getAttributes();*/
             $conn->commit();
         } catch (\Throwable $th) {
             $conn->rollBack();
@@ -141,26 +146,17 @@ class PqrFormController
 
     protected function createForm(): void
     {
-        if ($idform = $this->newRecordFormat()) {
-            $this->PqrForm->setAttributes([
-                'fk_formato' => $idform
-            ]);
-            if ($this->newRecordFormatField($idform)) {
-            } else {
-                throw new Exception("No fue posible registrar  los campos del formulario", 1);
-            }
-        } else {
-            throw new Exception("No fue posible registrar el formulario", 1);
-        }
+        $this->createRecordInFormat()
+            ->addEditRecordsInFormatFields();
     }
 
-    protected function newRecordFormat()
+    protected function createRecordInFormat(): self
     {
-        return Formato::newRecord([
+        $id = Formato::newRecord([
             'nombre' => 'pqr',
-            'etiqueta' => 'PQR',
+            'etiqueta' => $this->PqrForm->label,
             'cod_padre' => 0,
-            'contador_idcontador' => 0,
+            'contador_idcontador' => $this->PqrForm->fk_contador,
             'nombre_tabla' => 'ft_pqr',
             'ruta_mostrar' => 'app/modules/back_pqr/formatos/pqr/mostrar.php',
             'ruta_editar' => 'app/modules/back_pqr/formatos/pqr/editar.php',
@@ -183,11 +179,96 @@ class PqrFormController
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Modulo de PQR',
             'version' => 1,
-            'module' => 'pqr'
+            'module' => 'pqr',
+            'firma_digital' => 0
         ]);
+
+        $this->PqrForm->setAttributes([
+            'fk_formato' => $id
+        ]);
+        $this->PqrForm->update();
+
+        return $this;
     }
 
-    protected function newRecordFormatField(int $idform)
+    protected function addEditRecordsInFormatFields(): self
     {
+        $fields = $this->PqrForm->PqrFormFields;
+        foreach ($fields as $PqrFormField) {
+            if (!$PqrFormField->fk_campos_formato) {
+                $this->createRecordInFormatFields($PqrFormField);
+            } else {
+                $this->updateRecordInFormatFields($PqrFormField);
+            }
+        }
+        return $this;
+    }
+
+    protected function defaultConfigurationOfFormField(string $type): array
+    {
+        $typeField = [
+            'input' => [
+                'longitud' => 255,
+                'tipo_dato' => 'string',
+                'etiqueta_html' => 'text'
+            ],
+            'textarea' => [
+                'longitud' => 4000,
+                'tipo_dato' => 'text',
+                'etiqueta_html' => 'textarea_cke'
+            ],
+            'select' => [
+                'longitud' => 255,
+                'tipo_dato' => 'string',
+                'etiqueta_html' => 'text'
+            ],
+            'radio' => [
+                'longitud' => 255,
+                'tipo_dato' => 'string',
+                'etiqueta_html' => 'text'
+            ],
+            'checkbox' => [
+                'longitud' => 255,
+                'tipo_dato' => 'string',
+                'etiqueta_html' => 'text'
+            ]
+        ];
+        return $typeField[$type];
+    }
+
+    protected function createRecordInFormatFields(PqrFormField $PqrFormField)
+    {
+        $configuration = $this->defaultConfigurationOfFormField($PqrFormField->PqrHtmlField->type);
+
+        $id = CamposFormato::newRecord([
+            'formato_idformato' => $this->PqrForm->fk_formato,
+            'autoguardado' => 0,
+            'fila_visible' => 1,
+            'obligatoriedad' => $PqrFormField->required,
+            'orden' => $PqrFormField->order,
+            'nombre' => $PqrFormField->name,
+            'etiqueta' => $PqrFormField->label,
+            'tipo_dato' => $configuration['tipo_dato'],
+            'longitud' => $configuration['longitud'],
+            'etiqueta_html' => $configuration['etiqueta_html'],
+            'ayuda' => '-',
+            'acciones' => 'a,e',
+            'placeholder' => $PqrFormField->getSetting()->placeholder,
+            'listable' => 1
+        ]);
+
+        $PqrFormField->setAttributes([
+            'fk_campos_formato' => $id
+        ]);
+        var_dump($PqrFormField, $PqrFormField->getAttributes());
+        die();
+        //$PqrFormField->update();
+
+        return $this;
+    }
+
+    protected function updateRecordInFormatFields(PqrFormField $PqrFormField): self
+    {
+        return $this;
     }
 }

@@ -3,6 +3,9 @@
 namespace Saia\Pqr\Models;
 
 use Saia\core\model\Model;
+use Saia\models\Contador;
+use Saia\models\formatos\Formato;
+use Saia\Pqr\Models\PqrFormField;
 
 class PqrForm extends Model
 {
@@ -21,7 +24,27 @@ class PqrForm extends Model
                 'active'
             ],
             'primary' => 'id',
-            'table' => 'pqr_forms'
+            'table' => 'pqr_forms',
+            'relations' => [
+                'Formato' => [
+                    'model' => Formato::class,
+                    'attribute' => 'idformato',
+                    'primary' => 'fk_formato',
+                    'relation' => self::BELONGS_TO_ONE
+                ],
+                'Contador' => [
+                    'model' => Contador::class,
+                    'attribute' => 'idcontador',
+                    'primary' => 'fk_contador',
+                    'relation' => self::BELONGS_TO_ONE
+                ],
+                'PqrFormFields' => [
+                    'model' => PqrFormField::class,
+                    'attribute' => 'fk_pqr_form',
+                    'primary' => 'id',
+                    'relation' => self::BELONGS_TO_MANY
+                ]
+            ]
         ];
     }
 }
