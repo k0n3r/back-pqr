@@ -54,7 +54,7 @@ final class Version20191224165528 extends AbstractMigration
                 'tipo' => 1,
                 'imagen' => 'fa fa-bars',
                 'etiqueta' => 'Formulario',
-                'enlace' => 'views/modules/pqr/index.php',
+                'enlace' => 'views/modules/pqr/dist/index.html',
                 'cod_padre' => $id,
                 'orden' => 1
             ]
