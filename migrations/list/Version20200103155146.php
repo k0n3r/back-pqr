@@ -25,6 +25,19 @@ final class Version20200103155146 extends AbstractMigration
         }
 
         $table = $schema->createTable('pqr_form_fields');
+        $this->tablePqrFormFields($table);
+
+        $table2 = $schema->createTable('pqr_html_fields');
+        $this->tablePqrHtmlFields($table2);
+
+        $table3 = $schema->createTable('pqr_forms');
+        $this->tablePqrForm($table3);
+    }
+
+
+    public function tablePqrFormFields($table)
+    {
+
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
         ]);
@@ -47,35 +60,56 @@ final class Version20200103155146 extends AbstractMigration
 
         $table->addColumn('fk_pqr_html_field', 'integer');
 
+        $table->addColumn('fk_pqr_form', 'integer');
+
         $table->addColumn('fk_campos_formato', 'integer', [
-            'default' => 0
+            'default' => 0,
+            'notnull' => false
         ]);
 
         $table->addColumn('order', 'integer', [
-            'default' => 0
+            'default' => 0,
+            'notnull' => false
+        ]);
+
+        $table->addColumn('active', 'boolean', [
+            'default' => 1,
+            'notnull' => false
+        ]);
+    }
+
+    public function tablePqrHtmlFields($table)
+    {
+        $table->addColumn('id', 'integer', [
+            'autoincrement' => true
+        ]);
+        $table->setPrimaryKey(['id']);
+
+        $table->addColumn('label', 'string', [
+            'length' => 50
+        ]);
+
+        $table->addColumn('type', 'string', [
+            'length' => 50
         ]);
 
         $table->addColumn('active', 'boolean', [
             'default' => 1
         ]);
+    }
 
-        //-------------------------------------------
-
-        $table2 = $schema->createTable('pqr_html_fields');
-        $table2->addColumn('id', 'integer', [
+    public function tablePqrForm($table)
+    {
+        $table->addColumn('id', 'integer', [
             'autoincrement' => true
         ]);
-        $table2->setPrimaryKey(['id']);
+        $table->setPrimaryKey(['id']);
 
-        $table2->addColumn('label', 'string', [
-            'length' => 50
-        ]);
+        $table->addColumn('fk_formato', 'integer');
+        $table->addColumn('fk_contador', 'integer');
+        $table->addColumn('label', 'string');
 
-        $table2->addColumn('type', 'string', [
-            'length' => 50
-        ]);
-
-        $table2->addColumn('active', 'boolean', [
+        $table->addColumn('active', 'boolean', [
             'default' => 1
         ]);
     }
@@ -89,5 +123,6 @@ final class Version20200103155146 extends AbstractMigration
 
         $schema->dropTable('pqr_form_fields');
         $schema->dropTable('pqr_html_fields');
+        $schema->dropTable('pqr_forms');
     }
 }
