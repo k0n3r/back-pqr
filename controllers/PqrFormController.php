@@ -3,12 +3,14 @@
 namespace Saia\Pqr\Controllers;
 
 use Exception;
-use Saia\controllers\SessionController;
-use Saia\core\DatabaseConnection;
-use Saia\models\formatos\CamposFormato;
-use Saia\models\formatos\Formato;
 use Saia\Pqr\Models\PqrForm;
+use Saia\core\DatabaseConnection;
+use Saia\models\formatos\Formato;
 use Saia\Pqr\Models\PqrFormField;
+use Saia\controllers\SessionController;
+use Saia\models\formatos\CampoOpciones;
+use Saia\models\formatos\CamposFormato;
+use Saia\controllers\generador\FormatGenerator;
 
 class PqrFormController
 {
@@ -26,6 +28,13 @@ class PqrFormController
         $this->request = $request;
     }
 
+    /**
+     * Obtiene el formulario activo
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function index(): object
     {
         $Response = (object) [
@@ -33,13 +42,20 @@ class PqrFormController
             'data' => []
         ];
 
-        if ($PqrForm = PqrForm::findByAttributes(['active' => 1])) {
+        if ($PqrForm = PqrForm::getPqrFormActive()) {
             $Response->data = $PqrForm->getAttributes();
         };
 
         return $Response;
     }
 
+    /**
+     * Almacena un nuevo formulario
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function store(): object
     {
         $Response = (object) [
@@ -48,13 +64,21 @@ class PqrFormController
         ];
         $params = $this->request['params'];
 
+        $nameFormat = 'pqr';
         $defaultFields = [
             'fk_formato' => 0,
             'active' => 1,
+            'name' => $nameFormat
         ];
 
         try {
             $conn = DatabaseConnection::beginTransaction();
+
+            if (Formato::findByAttributes([
+                'nombre' => $nameFormat
+            ])) {
+                $defaultFields['name'] = 'pqrsf';
+            }
 
             $attributes = array_merge($params, $defaultFields);
 
@@ -73,7 +97,14 @@ class PqrFormController
         return $Response;
     }
 
-    public function update()
+    /**
+     * Actualiza el formulario
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function update(): object
     {
         $Response = (object) [
             'success' => 0
@@ -101,6 +132,13 @@ class PqrFormController
         return $Response;
     }
 
+    /**
+     * publica o crea el formulario en el webservice
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function publish(): object
     {
         $Response = (object) [
@@ -111,25 +149,20 @@ class PqrFormController
         try {
             $conn = DatabaseConnection::beginTransaction();
 
+            $this->PqrForm = PqrForm::getPqrFormActive();
+            // if ($this->PqrForm->fk_formato) {
+            //     $this->updateForm();
+            // } else {
+            //     $this->createForm();
+            // }
 
+            // $FormatGenerator = new FormatGenerator($this->PqrForm->fk_formato);
+            // $FormatGenerator->generate();
 
-            $PqrFormField = new PqrFormField(14);
-            $PqrFormField->setAttributes([
-                'fk_campos_formato' => 15
-            ]);
-            $PqrFormField->update();
-            var_dump($PqrFormField, $PqrFormField->getAttributes());
+            $Web = new WebserviceGenerator($this->PqrForm->Formato);
+            $Web->generate();
 
-            /*$id = $this->request['id'] ? $this->request['id'] : null;
-            $this->PqrForm = new PqrForm($id);
-
-            if ($this->PqrForm->fk_formato) {
-                $this->updateForm();
-            } else {
-                $this->createForm();
-            }
-
-            $Response->data = $this->PqrForm->getAttributes();*/
+            $Response->data = $this->PqrForm->getAttributes();
             $conn->commit();
         } catch (\Throwable $th) {
             $conn->rollBack();
@@ -140,27 +173,51 @@ class PqrFormController
         return $Response;
     }
 
-    protected function updateForm(): void
-    {
-    }
-
+    /**
+     * Crea el formulario
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function createForm(): void
     {
         $this->createRecordInFormat()
             ->addEditRecordsInFormatFields();
     }
 
-    protected function createRecordInFormat(): self
+    /**
+     * Actualiza el formulario
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function updateForm(): void
     {
-        $id = Formato::newRecord([
-            'nombre' => 'pqr',
+        $this->updateRecordInFormat()
+            ->addEditRecordsInFormatFields();
+    }
+
+    /**
+     * Obtiene los datos por defecto para la creacion del registro en Formato
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function getFormatDefaultData(): array
+    {
+        $name = $this->PqrForm->name;
+        return  [
+            'nombre' => $name,
             'etiqueta' => $this->PqrForm->label,
             'cod_padre' => 0,
             'contador_idcontador' => $this->PqrForm->fk_contador,
-            'nombre_tabla' => 'ft_pqr',
-            'ruta_mostrar' => 'app/modules/back_pqr/formatos/pqr/mostrar.php',
-            'ruta_editar' => 'app/modules/back_pqr/formatos/pqr/editar.php',
-            'ruta_adicionar' => 'app/modules/back_pqr/formatos/pqr/mostrar.php',
+            'nombre_tabla' => "ft_{$name}",
+            'ruta_mostrar' => "app/modules/back_pqr/formatos/{$name}/mostrar.php",
+            'ruta_editar' => "app/modules/back_pqr/formatos/{$name}/editar.php",
+            'ruta_adicionar' => "app/modules/back_pqr/formatos/{$name}/adicionar.php",
             'encabezado' => 1,
             'cuerpo' => '',
             'pie_pagina' => 0,
@@ -180,8 +237,22 @@ class PqrFormController
             'descripcion_formato' => 'Modulo de PQR',
             'version' => 1,
             'module' => 'pqr',
-            'firma_digital' => 0
-        ]);
+            'firma_digital' => 0,
+            'tipo_edicion' => 0,
+            'item' => 0
+        ];
+    }
+
+    /**
+     * Crea el registro en Formato
+     *
+     * @return self
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function createRecordInFormat(): self
+    {
+        $id = Formato::newRecord($this->getFormatDefaultData());
 
         $this->PqrForm->setAttributes([
             'fk_formato' => $id
@@ -191,6 +262,29 @@ class PqrFormController
         return $this;
     }
 
+    /**
+     * Actualiza el registro en Formato
+     *
+     * @return self
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function updateRecordInFormat(): self
+    {
+        $Formato = new Formato($this->PqrForm->fk_formato);
+        $Formato->setAttributes($this->getFormatDefaultData());
+        $Formato->update();
+
+        return $this;
+    }
+
+    /**
+     * Adiciona o actualiza los registros para la creacion de los campos del formulario
+     *
+     * @return self
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function addEditRecordsInFormatFields(): self
     {
         $fields = $this->PqrForm->PqrFormFields;
@@ -200,10 +294,22 @@ class PqrFormController
             } else {
                 $this->updateRecordInFormatFields($PqrFormField);
             }
+
+            if ($PqrFormField->getSetting()->options) {
+                $this->addEditformatOptions($PqrFormField);
+            }
         }
         return $this;
     }
 
+    /**
+     * Obtiene la configuracion de los campos del formulario
+     *
+     * @param string $type
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function defaultConfigurationOfFormField(string $type): array
     {
         $typeField = [
@@ -220,27 +326,108 @@ class PqrFormController
             'select' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'text'
+                'etiqueta_html' => 'select'
             ],
             'radio' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'text'
+                'etiqueta_html' => 'radio'
             ],
             'checkbox' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'text'
+                'etiqueta_html' => 'checkbox'
             ]
         ];
         return $typeField[$type];
     }
 
-    protected function createRecordInFormatFields(PqrFormField $PqrFormField)
+    /**
+     * Crea o edita las opciones de los campos tipo select, radio o checkbxo
+     *
+     * @param PqrFormField $PqrFormField
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function addEditformatOptions(PqrFormField $PqrFormField): void
+    {
+        $CampoFormato = $PqrFormField->CamposFormato;
+        $llave = 0;
+        foreach ($CampoFormato->CampoOpciones as $CampoOpciones) {
+
+            if ((int) $CampoOpciones->llave > $llave) {
+                $llave = (int) $CampoOpciones->llave;
+            }
+            if ((int) $CampoOpciones->estado) {
+                $CampoOpciones->setAttributes([
+                    'estado' => 0
+                ]);
+                $CampoOpciones->update();
+            }
+        }
+
+        $data = [];
+
+        foreach ($PqrFormField->getSetting()->options as $option) {
+
+            if ($CampoOpciones = CampoOpciones::findByAttributes([
+                'valor' => $option,
+                'fk_campos_formato' => $CampoFormato->getPk()
+            ])) {
+                $CampoOpciones->setAttributes([
+                    'estado' => 1
+                ]);
+                $CampoOpciones->update();
+                $id = $CampoOpciones->llave;
+            } else {
+                $id = $llave + 1;
+                $llave = $id;
+                CampoOpciones::newRecord([
+                    'llave' => $id,
+                    'valor' => $option,
+                    'fk_campos_formato' => $CampoFormato->getPK(),
+                    'estado' => 1
+                ]);
+            }
+
+            $data[] = [
+                'llave' => $id,
+                'item' => $option
+            ];
+        }
+        $CampoFormato->setAttributes([
+            'opciones' => json_encode($data)
+        ]);
+        $CampoFormato->update();
+    }
+
+    /**
+     * Obtiene los datos por defecto para la creacion o actualizacion de un campo del formulario
+     *
+     * @param PqrFormField $PqrFormField
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function getFormatFieldData(PqrFormField $PqrFormField): array
     {
         $configuration = $this->defaultConfigurationOfFormField($PqrFormField->PqrHtmlField->type);
 
-        $id = CamposFormato::newRecord([
+        $actions = [
+            CamposFormato::FLAG_ADD,
+            CamposFormato::FLAG_DESCRIPTION
+        ];
+        if ($PqrFormField->required) {
+            //TODO: CAMBIAR ESTO POR EL CAMPO DESCRIPCION QUE SE VERA EN EL DOCUMENTO
+            //PREGUNTAR A JORGE RAMIREZ
+            if (!$this->flagDescripcion) {
+                $actions[] = CamposFormato::FLAG_DESCRIPTION;
+                $this->flagDescripcion = true;
+            }
+        }
+
+        return [
             'formato_idformato' => $this->PqrForm->fk_formato,
             'autoguardado' => 0,
             'fila_visible' => 1,
@@ -252,23 +439,46 @@ class PqrFormController
             'longitud' => $configuration['longitud'],
             'etiqueta_html' => $configuration['etiqueta_html'],
             'ayuda' => '-',
-            'acciones' => 'a,e',
+            'acciones' => implode(',', $actions),
             'placeholder' => $PqrFormField->getSetting()->placeholder,
-            'listable' => 1
-        ]);
+            'listable' => 1,
+            'opciones' => null
+        ];
+    }
 
+    /**
+     * Crea un nuevo campo del formulario
+     *
+     * @param PqrFormField $PqrFormField
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function createRecordInFormatFields(PqrFormField $PqrFormField)
+    {
+        $id = CamposFormato::newRecord($this->getFormatFieldData($PqrFormField));
         $PqrFormField->setAttributes([
             'fk_campos_formato' => $id
         ]);
-        var_dump($PqrFormField, $PqrFormField->getAttributes());
-        die();
-        //$PqrFormField->update();
+        $PqrFormField->update();
 
         return $this;
     }
 
+    /**
+     * Actualiza un campo del formulario
+     *
+     * @param PqrFormField $PqrFormField
+     * @return self
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function updateRecordInFormatFields(PqrFormField $PqrFormField): self
     {
+        $CamposFormato = new CamposFormato($PqrFormField->fk_campos_formato);
+        $CamposFormato->setAttributes($this->getFormatFieldData($PqrFormField));
+        $CamposFormato->update(true);
+
         return $this;
     }
 }

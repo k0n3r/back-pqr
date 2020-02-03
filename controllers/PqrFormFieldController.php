@@ -16,6 +16,13 @@ class PqrFormFieldController
         $this->request = $request;
     }
 
+    /**
+     * Obtiene los campos del formulario activos
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function index(): object
     {
         $Response = (object) [
@@ -36,6 +43,13 @@ class PqrFormFieldController
         return $Response;
     }
 
+    /**
+     * Almacena un nuevo campo del formulario
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function store(): object
     {
         $Response = (object) [
@@ -48,7 +62,9 @@ class PqrFormFieldController
             'name' => $this->generateName($params['label']),
             'active' => 1,
             'setting' => json_encode($params['setting']),
-            'fk_pqr_form' => $params['fk_pqr_form']
+            'fk_pqr_form' => $params['fk_pqr_form'],
+            'orden' => 0,
+            'fk_campos_formato' => 0
         ];
 
         try {
@@ -74,6 +90,15 @@ class PqrFormFieldController
         return $Response;
     }
 
+    /**
+     * genera un nombre unico para el campo del formulario
+     *
+     * @param string $label
+     * @param integer $pref
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function generateName(string $label, int $pref = 0): string
     {
         $cadena = trim(preg_replace('/[^a-z]/', '_', strtolower($label)));
@@ -91,6 +116,13 @@ class PqrFormFieldController
         return $name;
     }
 
+    /**
+     * Elimina un campo del formulario
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function destroy(): object
     {
         $Response = (object) [
@@ -116,7 +148,14 @@ class PqrFormFieldController
         return $Response;
     }
 
-    public function update()
+    /**
+     * Actualiza un campo del formulario
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function update(): object
     {
         $Response = (object) [
             'success' => 0

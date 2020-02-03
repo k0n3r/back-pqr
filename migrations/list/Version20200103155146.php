@@ -67,7 +67,7 @@ final class Version20200103155146 extends AbstractMigration
             'notnull' => false
         ]);
 
-        $table->addColumn('order', 'integer', [
+        $table->addColumn('orden', 'integer', [
             'default' => 0,
             'notnull' => false
         ]);
@@ -108,6 +108,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('fk_formato', 'integer');
         $table->addColumn('fk_contador', 'integer');
         $table->addColumn('label', 'string');
+        $table->addColumn('name', 'string');
 
         $table->addColumn('active', 'boolean', [
             'default' => 1

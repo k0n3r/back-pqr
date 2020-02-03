@@ -53,6 +53,13 @@ class PqrFormField extends Model
         ];
     }
 
+    /**
+     * obtiene los datos de las atributos
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function getDataAttributes(): array
     {
         $attributes = $this->getSafeAttributes();
@@ -69,11 +76,26 @@ class PqrFormField extends Model
         return $data;
     }
 
+    /**
+     * obtiene el atributo de setting decodificado 
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function getSetting(): object
     {
         return json_decode($this->setting);
     }
 
+    /**
+     * obtiene los atributos de PqrHtmlField
+     * relacionados al registro
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function getFkPqrHtmlField(): array
     {
         return $this->PqrHtmlField->getAttributes();

@@ -37,7 +37,8 @@ final class Version20191224165528 extends AbstractMigration
             'etiqueta' => 'PQR',
             'enlace' => '#',
             'cod_padre' => 0,
-            'orden' => 5
+            'orden' => 5,
+            'color' => 'bg-danger-light'
         ];
 
         $id = $this->createModulo($data, 'agrupador_pqr');

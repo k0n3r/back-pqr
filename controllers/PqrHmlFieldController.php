@@ -13,7 +13,14 @@ class PqrHtmlFieldController
         $this->request = $request;
     }
 
-    public function index()
+    /**
+     * Obtiene los componentes html activos
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function index(): object
     {
         $Response = (object) [
             'success' => 1,

@@ -9,6 +9,16 @@ use Saia\Pqr\Models\PqrFormField;
 
 class PqrForm extends Model
 {
+
+    /**
+     * almacena las instancias activas
+     *
+     * @var array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public $pqrFormFieldsActive;
+
     public function __construct($id = null)
     {
         parent::__construct($id);
@@ -21,6 +31,7 @@ class PqrForm extends Model
                 'fk_formato',
                 'fk_contador',
                 'label',
+                'name',
                 'active'
             ],
             'primary' => 'id',
@@ -46,5 +57,40 @@ class PqrForm extends Model
                 ]
             ]
         ];
+    }
+
+    /**
+     * obtiene las instancias activas del modelo PqrFormField
+     *
+     * @param boolean $force : true => forza a consultar nuevamente
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getPqrFormFieldsActive(bool $force = false): array
+    {
+        if (!$this->pqrFormFieldsActive || $force) {
+            $data = [];
+            foreach ($this->PqrFormFields as $PqrFormFields) {
+                if ($PqrFormFields->active) {
+                    $data[] = $PqrFormFields;
+                }
+            }
+            $this->pqrFormFieldsActive = $data;
+        }
+
+        return $this->pqrFormFieldsActive;
+    }
+
+    /**
+     * obtiene la instancia del modelo PqrForm activa
+     *
+     * @return PqrForm|false
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public static function getPqrFormActive()
+    {
+        return PqrForm::findByAttributes(['active' => 1]);
     }
 }
