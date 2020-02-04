@@ -53,7 +53,8 @@ class PqrForm extends Model
                     'model' => PqrFormField::class,
                     'attribute' => 'fk_pqr_form',
                     'primary' => 'id',
-                    'relation' => self::BELONGS_TO_MANY
+                    'relation' => self::BELONGS_TO_MANY,
+                    'order' => 'orden ASC'
                 ]
             ]
         ];

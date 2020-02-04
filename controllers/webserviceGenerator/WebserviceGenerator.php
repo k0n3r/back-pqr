@@ -1,53 +1,84 @@
 <?php
 
-namespace Saia\Pqr\Controllers;
+namespace Saia\Pqr\Controllers\WebserviceGenerator;
 
 use Exception;
-use Saia\models\formatos\Formato;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Date;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Text;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Radio;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Hidden;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Select;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Checkbox;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Dropzone;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Textarea;
 
-class WebserviceGenerator
+abstract class WebserviceGenerator
 {
-
-    const DIRECTORY = '../pqrClient/';
     const TYPE_CSS = 'css/';
     const TYPE_JS = 'js/';
+    const TYPE_IMAGE = 'images/';
 
-    public $registeredCssFiles = [];
-    public $registeredJsFiles = [];
+    const FOLDER_TO_GENERATE = [
+        self::TYPE_CSS,
+        self::TYPE_JS,
+        self::TYPE_IMAGE
+    ];
 
-    public $Formato;
+    const FIELD_TYPE = [
+        'textarea_cke' => Textarea::class,
+        'textarea' => Textarea::class,
+        'fecha' => Date::class,
+        'radio' => Radio::class,
+        'checkbox' => Checkbox::class,
+        'select' => Select::class,
+        'archivo' => Dropzone::class,
+        'hidden' => Hidden::class,
+        'text' => Text::class,
+        'input' => Text::class
+    ];
 
-    public function __construct(Formato $Formato)
-    {
-        global $rootPath;
+    abstract protected function getContent(): array;
 
-        $this->Formato = $Formato;
-        $this->rootPath = $rootPath;
-    }
+    public static $directory = '../client/';
+    public $rootPath;
+    protected $registeredCssFiles = [];
+    protected $registeredJsFiles = [];
 
     public function generate()
     {
+        global $rootPath;
+
+        $this->rootPath = $rootPath;
+
         $this->generateDirectory()
             ->generateFiles();
     }
 
     protected function generateDirectory(): self
     {
-        $folders = [
-            self::TYPE_CSS,
-            self::TYPE_JS
-        ];
-
-        foreach ($folders as $folder) {
-            crear_destino($this->rootPath . $this->getDirectory($folder));
+        foreach (self::FOLDER_TO_GENERATE as $folder) {
+            crear_destino($this->rootPath . $this->getRouteDirectory($folder));
         }
 
         return $this;
     }
 
-    protected function getDirectory(string $folder = null): string
+    protected function setDirectory(string $directory): void
     {
-        return $folder ? self::DIRECTORY . $folder : self::DIRECTORY;
+        self::$directory = $directory;
+    }
+
+    protected function getDirectory(): string
+    {
+        return self::$directory;
+    }
+
+    protected function getRouteDirectory(string $folder): string
+    {
+        if (!in_array($folder, self::FOLDER_TO_GENERATE)) {
+            throw new Exception("Carpeta no registrada", 1);
+        }
+        return $this->getDirectory() . $folder;
     }
 
     protected function generateFiles()
@@ -63,27 +94,27 @@ class WebserviceGenerator
         $files = [
             [
                 'origin' => 'views/assets/node_modules/jquery/dist/jquery.min.js',
-                'destination' => $this->getDirectory(self::TYPE_JS) . 'jquery.min.js',
+                'destination' => $this->getRouteDirectory(self::TYPE_JS) . 'jquery.min.js',
                 'type' => self::TYPE_JS
             ],
             [
                 'origin' => 'views/assets/node_modules/bootstrap/dist/js/bootstrap.min.js',
-                'destination' => $this->getDirectory(self::TYPE_JS) . 'bootstrap.min.js',
+                'destination' => $this->getRouteDirectory(self::TYPE_JS) . 'bootstrap.min.js',
                 'type' => self::TYPE_JS
             ],
             [
                 'origin' => 'views/assets/node_modules/bootstrap/dist/css/bootstrap.min.css',
-                'destination' => $this->getDirectory(self::TYPE_CSS) . 'bootstrap.min.css',
+                'destination' => $this->getRouteDirectory(self::TYPE_CSS) . 'bootstrap.min.css',
                 'type' => self::TYPE_CSS
             ],
             [
                 'origin' => 'views/assets/node_modules/jquery-validation/dist/jquery.validate.min.js',
-                'destination' => $this->getDirectory(self::TYPE_JS) . 'jquery.validate.min.js',
+                'destination' => $this->getRouteDirectory(self::TYPE_JS) . 'jquery.validate.min.js',
                 'type' => self::TYPE_JS
             ],
             [
                 'origin' => 'views/assets/node_modules/jquery-validation/dist/localization/messages_es.min.js',
-                'destination' => $this->getDirectory(self::TYPE_JS) . 'jquery.messages_es.min.js',
+                'destination' => $this->getRouteDirectory(self::TYPE_JS) . 'jquery.messages_es.min.js',
                 'type' => self::TYPE_JS
             ]
         ];
@@ -120,7 +151,7 @@ class WebserviceGenerator
 
         foreach ($files as $file) {
 
-            $newFile = "{$this->rootPath}{$this->getDirectory($file['type'])}{$file['file']}";
+            $newFile = "{$this->rootPath}{$this->getRouteDirectory($file['type'])}{$file['file']}";
             if (!file_exists($newFile)) {
                 $text = "// Aqui va el contenido personalizado";
                 if (!file_put_contents($newFile, $text)) {
@@ -135,9 +166,10 @@ class WebserviceGenerator
 
     protected function createAddForm(): self
     {
+        $content = $this->getContent();
 
         $html = $this->getHeader();
-        $html .= $this->getContent();
+        $html .= $content;
         $html .= $this->getFooter();
 
         $fileName = "{$this->rootPath}{$this->getDirectory()}index.html";
@@ -198,7 +230,7 @@ PHP;
         return $data;
     }
 
-    protected function getFooter()
+    protected function getFooter(): string
     {
         $scriptJs = $this->getJsRoute();
 
@@ -215,8 +247,12 @@ PHP;
         return $code;
     }
 
-    protected function getContent()
+    protected function resolveClass(string $type)
     {
+        if (!array_key_exists($type, self::FIELD_TYPE)) {
+            throw new Exception("El tipo de campo no ha sido registrado", 1);
+        }
+        return self::FIELD_TYPE[$type];
     }
 
     protected function registerFile(string $type, string $file): void
