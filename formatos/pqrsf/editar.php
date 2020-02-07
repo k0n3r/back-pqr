@@ -47,7 +47,7 @@ $FtPqrsf = FtPqrsf::findByDocumentId($documentId);
         <div class='card card-default'>
             <div class='card-body'>
                 <h5 class='text-black w-100 text-center'>
-                    FORMULARIO DE PQR
+                    FORMULARIO DE PQR ANDRES AGUDELO
                 </h5>
                 <form 
                     name='formulario_formatos' 
@@ -123,7 +123,7 @@ $FtPqrsf = FtPqrsf::findByDocumentId($documentId);
         
         echo "</div>";
         ?>
-<input type='hidden' name='campo_descripcion' value='9219,9204,9205,9206,9207,9208,9209,9210,9211,9212,9213'>
+<input type='hidden' name='campo_descripcion' value='9219,9220,9221,9222,9223,9204,9205,9206,9207,9208,9209,9210,9211,9212,9213'>
 					<input type='hidden' name='documentId' value='<?= $documentId ?>'>
 					<input type='hidden' id='tipo_radicado' name='tipo_radicado' value='radicacion_entrada'>
 					<input type='hidden' name='formatId' value='28'>

@@ -15,7 +15,9 @@ class FtPqrsfProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'area_de_texto_obliga',
+                'adlias',
+				'andres',
+				'area_de_texto_obliga',
 				'area_de_texto_opcion',
 				'checkbox_obligatorio',
 				'checkbox_opcional',
@@ -26,9 +28,11 @@ class FtPqrsfProperties extends ModelFormat
 				'encabezado',
 				'firma',
 				'idft_pqrsf',
+				'juan',
 				'lista_obligatorio',
 				'lista_opcional',
 				'nombre',
+				'nombre_1',
 				'radio_obligatorio',
 				'radio_opcional' 
             ],

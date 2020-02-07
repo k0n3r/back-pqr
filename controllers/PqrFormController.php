@@ -10,6 +10,7 @@ use Saia\Pqr\Models\PqrFormField;
 use Saia\controllers\SessionController;
 use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
+use Saia\controllers\generador\FormatGenerator;
 
 class PqrFormController
 {
@@ -149,11 +150,11 @@ class PqrFormController
             $conn = DatabaseConnection::beginTransaction();
 
             $this->PqrForm = PqrForm::getPqrFormActive();
-            // if ($this->PqrForm->fk_formato) {
-            //     $this->updateForm();
-            // } else {
-            //     $this->createForm();
-            // }
+            if ($this->PqrForm->fk_formato) {
+                $this->updateForm();
+            } else {
+                $this->createForm();
+            }
 
             // $FormatGenerator = new FormatGenerator($this->PqrForm->fk_formato);
             // $FormatGenerator->generate();

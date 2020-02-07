@@ -37,12 +37,15 @@ abstract class WebserviceGenerator
         'input' => Text::class
     ];
 
-    abstract protected function getContent(): array;
+    abstract protected function getFormatFields(): array;
+    abstract protected function getNameForm(): string;
+
 
     public static $directory = '../client/';
     public $rootPath;
     protected $registeredCssFiles = [];
     protected $registeredJsFiles = [];
+    protected $jsAditionalContent = [];
 
     public function generate()
     {
@@ -84,89 +87,72 @@ abstract class WebserviceGenerator
     protected function generateFiles()
     {
         $this->moveDefaultFiles()
-            ->generateDefaultFiles()
             ->createAddForm();
     }
 
 
     protected function moveDefaultFiles(): self
     {
+
         $files = [
             [
                 'origin' => 'views/assets/node_modules/jquery/dist/jquery.min.js',
-                'destination' => $this->getRouteDirectory(self::TYPE_JS) . 'jquery.min.js',
+                'fieldName' => 'jquery.min.js',
                 'type' => self::TYPE_JS
             ],
             [
                 'origin' => 'views/assets/node_modules/bootstrap/dist/js/bootstrap.min.js',
-                'destination' => $this->getRouteDirectory(self::TYPE_JS) . 'bootstrap.min.js',
+                'fieldName' => 'bootstrap.min.js',
                 'type' => self::TYPE_JS
             ],
             [
                 'origin' => 'views/assets/node_modules/bootstrap/dist/css/bootstrap.min.css',
-                'destination' => $this->getRouteDirectory(self::TYPE_CSS) . 'bootstrap.min.css',
+                'fieldName' => 'bootstrap.min.css',
                 'type' => self::TYPE_CSS
             ],
             [
                 'origin' => 'views/assets/node_modules/jquery-validation/dist/jquery.validate.min.js',
-                'destination' => $this->getRouteDirectory(self::TYPE_JS) . 'jquery.validate.min.js',
+                'fieldName' => 'jquery.validate.min.js',
                 'type' => self::TYPE_JS
             ],
             [
                 'origin' => 'views/assets/node_modules/jquery-validation/dist/localization/messages_es.min.js',
-                'destination' => $this->getRouteDirectory(self::TYPE_JS) . 'jquery.messages_es.min.js',
+                'fieldName' => 'jquery.messages_es.min.js',
                 'type' => self::TYPE_JS
-            ]
+            ],
+            [
+                'origin' => 'views/assets/theme/pages/css/pages.min.css',
+                'fieldName' => 'pages.min.css',
+                'type' => self::TYPE_CSS
+            ],
         ];
 
+        $this->copyFiles($files);
+
+        return $this;
+    }
+
+    protected function copyFiles(array $files): void
+    {
         foreach ($files as $file) {
 
             $origin = $this->rootPath . $file["origin"];
             chmod($origin, PERMISOS_ARCHIVOS);
 
-            $destination = $this->rootPath . $file['destination'];
-            $this->registerFile($file['type'], basename($file['destination']));
+            $destination = $this->rootPath . $this->getRouteDirectory($file['type']) . $file['fieldName'];
+            $this->registerFile($file['type'], $file['fieldName']);
 
             if (!copy($origin, $destination)) {
                 throw new Exception("No fue posible copiar los archivos por defecto", 1);
             }
             chmod($destination, PERMISOS_ARCHIVOS);
         }
-
-        return $this;
-    }
-
-    protected function generateDefaultFiles(): self
-    {
-        $files = [
-            [
-                'type' => self::TYPE_JS,
-                'file' => 'custom.js'
-            ],
-            [
-                'type' => self::TYPE_CSS,
-                'file' => 'custom.css'
-            ]
-        ];
-
-        foreach ($files as $file) {
-
-            $newFile = "{$this->rootPath}{$this->getRouteDirectory($file['type'])}{$file['file']}";
-            if (!file_exists($newFile)) {
-                $text = "// Aqui va el contenido personalizado";
-                if (!file_put_contents($newFile, $text)) {
-                    throw new Exception("No fue posible crear el archivo {$file}", 1);
-                }
-            }
-            $this->registerFile($file['type'], $file['file']);
-        }
-
-        return $this;
     }
 
     protected function createAddForm(): self
     {
         $content = $this->getContent();
+        $this->createJsContent();
 
         $html = $this->getHeader();
         $html .= $content;
@@ -179,6 +165,68 @@ abstract class WebserviceGenerator
         }
 
         return $this;
+    }
+
+    protected function createJsContent(): void
+    {
+        $contentAditional = $this->getJsAditionalContent();
+
+        $code = <<<JAVASCRIPT
+$(function() {
+    {$contentAditional}
+});
+
+$("#formulario").validate({
+    errorPlacement: function(error, element) {
+        let node = element[0];
+
+        if (
+            node.tagName == "SELECT" &&
+            node.className.indexOf("select2") !== false
+        ) {
+            error.addClass("pl-2");
+            element.next().append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    },
+    submitHandler: function(form) {
+        alert("formulario correcto!")
+    }
+});
+JAVASCRIPT;
+
+        $fileName = "{$this->rootPath}{$this->getRouteDirectory(self::TYPE_JS)}index.js";
+        $this->registerFile(self::TYPE_JS, 'index.js');
+
+        if (!file_put_contents($fileName, $code)) {
+            throw new Exception("No fue posible crear el js", 1);
+        }
+    }
+
+    protected function getContent(): string
+    {
+        $code = '';
+        foreach ($this->getFormatFields() as $CamposFormato) {
+            $class = $this->resolveClass($CamposFormato->etiqueta_html);
+            $GenerateFieldContent = new GenerateFieldContent(new $class($CamposFormato));
+            $code .= $GenerateFieldContent->getContent();
+
+            if ($files = $GenerateFieldContent->getAditionalFiles()) {
+                $this->copyFiles($files);
+            }
+
+            if ($content = $GenerateFieldContent->getJsAditionalContent()) {
+                $this->addContentJs($content);
+            }
+        }
+
+        return $code;
+    }
+
+    protected function addContentJs(string $content): void
+    {
+        array_push($this->jsAditionalContent, $content);
     }
 
     protected function getHeader(): string
@@ -202,9 +250,9 @@ abstract class WebserviceGenerator
         <div class='card card-default'>
             <div class='card-body'>
                 <h5 class='text-black w-100 text-center'>
-                    FORMULARIO DE PQR
+                    {$this->getNameForm()}
                 </h5>
-                <form name='formulario_formatos' id='formulario_formatos' role='form' autocomplete='off'>
+                <form name='formulario' id='formulario' role='form' autocomplete='off'>
 PHP;
 
         return $code;
@@ -245,6 +293,11 @@ PHP;
 PHP;
 
         return $code;
+    }
+
+    protected function getJsAditionalContent(): string
+    {
+        return implode("\n", $this->jsAditionalContent);
     }
 
     protected function resolveClass(string $type)

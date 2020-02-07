@@ -2,13 +2,13 @@
 
 namespace Saia\Pqr\Controllers\WebserviceGenerator;
 
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\FieldGenerator;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\FieldFormatGeneratorInterface;
 
 class GenerateFieldContent
 {
-    public $TypeField;
+    protected $TypeField;
 
-    public function __construct(FieldGenerator $TypeField)
+    public function __construct(FieldFormatGeneratorInterface $TypeField)
     {
         $this->TypeField = $TypeField;
     }
@@ -16,5 +16,15 @@ class GenerateFieldContent
     public function getContent(): string
     {
         return $this->TypeField->getFieldContent();
+    }
+
+    public function getAditionalFiles(): array
+    {
+        return $this->TypeField->getAditionalFiles();
+    }
+
+    public function getJsAditionalContent(): string
+    {
+        return $this->TypeField->getJsAditionalContent();
     }
 }

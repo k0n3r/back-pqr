@@ -8,7 +8,7 @@ while ($max_salida > 0) {
     }
 
     $ruta .= "../";
-    $max_salida--;
+    $max_salida --;
 }
 
 include_once $rootPath . 'app/vendor/autoload.php';
@@ -20,11 +20,11 @@ use Saia\controllers\AccionController;
 use Saia\models\formatos\Formato;
 use Saia\Pqr\formatos\pqrsf\FtPqrsf;
 
-//JwtController::check($_REQUEST["token"], $_REQUEST["key"]); 
+JwtController::check($_REQUEST["token"], $_REQUEST["key"]); 
 
 $Formato = new Formato(28);
-$documentId = $_REQUEST['documentId'] ?? 0;
-$baseUrl = $Formato->isItem() ? ABSOLUTE_SAIA_ROUTE : $rootPath;
+$documentId=$_REQUEST['documentId'] ?? 0;
+$baseUrl=$Formato->isItem() ? ABSOLUTE_SAIA_ROUTE : $rootPath;
 
 $FtPqrsf = new FtPqrsf;
 
@@ -47,160 +47,256 @@ $FtPqrsf = new FtPqrsf;
         <div class='card card-default'>
             <div class='card-body'>
                 <h5 class='text-black w-100 text-center'>
-                    FORMULARIO DE PQR
+                    FORMULARIO DE PQR ANDRES AGUDELO
                 </h5>
-                <form name='formulario_formatos' id='formulario_formatos' role='form' autocomplete='off'>
+                <form 
+                    name='formulario_formatos' 
+                    id='formulario_formatos' 
+                    role='form' 
+                    autocomplete='off' 
+                    >
                     <input type='hidden' name='encabezado' value='1'>
-                    <input type='hidden' name='firma' value='1'>
-                    <div class='form-group form-group-default required ' id='group_nombre'>
-                        <label title='-'>NOMBRE</label>
-                        <input class='form-control required' type='text' id='nombre' name='nombre' value='' maxLength='250' />
-                    </div>
-                    <div class='form-group form-group-default required ' id='group_cuadro_de_texto_obli'>
-                        <label title='-'>CUADRO DE TEXTO OBLIGATORIO</label>
-                        <input class='form-control required' type='text' id='cuadro_de_texto_obli' name='cuadro_de_texto_obli' value='' maxLength='250' />
-                    </div>
-                    <div class='form-group form-group-default  ' id='group_cuadro_de_texto_opci'>
-                        <label title='-'>CUADRO DE TEXTO OPCIONAL</label>
-                        <input class='form-control ' type='text' id='cuadro_de_texto_opci' name='cuadro_de_texto_opci' value='' maxLength='250' />
-                    </div>
-                    <div class="form-group form-group-default required" id="group_area_de_texto_obliga">
-                        <label title="-">
-                            AREA DE TEXTO OBLIGATORIO
-                        </label>
-                        <textarea name="area_de_texto_obliga" id="area_de_texto_obliga" rows="3" class="form-control required"></textarea>
+<input type='hidden' name='firma' value='1'>
+<div class='form-group form-group-default required '  id='group_nombre'>
+            <label title='-'>NOMBRE</label>
+            <input class='form-control required' type='text' id='nombre' name='nombre' value='' maxLength='250'/>
+        </div>
+<div class='form-group form-group-default required '  id='group_andres'>
+            <label title='-'>ANDRES</label>
+            <input class='form-control required' type='text' id='andres' name='andres' value='' maxLength='250'/>
+        </div>
 
-                    </div>
-                    <div class="form-group form-group-default " id="group_area_de_texto_opcion">
-                        <label title="-">
-                            AREA DE TEXTO OPCIONAL
-                        </label>
-                        <textarea name="area_de_texto_opcion" id="area_de_texto_opcion" rows="3" class="form-control "></textarea>
+        <div class='form-group form-group-default form-group-default-select2 required' id='group_juan'>
+            <label title='-'>JUAN</label>
+            <select class='full-width' name='juan' id='juan' required>
+            <option value=''>Por favor seleccione...</option>
+        <option value='1'>
+                AD
+            </option><option value='2'>
+                PEPTIO
+            </option></select>
+                <script>
+                $(document).ready(function() {
+                    $('#juan').select2();
+                });
+                </script>
+        </div>
+<div class='form-group form-group-default required '  id='group_nombre_1'>
+            <label title='-'>NOMBRE</label>
+            <input class='form-control required' type='text' id='nombre_1' name='nombre_1' value='' maxLength='250'/>
+        </div>
 
-                    </div>
+        <div class='form-group form-group-default form-group-default-select2 ' id='group_adlias'>
+            <label title='-'>ADLIAS</label>
+            <select class='full-width' name='adlias' id='adlias' >
+            <option value=''>Por favor seleccione...</option>
+        <option value='1'>
+                ZDFSE
+            </option><option value='2'>
+                ASDF
+            </option></select>
+                <script>
+                $(document).ready(function() {
+                    $('#adlias').select2();
+                });
+                </script>
+        </div>
+<div class='form-group form-group-default required '  id='group_cuadro_de_texto_obli'>
+            <label title='-'>CUADRO DE TEXTO OBLIGATORIO</label>
+            <input class='form-control required' type='text' id='cuadro_de_texto_obli' name='cuadro_de_texto_obli' value='' maxLength='250'/>
+        </div>
+<div class='form-group form-group-default  '  id='group_cuadro_de_texto_opci'>
+            <label title='-'>CUADRO DE TEXTO OPCIONAL</label>
+            <input class='form-control ' type='text' id='cuadro_de_texto_opci' name='cuadro_de_texto_opci' value='' maxLength='250'/>
+        </div>
+            <div class="form-group form-group-default required" id="group_area_de_texto_obliga">
+                <label title="-">
+                    AREA DE TEXTO OBLIGATORIO
+                </label>
+                <textarea 
+                    name="area_de_texto_obliga"
+                    id="area_de_texto_obliga" 
+                    rows="3" 
+                    class="form-control required"
+                ></textarea>
+                
+            </div>
+            <div class="form-group form-group-default " id="group_area_de_texto_opcion">
+                <label title="-">
+                    AREA DE TEXTO OPCIONAL
+                </label>
+                <textarea 
+                    name="area_de_texto_opcion"
+                    id="area_de_texto_opcion" 
+                    rows="3" 
+                    class="form-control "
+                ></textarea>
+                
+            </div>
 
-                    <div class='form-group form-group-default form-group-default-select2 required' id='group_lista_obligatorio'>
-                        <label title='-'>LISTA OBLIGATORIO</label>
-                        <select class='full-width' name='lista_obligatorio' id='lista_obligatorio' required>
-                            <option value=''>Por favor seleccione...</option>
-                            <option value='2'>
-                                si
-                            </option>
-                            <option value='1'>
-                                no
-                            </option>
-                        </select>
-                        <script>
-                            $(document).ready(function() {
-                                $('#lista_obligatorio').select2();
-                            });
-                        </script>
-                    </div>
+        <div class='form-group form-group-default form-group-default-select2 required' id='group_lista_obligatorio'>
+            <label title='-'>LISTA OBLIGATORIO</label>
+            <select class='full-width' name='lista_obligatorio' id='lista_obligatorio' required>
+            <option value=''>Por favor seleccione...</option>
+        <option value='2'>
+                si
+            </option><option value='1'>
+                no
+            </option></select>
+                <script>
+                $(document).ready(function() {
+                    $('#lista_obligatorio').select2();
+                });
+                </script>
+        </div>
 
-                    <div class='form-group form-group-default form-group-default-select2 ' id='group_lista_opcional'>
-                        <label title='-'>LISTA OPCIONAL</label>
-                        <select class='full-width' name='lista_opcional' id='lista_opcional'>
-                            <option value=''>Por favor seleccione...</option>
-                            <option value='2'>
-                                si
-                            </option>
-                            <option value='1'>
-                                no
-                            </option>
-                        </select>
-                        <script>
-                            $(document).ready(function() {
-                                $('#lista_opcional').select2();
-                            });
-                        </script>
-                    </div>
+        <div class='form-group form-group-default form-group-default-select2 ' id='group_lista_opcional'>
+            <label title='-'>LISTA OPCIONAL</label>
+            <select class='full-width' name='lista_opcional' id='lista_opcional' >
+            <option value=''>Por favor seleccione...</option>
+        <option value='2'>
+                si
+            </option><option value='1'>
+                no
+            </option></select>
+                <script>
+                $(document).ready(function() {
+                    $('#lista_opcional').select2();
+                });
+                </script>
+        </div>
 
-                    <div class='form-group form-group-default required' id='group_radio_obligatorio'>
-                        <label title='-'>RADIO OBLIGATORIO</label>
-                        <div class='radio radio-success input-group'>
-                            <input required type='radio' name='radio_obligatorio' id='radio_obligatorio0' value='73' aria-required='true'>
-                            <label for='radio_obligatorio0' class='mr-3'>
-                                si
-                            </label><input required type='radio' name='radio_obligatorio' id='radio_obligatorio1' value='74' aria-required='true'>
-                            <label for='radio_obligatorio1' class='mr-3'>
-                                no
-                            </label></div>
-                        <label id='radio_obligatorio-error' class='error' for='radio_obligatorio' style='display: none;'></label>
-                    </div>
+        <div class='form-group form-group-default required' id='group_radio_obligatorio'>
+            <label title='-'>RADIO OBLIGATORIO</label>
+            <div class='radio radio-success input-group'>
+        <input 
+                required
+                type='radio'
+                name='radio_obligatorio'
+                id='radio_obligatorio0'
+                value='73'
+                aria-required='true'>
+                <label for='radio_obligatorio0' class='mr-3'>
+                    si
+                </label><input 
+                required
+                type='radio'
+                name='radio_obligatorio'
+                id='radio_obligatorio1'
+                value='74'
+                aria-required='true'>
+                <label for='radio_obligatorio1' class='mr-3'>
+                    no
+                </label></div>
+            <label id='radio_obligatorio-error' class='error' for='radio_obligatorio' style='display: none;'></label>
+        </div>
 
-                    <div class='form-group form-group-default ' id='group_radio_opcional'>
-                        <label title='-'>RADIO OPCIONAL</label>
-                        <div class='radio radio-success input-group'>
-                            <input type='radio' name='radio_opcional' id='radio_opcional0' value='75' aria-required='true'>
-                            <label for='radio_opcional0' class='mr-3'>
-                                otra si
-                            </label><input type='radio' name='radio_opcional' id='radio_opcional1' value='76' aria-required='true'>
-                            <label for='radio_opcional1' class='mr-3'>
-                                otra no
-                            </label></div>
+        <div class='form-group form-group-default ' id='group_radio_opcional'>
+            <label title='-'>RADIO OPCIONAL</label>
+            <div class='radio radio-success input-group'>
+        <input 
+                
+                type='radio'
+                name='radio_opcional'
+                id='radio_opcional0'
+                value='75'
+                aria-required='true'>
+                <label for='radio_opcional0' class='mr-3'>
+                    otra si
+                </label><input 
+                
+                type='radio'
+                name='radio_opcional'
+                id='radio_opcional1'
+                value='76'
+                aria-required='true'>
+                <label for='radio_opcional1' class='mr-3'>
+                    otra no
+                </label></div>
+            
+        </div>
 
-                    </div>
+        <div class='form-group form-group-default required' id='group_checkbox_obligatorio'>
+            <label title='-'>CHECKBOX OBLIGATORIO</label>
+            <div class='checkbox check-success input-group'>
+        <input 
+                required
+                type='checkbox'
+                name='checkbox_obligatorio[]'
+                id='checkbox_obligatorio0'
+                value='77'
+                aria-required='true'>
+                <label for='checkbox_obligatorio0' class='mr-3'>
+                    check 1
+                </label><input 
+                required
+                type='checkbox'
+                name='checkbox_obligatorio[]'
+                id='checkbox_obligatorio1'
+                value='78'
+                aria-required='true'>
+                <label for='checkbox_obligatorio1' class='mr-3'>
+                    check 2
+                </label></div>
+            <label id='checkbox_obligatorio[]-error' class='error' for='checkbox_obligatorio[]' style='display: none;'></label>
+        </div>
 
-                    <div class='form-group form-group-default required' id='group_checkbox_obligatorio'>
-                        <label title='-'>CHECKBOX OBLIGATORIO</label>
-                        <div class='checkbox check-success input-group'>
-                            <input required type='checkbox' name='checkbox_obligatorio[]' id='checkbox_obligatorio0' value='77' aria-required='true'>
-                            <label for='checkbox_obligatorio0' class='mr-3'>
-                                check 1
-                            </label><input required type='checkbox' name='checkbox_obligatorio[]' id='checkbox_obligatorio1' value='78' aria-required='true'>
-                            <label for='checkbox_obligatorio1' class='mr-3'>
-                                check 2
-                            </label></div>
-                        <label id='checkbox_obligatorio[]-error' class='error' for='checkbox_obligatorio[]' style='display: none;'></label>
-                    </div>
+        <div class='form-group form-group-default ' id='group_checkbox_opcional'>
+            <label title='-'>CHECKBOX OPCIONAL</label>
+            <div class='checkbox check-success input-group'>
+        <input 
+                
+                type='checkbox'
+                name='checkbox_opcional[]'
+                id='checkbox_opcional0'
+                value='79'
+                aria-required='true'>
+                <label for='checkbox_opcional0' class='mr-3'>
+                    check 3
+                </label><input 
+                
+                type='checkbox'
+                name='checkbox_opcional[]'
+                id='checkbox_opcional1'
+                value='80'
+                aria-required='true'>
+                <label for='checkbox_opcional1' class='mr-3'>
+                    check 4
+                </label></div>
+            
+        </div>
+<input type='hidden' name='idft_pqrsf' value=''>
 
-                    <div class='form-group form-group-default ' id='group_checkbox_opcional'>
-                        <label title='-'>CHECKBOX OPCIONAL</label>
-                        <div class='checkbox check-success input-group'>
-                            <input type='checkbox' name='checkbox_opcional[]' id='checkbox_opcional0' value='79' aria-required='true'>
-                            <label for='checkbox_opcional0' class='mr-3'>
-                                check 3
-                            </label><input type='checkbox' name='checkbox_opcional[]' id='checkbox_opcional1' value='80' aria-required='true'>
-                            <label for='checkbox_opcional1' class='mr-3'>
-                                check 4
-                            </label></div>
+        <?php
+        use Saia\controllers\SessionController;use Saia\core\DatabaseConnection;
+        $selected = $FtPqrsf->dependencia ?? '';
+        $query = DatabaseConnection::getQueryBuilder();
+        $roles = $query
+            ->select("dependencia as nombre, iddependencia_cargo, cargo")
+            ->from("vfuncionario_dc")
+            ->where("estado_dc = 1 and tipo_cargo = 1 and login = :login")
+            ->andWhere(
+                $query->expr()->lte('fecha_inicial', ':initialDate'),
+                $query->expr()->gte('fecha_final', ':finalDate')
+            )->setParameter(":login", SessionController::getLogin())
+            ->setParameter(':initialDate', new DateTime(), \Doctrine\DBAL\Types\Type::DATETIME)
+            ->setParameter(':finalDate', new DateTime(), \Doctrine\DBAL\Types\Type::DATETIME)
+            ->execute()->fetchAll();
+    
+        $total = count($roles);
 
-                    </div>
-                    <input type='hidden' name='idft_pqrsf' value=''>
+        if ($total > 1) {
 
-                    <?php
-
-                    use Saia\controllers\SessionController;
-                    use Saia\core\DatabaseConnection;
-
-                    $selected = $FtPqrsf->dependencia ?? '';
-                    $query = DatabaseConnection::getQueryBuilder();
-                    $roles = $query
-                        ->select("dependencia as nombre, iddependencia_cargo, cargo")
-                        ->from("vfuncionario_dc")
-                        ->where("estado_dc = 1 and tipo_cargo = 1 and login = :login")
-                        ->andWhere(
-                            $query->expr()->lte('fecha_inicial', ':initialDate'),
-                            $query->expr()->gte('fecha_final', ':finalDate')
-                        )->setParameter(":login", SessionController::getLogin())
-                        ->setParameter(':initialDate', new DateTime(), \Doctrine\DBAL\Types\Type::DATETIME)
-                        ->setParameter(':finalDate', new DateTime(), \Doctrine\DBAL\Types\Type::DATETIME)
-                        ->execute()->fetchAll();
-
-                    $total = count($roles);
-
-                    if ($total > 1) {
-
-                        echo "<div class='form-group form-group-default form-group-default-select2 required' id='group_dependencie'>
+            echo "<div class='form-group form-group-default form-group-default-select2 required' id='group_dependencie'>
             <label>PERTENECE A</label>
             <select class='full-width select2-hidden-accessible' name='dependencia' id='dependencia' required>";
-                        foreach ($roles as $row) {
-                            echo "<option value='{$row["iddependencia_cargo"]}'>
+            foreach ($roles as $row) {
+                echo "<option value='{$row["iddependencia_cargo"]}'>
                     {$row["nombre"]} - ({$row["cargo"]})
                 </option>";
-                        }
-
-                        echo "</select>
+            }
+    
+            echo "</select>
                 <script>
                 $(function (){
                     $('#dependencia').select2();
@@ -209,29 +305,27 @@ $FtPqrsf = new FtPqrsf;
                 });  
                 </script>
             ";
-                    } else if ($total == 1) {
-                        echo "<div class='form-group form-group-default required' id='group_dependencie'>
+        } else if ($total == 1) {
+            echo "<div class='form-group form-group-default required' id='group_dependencie'>
                 <input class='required' type='hidden' value='{$roles[0]['iddependencia_cargo']}' id='dependencia' name='dependencia'>
                 <label>Rol activo</label>
                 <div class='form-group'>
                     <label>{$roles[0]["nombre"]} - ({$roles[0]["cargo"]})</label>
                 </div>";
-                    } else {
-                        throw new Exception("Error al buscar la dependencia", 1);
-                    }
-
-                    echo "</div>";
-                    ?>
-                    <input type='hidden' name='anterior' value='<?= $_REQUEST['anterior'] ?>'>
-                    <input type='hidden' name='campo_descripcion' value='9219,9204,9205,9206,9207,9208,9209,9210,9211,9212,9213'>
-                    <input type='hidden' name='documentId' value='<?= $documentId ?>'>
-                    <input type='hidden' id='tipo_radicado' name='tipo_radicado' value='radicacion_entrada'>
-                    <input type='hidden' name='formatId' value='28'>
-                    <input type='hidden' name='tabla' value='ft_pqrsf'>
-                    <input type='hidden' name='formato' value='pqrsf'>
-                    <div class='form-group px-0 pt-3' id='form_buttons'><button class='btn btn-complete' id='save_document' type='button'>Continuar</button>
-                        <div class='progress-circle-indeterminate d-none' id='spiner'></div>
-                    </div>
+        } else {
+            throw new Exception("Error al buscar la dependencia", 1);
+        }
+        
+        echo "</div>";
+        ?>
+<input type='hidden' name='anterior' value='<?= $_REQUEST['anterior'] ?>'>
+					<input type='hidden' name='campo_descripcion' value='9219,9220,9221,9222,9223,9204,9205,9206,9207,9208,9209,9210,9211,9212,9213'>
+					<input type='hidden' name='documentId' value='<?= $documentId ?>'>
+					<input type='hidden' id='tipo_radicado' name='tipo_radicado' value='radicacion_entrada'>
+					<input type='hidden' name='formatId' value='28'>
+					<input type='hidden' name='tabla' value='ft_pqrsf'>
+					<input type='hidden' name='formato' value='pqrsf'>
+					<div class='form-group px-0 pt-3' id='form_buttons'><button class='btn btn-complete' id='save_document' type='button'>Continuar</button><div class='progress-circle-indeterminate d-none' id='spiner'></div></div>
                 </form>
             </div>
         </div>
@@ -247,20 +341,20 @@ $FtPqrsf = new FtPqrsf;
     <?= fancyTree(true) ?>
     <?= dateTimePicker() ?>
     <?= dropzone() ?>
-
+   
     <?php
-
-    if ($documentId) {
-        $additionalParameters = $FtPqrsf->getRouteParams(FtPqrsf::SCOPE_ROUTE_PARAMS_EDIT);
-    } else {
-        $additionalParameters = $FtPqrsf->getRouteParams(FtPqrsf::SCOPE_ROUTE_PARAMS_ADD);
-    }
-    $params = array_merge($_REQUEST, $additionalParameters, ['baseUrl' => $baseUrl]);
+ 
+        if($documentId){
+            $additionalParameters=$FtPqrsf->getRouteParams(FtPqrsf::SCOPE_ROUTE_PARAMS_EDIT); 
+        }else{
+            $additionalParameters=$FtPqrsf->getRouteParams(FtPqrsf::SCOPE_ROUTE_PARAMS_ADD); 
+        }
+        $params=array_merge($_REQUEST,$additionalParameters,['baseUrl'=> $baseUrl]);
     ?>
     <script>
         $(function() {
             $.getScript('<?= $baseUrl ?>app/modules/back_pqr/formatos/pqrsf/funciones.js', () => {
-                window.routeParams = <?= json_encode($params) ?>;
+                window.routeParams=<?= json_encode($params) ?>;
                 if (+'<?= $documentId ?>') {
                     edit(<?= json_encode($params) ?>)
                 } else {
@@ -277,7 +371,7 @@ $FtPqrsf = new FtPqrsf;
             });
 
             $("#save_item").click(function() {
-                checkForm((data) => {
+                checkForm((data) => {                    
                     top.successModalEvent(data);
                 })
             });
@@ -290,10 +384,10 @@ $FtPqrsf = new FtPqrsf;
                 })
             });
 
-            function checkForm(callback) {
+            function checkForm(callback){
                 $("#formulario_formatos").validate({
                     ignore: [],
-                    errorPlacement: function(error, element) {
+                    errorPlacement: function (error, element) {
                         let node = element[0];
 
                         if (
@@ -306,9 +400,9 @@ $FtPqrsf = new FtPqrsf;
                             error.insertAfter(element);
                         }
                     },
-                    submitHandler: function(form) {
+                    submitHandler: function(form) {                       
                         $("#form_buttons").find('button,#spiner').toggleClass('d-none');
-
+                        
                         executeEvents(callback);
                     },
                     invalidHandler: function() {
@@ -319,34 +413,34 @@ $FtPqrsf = new FtPqrsf;
                 $("#formulario_formatos").trigger('submit');
             }
 
-            function executeEvents(callback) {
+            function executeEvents(callback){
                 let documentId = $("[name='documentId']").val();
 
                 (+documentId ? beforeSendEdit() : beforeSendAdd())
-                .then(r => {
-                    sendData()
-                        .then(requestResponse => {
-                            (+documentId ? afterSendEdit(requestResponse) : afterSendAdd(requestResponse))
-                            .then(r => {
-                                    callback(requestResponse.data);
-                                })
-                                .catch(message => {
-                                    fail(message);
-                                })
-                        })
-                }).catch(message => {
-                    fail(message);
-                });
+                    .then(r => {
+                        sendData()
+                            .then(requestResponse => {
+                                (+documentId ? afterSendEdit(requestResponse) : afterSendAdd(requestResponse))
+                                    .then(r => {
+                                        callback(requestResponse.data);
+                                    })
+                                    .catch(message => {
+                                        fail(message);
+                                    })
+                            })
+                    }).catch(message => {
+                       fail(message);
+                    });
             }
 
-            function sendData() {
+            function sendData(){
                 return new Promise((resolve, reject) => {
                     let data = $('#formulario_formatos').serialize() + '&' +
-                        $.param({
-                            key: localStorage.getItem('key'),
-                            token: localStorage.getItem('token')
-                        });
-
+                    $.param({
+                        key: localStorage.getItem('key'),
+                        token: localStorage.getItem('token')
+                    });
+    
                     $.post(
                         '<?= $baseUrl ?>app/documento/guardar_ft.php',
                         data,
@@ -362,7 +456,7 @@ $FtPqrsf = new FtPqrsf;
                 });
             }
 
-            function fail(message) {
+            function fail(message){
                 $("#form_buttons").find('button,#spiner').toggleClass('d-none');
                 top.notification({
                     message: message,
@@ -379,5 +473,4 @@ $FtPqrsf = new FtPqrsf;
         $Formato
     ) ?>
 </body>
-
 </html>

@@ -4,7 +4,6 @@ namespace Saia\Pqr\Controllers;
 
 use Saia\Pqr\Models\PqrForm;
 use Saia\Pqr\Controllers\WebserviceGenerator\WebserviceGenerator;
-use Saia\Pqr\Controllers\WebserviceGenerator\GenerateFieldContent;
 
 class WebservicePqr extends WebserviceGenerator
 {
@@ -15,14 +14,25 @@ class WebservicePqr extends WebserviceGenerator
         $this->PqrForm = $PqrForm;
     }
 
+    protected function getFormatFields(): array
+    {
+        $data = [];
+
+        foreach ($this->PqrForm->getPqrFormFieldsActive() as $PqrFormField) {
+            $data[] = $PqrFormField->CamposFormato;
+        }
+
+        return $data;
+    }
+
+    protected function getNameForm(): string
+    {
+        return $this->PqrForm->label;
+    }
+
     protected function getContent(): string
     {
-        $code = '';
-        foreach ($this->PqrForm->getPqrFormFieldsActive() as $PqrFormField) {
-            $class = $this->resolveClass($PqrFormField->PqrHtmlField->type);
-            $GenerateFieldContent = new GenerateFieldContent(new $class());
-            $code .= $GenerateFieldContent->getContent();
-        }
+        $code = parent::getContent();
 
         return $code;
     }
