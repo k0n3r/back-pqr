@@ -28,7 +28,7 @@ class Textarea extends FieldGenerator implements FieldFormatGeneratorInterface
         $placeholder = $this->CamposFormato->placeholder ? "placeholder='{$this->CamposFormato->placeholder}'" : '';
 
         $code = <<<PHP
-        <div class="form-group form-group-default {$requiredClass}" id="group_{$this->CamposFormato->nombre}">
+        {n}<div class="form-group form-group-default {$requiredClass}" id="group_{$this->CamposFormato->nombre}">
             <label{$title}">
                 {$this->getLabel()}
             </label>
@@ -40,6 +40,6 @@ class Textarea extends FieldGenerator implements FieldFormatGeneratorInterface
         </div>
 PHP;
 
-        return $code;
+        return $this->addTab($code);
     }
 }

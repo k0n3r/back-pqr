@@ -48,4 +48,9 @@ class FieldGenerator
             throw new Exception("El componente debe ser de tipo radio,checkbox o select", 1);
         }
     }
+
+    protected function addTab(string $code)
+    {
+        return str_replace("{n}", "\n", $code);
+    }
 }

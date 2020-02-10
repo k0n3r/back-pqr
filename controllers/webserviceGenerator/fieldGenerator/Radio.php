@@ -31,16 +31,12 @@ class Radio extends FieldGenerator implements FieldFormatGeneratorInterface
         $title = $this->CamposFormato->ayuda ? " title='{$this->CamposFormato->ayuda}'" : '';
 
 
-        $code = "<div class='form-group form-group-default {$requiredClass}' id='group_{$this->CamposFormato->nombre}'>
+        $code = "{n}<div class='form-group form-group-default {$requiredClass}' id='group_{$this->CamposFormato->nombre}'>
             <label{$title}>{$this->getLabel()}</label>
             <div class='radio radio-success input-group'>";
 
         foreach ($this->getMultipleOptions() as $key => $CampoOpciones) {
-            $code .= "<input {$requiredClass} type='radio'
-            name='{$this->CamposFormato->nombre}'
-            id='{$this->CamposFormato->nombre}{$key}'
-            value='{$CampoOpciones->getPK()}'
-            aria-required='true'>
+            $code .= "<input {$requiredClass} type='radio' name='{$this->CamposFormato->nombre}' id='{$this->CamposFormato->nombre}{$key}' value='{$CampoOpciones->getPK()}' aria-required='true'>
             <label for='{$this->CamposFormato->nombre}{$key}' class='mr-3'>
                 {$CampoOpciones->valor}
             </label>";
@@ -50,6 +46,6 @@ class Radio extends FieldGenerator implements FieldFormatGeneratorInterface
             {$labelRequired}
         </div>";
 
-        return $code;
+        return $this->addTab($code);
     }
 }

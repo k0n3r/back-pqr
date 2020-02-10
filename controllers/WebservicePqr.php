@@ -32,8 +32,13 @@ class WebservicePqr extends WebserviceGenerator
 
     protected function getContent(): string
     {
-        $code = parent::getContent();
+        $code = parent::getContentDefault();
 
         return $code;
+    }
+
+    protected function createJsContent(): string
+    {
+        return parent::jsContentDefault('app/modules/back_pqr/app/webservice.php');
     }
 }

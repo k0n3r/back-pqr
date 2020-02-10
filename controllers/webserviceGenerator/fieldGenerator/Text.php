@@ -28,12 +28,11 @@ class Text extends FieldGenerator implements FieldFormatGeneratorInterface
         $placeholder = $this->CamposFormato->placeholder ? "placeholder='{$this->CamposFormato->placeholder}'" : '';
 
         $code = <<<PHP
-        <div class="form-group form-group-default {$requiredClass}"  id="group_{$this->CamposFormato->nombre}">
+        {n}<div class="form-group form-group-default {$requiredClass}"  id="group_{$this->CamposFormato->nombre}">
             <label{$title}>{$this->getLabel()}</label>
             <input class="form-control {$requiredClass}" type="text" id="{$this->CamposFormato->nombre}" name="{$this->CamposFormato->nombre}" value="{$this->getDafaultValue()}" {$placeholder} maxLength="250"/>
         </div>
 PHP;
-
-        return $code;
+        return $this->addTab($code);
     }
 }

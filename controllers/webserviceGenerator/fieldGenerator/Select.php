@@ -43,7 +43,7 @@ class Select extends FieldGenerator implements FieldFormatGeneratorInterface
         $requiredClass = $this->getRequiredClass();
         $title = $this->CamposFormato->ayuda ? " title='{$this->CamposFormato->ayuda}'" : '';
 
-        $code = "<div class='form-group form-group-default form-group-default-select2 {$requiredClass}' id='group_{$this->CamposFormato->nombre}'>
+        $code = "{n}<div class='form-group form-group-default form-group-default-select2 {$requiredClass}' id='group_{$this->CamposFormato->nombre}'>
             <label{$title}>{$this->getLabel()}</label>
             <select class='full-width {$requiredClass}' name='{$this->CamposFormato->nombre}' id='{$this->CamposFormato->nombre}'>
             <option value=''>Por favor seleccione...</option>";
@@ -57,6 +57,6 @@ class Select extends FieldGenerator implements FieldFormatGeneratorInterface
         $code .= "</select>
         </div>";
 
-        return $code;
+        return $this->addTab($code);
     }
 }
