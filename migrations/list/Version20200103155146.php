@@ -67,6 +67,11 @@ final class Version20200103155146 extends AbstractMigration
             'notnull' => false
         ]);
 
+        $table->addColumn('system', 'boolean', [
+            'default' => 0,
+            'notnull' => false
+        ]);
+
         $table->addColumn('orden', 'integer', [
             'default' => 0,
             'notnull' => false

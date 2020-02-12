@@ -4,7 +4,6 @@ namespace Saia\Pqr\Controllers;
 
 use Exception;
 use Saia\core\DatabaseConnection;
-use Saia\Pqr\Models\PqrForm;
 use Saia\Pqr\Models\PqrFormField;
 
 class PqrFormFieldController
@@ -64,7 +63,8 @@ class PqrFormFieldController
             'setting' => json_encode($params['setting']),
             'fk_pqr_form' => $params['fk_pqr_form'],
             'orden' => 0,
-            'fk_campos_formato' => 0
+            'fk_campos_formato' => 0,
+            'system' => 0
         ];
 
         try {

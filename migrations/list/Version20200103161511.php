@@ -42,6 +42,11 @@ final class Version20200103161511 extends AbstractMigration
                 'active' => 1
             ],
             [
+                'label' => 'E-mail',
+                'type' => 'email',
+                'active' => 1
+            ],
+            [
                 'label' => 'Lista desplegable',
                 'type' => 'select',
                 'active' => 1

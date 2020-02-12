@@ -3,6 +3,7 @@
 namespace Saia\Pqr\Controllers;
 
 use Exception;
+use Saia\models\Contador;
 use Saia\Pqr\Models\PqrForm;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
@@ -11,6 +12,7 @@ use Saia\controllers\SessionController;
 use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
 use Saia\controllers\generador\FormatGenerator;
+use Saia\Pqr\Models\PqrHtmlField;
 
 class PqrFormController
 {
@@ -64,15 +66,22 @@ class PqrFormController
         ];
         $params = $this->request['params'];
 
-        $nameFormat = 'pqr';
-        $defaultFields = [
-            'fk_formato' => 0,
-            'active' => 1,
-            'name' => $nameFormat
-        ];
-
         try {
             $conn = DatabaseConnection::beginTransaction();
+
+            if (!$contador = Contador::findColumn('idcontador', [
+                'nombre' => 'radicacion_entrada'
+            ])) {
+                throw new Exception("El contador Externo-Interno NO existe", 1);
+            }
+
+            $nameFormat = 'pqr';
+            $defaultFields = [
+                'fk_formato' => 0,
+                'active' => 1,
+                'name' => $nameFormat,
+                'fk_contador' => $contador[0]
+            ];
 
             if (Formato::findByAttributes([
                 'nombre' => $nameFormat
@@ -82,12 +91,14 @@ class PqrFormController
 
             $attributes = array_merge($params, $defaultFields);
 
-            $PqrForm = new PqrForm();
-            $PqrForm->setAttributes($attributes);
-            $PqrForm->save();
+            $this->PqrForm = new PqrForm();
+            $this->PqrForm->setAttributes($attributes);
+            $this->PqrForm->save();
+
+            $this->createSystemFields();
 
             $conn->commit();
-            $Response->data = $PqrForm->getAttributes();
+            $Response->data = $this->PqrForm->getAttributes();
         } catch (Exception $th) {
             $conn->rollBack();
             $Response->success = 0;
@@ -95,6 +106,79 @@ class PqrFormController
         }
 
         return $Response;
+    }
+
+    /**
+     * Crea los campos del sistema
+     *
+     * @param PqrForm $PqrForm
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     * 
+     */
+    protected function createSystemFields(): void
+    {
+        foreach ($this->getSystemFields() as  $field) {
+            PqrFormField::newRecord($field);
+        }
+    }
+
+    /**
+     * Campos que siempre deben ir en el formulario
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     * 
+     * @throws Exception
+     * 
+     */
+    protected function getSystemFields(): array
+    {
+
+        if ($record = PqrHtmlField::findColumn('id', ['type' => 'select'])) {
+            $selectType = $record[0];
+        } else {
+            throw new Exception("No se encontro el tipo de campo Select", 1);
+        }
+
+        if ($record = PqrHtmlField::findColumn('id', ['type' => 'email'])) {
+            $emailType = $record[0];
+        } else {
+            throw new Exception("No se encontro el tipo de campo Input", 1);
+        }
+
+        return [
+            [
+                'label' => 'Tipo',
+                'name' => 'sys_tipo',
+                'required' => 1,
+                'system' => 1,
+                'fk_pqr_html_field' => $selectType,
+                'fk_pqr_form' => $this->PqrForm->getPK(),
+                'setting' => json_encode([
+                    'options' => [
+                        'Petición',
+                        'Queja',
+                        'Reclamo',
+                        'Sugerencia',
+                        'Felicitación'
+                    ]
+                ])
+            ],
+            [
+                'label' => 'E-mail',
+                'name' => 'sys_email',
+                'required' => 1,
+                'system' => 1,
+                'fk_pqr_html_field' => $emailType,
+                'fk_pqr_form' => $this->PqrForm->getPK(),
+                'setting' => json_encode([
+                    'placeholder' => 'example@pqr.com'
+                ])
+            ]
+        ];
     }
 
     /**
@@ -156,8 +240,8 @@ class PqrFormController
                 $this->createForm();
             }
 
-            // $FormatGenerator = new FormatGenerator($this->PqrForm->fk_formato);
-            // $FormatGenerator->generate();
+            $FormatGenerator = new FormatGenerator($this->PqrForm->fk_formato);
+            $FormatGenerator->generate();
 
             $Web = new WebservicePqr($this->PqrForm);
             $Web->generate();
@@ -205,6 +289,7 @@ class PqrFormController
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
+     * 
      */
     protected function getFormatDefaultData(): array
     {
@@ -226,11 +311,10 @@ class PqrFormController
             'papel' => 'Letter',
             'exportar' => 'mpdf',
             'funcionario_idfuncionario' => SessionController::getValue('idfuncionario'),
-            'mostrar' => 1,
             'detalle' => 0,
             'font_size' => 11,
             'mostrar_pdf' => 0,
-            'fk_categoria_formato' => 0,
+            'fk_categoria_formato' => '2,3',
             'funcion_predeterminada' => 0,
             'paginar' => 0,
             'pertenece_nucleo' => 0,
@@ -438,11 +522,11 @@ class PqrFormController
             'tipo_dato' => $configuration['tipo_dato'],
             'longitud' => $configuration['longitud'],
             'etiqueta_html' => $configuration['etiqueta_html'],
-            'ayuda' => '-',
             'acciones' => implode(',', $actions),
             'placeholder' => $PqrFormField->getSetting()->placeholder,
             'listable' => 1,
             'opciones' => null
+            //'ayuda' => '-',
         ];
     }
 
