@@ -155,6 +155,7 @@ class PqrFormController
                 'name' => 'sys_tipo',
                 'required' => 1,
                 'system' => 1,
+                'orden' => 1,
                 'fk_pqr_html_field' => $selectType,
                 'fk_pqr_form' => $this->PqrForm->getPK(),
                 'setting' => json_encode([
@@ -172,6 +173,7 @@ class PqrFormController
                 'name' => 'sys_email',
                 'required' => 1,
                 'system' => 1,
+                'orden' => 2,
                 'fk_pqr_html_field' => $emailType,
                 'fk_pqr_form' => $this->PqrForm->getPK(),
                 'setting' => json_encode([

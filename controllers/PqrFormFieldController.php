@@ -31,7 +31,7 @@ class PqrFormFieldController
 
         $Instances = PqrFormField::findAllByAttributes([
             'active' => 1
-        ]);
+        ], [], 'orden asc');
 
         $data = [];
         foreach ($Instances as $Instance) {
@@ -141,7 +141,6 @@ class PqrFormFieldController
             }
         } catch (Exception $th) {
             $conn->rollBack();
-            $Response->success = 0;
             $Response->message = $th->getMessage();
         }
 
@@ -181,10 +180,41 @@ class PqrFormFieldController
             }
         } catch (Exception $th) {
             $conn->rollBack();
-            $Response->success = 0;
             $Response->message = $th->getMessage();
         }
 
+        return $Response;
+    }
+
+    /**
+     * Actualiza el orden de los campos
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function updateOrder(): object
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+
+        try {
+            $conn = DatabaseConnection::beginTransaction();
+
+            foreach ($this->request['params'] as $record) {
+                $PqrFormField = new PqrFormField($record['id']);
+                $PqrFormField->setAttributes([
+                    'orden' => $record['order']
+                ]);
+                $PqrFormField->update();
+            }
+            $conn->commit();
+            $Response->success = 1;
+        } catch (Exception $th) {
+            $conn->rollBack();
+            $Response->message = $th->getMessage();
+        }
         return $Response;
     }
 }
