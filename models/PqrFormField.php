@@ -25,7 +25,7 @@ class PqrFormField extends Model
                 'fk_pqr_html_field',
                 'fk_campos_formato',
                 'system',
-                'order',
+                'orden',
                 'fk_pqr_form',
                 'active'
             ],

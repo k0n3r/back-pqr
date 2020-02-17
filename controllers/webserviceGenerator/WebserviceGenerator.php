@@ -9,12 +9,13 @@ use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Radio;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Select;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Checkbox;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Textarea;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\FieldFormatGeneratorInterface;
 
 abstract class WebserviceGenerator
 {
     const TYPE_CSS = 'css/';
     const TYPE_JS = 'js/';
-    const TYPE_IMAGE = 'images/';
+    const TYPE_IMAGE = 'img/';
     const TYPE_FONT = 'fonts/';
 
     const FOLDER_TO_GENERATE = [
@@ -265,6 +266,12 @@ abstract class WebserviceGenerator
                 'origin' => 'views/assets/theme/assets/plugins/font-awesome/css/font-awesome.min.css',
                 'fieldName' => 'font-awesome.min.css',
                 'type' => self::TYPE_CSS
+            ],
+            [
+                'origin' => 'views/assets/theme/pages/img/progress/progress-circle-master.svg',
+                'fieldName' => 'progress-circle-master.svg',
+                'destination' => 'progress/',
+                'type' => self::TYPE_IMAGE
             ]
         ];
 
@@ -302,7 +309,13 @@ abstract class WebserviceGenerator
             $origin = $this->rootPath . $file["origin"];
             chmod($origin, PERMISOS_ARCHIVOS);
 
-            $destination = $this->rootPath . $this->getRouteDirectory($file['type']) . $file['fieldName'];
+            if ($file['destination']) {
+                $newDir = $this->rootPath . $this->getRouteDirectory($file['type']) . $file['destination'];
+                crear_destino($newDir);
+                $destination =  $newDir . $file['fieldName'];
+            } else {
+                $destination = $this->rootPath . $this->getRouteDirectory($file['type']) . $file['fieldName'];
+            }
             $this->registerFile($file['type'], $file['fieldName']);
 
             if (!copy($origin, $destination)) {
@@ -406,9 +419,10 @@ $(function () {
                         notification({
                             color:'green',
                             position: "topCenter",
-                            timeout: false,
-                            message:'Su solicitud ha sido radicada, en los proximos minutos sera enviado toda la informacion al correo registrado'
+                            timeout: 30000,
+                            message:'Su solicitud ha sido radicada, en los proximos minutos sera enviada toda la información al correo registrado'
                         });
+                        clearForm(form);
                     } else {
                         console.error(response.message);
                         notification({
@@ -435,6 +449,12 @@ $(function () {
 
     function toggleButton(message) {
         $("#form_buttons").find('button,#spiner').toggleClass('d-none');
+    }
+
+    function clearForm(form) {
+        form.reset();
+        $("select").val("");
+        $('select').select2().trigger('change');
     }
 
     function notification(options) {
@@ -478,11 +498,26 @@ JAVASCRIPT;
         return $code;
     }
 
+    /**
+     * Agrega o registra mas contenido adicional al JS
+     *
+     * @param string $content
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function addContentJs(string $content): void
     {
         array_push($this->jsAditionalContent, $content);
     }
 
+    /**
+     * Obtiene el header del formulario
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function getHeader(): string
     {
         $linkCss = $this->getCssRoute();
@@ -512,6 +547,13 @@ PHP;
         return $code;
     }
 
+    /**
+     * Obtiene el los link del CSS utilizado en el formulario
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function getCssRoute(): string
     {
         $data = "\n\r";
@@ -522,6 +564,13 @@ PHP;
         return $data;
     }
 
+    /**
+     * Obtiene el scritp JS que se utilizara en el formulario
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function getJsRoute(): string
     {
         $data = "\n\r";
@@ -532,6 +581,13 @@ PHP;
         return $data;
     }
 
+    /**
+     * Obtiene el footer del formulario
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function getFooter(): string
     {
         $scriptJs = $this->getJsRoute();
@@ -553,12 +609,27 @@ PHP;
         return $code;
     }
 
+    /**
+     * Obtiene el contenido adicional JS que sera utilizado en el formulario
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function getJsAditionalContent(): string
     {
         return implode("\n", $this->jsAditionalContent);
     }
 
-    protected function resolveClass(string $type)
+    /**
+     * Resuelve la clase que sera utilizada para generar un campo del formulario
+     *
+     * @param string $type
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function resolveClass(string $type): string
     {
         if (!array_key_exists($type, self::FIELD_TYPE)) {
             throw new Exception("El tipo de campo no ha sido registrado", 1);
@@ -566,15 +637,21 @@ PHP;
         return self::FIELD_TYPE[$type];
     }
 
+    /**
+     * Registra los archivos JS o CSS 
+     *
+     * @param string $type
+     * @param string $file
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function registerFile(string $type, string $file): void
     {
-
         if ($type == self::TYPE_JS) {
             array_push($this->registeredJsFiles, $file);
         } else if ($type == self::TYPE_CSS) {
             array_push($this->registeredCssFiles, $file);
-        } else {
-            throw new Exception("tipo de archivo no valido para registrar", 1);
         }
     }
 }

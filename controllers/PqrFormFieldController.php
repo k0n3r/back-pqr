@@ -4,10 +4,23 @@ namespace Saia\Pqr\Controllers;
 
 use Exception;
 use Saia\core\DatabaseConnection;
+use Saia\Pqr\Models\PqrForm;
 use Saia\Pqr\Models\PqrFormField;
 
 class PqrFormFieldController
 {
+    /**
+     * Bandera que indica el numero minimo donde empezara el orden de los campos
+     */
+    const INITIAL_ORDER = 2;
+
+    /**
+     * Variable que contiene todo el request que llega de las peticiones
+     *
+     * @var array|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public $request;
 
     public function __construct(array $request = null)
@@ -57,12 +70,15 @@ class PqrFormFieldController
         ];
         $params = $this->request['params'];
 
+        $PqrForm = new PqrForm($params['fk_pqr_form']);
+        $cant = $PqrForm->countFields();
+
         $defaultFields = [
             'name' => $this->generateName($params['label']),
             'active' => 1,
             'setting' => json_encode($params['setting']),
-            'fk_pqr_form' => $params['fk_pqr_form'],
-            'orden' => 0,
+            'fk_pqr_form' => $PqrForm->getPK(),
+            'orden' => $cant + self::INITIAL_ORDER,
             'fk_campos_formato' => 0,
             'system' => 0
         ];
@@ -176,7 +192,7 @@ class PqrFormFieldController
                 $Response->success = 1;
                 $Response->data = $PqrFormField->getDataAttributes();
             } else {
-                throw new Exception("No fue posible eliminar", 1);
+                throw new Exception("No fue posible actualizar", 1);
             }
         } catch (Exception $th) {
             $conn->rollBack();
@@ -205,10 +221,46 @@ class PqrFormFieldController
             foreach ($this->request['params'] as $record) {
                 $PqrFormField = new PqrFormField($record['id']);
                 $PqrFormField->setAttributes([
-                    'orden' => $record['order']
+                    'orden' => $record['order'] + self::INITIAL_ORDER
                 ]);
                 $PqrFormField->update();
             }
+            $conn->commit();
+            $Response->success = 1;
+        } catch (Exception $th) {
+            $conn->rollBack();
+            $Response->message = $th->getMessage();
+        }
+        return $Response;
+    }
+
+    /**
+     * Actualiza el estado(active) del campo
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function updateActive(): object
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+
+        try {
+            $conn = DatabaseConnection::beginTransaction();
+            $params = $this->request['params'];
+
+            $PqrFormField = new PqrFormField($params['id']);
+            $PqrFormField->setAttributes([
+                'active' => (int) $params['active']
+            ]);
+
+            if (!$PqrFormField->update()) {
+                throw new Exception("No fue posible actualizar el campo", 1);
+            }
+            $Response->data = $PqrFormField->getDataAttributes();
+
             $conn->commit();
             $Response->success = 1;
         } catch (Exception $th) {

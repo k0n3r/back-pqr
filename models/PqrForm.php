@@ -84,9 +84,23 @@ class PqrForm extends Model
     }
 
     /**
+     * Cuenta la cantidad de campos que tiene el formulario
+     *
+     * @return integer
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function countFields(): int
+    {
+        $fields = $this->PqrFormFields;
+
+        return $fields ? count($fields) : 0;
+    }
+
+    /**
      * obtiene la instancia del modelo PqrForm activa
      *
-     * @return PqrForm|false
+     * @return PqrForm|null
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */

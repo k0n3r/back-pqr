@@ -25,7 +25,7 @@ $Response = (object) [
     'success' => 0,
 ];
 
-SessionController::refresh(new Funcionario(Funcionario::RADICADOR_WEB));
+//SessionController::refresh(new Funcionario(Funcionario::RADICADOR_WEB));
 
 if ($idformato = $_REQUEST['formatId']) {
     //throw new Exception("Error Processing Request", 1);

@@ -16,6 +16,11 @@ use Saia\Pqr\Models\PqrHtmlField;
 
 class PqrFormController
 {
+    const FIELDS_DESCRIPTION = [
+        'sys_tipo',
+        'sys_email'
+    ];
+
     public $request;
     /**
      *
@@ -155,7 +160,7 @@ class PqrFormController
                 'name' => 'sys_tipo',
                 'required' => 1,
                 'system' => 1,
-                'orden' => 1,
+                'orden' => 2,
                 'fk_pqr_html_field' => $selectType,
                 'fk_pqr_form' => $this->PqrForm->getPK(),
                 'setting' => json_encode([
@@ -173,7 +178,7 @@ class PqrFormController
                 'name' => 'sys_email',
                 'required' => 1,
                 'system' => 1,
-                'orden' => 2,
+                'orden' => 3,
                 'fk_pqr_html_field' => $emailType,
                 'fk_pqr_form' => $this->PqrForm->getPK(),
                 'setting' => json_encode([
@@ -402,28 +407,40 @@ class PqrFormController
             'input' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'text'
+                'etiqueta_html' => 'text',
+                'opciones' => NULL
             ],
             'textarea' => [
                 'longitud' => 4000,
                 'tipo_dato' => 'text',
-                'etiqueta_html' => 'textarea_cke'
+                'etiqueta_html' => 'textarea_cke',
+                'opciones' => NULL
             ],
             'select' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'select'
+                'etiqueta_html' => 'select',
+                'opciones' => NULL
             ],
             'radio' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'radio'
+                'etiqueta_html' => 'radio',
+                'opciones' => NULL
             ],
             'checkbox' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'checkbox'
-            ]
+                'etiqueta_html' => 'checkbox',
+                'opciones' => NULL
+            ],
+            'email' => [
+                'longitud' => 255,
+                'tipo_dato' => 'string',
+                'etiqueta_html' => 'text',
+                'opciones' => '{"type":"email"}'
+            ],
+
         ];
         return $typeField[$type];
     }
@@ -502,14 +519,12 @@ class PqrFormController
 
         $actions = [
             CamposFormato::FLAG_ADD,
-            CamposFormato::FLAG_DESCRIPTION
+            CamposFormato::FLAG_EDIT
         ];
+
         if ($PqrFormField->required) {
-            //TODO: CAMBIAR ESTO POR EL CAMPO DESCRIPCION QUE SE VERA EN EL DOCUMENTO
-            //PREGUNTAR A JORGE RAMIREZ
-            if (!$this->flagDescripcion) {
+            if (in_array($PqrFormField->name, self::FIELDS_DESCRIPTION)) {
                 $actions[] = CamposFormato::FLAG_DESCRIPTION;
-                $this->flagDescripcion = true;
             }
         }
 
@@ -518,7 +533,7 @@ class PqrFormController
             'autoguardado' => 0,
             'fila_visible' => 1,
             'obligatoriedad' => $PqrFormField->required,
-            'orden' => $PqrFormField->order,
+            'orden' => $PqrFormField->orden,
             'nombre' => $PqrFormField->name,
             'etiqueta' => $PqrFormField->label,
             'tipo_dato' => $configuration['tipo_dato'],
@@ -527,8 +542,9 @@ class PqrFormController
             'acciones' => implode(',', $actions),
             'placeholder' => $PqrFormField->getSetting()->placeholder,
             'listable' => 1,
-            'opciones' => null
-            //'ayuda' => '-',
+            'opciones' => $configuration['opciones'],
+            'ayuda' => NULL,
+            'longitud_vis' => NULL
         ];
     }
 
