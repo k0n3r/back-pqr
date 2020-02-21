@@ -3,13 +3,12 @@
 namespace Saia\Pqr\Controllers\WebserviceGenerator;
 
 use Exception;
-use Saia\controllers\UtilitiesController;
+use Saia\Pqr\Helpers\UtilitiesPqr;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Text;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Radio;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Select;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Checkbox;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Textarea;
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\FieldFormatGeneratorInterface;
 
 abstract class WebserviceGenerator
 {
@@ -71,6 +70,15 @@ abstract class WebserviceGenerator
      * @date 2020
      */
     abstract protected function getContent(): string;
+
+    /**
+     * Obtiene el idformato
+     *
+     * @return integer
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    abstract protected function getFormatId(): int;
 
     /**
      * Directorio principal donde quedara el webservice
@@ -286,7 +294,7 @@ abstract class WebserviceGenerator
 
         foreach ($folders as $folder) {
             $destination = $this->rootPath . $folder['destination'];
-            if (!UtilitiesController::copyToDir($this->rootPath . $folder['origin'], $destination)) {
+            if (!UtilitiesPqr::copyToDir($this->rootPath . $folder['origin'], $destination)) {
                 throw new Exception("No fue posible generar las fuentes", 1);
             }
         }
@@ -381,6 +389,7 @@ abstract class WebserviceGenerator
     {
         $contentAditional = $this->getJsAditionalContent();
         $baseUrl = ABSOLUTE_SAIA_ROUTE;
+        $formatId = $this->getFormatId();
 
         $code = <<<JAVASCRIPT
 
@@ -409,8 +418,10 @@ $(function () {
             }
         },
         submitHandler: function (form) {
-            let data = $('#formulario').serialize();
-
+            let data = $('#formulario').serialize()+ '&' +
+            $.param({
+                formatId: {$formatId},
+            });
             $.post(
                 `${baseUrl}{$url}`,
                 data,

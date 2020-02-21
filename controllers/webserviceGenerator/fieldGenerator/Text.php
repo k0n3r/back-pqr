@@ -33,7 +33,7 @@ class Text extends FieldGenerator implements FieldFormatGeneratorInterface
         $code = <<<PHP
         {n}<div class="form-group form-group-default {$requiredClass}"  id="group_{$this->CamposFormato->nombre}">
             <label{$title}>{$this->getLabel()}</label>
-            <input class="form-control {$requiredClass}" type="{$type}" id="{$this->CamposFormato->nombre}" name="{$this->CamposFormato->nombre}" value="{$this->getDafaultValue()}" {$placeholder} maxLength="250"/>
+            <input class="form-control {$requiredClass}" type="{$type}" id="{$this->CamposFormato->nombre}" name="{$this->CamposFormato->nombre}" value="{$this->getDefaultValue()}" {$placeholder} maxLength="250"/>
         </div>
 PHP;
         return $this->addTab($code);

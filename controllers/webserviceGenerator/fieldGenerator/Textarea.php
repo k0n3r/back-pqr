@@ -36,7 +36,7 @@ class Textarea extends FieldGenerator implements FieldFormatGeneratorInterface
                 id="{$this->CamposFormato->nombre}" 
                 rows="3" 
                 class="form-control {$requiredClass}"
-            >{$this->getDafaultValue()}</textarea>
+            >{$this->getDefaultValue()}</textarea>
         </div>
 PHP;
 

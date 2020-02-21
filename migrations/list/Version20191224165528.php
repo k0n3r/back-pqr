@@ -13,6 +13,7 @@ use Doctrine\Migrations\AbstractMigration;
 final class Version20191224165528 extends AbstractMigration
 {
     public $idperfil;
+    public $idperfilInterno;
 
     public function getDescription(): string
     {
@@ -27,6 +28,14 @@ final class Version20191224165528 extends AbstractMigration
             $this->idperfil = (int) $perfil[0]['idperfil'];
         } else {
             $this->abortIf(true, "No se encontro el perfil del administador");
+        }
+
+        $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like '%admin_interno%'";
+        $perfil2 = $this->connection->fetchAll($sql);
+        if ($perfil2) {
+            $this->idperfilInterno = (int) $perfil2[0]['idperfil'];
+        } else {
+            $this->abortIf(true, "No se encontro el perfil del administador interno");
         }
 
         $data =    [
@@ -78,6 +87,7 @@ final class Version20191224165528 extends AbstractMigration
             $id = $this->connection->lastInsertId();
         }
         $this->createPermiso((int) $id, $this->idperfil);
+        $this->createPermiso((int) $id, $this->idperfilInterno);
 
         return (int) $id;
     }

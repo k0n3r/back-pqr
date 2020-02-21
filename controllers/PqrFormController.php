@@ -16,11 +16,21 @@ use Saia\Pqr\Models\PqrHtmlField;
 
 class PqrFormController
 {
+    /**
+     * Campos que seran utilizados como descripcion/detalle en el modulo 
+     */
     const FIELDS_DESCRIPTION = [
         'sys_tipo',
         'sys_email'
     ];
 
+    /**
+     * Variable que contiene todo el request que llega de las peticiones
+     *
+     * @var array|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public $request;
     /**
      *
@@ -29,6 +39,7 @@ class PqrFormController
      * @date 2020
      */
     public $PqrForm;
+
 
     public function __construct(array $request = null)
     {
@@ -249,6 +260,8 @@ class PqrFormController
 
             $FormatGenerator = new FormatGenerator($this->PqrForm->fk_formato);
             $FormatGenerator->generate();
+            $FormatGenerator->createModule();
+
 
             $Web = new WebservicePqr($this->PqrForm);
             $Web->generate();
@@ -256,6 +269,7 @@ class PqrFormController
             $Response->data = $this->PqrForm->getAttributes();
             $conn->commit();
         } catch (\Throwable $th) {
+            var_dump($th);
             $conn->rollBack();
             $Response->success = 0;
             $Response->message = $th->getMessage();
@@ -311,7 +325,7 @@ class PqrFormController
             'ruta_editar' => "app/modules/back_pqr/formatos/{$name}/editar.php",
             'ruta_adicionar' => "app/modules/back_pqr/formatos/{$name}/adicionar.php",
             'encabezado' => 1,
-            'cuerpo' => '',
+            'cuerpo' => '{*showContent*}',
             'pie_pagina' => 0,
             'margenes' => '25,25,25,25',
             'orientacion' => 0,
@@ -327,6 +341,7 @@ class PqrFormController
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Modulo de PQR',
             'version' => 1,
+            'banderas' => 'e', //Aprobacion automatica
             'module' => 'pqr',
             'firma_digital' => 0,
             'tipo_edicion' => 0,
@@ -552,11 +567,11 @@ class PqrFormController
      * Crea un nuevo campo del formulario
      *
      * @param PqrFormField $PqrFormField
-     * @return void
+     * @return self
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function createRecordInFormatFields(PqrFormField $PqrFormField)
+    protected function createRecordInFormatFields(PqrFormField $PqrFormField): self
     {
         $id = CamposFormato::newRecord($this->getFormatFieldData($PqrFormField));
         $PqrFormField->setAttributes([

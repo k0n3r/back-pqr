@@ -104,7 +104,7 @@ class PqrForm extends Model
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public static function getPqrFormActive()
+    public static function getPqrFormActive(): ?PqrForm
     {
         return PqrForm::findByAttributes(['active' => 1]);
     }

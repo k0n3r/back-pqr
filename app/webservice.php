@@ -15,36 +15,47 @@ while ($max_salida > 0) {
 include_once $rootPath . 'app/vendor/autoload.php';
 
 use Exception;
-use Saia\models\Funcionario;
 use Saia\core\DatabaseConnection;
 use Saia\controllers\SessionController;
 use Saia\controllers\GuardarFtController;
+use Saia\controllers\UtilitiesController;
+use Saia\Pqr\Models\PqrForm;
 
 $Response = (object) [
     'message' => '',
     'success' => 0,
 ];
 
-//SessionController::refresh(new Funcionario(Funcionario::RADICADOR_WEB));
-
-if ($idformato = $_REQUEST['formatId']) {
-    //throw new Exception("Error Processing Request", 1);
-}
-
 try {
     $Connection = DatabaseConnection::beginTransaction();
 
-    // $GuardarFtController = new GuardarFtController($idformato);
-    // $GuardarFtController->create($_REQUEST);
+    //SessionController::refresh(new Funcionario(Funcionario::RADICADOR_WEB));
 
+    $formatId = $_REQUEST['formatId'];
+    $PqrForm = PqrForm::getPqrFormActive();
+
+    if ($PqrForm->fk_formato != $formatId || !$formatId) {
+        throw new Exception("Error Processing Request", 1);
+    }
+
+    $request = UtilitiesController::cleanForm($_REQUEST);
+
+    $newData = array_merge($request, [
+        'dependencia' => -1,
+        'tipo_radicado' => $PqrForm->Contador->nombre
+    ]);
+
+    $GuardarFtController = new GuardarFtController($formatId, $newData);
+    if (!$GuardarFtController->create()) {
+        throw new Exception("No fue posible radicar el documento2", 1);
+    }
     $Response->success = 1;
-
     $Connection->commit();
 } catch (Throwable $th) {
     $Connection->rollBack();
     $Response->message = $th->getMessage();
 }
 
-SessionController::logoutWebservice();
+//SessionController::logoutWebservice();
 
 echo json_encode($Response);
