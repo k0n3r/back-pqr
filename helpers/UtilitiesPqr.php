@@ -44,4 +44,24 @@ class UtilitiesPqr
 
         return true;
     }
+
+    public static function notifyAdministrator(string $message): void
+    {
+        //TODO: ENVIAR CORREO AL ADMINISTRADOR CON EL ERROR
+        self::saveLog($message);
+    }
+
+    public static function saveLog(string $message)
+    {
+        global $rootPath;
+
+        $path = $rootPath . 'app/modules/back_pqr/logs/';
+        crear_destino($path);
+
+        $data = [
+            'date' => date('Y-m-d H:i:s'),
+            'message' => $message
+        ];
+        file_put_contents($path . 'log.txt', json_encode($data) . "\n", FILE_APPEND);
+    }
 }

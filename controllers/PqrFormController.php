@@ -99,12 +99,6 @@ class PqrFormController
                 'fk_contador' => $contador[0]
             ];
 
-            if (Formato::findByAttributes([
-                'nombre' => $nameFormat
-            ])) {
-                $defaultFields['name'] = 'pqrsf';
-            }
-
             $attributes = array_merge($params, $defaultFields);
 
             $this->PqrForm = new PqrForm();
@@ -325,7 +319,7 @@ class PqrFormController
             'ruta_editar' => "app/modules/back_pqr/formatos/{$name}/editar.php",
             'ruta_adicionar' => "app/modules/back_pqr/formatos/{$name}/adicionar.php",
             'encabezado' => 1,
-            'cuerpo' => '{*showContent*}',
+            'cuerpo' => '{*showContent*}{*mostrar_estado_proceso*}',
             'pie_pagina' => 0,
             'margenes' => '25,25,25,25',
             'orientacion' => 0,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Saia\Pqr\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
@@ -32,10 +33,12 @@ final class Version20200103155146 extends AbstractMigration
 
         $table3 = $schema->createTable('pqr_forms');
         $this->tablePqrForm($table3);
+
+        $table4 = $schema->createTable('pqr_backups');
+        $this->tablePqrBackup($table4);
     }
 
-
-    public function tablePqrFormFields($table)
+    public function tablePqrFormFields(Table $table)
     {
 
         $table->addColumn('id', 'integer', [
@@ -83,7 +86,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    public function tablePqrHtmlFields($table)
+    public function tablePqrHtmlFields(Table $table)
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -103,7 +106,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    public function tablePqrForm($table)
+    public function tablePqrForm(Table $table)
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -120,6 +123,20 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
+    public function tablePqrBackup(Table $table)
+    {
+        $table->addColumn('id', 'integer', [
+            'autoincrement' => true
+        ]);
+        $table->setPrimaryKey(['id']);
+
+        $table->addColumn('fk_documento', 'integer');
+        $table->addIndex(['fk_documento'], 'i_fk_documento');
+        $table->addColumn('fk_pqr', 'integer');
+        $table->addIndex(['fk_pqr'], 'i_fk_pqr');
+        $table->addColumn('data', 'text');
+    }
+
     public function down(Schema $schema): void
     {
 
@@ -130,5 +147,6 @@ final class Version20200103155146 extends AbstractMigration
         $schema->dropTable('pqr_form_fields');
         $schema->dropTable('pqr_html_fields');
         $schema->dropTable('pqr_forms');
+        $schema->dropTable('pqr_backups');
     }
 }

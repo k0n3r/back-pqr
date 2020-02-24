@@ -15,11 +15,13 @@ while ($max_salida > 0) {
 include_once $rootPath . 'app/vendor/autoload.php';
 
 use Exception;
+use Saia\models\Funcionario;
+use Saia\Pqr\Models\PqrForm;
 use Saia\core\DatabaseConnection;
-use Saia\controllers\SessionController;
+use Saia\models\vistas\VfuncionarioDc;
 use Saia\controllers\GuardarFtController;
 use Saia\controllers\UtilitiesController;
-use Saia\Pqr\Models\PqrForm;
+use Saia\Pqr\Helpers\UtilitiesPqr;
 
 $Response = (object) [
     'message' => '',
@@ -40,8 +42,16 @@ try {
 
     $request = UtilitiesController::cleanForm($_REQUEST);
 
+    $iddependenciaCargo = VfuncionarioDc::getFirstUserRole(Funcionario::RADICADOR_WEB);
+    if (!$iddependenciaCargo) {
+        UtilitiesPqr::notifyAdministrator(
+            "El funcionario con login 'radicador_web' NO tiene roles activos"
+        );
+        throw new Exception("Error Processing Request", 1);
+    }
+
     $newData = array_merge($request, [
-        'dependencia' => -1,
+        'dependencia' => $iddependenciaCargo,
         'tipo_radicado' => $PqrForm->Contador->nombre
     ]);
 
