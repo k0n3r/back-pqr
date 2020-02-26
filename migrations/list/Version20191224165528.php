@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace Saia\Pqr\Migrations;
 
-use Exception;
-use Saia\models\Cargo;
 use Saia\models\Perfil;
-use Saia\models\Funcionario;
 use Doctrine\DBAL\Schema\Schema;
-use Saia\models\DependenciaCargo;
+use Saia\Pqr\Migrations\TMigrations;
 use Saia\controllers\CriptoController;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -18,8 +15,7 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20191224165528 extends AbstractMigration
 {
-    public $idperfil;
-    public $idperfilInterno;
+    use TMigrations;
 
     public function getDescription(): string
     {
@@ -28,32 +24,11 @@ final class Version20191224165528 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like '%administrador%'";
-        $perfil = $this->connection->fetchAll($sql);
-        if ($perfil) {
-            $this->idperfil = (int) $perfil[0]['idperfil'];
-        } else {
-            $this->abortIf(true, "No se encontro el perfil del administador");
-        }
-
-        $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like '%admin_interno%'";
-        $perfil2 = $this->connection->fetchAll($sql);
-        if ($perfil2) {
-            $this->idperfilInterno = (int) $perfil2[0]['idperfil'];
-        } else {
-            $this->abortIf(true, "No se encontro el perfil del administador interno");
-        }
-
-        $sql = "SELECT idformato FROM formato WHERE nombre='pqr' OR nombre_tabla='ft_pqr'";
-        $exist = $this->connection->fetchAll($sql);
-        if ($exist) {
-            $this->abortIf(true, "Ya existe el formato PQR");
-        }
-
+        $this->init();
+        $this->validateCreation();
         $this->createRadicadorWeb();
 
-
-        $data =    [
+        $data = [
             'pertenece_nucleo' => 0,
             'nombre' => 'agrupador_pqr',
             'tipo' => 0,
@@ -65,7 +40,7 @@ final class Version20191224165528 extends AbstractMigration
             'color' => 'bg-danger-light'
         ];
 
-        $id = $this->createModulo($data, 'agrupador_pqr');
+        $id = $this->createModulo($data, $this->getNameMainModule());
 
 
         $data2 =  [
@@ -79,28 +54,48 @@ final class Version20191224165528 extends AbstractMigration
             'orden' => 1
         ];
 
-        $id2 = $this->createModulo($data2, 'formulario_pqr');
+        $this->createModulo($data2, 'formulario_pqr');
     }
 
-    public function createRadicadorWeb(): void
+    protected function validateCreation(): void
+    {
+        $sql = "SELECT idformato FROM formato WHERE nombre='pqr' OR nombre_tabla='ft_pqr'";
+        $exist = $this->connection->fetchAll($sql);
+        if ($exist) {
+            $this->abortIf(true, "Ya existe el formato PQR");
+        }
+
+        $sql = "SELECT idbusqueda FROM busqueda WHERE nombre='reporte_pqr'";
+        $exist = $this->connection->fetchAll($sql);
+        if ($exist) {
+            $this->abortIf(true, "Ya existe un reporte de PQR");
+        }
+    }
+
+    protected function createRadicadorWeb(): void
     {
         $sqlCargo = "SELECT idcargo FROM cargo WHERE lower(nombre) like 'radicador web'";
         $cargo = $this->connection->fetchAll($sqlCargo);
         if (!$cargo) {
-            $idcargo = Cargo::newRecord([
+            $this->connection->insert('cargo', [
                 'nombre' => 'Radicador Web',
                 'cod_padre' => 0,
                 'estado' => 1,
                 'pertenece_nucleo' => 1
             ]);
+            $idcargo = $this->connection->lastInsertId();
         } else {
             $idcargo = $cargo[0]['idcargo'];
+        }
+
+        if (!$idcargo) {
+            $this->abortIf(true, "No fue posible encontrar el cargo Radicador Web");
         }
 
         $sqlFuncionario = "SELECT idfuncionario FROM funcionario WHERE login='radicador_web'";
         $funcionario = $this->connection->fetchAll($sqlFuncionario);
         if (!$funcionario) {
-            $idfuncionario = Funcionario::newRecord([
+            $this->connection->insert('funcionario', [
                 'login' => 'radicador_web',
                 'nombres' => 'Ventanilla',
                 'apellidos' => 'Web',
@@ -113,22 +108,25 @@ final class Version20191224165528 extends AbstractMigration
                 'sistema' => 1, //TODO: Preguntar si se puede borrar el campo
                 'ventanilla_radicacion' => 1, //TODO: De donde se obtiene este campo
             ]);
-            $this->abortIf(true, "Falta el funcionario con login radicador_web");
+            $idfuncionario = $this->connection->lastInsertId();
         } else {
             $idfuncionario = $funcionario[0]['idfuncionario'];
         }
+        if (!$idfuncionario) {
+            $this->abortIf(true, "No fue posible encontrar el funcionario Radicador Web");
+        }
 
-        if ($DependenciaCargo = DependenciaCargo::findByAttributes([
-            'funcionario_idfuncionario' => $idfuncionario,
-            'cargo_idcargo' => $idcargo
-        ])) {
-            $DependenciaCargo->setAttributes([
+        $sqlDependenciaCargo = "SELECT iddependencia_cargo FROM dependencia_cargo 
+        WHERE funcionario_idfuncionario={$idfuncionario} AND cargo_idcargo={$idcargo}";
+        $dependenciaCargo = $this->connection->fetchAll($sqlDependenciaCargo);
+
+        if ($dependenciaCargo[0]['iddependencia_cargo']) {
+            $this->connection->update('dependencia_cargo', [
                 'fecha_final' => date('Y-12-31 23:59:59'),
                 'estado' => 1
+            ], [
+                'iddependencia_cargo' => $dependenciaCargo[0]['iddependencia_cargo']
             ]);
-            if (!$DependenciaCargo->update()) {
-                $this->abortIf(true, "No se pudo actualizar el rol del radicador_web");
-            }
         } else {
             $sqlDependencia = "SELECT iddependencia FROM dependencia WHERE cod_padre=0 OR cod_padre IS NULL";
             $dependencia = $this->connection->fetchAll($sqlDependencia);
@@ -136,7 +134,7 @@ final class Version20191224165528 extends AbstractMigration
                 $this->abortIf(true, "No se encuentra la dependencia principal");
             }
 
-            if (!DependenciaCargo::newRecord([
+            $this->connection->insert('dependencia_cargo', [
                 'funcionario_idfuncionario' => $idfuncionario,
                 'cargo_idcargo' => $idcargo,
                 'dependencia_iddependencia' => $dependencia[0]['iddependencia'],
@@ -144,67 +142,13 @@ final class Version20191224165528 extends AbstractMigration
                 'fecha_ingreso' => date('Y-m-d H:i:s'),
                 'fecha_inicial' => date('Y-m-d H:i:s'),
                 'fecha_final' => date('Y-12-31 23:59:59')
-
-            ])) {
-                throw new Exception("No fue posible crear el rol del radicar_web", 1);
-            }
-        }
-    }
-
-    public function createModulo(array $data, string $search): int
-    {
-        $sql2 = "SELECT idmodulo FROM modulo WHERE nombre like '{$search}'";
-        $modulo = $this->connection->fetchAll($sql2);
-        if ($id = $modulo[0]['idmodulo']) {
-            $this->connection->update(
-                'modulo',
-                $data,
-                [
-                    'idmodulo' => $id
-                ]
-            );
-        } else {
-            $this->connection->insert(
-                'modulo',
-                $data
-            );
-            $id = $this->connection->lastInsertId();
-        }
-        $this->createPermiso((int) $id, $this->idperfil);
-        $this->createPermiso((int) $id, $this->idperfilInterno);
-
-        return (int) $id;
-    }
-
-    public function createPermiso(int $idmodulo, int $idperfil): void
-    {
-        $sql = "SELECT idpermiso_perfil FROM permiso_perfil WHERE modulo_idmodulo={$idmodulo} AND perfil_idperfil={$idperfil}";
-        $permiso = $this->connection->fetchAll($sql);
-        if (!$permiso) {
-            $this->connection->insert(
-                'permiso_perfil',
-                [
-                    'modulo_idmodulo' => $idmodulo,
-                    'perfil_idperfil' => $idperfil
-                ]
-            );
+            ]);
         }
     }
 
     public function down(Schema $schema): void
     {
         $this->deleteModulo('formulario_pqr');
-        $this->deleteModulo('agrupado_por');
-    }
-
-    public function deleteModulo(string $search): void
-    {
-        $sql = "SELECT idmodulo FROM modulo WHERE nombre like '{$search}'";
-        $modulo = $this->connection->fetchAll($sql);
-
-        if ($id = $modulo[0]['idmodulo']) {
-            $this->connection->delete('modulo', ['idmodulo' => $id]);
-            $this->connection->delete('permiso_perfil', ['modulo_idmodulo' => $id]);
-        }
+        $this->deleteModulo('agrupador_pqr');
     }
 }
