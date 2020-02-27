@@ -30,8 +30,8 @@ final class Version20200226192642 extends AbstractMigration
             'estado' => 1,
             'campos' => NULL,
             'tablas' => 'vpqr v',
-            'ruta_libreria' => 'app/modules/back_pqr/formatos/pqr/funciones_reporte.php',
-            'ruta_libreria_pantalla' => NULL,
+            'ruta_libreria' => 'app/modules/back_pqr/formatos/pqr/reporteFunciones.php',
+            'ruta_libreria_pantalla' => 'app/modules/back_pqr/formatos/pqr/reporteAcciones.php',
             'cantidad_registros' => 20,
             'tipo_busqueda' => 2
         ];
@@ -44,7 +44,7 @@ final class Version20200226192642 extends AbstractMigration
             'etiqueta' => 'Pendientes',
             'nombre' => $nombreComponente,
             'orden' => 1,
-            'info' => '[{"title":"RADICADO","field":"{*view@iddocumento,numero*}","align":"center"},{"title":"TIPO","field":"{*sys_tipo*}","align":"center"},{"title":"E-MAIL","field":"{*sys_email*}","align":"center"}]',
+            'info' => '[{"title":"RADICADO","field":"{*view@iddocumento,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},{"title":"TIPO","field":"{*sys_tipo*}","align":"center"},{"title":"E-MAIL","field":"{*sys_email*}","align":"center"},{"title":"OPCIONES","field":"{*options@iddocumento*}","align":"center"}]',
             'encabezado_componente' => NULL,
             'campos_adicionales' => 'v.numero,v.fecha,v.sys_email,v.sys_tipo',
             'tablas_adicionales' => NULL,
@@ -60,7 +60,7 @@ final class Version20200226192642 extends AbstractMigration
 
         $busquedaCondicion = [
             'fk_busqueda_componente' => $idbusquedaComponente,
-            'codigo_where' => '',
+            'codigo_where' => '1=1',
             'etiqueta_condicion' => $nombreComponente
         ];
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
@@ -164,7 +164,7 @@ final class Version20200226192642 extends AbstractMigration
             $records = $this->connection->fetchAll($sql);
 
             foreach ($records as $busquedaComponente) {
-                $idbusquedaComponente = $busquedaComponente[0]['idbusqueda_componente'];
+                $idbusquedaComponente = $busquedaComponente['idbusqueda_componente'];
                 $this->connection->delete('busqueda_componente', [
                     'idbusqueda_componente' => $idbusquedaComponente
                 ]);

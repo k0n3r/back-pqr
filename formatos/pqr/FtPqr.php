@@ -121,8 +121,8 @@ class FtPqr extends FtPqrProperties
         foreach ($data as $key => $value) {
             $val = (is_array($value)) ? implode(',', $value) : $value;
             $code .= "<tr>
-                <td>{$key}</td>
-                <td>{$val}</td>
+                <td class='text-uppercase font-weight-bold' style='width:35%'>{$key} :</td>
+                <td style='width:65%'>{$val}</td>
             <tr>";
         }
         $code .= '</table>';

@@ -260,6 +260,8 @@ class PqrFormController
             $Web = new WebservicePqr($this->PqrForm);
             $Web->generate();
 
+            $this->generateView();
+
             $Response->data = $this->PqrForm->getAttributes();
             $conn->commit();
         } catch (\Throwable $th) {
@@ -321,7 +323,7 @@ class PqrFormController
             'encabezado' => 1,
             'cuerpo' => '{*showContent*}{*mostrar_estado_proceso*}',
             'pie_pagina' => 0,
-            'margenes' => '25,25,25,25',
+            'margenes' => '25,25,15,25',
             'orientacion' => 0,
             'papel' => 'Letter',
             'exportar' => 'mpdf',
@@ -591,5 +593,43 @@ class PqrFormController
         $CamposFormato->update(true);
 
         return $this;
+    }
+
+    protected function generateView(): void
+    {
+        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.sys_email,cs.valor as sys_tipo
+        FROM ft_pqr ft,documento d, campo_seleccionados cs
+        WHERE ft.documento_iddocumento=d.iddocumento AND
+        cs.fk_documento=d.iddocumento
+        AND d.estado NOT IN ('ELIMINADO','ANULADO')";
+
+        $this->createView($sql);
+    }
+
+    protected function createView(string $select): void
+    {
+        $conn = DatabaseConnection::getInstance();
+
+        switch (MOTOR) {
+            case 'MySql':
+            case 'Oracle':
+                $create = "CREATE OR REPLACE VIEW vpqr AS {$select}";
+                $conn->executeQuery($create);
+                break;
+
+            case 'SqlServer':
+                $drop = "DROP VIEW vpqr";
+                $conn->executeQuery($drop);
+
+
+                $create = "CREATE VIEW vpqr AS {$select}";
+                $conn->executeQuery($create);
+
+                break;
+
+            default:
+                throw new Exception("No fue posible generar la vista vpqr", 1);
+                break;
+        }
     }
 }
