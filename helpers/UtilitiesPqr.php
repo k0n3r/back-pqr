@@ -3,6 +3,8 @@
 namespace Saia\Pqr\Helpers;
 
 use Saia\models\formatos\Formato;
+use Saia\models\tarea\TareaEstado;
+use Saia\models\documento\Documento;
 use Saia\models\vistas\VfuncionarioDc;
 
 class UtilitiesPqr
@@ -63,5 +65,37 @@ class UtilitiesPqr
             'message' => $message
         ];
         file_put_contents($path . 'log.txt', json_encode($data) . "\n", FILE_APPEND);
+    }
+
+    /**
+     * Obtiene la cantidad de tareas y cantidad de tareas finalizadas 
+     * del documento
+     *
+     * @param Documento $Documento
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public static function getFinishTotalTask(Documento $Documento): array
+    {
+        $finish = $total = 0;
+
+        if ($Tareas = $Documento->getTasks()) {
+            $total = count($Tareas);
+
+            foreach ($Tareas as $Tarea) {
+                if (
+                    $Tarea->getState() == TareaEstado::REALIZADA ||
+                    $Tarea->getState() == TareaEstado::CANCELADA
+                ) {
+                    $finish = $finish + 1;
+                }
+            }
+        }
+
+        return [
+            'finish' => $finish,
+            'total' => $total
+        ];
     }
 }

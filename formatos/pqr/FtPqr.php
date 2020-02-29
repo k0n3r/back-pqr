@@ -11,6 +11,10 @@ use Saia\models\formatos\CampoSeleccionados;
 
 class FtPqr extends FtPqrProperties
 {
+    const ESTADO_PENDIENTE = 'PENDIENTE';
+    const ESTADO_PROCESO = 'PROCESO';
+    const ESTADO_TERMINADO = 'TERMINADO';
+
     public function __construct($id = null)
     {
         parent::__construct($id);

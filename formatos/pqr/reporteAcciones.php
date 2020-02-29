@@ -15,13 +15,8 @@
                 },
                 size: 'modal-lg',
                 title: 'Tarea',
-                buttons: {
-                    success: {
-                        label: "Guardar",
-                        class: "btn btn-complete"
-                    }
-                },
-                onSuccess: function() {
+                buttons: {},
+                afterHide: function() {
                     $('#table').bootstrapTable("refresh");
                 }
             });

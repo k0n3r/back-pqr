@@ -15,16 +15,32 @@ while ($max_salida > 0) {
 include_once $rootPath . 'app/vendor/autoload.php';
 
 use Saia\controllers\DateController;
-use Saia\Pqr\formatos\pqr\FtPqr;
+use Saia\models\documento\Documento;
+use Saia\Pqr\Helpers\UtilitiesPqr;
 
 function view(int $iddocumento, $numero): String
 {
-    return $numero;
+    $enlace = <<<HTML
+    <div class='kenlace_saia'
+    enlace='views/documento/index_acordeon.php?documentId={$iddocumento}' 
+    conector='iframe'
+    titulo='No Registro {$numero}'>
+        <button class='btn btn-complete' style='margin:auto'>{$numero}</button>
+    </div>
+HTML;
+    return $enlace;
 }
 
 function dateRadication($date): string
 {
     return DateController::convertDate($date);
+}
+
+function totalTask(int $iddocumento): string
+{
+    $data = UtilitiesPqr::getFinishTotalTask(new Documento($iddocumento));
+
+    return "{$data['finish']}/{$data['total']}";
 }
 
 function options(int $iddocumento)
@@ -36,7 +52,7 @@ function options(int $iddocumento)
         </button>
         <div class="dropdown-menu dropdown-menu-left bg-white" role="menu" style="">
             <a href="#" class="dropdown-item addResponsable" data-id="{$iddocumento}">
-                <i class="fa fa-user"></i> Asignar Responsable
+                <i class="fa fa-user"></i> Asignar Tarea
             </a>
             <a href="#" class="dropdown-item cancel" data-id="{$iddocumento}">
                 <i class="fa fa-exclamation-triangle"></i> Anular

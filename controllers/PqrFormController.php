@@ -12,6 +12,7 @@ use Saia\controllers\SessionController;
 use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
 use Saia\controllers\generador\FormatGenerator;
+use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\Models\PqrHtmlField;
 
 class PqrFormController
@@ -21,7 +22,8 @@ class PqrFormController
      */
     const FIELDS_DESCRIPTION = [
         'sys_tipo',
-        'sys_email'
+        'sys_email',
+        'sys_estado'
     ];
 
     /**
@@ -284,7 +286,8 @@ class PqrFormController
     protected function createForm(): void
     {
         $this->createRecordInFormat()
-            ->addEditRecordsInFormatFields();
+            ->addEditRecordsInFormatFields()
+            ->addOtherFields();
     }
 
     /**
@@ -297,7 +300,8 @@ class PqrFormController
     protected function updateForm(): void
     {
         $this->updateRecordInFormat()
-            ->addEditRecordsInFormatFields();
+            ->addEditRecordsInFormatFields()
+            ->addOtherFields();
     }
 
     /**
@@ -579,6 +583,55 @@ class PqrFormController
     }
 
     /**
+     * Adiciona campos adicionales predeterminados
+     * al formulario (sys_estado)
+     *
+     * @return self
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     * 
+     * @throws Exception
+     */
+    protected function addOtherFields(): self
+    {
+        $data = [
+            'formato_idformato' => $this->PqrForm->fk_formato,
+            'autoguardado' => 0,
+            'fila_visible' => 0,
+            'obligatoriedad' => 0,
+            'orden' => 0,
+            'nombre' => 'sys_estado',
+            'etiqueta' => 'Estado de la PQR',
+            'tipo_dato' => 'string',
+            'longitud' => '30',
+            'predeterminado' => FtPqr::ESTADO_PENDIENTE,
+            'etiqueta_html' => 'hidden',
+            'acciones' => NULL,
+            'placeholder' => 'Estado de la PQR',
+            'listable' => 1,
+            'opciones' => NULL,
+            'ayuda' => NULL,
+            'longitud_vis' => NULL
+        ];
+
+        if ($CamposFormato = CamposFormato::findByAttributes([
+            'nombre' => 'sys_estado',
+            'formato_idformato' => $this->PqrForm->fk_formato
+        ])) {
+            $CamposFormato->setAttributes($data);
+            if (!$CamposFormato->update(true)) {
+                throw new Exception("Error al actualizar", 1);
+            }
+        } else {
+            if (!CamposFormato::newRecord($data)) {
+                throw new Exception("No fue posible crear el campo Estado de la PQR", 1);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Actualiza un campo del formulario
      *
      * @param PqrFormField $PqrFormField
@@ -597,7 +650,7 @@ class PqrFormController
 
     protected function generateView(): void
     {
-        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.sys_email,cs.valor as sys_tipo
+        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.sys_email,cs.valor as sys_tipo,ft.sys_estado
         FROM ft_pqr ft,documento d, campo_seleccionados cs
         WHERE ft.documento_iddocumento=d.iddocumento AND
         cs.fk_documento=d.iddocumento

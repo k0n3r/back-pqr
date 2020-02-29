@@ -3,8 +3,11 @@
 namespace Saia\Pqr\Controllers;
 
 use Saia\core\model\Model;
+use Saia\models\documento\Documento;
 use Saia\models\tarea\Tarea;
+use Saia\Pqr\Helpers\UtilitiesPqr;
 use Saia\models\tarea\IExternalEventsTask;
+use Saia\Pqr\formatos\pqr\FtPqr;
 
 class TaskEvents implements IExternalEventsTask
 {
@@ -25,6 +28,10 @@ class TaskEvents implements IExternalEventsTask
     {
     }
 
+    public function afterDeleteTarea(): void
+    {
+    }
+
     public function afterCreateTareaAnexo(): void
     {
     }
@@ -35,6 +42,8 @@ class TaskEvents implements IExternalEventsTask
 
     public function afterCreateTareaEstado(): void
     {
+        $DocumentoTarea = $this->Tarea->getDocument();
+        $this->updateEstado($DocumentoTarea->Documento);
     }
 
     public function afterCreateTareaEtiqueta(): void
@@ -59,10 +68,32 @@ class TaskEvents implements IExternalEventsTask
 
     public function afterCreateDocumentoTarea(): void
     {
-        // $Documento = $this->Instance->Documento;
-        // $Ft = $Documento->getFt();
-        // $Ft->setAttributes([
-        //     'fk_tarea'
-        // ]);
+        $this->updateEstado($this->Instance->Documento);
+    }
+
+    /**
+     * Actualiza el estado de la PQR
+     *
+     * @param Documento $Documento
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function updateEstado(Documento $Documento): void
+    {
+        $estado = FtPqr::ESTADO_PENDIENTE;
+
+        $data = UtilitiesPqr::getFinishTotalTask($Documento);
+        if ($data['total']) {
+            $estado = $data['total'] == $data['finish'] ?
+                FtPqr::ESTADO_TERMINADO : FtPqr::ESTADO_PROCESO;
+        }
+        $Ft = $Documento->getFt();
+        $estadoActual = $Ft->sys_estado;
+
+        if ($estadoActual != $estado) {
+            $Ft->sys_estado = $estado;
+            $Ft->update();
+        }
     }
 }
