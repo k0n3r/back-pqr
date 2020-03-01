@@ -42,8 +42,9 @@ class TaskEvents implements IExternalEventsTask
 
     public function afterCreateTareaEstado(): void
     {
-        $DocumentoTarea = $this->Tarea->getDocument();
-        $this->updateEstado($DocumentoTarea->Documento);
+        if ($DocumentoTarea = $this->Tarea->getDocument()) {
+            $this->updateEstado($DocumentoTarea->Documento);
+        }
     }
 
     public function afterCreateTareaEtiqueta(): void
@@ -68,7 +69,7 @@ class TaskEvents implements IExternalEventsTask
 
     public function afterCreateDocumentoTarea(): void
     {
-        $this->updateEstado($this->Instance->Documento);
+        $this->updateEstado($this->Instance->Documento, FtPqr::ESTADO_PROCESO);
     }
 
     /**
@@ -79,9 +80,9 @@ class TaskEvents implements IExternalEventsTask
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function updateEstado(Documento $Documento): void
+    protected function updateEstado(Documento $Documento, ?string $estado = null): void
     {
-        $estado = FtPqr::ESTADO_PENDIENTE;
+        $estado = $estado ?? FtPqr::ESTADO_PENDIENTE;
 
         $data = UtilitiesPqr::getFinishTotalTask($Documento);
         if ($data['total']) {
