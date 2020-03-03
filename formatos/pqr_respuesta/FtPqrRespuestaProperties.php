@@ -1,10 +1,10 @@
 <?php
 
-namespace Saia\Pqr\formatos\pqr;
+namespace Saia\Pqr\formatos\pqr_respuesta;
 
 use Saia\core\model\ModelFormat;
 
-class FtPqrProperties extends ModelFormat
+class FtPqrRespuestaProperties extends ModelFormat
 {
     public function __construct($id = null)
     {
@@ -15,18 +15,20 @@ class FtPqrProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'dependencia',
+                'adjuntos',
+				'content',
+				'dependencia',
 				'documento_iddocumento',
+				'email',
 				'encabezado',
 				'firma',
-				'idft_pqr',
-				'sys_email',
-				'sys_estado',
-				'sys_tipo' 
+				'fk_response_template',
+				'fk_response_template_json',
+				'idft_pqr_respuesta' 
             ],
             'date' => [],
-            'table' => 'ft_pqr',
-            'primary' => 'idft_pqr'
+            'table' => 'ft_pqr_respuesta',
+            'primary' => 'idft_pqr_respuesta'
         ];
     }
 

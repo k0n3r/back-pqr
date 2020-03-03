@@ -48,13 +48,39 @@ final class Version20191224165528 extends AbstractMigration
             'nombre' => 'formulario_pqr',
             'tipo' => 1,
             'imagen' => 'fa fa-bars',
-            'etiqueta' => 'Formulario',
+            'etiqueta' => 'Formularios',
+            'enlace' => NULL,
+            'cod_padre' => $id,
+            'orden' => 1
+        ];
+
+        $id = $this->createModulo($data2, 'formulario_pqr');
+
+        $data2 =  [
+            'pertenece_nucleo' => 0,
+            'nombre' => 'plantilla_pqr',
+            'tipo' => 1,
+            'imagen' => 'fa fa-newspaper-o',
+            'etiqueta' => 'Formulario PQR',
             'enlace' => 'views/modules/pqr/dist/index.html',
             'cod_padre' => $id,
             'orden' => 1
         ];
 
-        $this->createModulo($data2, 'formulario_pqr');
+        $this->createModulo($data2, 'plantilla_pqr');
+
+        $data3 =  [
+            'pertenece_nucleo' => 0,
+            'nombre' => 'respuesta_pqr',
+            'tipo' => 1,
+            'imagen' => 'fa fa-mail-reply',
+            'etiqueta' => 'Respuesta PQR',
+            'enlace' => 'views/modules/pqr/dist/index.html',
+            'cod_padre' => $id,
+            'orden' => 1
+        ];
+
+        $this->createModulo($data3, 'respuesta_pqr');
     }
 
     protected function validateCreation(): void

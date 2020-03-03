@@ -50,7 +50,7 @@ final class Version20200226192642 extends AbstractMigration
             'nombre' => 'reporte_pqr',
             'tipo' => 1,
             'imagen' => 'fa fa-bar-chart-o',
-            'etiqueta' => 'Reporte',
+            'etiqueta' => 'Reportes',
             'enlace' => NULL,
             'cod_padre' => $modulo[0]['idmodulo'],
             'orden' => 2

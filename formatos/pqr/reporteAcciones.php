@@ -39,6 +39,9 @@
                         label: 'Cerrar',
                         class: 'btn btn-danger'
                     }
+                },
+                afterHide: function() {
+                    $('#table').bootstrapTable("refresh");
                 }
             };
             top.topModal(options);
