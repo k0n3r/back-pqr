@@ -62,7 +62,7 @@ final class Version20191224165528 extends AbstractMigration
             'tipo' => 1,
             'imagen' => 'fa fa-newspaper-o',
             'etiqueta' => 'Formulario PQR',
-            'enlace' => 'views/modules/pqr/dist/index.html',
+            'enlace' => 'views/modules/pqr/dist/pqr/index.html',
             'cod_padre' => $id,
             'orden' => 1
         ];
@@ -75,7 +75,7 @@ final class Version20191224165528 extends AbstractMigration
             'tipo' => 1,
             'imagen' => 'fa fa-mail-reply',
             'etiqueta' => 'Respuesta PQR',
-            'enlace' => 'views/modules/pqr/dist/index.html',
+            'enlace' => 'views/modules/pqr/dist/respuestaPqr/index.html',
             'cod_padre' => $id,
             'orden' => 1
         ];
