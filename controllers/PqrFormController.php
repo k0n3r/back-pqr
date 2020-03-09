@@ -96,12 +96,13 @@ class PqrFormController
 
             $this->PqrForm = new PqrForm();
             $this->PqrForm->setAttributes($attributes);
-            $this->PqrForm->save();
-
-            $this->createSystemFields();
-
-            $conn->commit();
-            $Response->data = $this->PqrForm->getAttributes();
+            if ($this->PqrForm->save()) {
+                $this->createSystemFields();
+                $conn->commit();
+                $Response->data = $this->PqrForm->getAttributes();
+            } else {
+                throw new Exception("No fue posible crear el formulario", 1);
+            }
         } catch (Exception $th) {
             $conn->rollBack();
             $Response->success = 0;
@@ -207,11 +208,14 @@ class PqrFormController
 
             $PqrForm = new PqrForm($id);
             $PqrForm->setAttributes($params);
-            $PqrForm->update();
+            if ($PqrForm->update()) {
 
-            $conn->commit();
-            $Response->success = 1;
-            $Response->data = $PqrForm->getAttributes();
+                $conn->commit();
+                $Response->success = 1;
+                $Response->data = $PqrForm->getAttributes();
+            } else {
+                throw new Exception("No fue posible actualizar el formulario", 1);
+            }
         } catch (Exception $th) {
             $conn->rollBack();
             $Response->success = 0;

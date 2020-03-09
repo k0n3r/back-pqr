@@ -13,7 +13,9 @@ while ($max_salida > 0) {
 
 include_once $rootPath . 'views/assets/librerias.php';
 
-$_REQUEST['baseUrl'] = $rootPath;
+// TODO: ERROR EN BASE URL
+$_REQUEST['baseUrl'] = "../../";
+
 $params = json_encode($_REQUEST);
 ?>
 
@@ -40,10 +42,10 @@ $params = json_encode($_REQUEST);
 <div class="row" id="divSelect">
     <div class="col-12">
         <div class="form-group form-group-default form-group-default-select2">
-            <label class="my-0">BUSCAR DOCUMENTO :</label>
+            <label class="my-0">RADICADO DEL DOCUMENTO :</label>
             <select class="form-control" id="iddocumento"></select>
         </div>
     </div>
 </div>
 <?= select2() ?>
-<script id="scriptResponder" src="../../app/modules/back_pqr/views/js/responder.js" data-params='<?= $params ?>'></script>
+<script id="scriptResponder" src="<?= $_REQUEST['baseUrl'] ?>app/modules/back_pqr/views/js/responder.js" data-params='<?= $params ?>'></script>

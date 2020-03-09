@@ -29,6 +29,7 @@ class PqrForm extends Model
         $this->dbAttributes = (object) [
             'safe' => [
                 'fk_formato',
+                'fk_formato_r',
                 'fk_contador',
                 'label',
                 'name',

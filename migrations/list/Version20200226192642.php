@@ -32,7 +32,7 @@ final class Version20200226192642 extends AbstractMigration
             'campos' => NULL,
             'tablas' => 'vpqr v',
             'ruta_libreria' => 'app/modules/back_pqr/formatos/pqr/reporteFunciones.php',
-            'ruta_libreria_pantalla' => 'app/modules/back_pqr/formatos/pqr/reporteAcciones.php',
+            'ruta_libreria_pantalla' => 'app/modules/back_pqr/formatos/pqr/reporteAcciones.php,app/modules/back_pqr/formatos/pqr/accionesSeleccionados.php',
             'cantidad_registros' => 20,
             'tipo_busqueda' => 2
         ];
@@ -95,7 +95,7 @@ final class Version20200226192642 extends AbstractMigration
             'ordenado_por' => 'v.fecha',
             'direccion' => 'DESC',
             'agrupado_por' => NULL,
-            'busqueda_avanzada' => NULL,
+            'busqueda_avanzada' => 'app/modules/back_pqr/formatos/pqr/busqueda.php',
             'acciones_seleccionados' => NULL,
             'enlace_adicionar' => NULL,
             'llave' => 'v.iddocumento'
@@ -177,7 +177,8 @@ final class Version20200226192642 extends AbstractMigration
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta' => 'Terminados',
             'nombre' => $nombreComponente,
-            'orden' => 3
+            'orden' => 3,
+            'acciones_seleccionados' => 'answers'
         ];
         $busquedaComponente = array_merge($dataComponente, $this->getDefaultData(true));
 

@@ -70,6 +70,7 @@ class FtPqrController implements IAddEditFormat
             'ruta_mostrar' => "app/modules/back_pqr/formatos/{$name}/mostrar.php",
             'ruta_editar' => "app/modules/back_pqr/formatos/{$name}/editar.php",
             'ruta_adicionar' => "app/modules/back_pqr/formatos/{$name}/adicionar.php",
+            'ruta_buscar' => "app/modules/back_pqr/formatos/{$name}/buscar.php",
             'encabezado' => 1,
             'cuerpo' => '{*showContent*}{*mostrar_estado_proceso*}',
             'pie_pagina' => 0,
@@ -91,7 +92,8 @@ class FtPqrController implements IAddEditFormat
             'module' => 'pqr',
             'firma_digital' => 0,
             'tipo_edicion' => 0,
-            'item' => 0
+            'item' => 0,
+            'class_name' => 'Saia\Pqr\Controllers\TaskEvents'
         ];
 
         if ($edit) {
