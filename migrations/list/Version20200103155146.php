@@ -37,9 +37,6 @@ final class Version20200103155146 extends AbstractMigration
         $table4 = $schema->createTable('pqr_backups');
         $this->tablePqrBackup($table4);
 
-        $table5 = $schema->createTable('pqr_backups');
-        $this->tablePqrBackup($table5);
-
         $table6 = $schema->createTable('pqr_response_templates');
         $this->tablePqrResponseTemplate($table6);
 
@@ -200,7 +197,7 @@ final class Version20200103155146 extends AbstractMigration
             'pqr_html_fields',
             'pqr_forms',
             'pqr_backups',
-            'pqr_response_template',
+            'pqr_response_templates',
             'pqr_answers'
         ];
 

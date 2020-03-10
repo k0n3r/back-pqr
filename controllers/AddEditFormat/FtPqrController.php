@@ -299,7 +299,6 @@ class FtPqrController implements IAddEditFormat
 
         return [
             'formato_idformato' => $this->PqrForm->fk_formato,
-            'autoguardado' => 0,
             'fila_visible' => 1,
             'obligatoriedad' => $PqrFormField->required,
             'orden' => $PqrFormField->orden,
@@ -349,7 +348,6 @@ class FtPqrController implements IAddEditFormat
     {
         $data = [
             'formato_idformato' => $this->PqrForm->fk_formato,
-            'autoguardado' => 0,
             'fila_visible' => 0,
             'obligatoriedad' => 0,
             'orden' => 0,

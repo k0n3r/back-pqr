@@ -96,7 +96,6 @@ final class Version20200226192642 extends AbstractMigration
             'direccion' => 'DESC',
             'agrupado_por' => NULL,
             'busqueda_avanzada' => 'app/modules/back_pqr/formatos/pqr/busqueda.php',
-            'acciones_seleccionados' => NULL,
             'enlace_adicionar' => NULL,
             'llave' => 'v.iddocumento'
         ];

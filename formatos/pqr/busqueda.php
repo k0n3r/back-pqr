@@ -89,11 +89,6 @@ $baseUrl = "../../";
                     </div>
 
                     <div id="morefields"></div>
-
-                    <div class="form-group">
-                        <button type="button" class="btn btn-danger" id="clear">Limpiar</button>
-                        <button type="submit" class="btn btn-complete">Buscar</button>
-                    </div>
                 </form>
             </div>
         </div>

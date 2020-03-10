@@ -1,4 +1,16 @@
 <?php
+$max_salida = 6;
+$rootPath = $ruta = "";
+while ($max_salida > 0) {
+    if (is_file($ruta . "sw.js")) {
+        $rootPath = $ruta;
+    }
+    $ruta .= "../";
+    $max_salida--;
+}
+
+include_once $rootPath . "views/assets/librerias.php";
+echo select2();
 
 function answers(array $data)
 {
@@ -7,6 +19,7 @@ function answers(array $data)
         <option value=''>Acciones...</option>
         <option value='1'>Responder</option>
     </select>
+    <script>$("#actions").select2()</script>
 HTML;
 
     return $code;

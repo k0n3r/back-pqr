@@ -22,9 +22,10 @@ class FtPqrRespuestaProperties extends ModelFormat
 				'email',
 				'encabezado',
 				'firma',
-				'fk_response_template',
 				'fk_response_template_json',
-				'idft_pqr_respuesta' 
+				'idft_pqr_respuesta',
+				'sql',
+				'sql_json' 
             ],
             'date' => [],
             'table' => 'ft_pqr_respuesta',
