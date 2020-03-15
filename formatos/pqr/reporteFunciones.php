@@ -60,8 +60,11 @@ HTML;
 
         case FtPqr::ESTADO_TERMINADO:
             $options = <<<HTML
-            <a href="#" class="dropdown-item answer" data-id="{$iddocumento}">
-               <i class="fa fa-mail-reply"></i> Responder
+            <a href="#" class="dropdown-item answer2" data-id="{$iddocumento}">
+               <i class="fa fa-mail-reply"></i> Responder con documento nuevo
+           </a>
+           <a href="#" class="dropdown-item answer" data-id="{$iddocumento}">
+               <i class="fa fa-mail-reply"></i> Responder con documento existente
            </a>
            <a href="#" class="dropdown-item viewTask" data-id="{$iddocumento}">
                <i class="fa fa-eye"></i> Tareas

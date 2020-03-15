@@ -139,11 +139,65 @@
                         class: 'btn btn-danger'
                     }
                 },
+                onSuccess(documentId) {
+                    answerPqr(documentId);
+
+                    top.closeTopModal();
+                },
                 afterHide: function() {
                     $('#table').bootstrapTable("refresh");
                 }
             });
 
         });
+
+        $(document).on('click', '.answer2', function() {
+            let documentId = $(this).data('id');
+            answerPqr(documentId);
+        });
+
+        function answerPqr(documentId) {
+            $.post(
+                `${params.baseUrl}app/formato/consulta_rutas.php`, {
+                    key: localStorage.getItem('key'),
+                    token: localStorage.getItem('token'),
+                    formatName: "pqr_respuesta",
+                    fk_pqr: documentId
+                },
+                function(response) {
+                    if (response.success) {
+                        let route = params.baseUrl + response.data.ruta_adicionar;
+                        let iframe = $('<iframe>', {
+                            src: route
+                        }).css({
+                            width: '100%',
+                            height: '100%',
+                            border: 'none'
+                        });
+
+                        top.topJsPanel({
+                            headerTitle: 'Documento',
+                            contentSize: {
+                                width: $(window).width() * 0.8,
+                                height: $(window).height() * 0.9
+                            },
+                            content: iframe.prop('outerHTML'),
+                            onbeforeclose: function() {
+                                $('#table').bootstrapTable("refresh");
+                                return true;
+                            }
+                        });
+
+                    } else {
+                        top.notification({
+                            type: 'error',
+                            message: response.message
+                        });
+                    }
+                },
+                'json'
+            );
+        }
+
     });
 </script>

@@ -81,28 +81,7 @@ $(function () {
                 });
             }
         } else {
-            $.post(
-                `${params.baseUrl}app/formato/consulta_rutas.php`,
-                {
-                    key: localStorage.getItem('key'),
-                    token: localStorage.getItem('token'),
-                    formatName: "pqr_respuesta",
-                    fk_pqr: +params.documentId
-                },
-                function (response) {
-                    if (response.success) {
-                        let route = params.baseUrl + response.data.ruta_adicionar;
-                        $('#iframe_workspace').attr('src', route);
-                        top.closeTopModal();
-                    } else {
-                        top.notification({
-                            type: 'error',
-                            message: response.message
-                        });
-                    }
-                },
-                'json'
-            );
+            top.successModalEvent(+params.documentId);
         }
     });
 
