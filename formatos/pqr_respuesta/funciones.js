@@ -7,6 +7,11 @@ function add(data) {
     viewEmail(+data.fk_pqr)
   }
 
+  $("#fk_response_template").change(function () {
+
+  });
+
+
   function viewEmail(id) {
     $.ajax({
       type: "POST",
@@ -15,7 +20,7 @@ function add(data) {
         key: localStorage.getItem("key"),
         token: localStorage.getItem("token"),
         class: "FtPqrController",
-        method: "index",
+        method: "getEmail",
         params: {
           id: id
         }
@@ -23,7 +28,7 @@ function add(data) {
       dataType: "json",
       success(response) {
         if (response.success) {
-          console.log(response)
+          $("#email").val(response.data);
         } else {
           top.notification({
             message: response.message,

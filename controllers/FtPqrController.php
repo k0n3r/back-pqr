@@ -40,14 +40,39 @@ class FtPqrController
     public function index(): object
     {
         $Response = (object) [
-            'success' => 1,
+            'success' => 0,
             'data' => []
         ];
         if ($id = $this->request['id']) {
-            $FtPqr = new FtPqr($id);
-            $Response->data = $FtPqr->getAttributes();
+            if ($FtPqr = FtPqr::findByDocumentId($id)) {
+                $Response->success = 1;
+                $Response->data = $FtPqr->getAttributes();
+            }
         }
 
+        return $Response;
+    }
+
+
+    /**
+     * Obtiene el email
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getEmail(): object
+    {
+        $Response = (object) [
+            'success' => 0,
+            'data' => []
+        ];
+        if ($id = $this->request['id']) {
+            if ($FtPqr = FtPqr::findByDocumentId($id)) {
+                $Response->success = 1;
+                $Response->data = $FtPqr->sys_email;
+            }
+        }
 
         return $Response;
     }

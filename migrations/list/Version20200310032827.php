@@ -124,7 +124,7 @@ final class Version20200310032827 extends AbstractMigration
                 'obligatoriedad' => 0,
                 'orden' => 2,
                 'nombre' => 'email',
-                'etiqueta' => 'Responder a (Email):',
+                'etiqueta' => 'Responder a (E-mail):',
                 'tipo_dato' => 'string',
                 'longitud' => NULL,
                 'etiqueta_html' => 'text',
@@ -133,6 +133,23 @@ final class Version20200310032827 extends AbstractMigration
                 'listable' => 1,
                 'opciones' => NULL,
                 'ayuda' => 'Ingrese el o los correos, separados por coma a los cuales se le remitira la respuesta',
+                'longitud_vis' => NULL
+            ],
+            'email_copia' => [
+                'formato_idformato' => $idformato,
+                'fila_visible' => 1,
+                'obligatoriedad' => 0,
+                'orden' => 3,
+                'nombre' => 'email_copia',
+                'etiqueta' => 'Copia a (E-mail):',
+                'tipo_dato' => 'string',
+                'longitud' => NULL,
+                'etiqueta_html' => 'text',
+                'acciones' => 'a,e',
+                'placeholder' => 'Ingrese los correos',
+                'listable' => 1,
+                'opciones' => NULL,
+                'ayuda' => 'Ingrese el o los correos, separados por coma a los cuales se le copiara la respuesta',
                 'longitud_vis' => NULL
             ],
             'content' => [
