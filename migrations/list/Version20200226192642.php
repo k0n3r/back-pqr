@@ -248,7 +248,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->deleteModulo('reporte_pqr');
         $this->deleteModulo('pendientes_pqr');
         $this->deleteModulo('proceso_pqr');
-        $this->deleteModulo('terminado_pqr');
+        $this->deleteModulo('terminados_pqr');
 
         $this->deleteBusqueda('reporte_pqr');
     }

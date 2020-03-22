@@ -2,6 +2,7 @@
 
 namespace Saia\Pqr\Controllers\AddEditFormat;
 
+use Exception;
 use Saia\Pqr\Models\PqrForm;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\models\formatos\Formato;
@@ -119,6 +120,17 @@ class FtPqrController implements IAddEditFormat
         ]);
         $this->PqrForm->update();
 
+        if (!$Respuesta = Formato::findByAttributes([
+            'nombre' => 'pqr_respuesta'
+        ])) {
+            throw new Exception("No se encontro el formato RESPUESTA PQR", 1);
+        }
+
+        $Respuesta->setAttributes([
+            'cod_padre' => $id
+        ]);
+        $Respuesta->update();
+
         return $this;
     }
 
@@ -176,37 +188,37 @@ class FtPqrController implements IAddEditFormat
             'input' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'text',
+                'etiqueta_html' => 'Text',
                 'opciones' => NULL
             ],
             'textarea' => [
                 'longitud' => 4000,
                 'tipo_dato' => 'text',
-                'etiqueta_html' => 'textarea_cke',
+                'etiqueta_html' => 'Textarea',
                 'opciones' => NULL
             ],
             'select' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'select',
+                'etiqueta_html' => 'Select',
                 'opciones' => NULL
             ],
             'radio' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'radio',
+                'etiqueta_html' => 'Radio',
                 'opciones' => NULL
             ],
             'checkbox' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'checkbox',
+                'etiqueta_html' => 'Checkbox',
                 'opciones' => NULL
             ],
             'email' => [
                 'longitud' => 255,
                 'tipo_dato' => 'string',
-                'etiqueta_html' => 'text',
+                'etiqueta_html' => 'Text',
                 'opciones' => '{"type":"email"}'
             ],
 
@@ -287,13 +299,13 @@ class FtPqrController implements IAddEditFormat
         $configuration = $this->defaultConfigurationOfFormField($PqrFormField->PqrHtmlField->type);
 
         $actions = [
-            CamposFormato::FLAG_ADD,
-            CamposFormato::FLAG_EDIT
+            CamposFormato::ACTION_ADD,
+            CamposFormato::ACTION_EDIT
         ];
 
         if ($PqrFormField->required) {
             if (in_array($PqrFormField->name, self::FIELDS_DESCRIPTION)) {
-                $actions[] = CamposFormato::FLAG_DESCRIPTION;
+                $actions[] = CamposFormato::ACTION_DESCRIPTION;
             }
         }
 

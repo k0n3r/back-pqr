@@ -25,12 +25,11 @@ abstract class WebserviceGenerator
     ];
 
     const FIELD_TYPE = [
-        'textarea_cke' => Textarea::class,
-        'textarea' => Textarea::class,
-        'radio' => Radio::class,
-        'checkbox' => Checkbox::class,
-        'select' => Select::class,
-        'text' => Text::class,
+        'Textarea' => Textarea::class,
+        'Radio' => Radio::class,
+        'Checkbox' => Checkbox::class,
+        'Select' => Select::class,
+        'Text' => Text::class,
         'input' => Text::class
     ];
 

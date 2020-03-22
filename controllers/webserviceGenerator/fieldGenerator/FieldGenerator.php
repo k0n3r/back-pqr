@@ -2,8 +2,6 @@
 
 namespace Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator;
 
-use Exception;
-use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
 
 class FieldGenerator
@@ -66,24 +64,13 @@ class FieldGenerator
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      * 
-     * @throws Exception
      */
     protected function getMultipleOptions(): array
     {
-        if (in_array($this->CamposFormato->etiqueta_html, [
-            'radio',
-            'select',
-            'checkbox'
-        ])) {
-            $this->campoOpciones = CampoOpciones::findAllByAttributes([
-                'fk_campos_formato' => $this->CamposFormato->getPK(),
-                'estado' => 1
-            ]);
-
-            return $this->campoOpciones;
-        } else {
-            throw new Exception("El componente debe ser de tipo radio,checkbox o select", 1);
-        }
+        return CamposFormato::getCampoOpciones(
+            $this->CamposFormato->etiqueta_html,
+            $this->CamposFormato->getPK()
+        );
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace Saia\Pqr\Controllers\AddEditFormat;
 
-use Saia\controllers\generador\FormatGenerator;
+use Saia\controllers\generator\FormatGenerator;
 
 trait TAddEditFormat
 {

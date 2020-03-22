@@ -6,13 +6,14 @@ namespace Saia\Pqr\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Saia\Pqr\Controllers\AddEditFormat\FtPqrRespuestaController;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
 final class Version20200310032827 extends AbstractMigration
 {
-    protected $formatName = 'pqr_respuesta';
+    protected $formatName = FtPqrRespuestaController::FORMAT_NAME;
 
     public function getDescription(): string
     {
@@ -38,7 +39,7 @@ final class Version20200310032827 extends AbstractMigration
         $funcionario = $this->connection->executeQuery($sql)->fetchAll();
 
         if (!$funcionario[0]['idfuncionario']) {
-            $this->abortIf(true, "El contador radicacion_salida NO existe");
+            $this->abortIf(true, "El funcionario cerok NO existe");
         }
 
         $name = $this->formatName;
@@ -84,6 +85,22 @@ final class Version20200310032827 extends AbstractMigration
     protected function createFields($idformato): void
     {
         $data = [
+            'ft_pqr' => [
+                'formato_idformato' => $idformato,
+                'fila_visible' => 1,
+                'obligatoriedad' => 1,
+                'orden' => 1,
+                'nombre' => 'ft_pqr',
+                'etiqueta' => 'pqr',
+                'tipo_dato' => 'integer',
+                'banderas' => 'i',
+                'longitud' => 11,
+                'etiqueta_html' => 'Method',
+                'acciones' => 'a',
+                'listable' => 1,
+                'ayuda' => NULL,
+                'longitud_vis' => NULL
+            ],
             'fk_response_template' => [
                 'formato_idformato' => $idformato,
                 'fila_visible' => 1,
@@ -93,7 +110,7 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta' => 'Plantilla',
                 'tipo_dato' => 'integer',
                 'longitud' => 11,
-                'etiqueta_html' => 'opciones_sql',
+                'etiqueta_html' => 'SqlOptions',
                 'acciones' => 'a',
                 'placeholder' => '',
                 'listable' => 1,
@@ -110,7 +127,7 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta' => 'fk_response_template_json',
                 'tipo_dato' => 'text',
                 'longitud' => NULL,
-                'etiqueta_html' => 'system_field',
+                'etiqueta_html' => 'SystemField',
                 'acciones' => NULL,
                 'placeholder' => NULL,
                 'listable' => 0,
@@ -127,12 +144,12 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta' => 'Responder a (E-mail):',
                 'tipo_dato' => 'string',
                 'longitud' => NULL,
-                'etiqueta_html' => 'text',
+                'etiqueta_html' => 'Text',
                 'acciones' => 'a,e,p',
-                'placeholder' => 'Ingrese los correos',
+                'placeholder' => 'Ingrese el correo',
                 'listable' => 1,
-                'opciones' => NULL,
-                'ayuda' => 'Ingrese el o los correos, separados por coma a los cuales se le remitira la respuesta',
+                'opciones' => '{type:"email"}',
+                'ayuda' => 'Ingrese el correo del remitente a la cual dara respuesta a la PQR',
                 'longitud_vis' => NULL
             ],
             'email_copia' => [
@@ -144,12 +161,12 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta' => 'Copia a (E-mail):',
                 'tipo_dato' => 'string',
                 'longitud' => NULL,
-                'etiqueta_html' => 'text',
+                'etiqueta_html' => 'Text',
                 'acciones' => 'a,e',
                 'placeholder' => 'Ingrese los correos',
                 'listable' => 1,
                 'opciones' => NULL,
-                'ayuda' => 'Ingrese el o los correos, separados por coma a los cuales se le copiara la respuesta',
+                'ayuda' => 'Ingrese los correos separados por coma, a los cuales se le copiara la respuesta',
                 'longitud_vis' => NULL
             ],
             'content' => [
@@ -161,7 +178,7 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta' => 'Contenido',
                 'tipo_dato' => 'string',
                 'longitud' => NULL,
-                'etiqueta_html' => 'textarea_cke',
+                'etiqueta_html' => 'Textarea',
                 'acciones' => 'a,e',
                 'placeholder' => NULL,
                 'listable' => 1,
@@ -179,7 +196,7 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta' => 'Anexos',
                 'tipo_dato' => 'string',
                 'longitud' => NULL,
-                'etiqueta_html' => 'archivo',
+                'etiqueta_html' => 'Attached',
                 'acciones' => 'a,e',
                 'placeholder' => NULL,
                 'listable' => 1,
@@ -196,6 +213,10 @@ final class Version20200310032827 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
+        if ($this->connection->getDatabasePlatform()->getName() == "mysql") {
+            $this->platform->registerDoctrineTypeMapping('enum', 'string');
+        }
+
         $sql = "SELECT idformato FROM formato WHERE nombre like '{$this->formatName}'";
         $data = $this->connection->executeQuery($sql)->fetchAll();
         if (!$data[0]['idformato']) {
@@ -216,5 +237,10 @@ final class Version20200310032827 extends AbstractMigration
                 'idformato' => $idformato
             ]
         );
+
+        $table = "ft_{$this->formatName}";
+        if ($schema->hasTable($table)) {
+            $schema->dropTable($table);
+        }
     }
 }

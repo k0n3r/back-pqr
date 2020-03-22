@@ -7,7 +7,7 @@ namespace Saia\Pqr\Migrations;
 use Saia\models\Perfil;
 use Doctrine\DBAL\Schema\Schema;
 use Saia\Pqr\Migrations\TMigrations;
-use Saia\controllers\CriptoController;
+use Saia\controllers\CryptController;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
@@ -127,12 +127,11 @@ final class Version20191224165528 extends AbstractMigration
                 'apellidos' => 'Web',
                 'estado' => 1,
                 'fecha_ingreso' => date('Y-m-d H:i:s'),
-                'clave' => CriptoController::encrypt_md5('cerok_saia'),
+                'clave' => CryptController::md5Encrypt('cerok_saia'),
                 'nit' => '3',
                 'perfil' => Perfil::GENERAL,
                 'pertenece_nucleo' => 1,
-                'sistema' => 1, //TODO: Preguntar si se puede borrar el campo
-                'ventanilla_radicacion' => 1, //TODO: De donde se obtiene este campo
+                'ventanilla_radicacion' => 0, //TODO: De donde se obtiene este campo
             ]);
             $idfuncionario = $this->connection->lastInsertId();
         } else {
@@ -174,7 +173,9 @@ final class Version20191224165528 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        $this->deleteModulo('formulario_pqr');
         $this->deleteModulo('agrupador_pqr');
+        $this->deleteModulo('formulario_pqr');
+        $this->deleteModulo('plantilla_pqr');
+        $this->deleteModulo('respuesta_pqr');
     }
 }

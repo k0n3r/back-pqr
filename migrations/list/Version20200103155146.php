@@ -37,11 +37,8 @@ final class Version20200103155146 extends AbstractMigration
         $table4 = $schema->createTable('pqr_backups');
         $this->tablePqrBackup($table4);
 
-        $table6 = $schema->createTable('pqr_response_templates');
-        $this->tablePqrResponseTemplate($table6);
-
-        $table7 = $schema->createTable('pqr_answers');
-        $this->tablePqrAnswers($table7);
+        $table5 = $schema->createTable('pqr_response_templates');
+        $this->tablePqrResponseTemplate($table5);
     }
 
     public function tablePqrFormFields(Table $table)
@@ -120,9 +117,9 @@ final class Version20200103155146 extends AbstractMigration
         $table->setPrimaryKey(['id']);
 
         $table->addColumn('fk_formato', 'integer');
-        $table->addColumn('fk_formato_r', 'integer', [
-            'notnull' => false
-        ]);
+        // $table->addColumn('fk_formato_r', 'integer', [
+        //     'notnull' => false
+        // ]);
         $table->addColumn('fk_contador', 'integer');
         $table->addColumn('label', 'string');
         $table->addColumn('name', 'string');
@@ -161,30 +158,6 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    public function tablePqrAnswers(Table $table)
-    {
-        $table->addColumn('id', 'integer', [
-            'autoincrement' => true
-        ]);
-        $table->setPrimaryKey(['id']);
-
-        $table->addColumn('fk_pqr', 'integer', [
-            'comment' => 'iddoc pqr'
-        ]);
-        $table->addColumn('fk_respuesta', 'integer', [
-            'comment' => 'iddoc'
-        ]);
-        $table->addColumn('notification', 'boolean', [
-            'notnull' => false,
-            'default' => false
-        ]);
-        $table->addColumn('fk_encuesta', 'integer', [
-            'notnull' => false,
-            'comment' => 'iddoc pqr_encuesta'
-        ]);
-    }
-
-
     public function down(Schema $schema): void
     {
 
@@ -197,12 +170,13 @@ final class Version20200103155146 extends AbstractMigration
             'pqr_html_fields',
             'pqr_forms',
             'pqr_backups',
-            'pqr_response_templates',
-            'pqr_answers'
+            'pqr_response_templates'
         ];
 
         foreach ($data as $table) {
-            $schema->dropTable($table);
+            if ($schema->hasTable($table)) {
+                $schema->dropTable($table);
+            }
         }
     }
 }

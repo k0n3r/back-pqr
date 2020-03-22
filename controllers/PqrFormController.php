@@ -6,16 +6,18 @@ use Exception;
 use Saia\models\Contador;
 use Saia\Pqr\Models\PqrForm;
 use Saia\core\DatabaseConnection;
+use Saia\models\formatos\Formato;
 use Saia\Pqr\Models\PqrFormField;
 use Saia\Pqr\Models\PqrHtmlField;
 use Saia\Pqr\Controllers\WebservicePqr;
 use Saia\Pqr\Controllers\AddEditFormat\AddEditFormat;
 use Saia\Pqr\Controllers\AddEditFormat\IAddEditFormat;
+use Saia\Pqr\Controllers\AddEditFormat\TAddEditFormat;
 use Saia\Pqr\Controllers\AddEditFormat\FtPqrController;
-use Saia\Pqr\Controllers\AddEditFormat\FtPqrRespuestaController;
 
 class PqrFormController
 {
+    use TAddEditFormat;
 
     /**
      * Variable que contiene todo el request que llega de las peticiones
@@ -250,11 +252,19 @@ class PqrFormController
                 $option
             );
 
-            $option = $this->PqrForm->fk_formato_r ? AddEditFormat::ADIT : AddEditFormat::ADD;
-            $this->addEditFormat(
-                new FtPqrRespuestaController($this->PqrForm),
-                $option
-            );
+            if (!$Formato = Formato::findByAttributes([
+                'nombre' => 'pqr_respuesta'
+            ])) {
+                throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
+            }
+            $this->FormatGenerator($Formato->getPK());
+
+            if (!$Formato = Formato::findByAttributes([
+                'nombre' => 'pqr_calificacion'
+            ])) {
+                throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
+            }
+            $this->FormatGenerator($Formato->getPK());
 
             $Web = new WebservicePqr($this->PqrForm);
             $Web->generate();
