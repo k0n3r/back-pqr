@@ -57,23 +57,6 @@ class FieldGenerator
     }
 
     /**
-     * Devuelve las opciones de los campos
-     * select, checkbox y radios
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     * 
-     */
-    protected function getMultipleOptions(): array
-    {
-        return CamposFormato::getCampoOpciones(
-            $this->CamposFormato->etiqueta_html,
-            $this->CamposFormato->getPK()
-        );
-    }
-
-    /**
      * Adiciona tabulaciones al contenido
      *
      * @param string $code
