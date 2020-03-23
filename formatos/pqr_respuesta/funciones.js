@@ -1,18 +1,20 @@
 //evento ejecutado en el adicionar
 function add(data) {
-  if (Array.isArray(data.fk_pqr)) {
-    console.log(data)
-
+  let iddocPqr = +data.anterior;
+  if (iddocPqr) {
+    getEmail(iddocPqr)
   } else {
-    viewEmail(+data.fk_pqr)
+    console.error("No ha llegado el identificador");
+    return false;
   }
 
-  $("#fk_response_template").change(function () {
 
+  $("#fk_response_template").change(function () {
+    getPlantilla($(this).val());
   });
 
 
-  function viewEmail(id) {
+  function getEmail(id) {
     $.ajax({
       type: "POST",
       url: `${data.baseUrl}app/modules/back_pqr/app/request.php`,
@@ -41,10 +43,48 @@ function add(data) {
       }
     });
   }
+
+  function getPlantilla(id) {
+    $.ajax({
+      type: "POST",
+      url: `${data.baseUrl}app/modules/back_pqr/app/request.php`,
+      data: {
+        key: localStorage.getItem("key"),
+        token: localStorage.getItem("token"),
+        class: "FtPqrController",
+        method: "getPlantilla",
+        params: {
+          id: id
+        }
+      },
+      dataType: "json",
+      success(response) {
+        if (response.success) {
+          let editor = CKEDITOR.instances['content'];
+          editor.setData(response.data);
+          $("#content").val(response.data);
+        } else {
+          top.notification({
+            message: response.message,
+            type: "error"
+          });
+        }
+      },
+      error(error) {
+        console.error(error);
+      }
+    });
+  }
 }
 //evento ejecutado en el editar
 function edit(data) {
-
+  if (data.numero) {
+    top.notification({
+      type: 'error',
+      message: 'El documento ya se encuentra radicado, NO se puede editar'
+    });
+    window.history.back();
+  }
 }
 
 //evento ejecutado en el mostrar

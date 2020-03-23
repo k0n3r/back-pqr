@@ -82,7 +82,7 @@ class FtPqrController implements IAddEditFormat
             'funcionario_idfuncionario' => SessionController::getValue('idfuncionario'),
             'detalle' => 0,
             'font_size' => 11,
-            'mostrar_pdf' => 0,
+            'mostrar_pdf' => 1,
             'fk_categoria_formato' => '2,3',
             'funcion_predeterminada' => 0,
             'paginar' => 0,

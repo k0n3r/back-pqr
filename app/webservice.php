@@ -18,10 +18,11 @@ use Exception;
 use Saia\models\Funcionario;
 use Saia\Pqr\Models\PqrForm;
 use Saia\core\DatabaseConnection;
-use Saia\models\vistas\VfuncionarioDc;
-use Saia\controllers\GuardarFtController;
-use Saia\controllers\UtilitiesController;
+use Saia\models\formatos\Formato;
+use Saia\controllers\SaveDocument;
 use Saia\Pqr\Helpers\UtilitiesPqr;
+use Saia\models\vistas\VfuncionarioDc;
+use Saia\controllers\UtilitiesController;
 
 $Response = (object) [
     'message' => '',
@@ -55,7 +56,7 @@ try {
         'tipo_radicado' => $PqrForm->Contador->nombre
     ]);
 
-    $GuardarFtController = new GuardarFtController($formatId, $newData);
+    $GuardarFtController = new SaveDocument(new Formato($formatId), $newData);
     if (!$GuardarFtController->create()) {
         throw new Exception("No fue posible radicar el documento2", 1);
     }

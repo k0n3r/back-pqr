@@ -6,14 +6,13 @@ namespace Saia\Pqr\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use Saia\Pqr\Controllers\AddEditFormat\FtPqrRespuestaController;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
 final class Version20200310032827 extends AbstractMigration
 {
-    protected $formatName = FtPqrRespuestaController::FORMAT_NAME;
+    protected $formatName = 'pqr_respuesta';
 
     public function getDescription(): string
     {
@@ -61,7 +60,7 @@ final class Version20200310032827 extends AbstractMigration
             'papel' => 'Letter',
             'exportar' => 'mpdf',
             'funcionario_idfuncionario' => $funcionario[0]['idfuncionario'],
-            'detalle' => 0,
+            'detalle' => 1,
             'tipo_edicion' => 0,
             'item' => 0,
             'font_size' => 11,
@@ -74,7 +73,8 @@ final class Version20200310032827 extends AbstractMigration
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Formulario utilizado para responder las PQR',
             'version' => 1,
-            'module' => 'pqr'
+            'module' => 'pqr',
+            'banderas' => 'e'
         ];
 
         $this->connection->insert('formato', $data);
@@ -89,7 +89,7 @@ final class Version20200310032827 extends AbstractMigration
                 'formato_idformato' => $idformato,
                 'fila_visible' => 1,
                 'obligatoriedad' => 1,
-                'orden' => 1,
+                'orden' => 0,
                 'nombre' => 'ft_pqr',
                 'etiqueta' => 'pqr',
                 'tipo_dato' => 'integer',
@@ -101,10 +101,44 @@ final class Version20200310032827 extends AbstractMigration
                 'ayuda' => NULL,
                 'longitud_vis' => NULL
             ],
-            'fk_response_template' => [
+            'email' => [
                 'formato_idformato' => $idformato,
                 'fila_visible' => 1,
                 'obligatoriedad' => 1,
+                'orden' => 1,
+                'nombre' => 'email',
+                'etiqueta' => 'Responder a (E-mail):',
+                'tipo_dato' => 'string',
+                'longitud' => NULL,
+                'etiqueta_html' => 'Text',
+                'acciones' => 'a,e,p',
+                'placeholder' => 'Ingrese el correo',
+                'listable' => 1,
+                'opciones' => '{"type":"email"}',
+                'ayuda' => 'Ingrese el correo del remitente a la cual dara respuesta a la PQR',
+                'longitud_vis' => NULL
+            ],
+            'email_copia' => [
+                'formato_idformato' => $idformato,
+                'fila_visible' => 1,
+                'obligatoriedad' => 0,
+                'orden' => 2,
+                'nombre' => 'email_copia',
+                'etiqueta' => 'Copia a (E-mail):',
+                'tipo_dato' => 'string',
+                'longitud' => NULL,
+                'etiqueta_html' => 'Text',
+                'acciones' => 'a,e',
+                'placeholder' => 'Ingrese los correos',
+                'listable' => 1,
+                'opciones' => NULL,
+                'ayuda' => 'Ingrese los correos separados por coma, a los cuales se le copiara la respuesta',
+                'longitud_vis' => NULL
+            ],
+            'fk_response_template' => [
+                'formato_idformato' => $idformato,
+                'fila_visible' => 1,
+                'obligatoriedad' => 0,
                 'orden' => 1,
                 'nombre' => 'fk_response_template',
                 'etiqueta' => 'Plantilla',
@@ -135,40 +169,6 @@ final class Version20200310032827 extends AbstractMigration
                 'ayuda' => NULL,
                 'longitud_vis' => NULL
             ],
-            'email' => [
-                'formato_idformato' => $idformato,
-                'fila_visible' => 1,
-                'obligatoriedad' => 0,
-                'orden' => 2,
-                'nombre' => 'email',
-                'etiqueta' => 'Responder a (E-mail):',
-                'tipo_dato' => 'string',
-                'longitud' => NULL,
-                'etiqueta_html' => 'Text',
-                'acciones' => 'a,e,p',
-                'placeholder' => 'Ingrese el correo',
-                'listable' => 1,
-                'opciones' => '{type:"email"}',
-                'ayuda' => 'Ingrese el correo del remitente a la cual dara respuesta a la PQR',
-                'longitud_vis' => NULL
-            ],
-            'email_copia' => [
-                'formato_idformato' => $idformato,
-                'fila_visible' => 1,
-                'obligatoriedad' => 0,
-                'orden' => 3,
-                'nombre' => 'email_copia',
-                'etiqueta' => 'Copia a (E-mail):',
-                'tipo_dato' => 'string',
-                'longitud' => NULL,
-                'etiqueta_html' => 'Text',
-                'acciones' => 'a,e',
-                'placeholder' => 'Ingrese los correos',
-                'listable' => 1,
-                'opciones' => NULL,
-                'ayuda' => 'Ingrese los correos separados por coma, a los cuales se le copiara la respuesta',
-                'longitud_vis' => NULL
-            ],
             'content' => [
                 'formato_idformato' => $idformato,
                 'fila_visible' => 1,
@@ -176,7 +176,7 @@ final class Version20200310032827 extends AbstractMigration
                 'orden' => 3,
                 'nombre' => 'content',
                 'etiqueta' => 'Contenido',
-                'tipo_dato' => 'string',
+                'tipo_dato' => 'text',
                 'longitud' => NULL,
                 'etiqueta_html' => 'Textarea',
                 'acciones' => 'a,e',

@@ -3,6 +3,7 @@
 namespace Saia\Pqr\Controllers;
 
 use Saia\Pqr\formatos\pqr\FtPqr;
+use Saia\Pqr\Models\PqrResponseTemplate;
 
 class FtPqrController
 {
@@ -71,6 +72,30 @@ class FtPqrController
             if ($FtPqr = FtPqr::findByDocumentId($id)) {
                 $Response->success = 1;
                 $Response->data = $FtPqr->sys_email;
+            }
+        }
+
+        return $Response;
+    }
+
+
+    /**
+     * Obtiene el contenido de la plantilla
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getPlantilla(): object
+    {
+        $Response = (object) [
+            'success' => 0,
+            'data' => []
+        ];
+        if ($id = $this->request['id']) {
+            if ($PqrResponseTemplate = new PqrResponseTemplate($id)) {
+                $Response->success = 1;
+                $Response->data = $PqrResponseTemplate->content;
             }
         }
 

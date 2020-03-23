@@ -44,15 +44,15 @@ function totalTask(int $iddocumento): string
     return "{$data['finish']}/{$data['total']}";
 }
 
-function options(int $iddocumento, string $estado): string
+function options(int $iddocumento, string $estado, int $idft): string
 {
     switch ($estado) {
         case FtPqr::ESTADO_PROCESO:
             $options = <<<HTML
-            <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}">
+            <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}" data-idft="{$idft}">
                <i class="fa fa-plus"></i> Asignar Tarea
            </a>
-           <a href="#" class="dropdown-item viewTask" data-id="{$iddocumento}">
+           <a href="#" class="dropdown-item viewTask" data-id="{$iddocumento}" data-idft="{$idft}">
                <i class="fa fa-eye"></i> Tareas
            </a>
 HTML;
@@ -60,13 +60,13 @@ HTML;
 
         case FtPqr::ESTADO_TERMINADO:
             $options = <<<HTML
-            <a href="#" class="dropdown-item answer2" data-id="{$iddocumento}">
-               <i class="fa fa-mail-reply"></i> Responder con documento nuevo
+            <a href="#" class="dropdown-item answer" data-id="{$iddocumento}" data-idft="{$idft}">
+               <i class="fa fa-mail-reply"></i> Responder
            </a>
-           <a href="#" class="dropdown-item answer" data-id="{$iddocumento}">
+           <!-- <a href="#" class="dropdown-item answer2" data-id="{$iddocumento}" data-idft="{$idft}">
                <i class="fa fa-mail-reply"></i> Responder con documento existente
-           </a>
-           <a href="#" class="dropdown-item viewTask" data-id="{$iddocumento}">
+           </a> -->
+           <a href="#" class="dropdown-item viewTask" data-id="{$iddocumento}" data-idft="{$idft}">
                <i class="fa fa-eye"></i> Tareas
            </a>
 HTML;
@@ -74,10 +74,10 @@ HTML;
 
         default:
             $options = <<<HTML
-             <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}">
+             <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}" data-idft="{$idft}">
                 <i class="fa fa-plus"></i> Asignar Tarea
             </a>
-            <a href="#" class="dropdown-item cancel" data-id="{$iddocumento}">
+            <a href="#" class="dropdown-item cancel" data-id="{$iddocumento}" data-idft="{$idft}">
                 <i class="fa fa-exclamation-triangle"></i> Anular
             </a>
 HTML;

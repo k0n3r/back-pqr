@@ -66,7 +66,7 @@ final class Version20200321234633 extends AbstractMigration
             'papel' => 'Letter',
             'exportar' => 'mpdf',
             'funcionario_idfuncionario' => $funcionario[0]['idfuncionario'],
-            'detalle' => 0,
+            'detalle' => 1,
             'tipo_edicion' => 0,
             'item' => 0,
             'font_size' => 11,
@@ -79,7 +79,9 @@ final class Version20200321234633 extends AbstractMigration
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Formulario de calificación de las PQR',
             'version' => 1,
-            'module' => 'pqr'
+            'module' => 'pqr',
+            'banderas' => 'e'
+
         ];
 
         $this->connection->insert('formato', $data);

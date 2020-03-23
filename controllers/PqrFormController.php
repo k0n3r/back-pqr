@@ -291,7 +291,7 @@ class PqrFormController
 
     protected function generateView(): void
     {
-        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.sys_email,cs.valor as sys_tipo,ft.sys_estado
+        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.sys_email,cs.valor as sys_tipo,ft.sys_estado,ft.idft_pqr as idft
         FROM ft_pqr ft,documento d, campo_seleccionados cs
         WHERE ft.documento_iddocumento=d.iddocumento AND
         cs.fk_documento=d.iddocumento

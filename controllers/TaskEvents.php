@@ -26,10 +26,18 @@ class TaskEvents implements IExternalEventsTask
 
     public function afterUpdateTarea(): void
     {
+        if (!$this->Tarea->estado) {
+            if ($DocumentoTarea = $this->Tarea->getDocument()) {
+                $this->updateEstado($DocumentoTarea->Documento);
+            }
+        }
     }
 
     public function afterDeleteTarea(): void
     {
+        if ($DocumentoTarea = $this->Tarea->getDocument()) {
+            $this->updateEstado($DocumentoTarea->Documento);
+        }
     }
 
     public function afterCreateTareaAnexo(): void

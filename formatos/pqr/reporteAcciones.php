@@ -118,9 +118,11 @@
 
         });
 
-        $(document).on('click', '.answer', function() {
+        //TODO: RESPONDER CON DOCUMENTO EXISTENTE => SIN UTILIZAR HASTA SABER COMO DESARROLLARSE
+        $(document).on('click', '.answer2', function() {
 
             let documentId = $(this).data('id');
+            let idft = $(this).data('idft');
 
             top.topModal({
                 url: `app/modules/back_pqr/views/responder.php`,
@@ -140,7 +142,7 @@
                     }
                 },
                 onSuccess(documentId) {
-                    answerPqr(documentId);
+                    answerPqr(documentId, idft);
 
                     top.closeTopModal();
                 },
@@ -151,18 +153,20 @@
 
         });
 
-        $(document).on('click', '.answer2', function() {
+        $(document).on('click', '.answer', function() {
             let documentId = $(this).data('id');
+            let idft = $(this).data('idft');
             answerPqr(documentId);
         });
 
-        function answerPqr(documentId) {
+        function answerPqr(documentId, idft) {
             $.post(
                 `${params.baseUrl}app/formato/consulta_rutas.php`, {
                     key: localStorage.getItem('key'),
                     token: localStorage.getItem('token'),
                     formatName: "pqr_respuesta",
-                    fk_pqr: documentId
+                    anterior: documentId,
+                    padre: idft
                 },
                 function(response) {
                     if (response.success) {
