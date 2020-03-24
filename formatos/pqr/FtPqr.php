@@ -3,11 +3,14 @@
 namespace Saia\Pqr\formatos\pqr;
 
 use Exception;
-use Saia\controllers\UtilitiesController;
 use Saia\Pqr\Models\PqrForm;
 use Saia\Pqr\Models\PqrBackup;
+use Saia\controllers\Utilities;
+use Saia\Pqr\Helpers\UtilitiesPqr;
+use Saia\controllers\MpdfController;
+use Saia\models\documento\Documento;
+use Saia\controllers\SendMailController;
 use Saia\models\formatos\CampoSeleccionados;
-
 
 class FtPqr extends FtPqrProperties
 {
@@ -84,6 +87,7 @@ class FtPqr extends FtPqrProperties
             throw new Exception("No fue posible registrar el backup", 1);
         }
     }
+
     /**
      * Funcion ejecutada despues de editar un documento
      *
@@ -117,7 +121,7 @@ class FtPqr extends FtPqrProperties
     public function showContent(): string
     {
         $data = json_decode($this->PqrBackup->data);
-        $Qr = UtilitiesController::mostrar_qr($this);
+        $Qr = Utilities::mostrar_qr($this);
         $code = "<table class='table table-bordered' style='width:100%'>
         <tr>
             <td colspan='2' align='right'>{$Qr}</td>
@@ -132,5 +136,62 @@ class FtPqr extends FtPqrProperties
         $code .= '</table>';
 
         return $code;
+    }
+
+    public function afterRad(): void
+    {
+        $this->notifyEmail();
+    }
+
+    public function notifyEmail()
+    {
+        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {$this->Documento->numero}, adjunto encontrará una copia de la PQR diligenciada el día de hoy.<br/><br/>
+        El seguimiento lo puede realizar escaneando el código QR";
+
+        $SendMailController = new SendMailController(
+            "Solicitud de PQR # {$this->Documento->numero}",
+            $message
+        );
+
+        $SendMailController->setDestinations(
+            SendMailController::DESTINATION_TYPE_EMAIL,
+            [$this->sys_email]
+        );
+
+        if (!$this->Documento->pdf) {
+            $MpdfController = new MpdfController();
+            $MpdfController->configurarDocumento($this->Documento);
+            $this->Documento = $MpdfController->imprimir();
+
+            if (!$this->Documento->pdf) {
+                $log = [
+                    'error' => "MpdfController NO genero el PDF, iddoc: {$this->Documento->getPK()}",
+                    'message' => "No fue posible generar el PDF para el formato PQR"
+                ];
+                UtilitiesPqr::notifyAdministrator(
+                    "No fue posible generar el PDF para la PQR # {$this->Documento->numero}",
+                    $log
+                );
+            } else {
+                $SendMailController->setAttachments(
+                    $SendMailController::ATTACHMENT_TYPE_JSON,
+                    [$this->Documento->pdf]
+                );
+            }
+        }
+
+        $send = $SendMailController->send();
+        if ($send !== true) {
+            $log = [
+                'error' => $send,
+                'message' => "No fue posible notificar la PQR # {$this->Documento->numero}"
+            ];
+            UtilitiesPqr::notifyAdministrator(
+                "No fue posible notificar la PQR # {$this->Documento->numero}",
+                $log
+            );
+        }
+
+        return true;
     }
 }

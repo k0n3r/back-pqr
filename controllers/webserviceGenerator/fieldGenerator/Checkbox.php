@@ -35,7 +35,7 @@ class Checkbox extends FieldGenerator implements FieldFormatGeneratorInterface
             <label{$title}>{$this->getLabel()}</label>
             <div class='checkbox check-success input-group'>";
 
-        foreach ($this->CamposFormato->getRadioOptions() as $key => $CampoOpciones) {
+        foreach ($this->CamposFormato->getActiveRadioOptions() as $key => $CampoOpciones) {
             $code .= "<input {$requiredClass} type='checkbox' name='{$this->CamposFormato->nombre}[]' id='{$this->CamposFormato->nombre}{$key}' value='{$CampoOpciones->getPK()}' aria-required='true'>
             <label for='{$this->CamposFormato->nombre}{$key}' class='mr-3'>
                 {$CampoOpciones->valor}

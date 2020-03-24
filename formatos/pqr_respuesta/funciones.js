@@ -8,7 +8,6 @@ function add(data) {
     return false;
   }
 
-
   $("#fk_response_template").change(function () {
     getPlantilla($(this).val());
   });

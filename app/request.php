@@ -18,7 +18,7 @@ use Exception;
 use ReflectionClass;
 use Saia\controllers\JwtController;
 use Saia\controllers\notificaciones\NotifierController;
-use Saia\controllers\UtilitiesController;
+use Saia\controllers\Utilities;
 
 $Response = (object) [
     'message' => '',
@@ -28,7 +28,7 @@ $Response = (object) [
 
 try {
     JwtController::check($_REQUEST['token'], $_REQUEST['key']);
-    $newData = UtilitiesController::cleanForm($_REQUEST);
+    $newData = Utilities::cleanForm($_REQUEST);
 
     if (empty($method = $newData['method']) || empty($class = $newData['class'])) {
         throw new Exception("Error Processing Request", 1);

@@ -48,7 +48,7 @@ class Select extends FieldGenerator implements FieldFormatGeneratorInterface
             <select class='full-width {$requiredClass}' name='{$this->CamposFormato->nombre}' id='{$this->CamposFormato->nombre}'>
             <option value=''>Por favor seleccione...</option>";
 
-        foreach ($this->CamposFormato->getRadioOptions() as $CampoOpciones) {
+        foreach ($this->CamposFormato->getActiveRadioOptions() as $CampoOpciones) {
             $code .= "<option value='{$CampoOpciones->getPK()}'>
                 {$CampoOpciones->valor}
             </option>";

@@ -436,9 +436,9 @@ $(function () {
                     } else {
                         console.error(response.message);
                         notification({
-                            color:'red',
-                            message:'No fue posible radicar su solicitud'
-                        });
+                            color: 'red',
+                            message: +response.code == 200 ? response.message : 'No fue posible radicar su solicitud' 
+                        });                       
                     }
                 },
                 'json'

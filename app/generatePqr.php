@@ -20,9 +20,9 @@ use Saia\Pqr\Models\PqrForm;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
 use Saia\controllers\SaveDocument;
+use Saia\controllers\Utilities;
 use Saia\Pqr\Helpers\UtilitiesPqr;
 use Saia\models\vistas\VfuncionarioDc;
-use Saia\controllers\UtilitiesController;
 
 $Response = (object) [
     'message' => '',
@@ -38,17 +38,21 @@ try {
     $PqrForm = PqrForm::getPqrFormActive();
 
     if ($PqrForm->fk_formato != $formatId || !$formatId) {
-        throw new Exception("Error Processing Request", 1);
+        throw new Exception("Error Processing Request");
     }
 
-    $request = UtilitiesController::cleanForm($_REQUEST);
+    $request = Utilities::cleanForm($_REQUEST);
 
     $iddependenciaCargo = VfuncionarioDc::getFirstUserRole(Funcionario::RADICADOR_WEB);
     if (!$iddependenciaCargo) {
         UtilitiesPqr::notifyAdministrator(
             "El funcionario con login 'radicador_web' NO tiene roles activos"
         );
-        throw new Exception("Error Processing Request", 1);
+        throw new Exception("Error Processing Request");
+    }
+
+    if (!filter_var($request['sys_email'], FILTER_VALIDATE_EMAIL)) {
+        throw new Exception("Esta dirección de correo ({$request['sys_email']}) no es válida.", 200);
     }
 
     $newData = array_merge($request, [
@@ -58,13 +62,14 @@ try {
 
     $GuardarFtController = new SaveDocument(new Formato($formatId), $newData);
     if (!$GuardarFtController->create()) {
-        throw new Exception("No fue posible radicar el documento2", 1);
+        throw new Exception("No fue posible radicar el documento", 200);
     }
     $Response->success = 1;
     $Connection->commit();
 } catch (Throwable $th) {
     $Connection->rollBack();
     $Response->message = $th->getMessage();
+    $Response->code = $th->getCode();
 }
 
 //SessionController::logoutWebservice();

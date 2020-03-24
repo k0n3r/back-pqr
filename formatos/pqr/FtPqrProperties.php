@@ -15,17 +15,12 @@ class FtPqrProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'area_de_texto',
-				'checkbox',
-				'cuadro_de_texto',
-				'dependencia',
+                'dependencia',
 				'documento_iddocumento',
-				'email',
+				'emaail',
 				'encabezado',
 				'firma',
 				'idft_pqr',
-				'lista_desplegable',
-				'radio',
 				'sys_email',
 				'sys_estado',
 				'sys_tipo' 

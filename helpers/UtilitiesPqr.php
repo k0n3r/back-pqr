@@ -2,10 +2,10 @@
 
 namespace Saia\Pqr\Helpers;
 
-use Saia\models\formatos\Formato;
+use Saia\models\Configuracion;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\documento\Documento;
-use Saia\models\vistas\VfuncionarioDc;
+use Saia\controllers\SendMailController;
 
 class UtilitiesPqr
 {
@@ -47,13 +47,37 @@ class UtilitiesPqr
         return true;
     }
 
-    public static function notifyAdministrator(string $message): void
+    public static function notifyAdministrator(string $message, ?array $log = null): void
     {
-        //TODO: ENVIAR CORREO AL ADMINISTRADOR CON EL ERROR
-        self::saveLog($message);
+        if ($log) {
+            self::saveLog($log);
+        }
+
+        $SendMailController = new SendMailController(
+            "Notificación del sistema",
+            $message
+        );
+
+        if ($Configuracion = Configuracion::findByAttributes([
+            'nombre' => 'correo_administrador'
+        ])) {
+            if (filter_var($Configuracion->valor, FILTER_VALIDATE_EMAIL)) {
+                $SendMailController->setDestinations(
+                    SendMailController::DESTINATION_TYPE_EMAIL,
+                    [$Configuracion->valor]
+                );
+            }
+        }
+
+        $SendMailController->setHiddenCopyDestinations(
+            SendMailController::DESTINATION_TYPE_EMAIL,
+            ["andres.agudelo@cerok.com"]
+        );
+
+        $SendMailController->send();
     }
 
-    public static function saveLog(string $message)
+    public static function saveLog(array $log): void
     {
         global $rootPath;
 
@@ -62,7 +86,7 @@ class UtilitiesPqr
 
         $data = [
             'date' => date('Y-m-d H:i:s'),
-            'message' => $message
+            'log' => $log
         ];
         file_put_contents($path . 'log.txt', json_encode($data) . "\n", FILE_APPEND);
     }
