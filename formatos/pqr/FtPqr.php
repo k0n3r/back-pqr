@@ -5,12 +5,11 @@ namespace Saia\Pqr\formatos\pqr;
 use Exception;
 use Saia\Pqr\Models\PqrForm;
 use Saia\Pqr\Models\PqrBackup;
-use Saia\controllers\Utilities;
 use Saia\Pqr\Helpers\UtilitiesPqr;
-use Saia\controllers\MpdfController;
-use Saia\models\documento\Documento;
 use Saia\controllers\SendMailController;
 use Saia\models\formatos\CampoSeleccionados;
+use Saia\controllers\functions\CoreFunctions;
+use Saia\controllers\pdf\DocumentPdfGenerator;
 
 class FtPqr extends FtPqrProperties
 {
@@ -121,7 +120,7 @@ class FtPqr extends FtPqrProperties
     public function showContent(): string
     {
         $data = json_decode($this->PqrBackup->data);
-        $Qr = Utilities::mostrar_qr($this);
+        $Qr = CoreFunctions::mostrar_qr($this);
         $code = "<table class='table table-bordered' style='width:100%'>
         <tr>
             <td colspan='2' align='right'>{$Qr}</td>
@@ -159,11 +158,10 @@ class FtPqr extends FtPqrProperties
         );
 
         if (!$this->Documento->pdf) {
-            $MpdfController = new MpdfController();
-            $MpdfController->configurarDocumento($this->Documento);
-            $this->Documento = $MpdfController->imprimir();
+            $DocumentPdfGenerator = new DocumentPdfGenerator($this->Documento);
+            $route = $DocumentPdfGenerator->refreshFile();
 
-            if (!$this->Documento->pdf) {
+            if (!$route) {
                 $log = [
                     'error' => "MpdfController NO genero el PDF, iddoc: {$this->Documento->getPK()}",
                     'message' => "No fue posible generar el PDF para el formato PQR"

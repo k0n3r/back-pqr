@@ -16,9 +16,9 @@ include_once $rootPath . 'app/vendor/autoload.php';
 
 use Exception;
 use ReflectionClass;
-use Saia\controllers\JwtController;
+use Saia\controllers\SessionController;
+use Saia\controllers\functions\RequestProcessor;
 use Saia\controllers\notificaciones\NotifierController;
-use Saia\controllers\Utilities;
 
 $Response = (object) [
     'message' => '',
@@ -27,8 +27,9 @@ $Response = (object) [
 ];
 
 try {
-    JwtController::check($_REQUEST['token'], $_REQUEST['key']);
-    $newData = Utilities::cleanForm($_REQUEST);
+    SessionController::goUp($_REQUEST['token'], $_REQUEST['key']);
+
+    $newData = RequestProcessor::cleanForm($_REQUEST);
 
     if (empty($method = $newData['method']) || empty($class = $newData['class'])) {
         throw new Exception("Error Processing Request", 1);

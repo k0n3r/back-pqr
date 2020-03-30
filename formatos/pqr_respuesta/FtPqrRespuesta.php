@@ -5,8 +5,8 @@ namespace Saia\Pqr\formatos\pqr_respuesta;
 use Exception;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\Helpers\UtilitiesPqr;
-use Saia\controllers\MpdfController;
 use Saia\controllers\SendMailController;
+use Saia\controllers\pdf\DocumentPdfGenerator;
 
 class FtPqrRespuesta extends FtPqrRespuestaProperties
 {
@@ -135,11 +135,10 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         }
 
         if (!$this->Documento->pdf) {
-            $MpdfController = new MpdfController();
-            $MpdfController->configurarDocumento($this->Documento);
-            $this->Documento = $MpdfController->imprimir();
+            $DocumentPdfGenerator = new DocumentPdfGenerator($this->Documento);
+            $route = $DocumentPdfGenerator->refreshFile();
 
-            if (!$this->Documento->pdf) {
+            if (!$route) {
                 $log = [
                     'error' => "MpdfController NO genero el PDF, iddoc: {$this->Documento->getPK()}",
                     'message' => "No fue posible generar el PDF para el formato Respuesta PQR"

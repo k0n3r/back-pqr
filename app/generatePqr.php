@@ -20,9 +20,9 @@ use Saia\Pqr\Models\PqrForm;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
 use Saia\controllers\SaveDocument;
-use Saia\controllers\Utilities;
 use Saia\Pqr\Helpers\UtilitiesPqr;
 use Saia\models\vistas\VfuncionarioDc;
+use Saia\controllers\functions\RequestProcessor;
 
 $Response = (object) [
     'message' => '',
@@ -41,7 +41,7 @@ try {
         throw new Exception("Error Processing Request");
     }
 
-    $request = Utilities::cleanForm($_REQUEST);
+    $request = RequestProcessor::cleanForm($_REQUEST);
 
     $iddependenciaCargo = VfuncionarioDc::getFirstUserRole(Funcionario::RADICADOR_WEB);
     if (!$iddependenciaCargo) {
@@ -72,6 +72,6 @@ try {
     $Response->code = $th->getCode();
 }
 
-//SessionController::logoutWebservice();
+//SessionController::sessionDestroy();
 
 echo json_encode($Response);
