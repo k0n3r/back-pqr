@@ -18,11 +18,12 @@ final class Version20200226192642 extends AbstractMigration
 
     public function getDescription(): string
     {
-        return 'Creacion de los reportes (Busquedas)';
+        return 'Creacion de los reportes pendiente, proceso y terminado';
     }
 
     public function up(Schema $schema): void
     {
+        //,app/modules/back_pqr/formatos/pqr/accionesSeleccionados.php
         $this->init();
 
         $busqueda = [
@@ -31,8 +32,8 @@ final class Version20200226192642 extends AbstractMigration
             'estado' => 1,
             'campos' => NULL,
             'tablas' => 'vpqr v',
-            'ruta_libreria' => 'app/modules/back_pqr/formatos/pqr/reporteFunciones.php',
-            'ruta_libreria_pantalla' => 'app/modules/back_pqr/formatos/pqr/reporteAcciones.php,app/modules/back_pqr/formatos/pqr/accionesSeleccionados.php',
+            'ruta_libreria' => 'app/modules/back_pqr/formatos/pqr/reporteFunciones.php,app/modules/back_pqr/formatos/reporteFuncionesGenerales.php',
+            'ruta_libreria_pantalla' => 'app/modules/back_pqr/formatos/pqr/reporteAcciones.php',
             'cantidad_registros' => 20,
             'tipo_busqueda' => 2
         ];
@@ -62,29 +63,10 @@ final class Version20200226192642 extends AbstractMigration
         $this->createComponenteTerminados($idbusqueda, $idmodulo);
     }
 
-
-    protected function createBusqueda(array $data, string $search): int
-    {
-        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '{$search}'";
-        $record = $this->connection->fetchAll($sql);
-
-        if ($record[0]['idbusqueda']) {
-            $id = $record[0]['idbusqueda'];
-            $this->connection->update('busqueda', $data, [
-                'idbusqueda' => $id
-            ]);
-        } else {
-            $this->connection->insert('busqueda', $data);
-            $id = $this->connection->lastInsertId();
-        }
-
-        return (int) $id;
-    }
-
     protected function getDefaultData(bool $ViewNewField = false)
     {
 
-        $NewField = $ViewNewField ? '{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},' : '';
+        $NewField = $ViewNewField ? '{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},' : '';
 
         return [
             'url' => NULL,
@@ -101,6 +83,15 @@ final class Version20200226192642 extends AbstractMigration
         ];
     }
 
+    protected function updateBuscador(int $idbusquedaComponente): void
+    {
+        $this->connection->update('busqueda_componente', [
+            'busqueda_avanzada' => 'app/modules/back_pqr/formatos/pqr/busqueda.php?idbusqueda_componente=' . $idbusquedaComponente,
+        ], [
+            'idbusqueda_componente' => $idbusquedaComponente
+        ]);
+    }
+
     protected function createComponentePendientes(int $idbusqueda, int $idmodulo)
     {
         $nombreComponente = 'pendientes_pqr';
@@ -112,7 +103,12 @@ final class Version20200226192642 extends AbstractMigration
         ];
         $busquedaComponente = array_merge($dataComponente, $this->getDefaultData());
 
-        $idbusquedaComponente = $this->createBusquedaComponente($idbusqueda, $busquedaComponente, $nombreComponente);
+        $idbusquedaComponente = $this->createBusquedaComponente(
+            $idbusqueda,
+            $busquedaComponente,
+            $nombreComponente
+        );
+        $this->updateBuscador($idbusquedaComponente);
 
         $estado = FtPqr::ESTADO_PENDIENTE;
         $busquedaCondicion = [
@@ -146,7 +142,12 @@ final class Version20200226192642 extends AbstractMigration
         ];
         $busquedaComponente = array_merge($dataComponente, $this->getDefaultData(true));
 
-        $idbusquedaComponente = $this->createBusquedaComponente($idbusqueda, $busquedaComponente, $nombreComponente);
+        $idbusquedaComponente = $this->createBusquedaComponente(
+            $idbusqueda,
+            $busquedaComponente,
+            $nombreComponente
+        );
+        $this->updateBuscador($idbusquedaComponente);
 
         $estado = FtPqr::ESTADO_PROCESO;
         $busquedaCondicion = [
@@ -176,12 +177,17 @@ final class Version20200226192642 extends AbstractMigration
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta' => 'Terminados',
             'nombre' => $nombreComponente,
-            'orden' => 3,
-            'acciones_seleccionados' => 'answers'
+            'orden' => 3
         ];
+        //'acciones_seleccionados' => 'answers'
         $busquedaComponente = array_merge($dataComponente, $this->getDefaultData(true));
 
-        $idbusquedaComponente = $this->createBusquedaComponente($idbusqueda, $busquedaComponente, $nombreComponente);
+        $idbusquedaComponente = $this->createBusquedaComponente(
+            $idbusqueda,
+            $busquedaComponente,
+            $nombreComponente
+        );
+        $this->updateBuscador($idbusquedaComponente);
 
         $estado = FtPqr::ESTADO_TERMINADO;
         $busquedaCondicion = [
@@ -204,45 +210,6 @@ final class Version20200226192642 extends AbstractMigration
         $this->createModulo($data, $nombreComponente);
     }
 
-    protected function createBusquedaComponente(int $idbusqueda, array $data, string $search): int
-    {
-        $sql = "SELECT idbusqueda_componente FROM busqueda_componente
-        WHERE busqueda_idbusqueda={$idbusqueda} AND lower(nombre) like '{$search}'";
-        $record = $this->connection->fetchAll($sql);
-
-        if ($record[0]['idbusqueda_componente']) {
-            $id = $record[0]['idbusqueda_componente'];
-
-            $this->connection->update('busqueda_componente', $data, [
-                'idbusqueda_componente' => $id
-            ]);
-        } else {
-            $this->connection->insert('busqueda_componente', $data);
-            $id = $this->connection->lastInsertId();
-        }
-
-        return (int) $id;
-    }
-
-    protected function createBusquedaCondicion(int $idbusquedaComponente, array $data, string $search): int
-    {
-        $sql = "SELECT idbusqueda_condicion FROM busqueda_condicion
-        WHERE fk_busqueda_componente={$idbusquedaComponente} AND lower(etiqueta_condicion) like '{$search}'";
-        $record = $this->connection->fetchAll($sql);
-
-        if ($record[0]['idbusqueda_condicion']) {
-            $id = $record[0]['idbusqueda_condicion'];
-            $this->connection->update('busqueda_condicion', $data, [
-                'idbusqueda_condicion' => $id
-            ]);
-        } else {
-            $this->connection->insert('busqueda_condicion', $data);
-            $id = $this->connection->lastInsertId();
-        }
-
-        return (int) $id;
-    }
-
     public function down(Schema $schema): void
     {
         $this->deleteModulo('reporte_pqr');
@@ -251,32 +218,5 @@ final class Version20200226192642 extends AbstractMigration
         $this->deleteModulo('terminados_pqr');
 
         $this->deleteBusqueda('reporte_pqr');
-    }
-
-    protected function deleteBusqueda(string $search): void
-    {
-        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '{$search}'";
-        $busqueda = $this->connection->fetchAll($sql);
-
-        if ($busqueda[0]['idbusqueda']) {
-            $idbusqueda = $busqueda[0]['idbusqueda'];
-            $this->connection->delete('busqueda', [
-                'idbusqueda' => $idbusqueda
-            ]);
-
-            $sql = "SELECT idbusqueda_componente FROM busqueda_componente WHERE busqueda_idbusqueda={$idbusqueda}";
-            $records = $this->connection->fetchAll($sql);
-
-            foreach ($records as $busquedaComponente) {
-                $idbusquedaComponente = $busquedaComponente['idbusqueda_componente'];
-                $this->connection->delete('busqueda_componente', [
-                    'idbusqueda_componente' => $idbusquedaComponente
-                ]);
-
-                $this->connection->delete('busqueda_condicion', [
-                    'fk_busqueda_componente' => $idbusquedaComponente
-                ]);
-            }
-        }
     }
 }

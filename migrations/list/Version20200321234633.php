@@ -12,6 +12,8 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20200321234633 extends AbstractMigration
 {
+    use TMigrations;
+
     protected $formatName = 'pqr_calificacion';
 
     public function getDescription(): string
@@ -137,31 +139,6 @@ final class Version20200321234633 extends AbstractMigration
         if ($this->connection->getDatabasePlatform()->getName() == "mysql") {
             $this->platform->registerDoctrineTypeMapping('enum', 'string');
         }
-
-        $sql = "SELECT idformato FROM formato WHERE nombre like '{$this->formatName}'";
-        $data = $this->connection->executeQuery($sql)->fetchAll();
-        if (!$data[0]['idformato']) {
-            $this->abortIf(true, "No se encontro el formato {$this->formatName}");
-        }
-
-        $idformato = $data[0]['idformato'];
-        $this->connection->delete(
-            'campos_formato',
-            [
-                'formato_idformato' => $idformato
-            ]
-        );
-
-        $this->connection->delete(
-            'formato',
-            [
-                'idformato' => $idformato
-            ]
-        );
-
-        $table = "ft_{$this->formatName}";
-        if ($schema->hasTable($table)) {
-            $schema->dropTable($table);
-        }
+        $this->deleteFormat($this->formatName, $schema);
     }
 }

@@ -39,24 +39,21 @@ $(function () {
         // }
         // $("#variable_busqueda").val(JSON.stringify(variableBusqueda));
 
-        // $.post(
-        //     `${baseUrl}app/busquedas/procesa_filtro_busqueda.php`,
-        //     $('#find_document_form').serialize(),
-        //     function (response) {
-        //         if (response.exito) {
-        //             let route = baseUrl + response.url;
-        //             $('#iframe_workspace').attr('src', route);
-        //         } else {
-        //             top.notification({
-        //                 type: 'error',
-        //                 message: response.message
-        //             });
-        //         }
-        //     },
-        //     'json'
-        // );
-
-        // $('#dinamic_modal').modal('hide');
+        $('#btn_success').on('click', function () {
+            $.post(`${baseUrl}app/busquedas/procesa_filtro_busqueda.php`,
+                $("#find_document_form").serialize(),
+                function (data) {
+                    if (data.exito) {
+                        top.successModalEvent(data);
+                    } else {
+                        top.notification({
+                            message: data.mensaje,
+                            type: 'error'
+                        });
+                    }
+                },
+                'json');
+        });
     });
 
     $('#filtro_fecha').on('select2:select', function (e) {

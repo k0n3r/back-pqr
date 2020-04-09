@@ -7,9 +7,19 @@ use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\Helpers\UtilitiesPqr;
 use Saia\controllers\SendMailController;
 use Saia\controllers\pdf\DocumentPdfGenerator;
+use Saia\Pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 
 class FtPqrRespuesta extends FtPqrRespuestaProperties
 {
+
+    /**
+     *
+     * @var FtPqrCalificacion
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected $PqrCalificacion;
+
     public function __construct($id = null)
     {
         parent::__construct($id);
@@ -24,6 +34,12 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
                     'attribute' => 'idft_pqr',
                     'primary' => 'ft_pqr',
                     'relation' => self::BELONGS_TO_ONE
+                ],
+                'FtPqrCalificacion' => [
+                    'model' => FtPqrCalificacion::class,
+                    'attribute' => 'ft_pqr_respuesta',
+                    'primary' => 'idft_pqr_respuesta',
+                    'relation' => self::BELONGS_TO_MANY
                 ]
             ]
         ];
@@ -206,5 +222,18 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         }
 
         return true;
+    }
+
+    public function getFtPqrCalificacion(): ?FtPqrCalificacion
+    {
+        if (!$this->PqrCalificacion) {
+            foreach ($this->FtPqrCalificacion as $FtPqrCalificacion) {
+                if (!$FtPqrCalificacion->Documento->isActive()) {
+                    $this->PqrCalificacion = $FtPqrCalificacion;
+                    break;
+                }
+            }
+        }
+        return $this->PqrCalificacion;
     }
 }

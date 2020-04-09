@@ -10,6 +10,7 @@ use Saia\controllers\SendMailController;
 use Saia\models\formatos\CampoSeleccionados;
 use Saia\controllers\functions\CoreFunctions;
 use Saia\controllers\pdf\DocumentPdfGenerator;
+use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 
 class FtPqr extends FtPqrProperties
 {
@@ -31,7 +32,13 @@ class FtPqr extends FtPqrProperties
                     'attribute' => 'fk_documento',
                     'primary' => 'documento_iddocumento',
                     'relation' => self::BELONGS_TO_ONE
-                ]
+                ],
+                'PqrRespuesta' => [
+                    'model' => FtPqrRespuesta::class,
+                    'attribute' => 'ft_pqr',
+                    'primary' => 'idft_pqr',
+                    'relation' => self::BELONGS_TO_MANY
+                ],
             ]
         ];
     }
@@ -191,5 +198,17 @@ class FtPqr extends FtPqrProperties
         }
 
         return true;
+    }
+
+    public function getPqrAnswers(): array
+    {
+        $data = [];
+        foreach ($this->PqrRespuesta as $FtPqrRespuesta) {
+            if (!$FtPqrRespuesta->Documento->isActive()) {
+                $data[] = $FtPqrRespuesta;
+            }
+        }
+
+        return $data;
     }
 }

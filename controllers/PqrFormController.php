@@ -262,7 +262,7 @@ class PqrFormController
             if (!$Formato = Formato::findByAttributes([
                 'nombre' => 'pqr_calificacion'
             ])) {
-                throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
+                throw new Exception("El formato de calificacion PQR no fue encontrado", 1);
             }
             $this->FormatGenerator($Formato->getPK());
 
@@ -283,54 +283,98 @@ class PqrFormController
         return $Response;
     }
 
+    /**
+     * Encargado de genera el formato recibido
+     *
+     * @param IAddEditFormat $Controller
+     * @param string $addEdit
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function addEditFormat(IAddEditFormat $Controller, string $addEdit): void
     {
         $Generate = new AddEditFormat($Controller, $addEdit);
         $Generate->generate();
     }
 
+    /**
+     * Genera las vista del proceso
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function generateView(): void
     {
-        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.sys_email,cs.valor as sys_tipo,ft.sys_estado,ft.idft_pqr as idft
-        FROM ft_pqr ft,documento d, campo_seleccionados cs
-        WHERE ft.documento_iddocumento=d.iddocumento AND
-        cs.fk_documento=d.iddocumento
-        AND d.estado NOT IN ('ELIMINADO','ANULADO')";
-
-        $this->createView($sql);
+        $this->viewPqr();
+        $this->viewRespuestaPqr();
     }
 
     /**
-     * Crea la vista del formato PQR
+     * Genera el SQL de la vista PQR
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function viewPqr()
+    {
+        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.sys_email,cs.valor as sys_tipo,ft.sys_estado,ft.idft_pqr as idft
+        FROM ft_pqr ft,documento d, campo_seleccionados cs
+        WHERE ft.documento_iddocumento=d.iddocumento AND cs.fk_documento=d.iddocumento
+        AND d.estado NOT IN ('ELIMINADO','ANULADO')";
+
+        $this->createView('vpqr', $sql);
+    }
+
+    /**
+     * Genera el SQL de la vista respuesta a la PQR
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function viewRespuestaPqr()
+    {
+        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.idft_pqr_respuesta as idft,ft.ft_pqr
+        FROM ft_pqr_respuesta ft,documento d
+        WHERE ft.documento_iddocumento=d.iddocumento AND d.estado NOT IN ('ELIMINADO')";
+
+        $this->createView('vpqr_respuesta', $sql);
+    }
+
+    /**
+     * Crea la vista en la DB
      *
      * @param string $select
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function createView(string $select): void
+    protected function createView(string $name, string $select): void
     {
         $conn = DatabaseConnection::getInstance();
 
         switch (MOTOR) {
             case 'MySql':
             case 'Oracle':
-                $create = "CREATE OR REPLACE VIEW vpqr AS {$select}";
+                $create = "CREATE OR REPLACE VIEW {$name} AS {$select}";
                 $conn->executeQuery($create);
                 break;
 
             case 'SqlServer':
-                $drop = "DROP VIEW vpqr";
+                $drop = "DROP VIEW {$name}";
                 $conn->executeQuery($drop);
 
 
-                $create = "CREATE VIEW vpqr AS {$select}";
+                $create = "CREATE VIEW {$name} AS {$select}";
                 $conn->executeQuery($create);
 
                 break;
 
             default:
-                throw new Exception("No fue posible generar la vista vpqr", 1);
+                throw new Exception("No fue posible generar la vista {$name}", 1);
                 break;
         }
     }

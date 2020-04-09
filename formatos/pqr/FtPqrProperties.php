@@ -17,10 +17,10 @@ class FtPqrProperties extends ModelFormat
             'safe' => [
                 'dependencia',
 				'documento_iddocumento',
-				'emaail',
 				'encabezado',
 				'firma',
 				'idft_pqr',
+				'nombre',
 				'sys_email',
 				'sys_estado',
 				'sys_tipo' 
