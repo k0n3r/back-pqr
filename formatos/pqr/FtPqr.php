@@ -85,6 +85,10 @@ class FtPqr extends FtPqrProperties
      */
     public function afterAdd()
     {
+        if (!filter_var($this->sys_email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception("Esta dirección de correo ({$this->sys_email}) no es válida.", 200);
+        }
+
         if (!PqrBackup::newRecord([
             'fk_documento' => $this->documento_iddocumento,
             'fk_pqr' => $this->getPK(),

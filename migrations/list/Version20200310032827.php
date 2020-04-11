@@ -57,7 +57,7 @@ final class Version20200310032827 extends AbstractMigration
             'encabezado' => 1,
             'cuerpo' => '{*showTemplate*}{*mostrar_estado_proceso*}',
             'pie_pagina' => 0,
-            'margenes' => '25,25,25,25',
+            'margenes' => '25,25,50,25',
             'orientacion' => 0,
             'papel' => 'Letter',
             'exportar' => 'mpdf',

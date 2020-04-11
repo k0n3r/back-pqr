@@ -1,6 +1,6 @@
 //evento ejecutado en el adicionar
 function add(data) {
-
+  return;
 }
 
 //evento ejecutado en el editar

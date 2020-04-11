@@ -8,6 +8,7 @@ use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Text;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Radio;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Select;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Checkbox;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\FieldFormatGeneratorInterface;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Textarea;
 
 abstract class WebserviceGenerator
@@ -33,9 +34,15 @@ abstract class WebserviceGenerator
         'input' => Text::class
     ];
 
+
     /**
-     * Debe retornar un array con las instancias de CamposFormato que va a generar
+     * Obtiene los registros que se procesaran para generar el adicionar del formulario del webservice
      * en el formulario del webservice
+     * 
+     * Ej:[0][
+     *     'type'=>'camposFormato' : Existe solo 2 tipos => camposFormato o custom
+     *     'instance'=>CamposFormato::class para type camposFormato o una FieldFormatGeneratorInterface::class para custom 
+     * ]
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -86,7 +93,7 @@ abstract class WebserviceGenerator
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public static $directory = '../client/';
+    private static $directory = '../ws/';
 
     /**
      * Bandera que posiciona en la raiz del proyecto
@@ -457,7 +464,7 @@ $(function () {
         }
     });
 
-    function toggleButton(message) {
+    function toggleButton() {
         $("#form_buttons").find('button,#spiner').toggleClass('d-none');
     }
 
@@ -491,18 +498,31 @@ JAVASCRIPT;
     protected function getContentDefault(): string
     {
         $code = '';
-        foreach ($this->getFormatFields() as $CamposFormato) {
-            $class = $this->resolveClass($CamposFormato->etiqueta_html);
-            $GenerateFieldContent = new GenerateFieldContent(new $class($CamposFormato));
-            $code .= $GenerateFieldContent->getContent();
-
-            if ($files = $GenerateFieldContent->getAditionalFiles()) {
-                $this->copyFiles($files);
+        $records = $this->getFormatFields();
+        foreach ($records as $field) {
+            $Instance = $field['instance'];
+            if ($field['type'] == 'camposFormato') {
+                $class = $this->resolveClass($Instance->etiqueta_html);
+                $code .= $this->getFieldContent(new $class($Instance));
+            } else {
+                $code .= $this->getFieldContent($Instance);
             }
+        }
 
-            if ($content = $GenerateFieldContent->getJsAditionalContent()) {
-                $this->addContentJs($content);
-            }
+        return $code;
+    }
+
+    protected function getFieldContent(FieldFormatGeneratorInterface $Instance)
+    {
+        $GenerateFieldContent = new GenerateFieldContent($Instance);
+        $code = $GenerateFieldContent->getContent();
+
+        if ($files = $GenerateFieldContent->getAditionalFiles()) {
+            $this->copyFiles($files);
+        }
+
+        if ($content = $GenerateFieldContent->getJsAditionalContent()) {
+            $this->addContentJs($content);
         }
 
         return $code;

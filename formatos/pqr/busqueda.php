@@ -39,7 +39,7 @@ $baseUrl = "../../";
                         <div class="col-12">
                             <div class="form-group form-group-default">
                                 <label>Radicado:</label>
-                                <input class="form-control" name="bqCampo_d@numero" type="number">
+                                <input class="form-control" name="bqCampo_numero" type="number">
                                 <input type="hidden" name="bqCondicional_numero" value="like">
                             </div>
                         </div>
@@ -66,7 +66,7 @@ $baseUrl = "../../";
                             <div class="form-group form-group-default input-group">
                                 <div class="form-input-group">
                                     <label>Fecha inicial:</label>
-                                    <input name="bqCampo_d@fecha_x" type="text" class="form-control" placeholder="Seleccione.." id="fecha_inicial">
+                                    <input name="bqCampo_fecha_x" type="text" class="form-control" placeholder="Seleccione.." id="fecha_inicial">
                                     <input name="bqComparador_fecha_x" type="hidden" value="y" />
                                     <input name="bqTipo_fecha_x" type="hidden" value="date">
                                 </div>

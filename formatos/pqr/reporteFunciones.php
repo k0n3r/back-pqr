@@ -18,6 +18,20 @@ use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\Helpers\UtilitiesPqr;
 use Saia\models\documento\Documento;
 use Saia\models\busqueda\BusquedaComponente;
+use Saia\models\formatos\CampoSeleccionados;
+
+function getValueSysTipo(int $iddocumento, int $fkCampoOpciones)
+{
+    $tipo = '';
+    if ($valor = CampoSeleccionados::findColumn('valor', [
+        'fk_campo_opciones' => $fkCampoOpciones,
+        'fk_documento' => $iddocumento
+    ])) {
+        $tipo = $valor[0];
+    }
+
+    return $tipo;
+}
 
 function totalTask(int $iddocumento): string
 {

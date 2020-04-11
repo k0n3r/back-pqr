@@ -3,8 +3,10 @@
 namespace Saia\Pqr\formatos\pqr_respuesta;
 
 use Exception;
+use Saia\controllers\CryptController;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\Helpers\UtilitiesPqr;
+use Saia\Pqr\Controllers\WebserviceCalificacion;
 use Saia\controllers\SendMailController;
 use Saia\controllers\pdf\DocumentPdfGenerator;
 use Saia\Pqr\formatos\pqr_calificacion\FtPqrCalificacion;
@@ -194,9 +196,14 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
                 $log
             );
         } else {
-            $url = PROTOCOLO_CONEXION . DOMINIO . "/calificacion/?padre={$this->getPK()}&anterior={$this->Documento->getPK()}";
+
+            $params = CryptController::encrypt(json_encode([
+                'ft_pqr_respuesta' => $this->getPK(),
+                'anterior' => $this->Documento->getPK()
+            ]));
+            $url = ABSOLUTE_SAIA_ROUTE . WebserviceCalificacion::DIRECTORY . "/index.html?d={$params}";
             $message = "Cordial Saludo,<br/><br/>
-            Nos gustaría recibir tus comentarios sobre el servicio que has recibido por parte de nuestro equipo.<br/><a href='{$url}'>Clic aqui para calificar</a>";
+            Nos gustaría recibir tus comentarios sobre el servicio que has recibido por parte de nuestro equipo.<br/><a href='{$url}'>Calificar el servicio</a>";
 
             $SendMailController = new SendMailController(
                 "Queremos conocer tu opinión! (Solicitud de PQR # {$DocumentoPqr->numero})",

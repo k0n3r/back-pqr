@@ -63,7 +63,7 @@ final class Version20200321234633 extends AbstractMigration
             'encabezado' => 1,
             'cuerpo' => '{*showCalification*}',
             'pie_pagina' => 0,
-            'margenes' => '25,25,25,25',
+            'margenes' => '25,25,50,25',
             'orientacion' => 0,
             'papel' => 'Letter',
             'exportar' => 'mpdf',
@@ -110,27 +110,93 @@ final class Version20200321234633 extends AbstractMigration
                 'ayuda' => NULL,
                 'longitud_vis' => NULL
             ],
-            'campo' => [
+            'experiencia_gestion' => [
                 'formato_idformato' => $idformato,
                 'fila_visible' => 1,
-                'obligatoriedad' => 0,
+                'obligatoriedad' => 1,
                 'orden' => 2,
-                'nombre' => 'campo',
-                'etiqueta' => 'Campo:',
-                'tipo_dato' => 'string',
+                'nombre' => 'experiencia_gestion',
+                'etiqueta' => 'Valora tu experiencia con la gestión a tu Petición, Queja, Reclamo o Solicitud',
+                'tipo_dato' => 'integer',
                 'longitud' => NULL,
-                'etiqueta_html' => 'Text',
+                'etiqueta_html' => 'Radio',
                 'acciones' => 'a,e,p',
-                'placeholder' => 'Ingrese el texto',
+                'placeholder' => NULL,
                 'listable' => 1,
-                'opciones' => '{type:"text"}',
-                'ayuda' => 'Ingrese texto',
-                'longitud_vis' => NULL
+                'opciones' => NULL,
+                'ayuda' => NULL,
+                'longitud_vis' => NULL,
+                'campoOpciones' => [
+                    [
+                        'llave' => 4,
+                        'valor' => 'Excelente'
+                    ],
+                    [
+                        'llave' => 3,
+                        'valor' => 'Bueno'
+                    ],
+                    [
+                        'llave' => 2,
+                        'valor' => 'Regular'
+                    ],
+                    [
+                        'llave' => 1,
+                        'valor' => 'Deficiente'
+                    ]
+                ]
+            ],
+            'experiencia_servicio' => [
+                'formato_idformato' => $idformato,
+                'fila_visible' => 1,
+                'obligatoriedad' => 1,
+                'orden' => 3,
+                'nombre' => 'experiencia_servicio',
+                'etiqueta' => 'Valora tu experiencia global con respecto a los servicios que has recibido',
+                'tipo_dato' => 'integer',
+                'longitud' => NULL,
+                'etiqueta_html' => 'Radio',
+                'acciones' => 'a,e',
+                'placeholder' => NULL,
+                'listable' => 1,
+                'opciones' => NULL,
+                'ayuda' => NULL,
+                'longitud_vis' => NULL,
+                'campoOpciones' => [
+                    [
+                        'llave' => 4,
+                        'valor' => 'Excelente'
+                    ],
+                    [
+                        'llave' => 3,
+                        'valor' => 'Bueno'
+                    ],
+                    [
+                        'llave' => 2,
+                        'valor' => 'Regular'
+                    ],
+                    [
+                        'llave' => 1,
+                        'valor' => 'Deficiente'
+                    ]
+                ]
             ]
         ];
 
         foreach ($data as $field) {
+            $campoOpciones = $field['campoOpciones'];
+            unset($field['campoOpciones']);
+
             $this->connection->insert('campos_formato', $field);
+            $id = $this->connection->lastInsertId();
+
+            if ($campoOpciones) {
+                foreach ($campoOpciones as $option) {
+                    $dataOption = array_merge($option, [
+                        'fk_campos_formato' => $id
+                    ]);
+                    $this->connection->insert('campo_opciones', $dataOption);
+                }
+            }
         }
     }
 

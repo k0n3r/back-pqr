@@ -16,7 +16,6 @@ include_once $rootPath . 'app/vendor/autoload.php';
 
 use Exception;
 use Saia\models\Funcionario;
-use Saia\Pqr\Models\PqrForm;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
 use Saia\controllers\SaveDocument;
@@ -26,7 +25,7 @@ use Saia\controllers\functions\RequestProcessor;
 
 $Response = (object) [
     'message' => '',
-    'success' => 0,
+    'success' => 1,
 ];
 
 try {
@@ -34,10 +33,13 @@ try {
 
     //SessionController::refresh(new Funcionario(Funcionario::RADICADOR_WEB));
 
-    $formatId = $_REQUEST['formatId'];
-    $PqrForm = PqrForm::getPqrFormActive();
+    if (!$_REQUEST['anterior']) {
+        throw new Exception("Error Processing Request");
+    }
 
-    if ($PqrForm->fk_formato != $formatId || !$formatId) {
+    if (!$Formato = Formato::findByAttributes([
+        'nombre' => 'pqr_calificacion'
+    ])) {
         throw new Exception("Error Processing Request");
     }
 
@@ -53,12 +55,12 @@ try {
 
     $newData = array_merge($request, [
         'dependencia' => $iddependenciaCargo,
-        'tipo_radicado' => $PqrForm->Contador->nombre
+        'tipo_radicado' => $Formato->Contador->nombre
     ]);
 
-    $GuardarFtController = new SaveDocument(new Formato($formatId), $newData);
+    $GuardarFtController = new SaveDocument($Formato, $newData);
     if (!$GuardarFtController->create()) {
-        throw new Exception("No fue posible radicar el documento", 200);
+        throw new Exception("No fue posible calificar el servicio", 200);
     }
     $Response->success = 1;
     $Connection->commit();

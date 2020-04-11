@@ -75,7 +75,7 @@ class FtPqrController implements IAddEditFormat
             'encabezado' => 1,
             'cuerpo' => '{*showContent*}{*mostrar_estado_proceso*}',
             'pie_pagina' => 0,
-            'margenes' => '25,25,15,25',
+            'margenes' => '25,25,50,25',
             'orientacion' => 0,
             'papel' => 'Letter',
             'exportar' => 'mpdf',

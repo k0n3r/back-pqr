@@ -15,10 +15,11 @@ class FtPqrCalificacionProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'campo',
-				'dependencia',
+                'dependencia',
 				'documento_iddocumento',
 				'encabezado',
+				'experiencia_gestion',
+				'experiencia_servicio',
 				'firma',
 				'ft_pqr_respuesta',
 				'idft_pqr_calificacion' 

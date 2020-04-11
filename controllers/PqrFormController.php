@@ -10,10 +10,12 @@ use Saia\models\formatos\Formato;
 use Saia\Pqr\Models\PqrFormField;
 use Saia\Pqr\Models\PqrHtmlField;
 use Saia\Pqr\Controllers\WebservicePqr;
+use Saia\Pqr\Controllers\WebserviceCalificacion;
 use Saia\Pqr\Controllers\AddEditFormat\AddEditFormat;
 use Saia\Pqr\Controllers\AddEditFormat\IAddEditFormat;
 use Saia\Pqr\Controllers\AddEditFormat\TAddEditFormat;
 use Saia\Pqr\Controllers\AddEditFormat\FtPqrController;
+
 
 class PqrFormController
 {
@@ -252,24 +254,27 @@ class PqrFormController
                 $option
             );
 
-            if (!$Formato = Formato::findByAttributes([
+            if (!$FormatoR = Formato::findByAttributes([
                 'nombre' => 'pqr_respuesta'
             ])) {
                 throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
             }
-            $this->FormatGenerator($Formato->getPK());
+            $this->FormatGenerator($FormatoR->getPK());
 
-            if (!$Formato = Formato::findByAttributes([
+            if (!$FormatoC = Formato::findByAttributes([
                 'nombre' => 'pqr_calificacion'
             ])) {
                 throw new Exception("El formato de calificacion PQR no fue encontrado", 1);
             }
-            $this->FormatGenerator($Formato->getPK());
+            $this->FormatGenerator($FormatoC->getPK());
+
+            $this->generateView();
 
             $Web = new WebservicePqr($this->PqrForm);
             $Web->generate();
 
-            $this->generateView();
+            $WebCal = new WebserviceCalificacion($FormatoC);
+            $WebCal->generate();
 
             $Response->data = $this->PqrForm->getAttributes();
             $conn->commit();
@@ -320,9 +325,9 @@ class PqrFormController
      */
     protected function viewPqr()
     {
-        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.sys_email,cs.valor as sys_tipo,ft.sys_estado,ft.idft_pqr as idft
-        FROM ft_pqr ft,documento d, campo_seleccionados cs
-        WHERE ft.documento_iddocumento=d.iddocumento AND cs.fk_documento=d.iddocumento
+        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.sys_email,ft.sys_tipo,ft.sys_estado,ft.idft_pqr as idft
+        FROM ft_pqr ft,documento d
+        WHERE ft.documento_iddocumento=d.iddocumento
         AND d.estado NOT IN ('ELIMINADO','ANULADO')";
 
         $this->createView('vpqr', $sql);

@@ -4,8 +4,11 @@ $(function () {
 
         $('#filtro_fecha').select2();
         createPicker();
-        $("#morefields").empty().load(`${baseUrl}app/modules/back_pqr/formatos/pqr/buscar.php`);
 
+        $.get(`${baseUrl}app/modules/back_pqr/formatos/pqr/buscar.php`, function (html) {
+            let res = html.replace(/d\./g, "v.");
+            $("#morefields").empty().append(res);
+        });
     })();
 
 
@@ -22,38 +25,20 @@ $(function () {
             .clear();
     });
 
-    $('#find_document_form').on('submit', function (e) {
-        e.preventDefault();
-
-        top.notification({
-            type: 'info',
-            message: 'Esto puede tardar un momento'
-        });
-
-
-        // let variableBusqueda = {
-        //     'funcionario': $("#funcionario").val()
-        // };
-        // if ($("#isAdmin").prop('checked')) {
-        //     variableBusqueda.isAdmin = 1;
-        // }
-        // $("#variable_busqueda").val(JSON.stringify(variableBusqueda));
-
-        $('#btn_success').on('click', function () {
-            $.post(`${baseUrl}app/busquedas/procesa_filtro_busqueda.php`,
-                $("#find_document_form").serialize(),
-                function (data) {
-                    if (data.exito) {
-                        top.successModalEvent(data);
-                    } else {
-                        top.notification({
-                            message: data.mensaje,
-                            type: 'error'
-                        });
-                    }
-                },
-                'json');
-        });
+    $('#btn_success').on('click', function () {
+        $.post(`${baseUrl}app/busquedas/procesa_filtro_busqueda.php`,
+            $("#find_document_form").serialize(),
+            function (data) {
+                if (data.exito) {
+                    top.successModalEvent(data);
+                } else {
+                    top.notification({
+                        message: data.mensaje,
+                        type: 'error'
+                    });
+                }
+            },
+            'json');
     });
 
     $('#filtro_fecha').on('select2:select', function (e) {

@@ -7,6 +7,8 @@ use Saia\Pqr\Controllers\WebserviceGenerator\WebserviceGenerator;
 
 class WebservicePqr extends WebserviceGenerator
 {
+
+    const DIRECTORY_PQR = '../ws/pqr/';
     /**
      * Instancia de PqrForm
      *
@@ -19,6 +21,7 @@ class WebservicePqr extends WebserviceGenerator
     public function __construct(PqrForm $PqrForm)
     {
         $this->PqrForm = $PqrForm;
+        $this->setDirectory(self::DIRECTORY_PQR);
     }
 
     /**
@@ -45,7 +48,10 @@ class WebservicePqr extends WebserviceGenerator
         $data = [];
 
         foreach ($this->PqrForm->getPqrFormFieldsActive() as $PqrFormField) {
-            $data[] = $PqrFormField->CamposFormato;
+            $data[] = [
+                'type' => 'camposFormato',
+                'instance' => $PqrFormField->CamposFormato
+            ];
         }
 
         return $data;
