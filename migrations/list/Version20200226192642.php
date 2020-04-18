@@ -28,7 +28,7 @@ final class Version20200226192642 extends AbstractMigration
 
         $busqueda = [
             'nombre' => 'reporte_pqr',
-            'etiqueta' => 'Reporte de PQR',
+            'etiqueta' => 'Reporte de PQRSF',
             'estado' => 1,
             'campos' => NULL,
             'tablas' => 'vpqr v',

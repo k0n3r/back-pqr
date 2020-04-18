@@ -46,7 +46,7 @@ final class Version20200310032827 extends AbstractMigration
         $name = $this->formatName;
         $data = [
             'nombre' => $name,
-            'etiqueta' => 'RESPUESTA PQR',
+            'etiqueta' => 'RESPUESTAS PQRSF',
             'cod_padre' => 0,
             'contador_idcontador' => $contador[0]['idcontador'],
             'nombre_tabla' => "ft_{$name}",
@@ -73,7 +73,7 @@ final class Version20200310032827 extends AbstractMigration
             'funcion_predeterminada' => 0,
             'paginar' => 0,
             'pertenece_nucleo' => 0,
-            'descripcion_formato' => 'Formulario utilizado para responder las PQR',
+            'descripcion_formato' => 'Formulario utilizado para responder las PQRSF',
             'version' => 1,
             'module' => 'pqr',
             'banderas' => 'e'

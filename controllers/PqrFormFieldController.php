@@ -43,7 +43,7 @@ class PqrFormFieldController
         ];
 
         $Instances = PqrFormField::findAllByAttributes([
-            'active' => 1
+            //'active' => 1
         ], [], 'orden asc');
 
         $data = [];

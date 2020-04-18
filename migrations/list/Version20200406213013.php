@@ -25,7 +25,7 @@ final class Version20200406213013 extends AbstractMigration
 
         $busqueda = [
             'nombre' => 'reporte_respueta_pqr',
-            'etiqueta' => 'Reporte de Respuesta a la PQR',
+            'etiqueta' => 'Reporte de Respuesta a la PQRSF',
             'estado' => 1,
             'campos' => NULL,
             'tablas' => 'vpqr_respuesta v',
@@ -39,7 +39,7 @@ final class Version20200406213013 extends AbstractMigration
         $nombreComponente = 'respuesta_pqr';
         $busquedaComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
-            'etiqueta' => 'Respuesta PQR',
+            'etiqueta' => 'Respuestas PQRSF',
             'nombre' => $nombreComponente,
             'orden' => 1,
             'url' => NULL,

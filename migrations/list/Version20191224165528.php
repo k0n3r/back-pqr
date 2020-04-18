@@ -33,7 +33,7 @@ final class Version20191224165528 extends AbstractMigration
             'nombre' => 'agrupador_pqr',
             'tipo' => 0,
             'imagen' => 'fa fa-comments',
-            'etiqueta' => 'PQR',
+            'etiqueta' => 'PQRSF',
             'enlace' => '#',
             'cod_padre' => 0,
             'orden' => 5,
@@ -61,7 +61,7 @@ final class Version20191224165528 extends AbstractMigration
             'nombre' => 'plantilla_pqr',
             'tipo' => 1,
             'imagen' => 'fa fa-newspaper-o',
-            'etiqueta' => 'Formulario PQR',
+            'etiqueta' => 'Formulario PQRSF',
             'enlace' => 'views/modules/pqr/dist/pqr/index.html',
             'cod_padre' => $id,
             'orden' => 1
@@ -74,7 +74,7 @@ final class Version20191224165528 extends AbstractMigration
             'nombre' => 'respuesta_pqr',
             'tipo' => 1,
             'imagen' => 'fa fa-mail-reply',
-            'etiqueta' => 'Respuesta PQR',
+            'etiqueta' => 'Respuestas PQRSF',
             'enlace' => 'views/modules/pqr/dist/respuestaPqr/index.html',
             'cod_padre' => $id,
             'orden' => 1
@@ -105,7 +105,6 @@ final class Version20191224165528 extends AbstractMigration
         if (!$cargo) {
             $this->connection->insert('cargo', [
                 'nombre' => 'Radicador Web',
-                'cod_padre' => 0,
                 'estado' => 1,
                 'pertenece_nucleo' => 1
             ]);

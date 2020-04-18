@@ -46,13 +46,13 @@ final class Version20200321234633 extends AbstractMigration
         $sqlCodPadre = "SELECT idformato FROM formato WHERE nombre='pqr_respuesta'";
         $codPadre = $this->connection->executeQuery($sqlCodPadre)->fetchAll();
         if (!$codPadre[0]['idformato']) {
-            $this->abortIf(true, "No se encontro el formato padre Respuesta PQR");
+            $this->abortIf(true, "No se encontro el formato padre Respuesta PQRSF");
         }
 
         $name = $this->formatName;
         $data = [
             'nombre' => $name,
-            'etiqueta' => 'CALIFICACIÓN PQR',
+            'etiqueta' => 'CALIFICACIÓN PQRSF',
             'cod_padre' => $codPadre[0]['idformato'],
             'contador_idcontador' => $contador[0]['idcontador'],
             'nombre_tabla' => "ft_{$name}",
