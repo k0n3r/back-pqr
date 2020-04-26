@@ -80,7 +80,8 @@ class PqrFormFieldController
             'fk_pqr_form' => $PqrForm->getPK(),
             'orden' => $cant + self::INITIAL_ORDER,
             'fk_campos_formato' => 0,
-            'system' => 0
+            'system' => 0,
+            'show_anonymous' => 1
         ];
 
         try {

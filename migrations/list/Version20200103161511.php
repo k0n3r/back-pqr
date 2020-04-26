@@ -19,25 +19,43 @@ final class Version20200103161511 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $fields = $this->getHtmlFields();
+        $idsHtmlFields = [];
+        $fields = $this->getDataPqrHtmlFields();
         foreach ($fields as $field) {
             $this->connection->insert(
                 'pqr_html_fields',
                 $field
             );
+            $id = $this->connection->lastInsertId();
+
+            $idsHtmlFields[$field['type']] = $id;
         }
 
-
-        $fields = $this->getTemplateFields();
+        $fields = $this->getDataPqrResponseTemplates();
         foreach ($fields as $field) {
             $this->connection->insert(
                 'pqr_response_templates',
                 $field
             );
         }
+
+        $this->connection->insert(
+            'pqr_forms',
+            $this->getDataPqrForms()
+        );
+        $idform = (int) $this->connection->lastInsertId();
+
+
+        $fields = $this->getDataPqrFormFields($idform, $idsHtmlFields);
+        foreach ($fields as $field) {
+            $this->connection->insert(
+                'pqr_form_fields',
+                $field
+            );
+        }
     }
 
-    protected function getHtmlFields(): array
+    protected function getDataPqrHtmlFields(): array
     {
         return [
             [
@@ -73,7 +91,7 @@ final class Version20200103161511 extends AbstractMigration
         ];
     }
 
-    protected function getTemplateFields(): array
+    protected function getDataPqrResponseTemplates(): array
     {
         return [
             [
@@ -89,9 +107,71 @@ final class Version20200103161511 extends AbstractMigration
         ];
     }
 
+    protected function getDataPqrForms(): array
+    {
+        $sql = "SELECT idcontador FROM contador WHERE nombre='radicacion_entrada'";
+        $contador = $this->connection->fetchAll($sql);
+
+        if (!$contador[0]['idcontador']) {
+            $this->abortIf(true, 'El contador Externo-Interno NO existe');
+        }
+
+        return [
+            'fk_formato' => 0,
+            'fk_contador' => $contador[0]['idcontador'],
+            'label' => 'PQRSF',
+            'name' => 'pqr',
+            'active' => 1
+        ];
+    }
+
+    protected function getDataPqrFormFields(int $idform, array $idsHtmlFields): array
+    {
+
+        return [
+            [
+                'label' => 'Tipo',
+                'name' => 'sys_tipo',
+                'required' => 1,
+                'system' => 1,
+                'orden' => 2,
+                'fk_pqr_html_field' => $idsHtmlFields['select'],
+                'fk_pqr_form' => $idform,
+                'setting' => json_encode([
+                    'options' => [
+                        'Petición',
+                        'Queja',
+                        'Reclamo',
+                        'Sugerencia',
+                        'Felicitación'
+                    ]
+                ])
+            ],
+            [
+                'label' => 'E-mail',
+                'name' => 'sys_email',
+                'required' => 1,
+                'system' => 1,
+                'orden' => 3,
+                'fk_pqr_html_field' => $idsHtmlFields['email'],
+                'fk_pqr_form' => $idform,
+                'setting' => json_encode([
+                    'placeholder' => 'example@pqr.com'
+                ])
+            ]
+        ];
+    }
+
     public function down(Schema $schema): void
     {
-        $this->addSql("TRUNCATE TABLE pqr_html_fields");
-        $this->addSql("TRUNCATE TABLE pqr_response_templates");
+        $tables = [
+            'pqr_html_fields',
+            'pqr_response_templates',
+            'pqr_forms',
+            'pqr_form_fields'
+        ];
+        foreach ($tables as $table) {
+            $this->addSql("TRUNCATE TABLE {$table}");
+        }
     }
 }

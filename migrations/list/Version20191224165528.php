@@ -28,59 +28,140 @@ final class Version20191224165528 extends AbstractMigration
         $this->validateCreation();
         $this->createRadicadorWeb();
 
-        $data = [
-            'pertenece_nucleo' => 0,
-            'nombre' => 'agrupador_pqr',
-            'tipo' => 0,
-            'imagen' => 'fa fa-comments',
-            'etiqueta' => 'PQRSF',
-            'enlace' => '#',
-            'cod_padre' => 0,
-            'orden' => 5,
-            'color' => 'bg-danger-light'
+        $this->generateModules($this->modulesDefaultData());
+    }
+
+    protected function modulesDefaultData(): array
+    {
+        return [
+            'agrupador_pqr' => [
+                'pertenece_nucleo' => 0,
+                'nombre' => 'agrupador_pqr',
+                'tipo' => 0,
+                'imagen' => 'fa fa-comments',
+                'etiqueta' => 'PQRSF',
+                'enlace' => '#',
+                'orden' => 5,
+                'color' => 'bg-danger-light',
+                'children' => [
+                    'configuracion_pqr' => [
+                        'pertenece_nucleo' => 0,
+                        'nombre' => 'configuracion_pqr',
+                        'tipo' => 1,
+                        'imagen' => 'fa fa-cogs',
+                        'etiqueta' => 'Configuración',
+                        'enlace' => NULL,
+                        'orden' => 1,
+                        'children' => [
+                            'conf_formulario_pqr' => [
+                                'pertenece_nucleo' => 0,
+                                'nombre' => 'conf_formulario_pqr',
+                                'tipo' => 2,
+                                'imagen' => 'fa fa-cogs',
+                                'etiqueta' => 'Formulario',
+                                'enlace' => 'views/modules/pqr/dist/pqr/index.html',
+                                'orden' => 1
+                            ]
+                        ]
+                    ],
+                    'formulario_pqr' => [
+                        'pertenece_nucleo' => 0,
+                        'nombre' => 'formulario_pqr',
+                        'tipo' => 1,
+                        'imagen' => 'fa fa-bars',
+                        'etiqueta' => 'Formularios',
+                        'enlace' => NULL,
+                        'orden' => 2,
+                        'children' => [
+                            'form_plantilla_pqr' => [
+                                'pertenece_nucleo' => 0,
+                                'nombre' => 'form_plantilla_pqr',
+                                'tipo' => 2,
+                                'imagen' => 'fa fa-newspaper-o',
+                                'etiqueta' => 'Formulario PQRSF',
+                                'enlace' => 'views/modules/pqr/dist/pqr/index.html',
+                                'orden' => 1
+                            ],
+                            'form_respuesta_pqr' => [
+                                'pertenece_nucleo' => 0,
+                                'nombre' => 'form_respuesta_pqr',
+                                'tipo' => 2,
+                                'imagen' => 'fa fa-mail-reply',
+                                'etiqueta' => 'Respuestas PQRSF',
+                                'enlace' => 'views/modules/pqr/dist/respuestaPqr/index.html',
+                                'orden' => 1
+                            ]
+                        ]
+                    ],
+                    'reporte_pqr' => [
+                        'pertenece_nucleo' => 0,
+                        'nombre' => 'reporte_pqr',
+                        'tipo' => 1,
+                        'imagen' => 'fa fa-bar-chart-o',
+                        'etiqueta' => 'Reportes',
+                        'enlace' => NULL,
+                        'orden' => 3,
+                        'children' => [
+                            'rep_pendientes_pqr' => [
+                                'pertenece_nucleo' => 0,
+                                'nombre' => 'rep_pendientes_pqr',
+                                'tipo' => 2,
+                                'imagen' => 'fa fa-bar-chart-o',
+                                'etiqueta' => 'Pendientes',
+                                'enlace' => NULL,
+                                'orden' => 1
+                            ],
+                            'rep_proceso_pqr' => [
+                                'pertenece_nucleo' => 0,
+                                'nombre' => 'rep_proceso_pqr',
+                                'tipo' => 2,
+                                'imagen' => 'fa fa-bar-chart-o',
+                                'etiqueta' => 'En proceso',
+                                'enlace' => NULL,
+                                'orden' => 2
+                            ],
+                            'rep_terminados_pqr' => [
+                                'pertenece_nucleo' => 0,
+                                'nombre' => 'rep_terminados_pqr',
+                                'tipo' => 2,
+                                'imagen' => 'fa fa-bar-chart-o',
+                                'etiqueta' => 'Terminados',
+                                'enlace' => NULL,
+                                'orden' => 3
+                            ]
+                        ]
+                    ],
+                    'indicadores_pqr' => [
+                        'pertenece_nucleo' => 0,
+                        'nombre' => 'indicadores_pqr',
+                        'tipo' => 1,
+                        'imagen' => 'fa fa-pie-chart',
+                        'etiqueta' => 'Indicadores',
+                        'enlace' => 'views/modules/pqr/dist/pqr/index.html',
+                        'orden' => 4,
+                        'children' => []
+                    ]
+                ]
+            ]
         ];
+    }
 
-        $id = $this->createModulo($data, $this->getNameMainModule());
+    protected function generateModules(array $data, int $id = 0): void
+    {
+        if ($data) {
+            foreach ($data as $name => $dataModule) {
+                $child = $dataModule['children'];
+                unset($dataModule['children']);
 
-
-        $data2 =  [
-            'pertenece_nucleo' => 0,
-            'nombre' => 'formulario_pqr',
-            'tipo' => 1,
-            'imagen' => 'fa fa-bars',
-            'etiqueta' => 'Formularios',
-            'enlace' => NULL,
-            'cod_padre' => $id,
-            'orden' => 1
-        ];
-
-        $id = $this->createModulo($data2, 'formulario_pqr');
-
-        $data2 =  [
-            'pertenece_nucleo' => 0,
-            'nombre' => 'plantilla_pqr',
-            'tipo' => 1,
-            'imagen' => 'fa fa-newspaper-o',
-            'etiqueta' => 'Formulario PQRSF',
-            'enlace' => 'views/modules/pqr/dist/pqr/index.html',
-            'cod_padre' => $id,
-            'orden' => 1
-        ];
-
-        $this->createModulo($data2, 'plantilla_pqr');
-
-        $data3 =  [
-            'pertenece_nucleo' => 0,
-            'nombre' => 'respuesta_pqr',
-            'tipo' => 1,
-            'imagen' => 'fa fa-mail-reply',
-            'etiqueta' => 'Respuestas PQRSF',
-            'enlace' => 'views/modules/pqr/dist/respuestaPqr/index.html',
-            'cod_padre' => $id,
-            'orden' => 1
-        ];
-
-        $this->createModulo($data3, 'respuesta_pqr');
+                $idmodulo = $this->createModulo(
+                    array_merge($dataModule, ['cod_padre' => $id]),
+                    $name
+                );
+                if ($child) {
+                    $this->generateModules($child, $idmodulo);
+                }
+            }
+        }
     }
 
     protected function validateCreation(): void
@@ -172,9 +253,17 @@ final class Version20191224165528 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        $this->deleteModulo('agrupador_pqr');
-        $this->deleteModulo('formulario_pqr');
-        $this->deleteModulo('plantilla_pqr');
-        $this->deleteModulo('respuesta_pqr');
+        $this->delModules($this->modulesDefaultData());
+    }
+
+    protected function delModules(array $data): void
+    {
+        foreach ($data as $name => $dataModule) {
+            $this->deleteModulo($name);
+
+            if ($dataModule['children']) {
+                $this->delModules($dataModule['children']);
+            }
+        }
     }
 }

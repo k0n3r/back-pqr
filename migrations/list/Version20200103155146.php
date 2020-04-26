@@ -62,6 +62,11 @@ final class Version20200103155146 extends AbstractMigration
             'default' => 0
         ]);
 
+        $table->addColumn('show_anonymous', 'integer', [
+            'length' => 1,
+            'default' => 1
+        ]);
+
         $table->addColumn('setting', 'text');
 
         $table->addColumn('fk_pqr_html_field', 'integer');
@@ -117,9 +122,6 @@ final class Version20200103155146 extends AbstractMigration
         $table->setPrimaryKey(['id']);
 
         $table->addColumn('fk_formato', 'integer');
-        // $table->addColumn('fk_formato_r', 'integer', [
-        //     'notnull' => false
-        // ]);
         $table->addColumn('fk_contador', 'integer');
         $table->addColumn('label', 'string');
         $table->addColumn('name', 'string');

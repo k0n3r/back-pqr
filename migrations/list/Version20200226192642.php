@@ -39,28 +39,9 @@ final class Version20200226192642 extends AbstractMigration
         ];
         $idbusqueda = $this->createBusqueda($busqueda, 'reporte_pqr');
 
-        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '{$this->getNameMainModule()}'";
-        $modulo = $this->connection->fetchAll($sql);
-
-        if (!$modulo[0]['idmodulo']) {
-            $this->abortIf(true, "NO se encontro el agrupador principal del modulo");
-        }
-
-        $data = [
-            'pertenece_nucleo' => 0,
-            'nombre' => 'reporte_pqr',
-            'tipo' => 1,
-            'imagen' => 'fa fa-bar-chart-o',
-            'etiqueta' => 'Reportes',
-            'enlace' => NULL,
-            'cod_padre' => $modulo[0]['idmodulo'],
-            'orden' => 2
-        ];
-        $idmodulo = $this->createModulo($data, 'reporte_pqr');
-
-        $this->createComponentePendientes($idbusqueda, $idmodulo);
-        $this->createComponenteProcesos($idbusqueda, $idmodulo);
-        $this->createComponenteTerminados($idbusqueda, $idmodulo);
+        $this->createComponentePendientes($idbusqueda);
+        $this->createComponenteProcesos($idbusqueda);
+        $this->createComponenteTerminados($idbusqueda);
     }
 
     protected function getDefaultData(bool $ViewNewField = false)
@@ -83,9 +64,9 @@ final class Version20200226192642 extends AbstractMigration
         ];
     }
 
-    protected function createComponentePendientes(int $idbusqueda, int $idmodulo)
+    protected function createComponentePendientes(int $idbusqueda)
     {
-        $nombreComponente = 'pendientes_pqr';
+        $nombreComponente = 'rep_pendientes_pqr';
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta' => 'Pendientes',
@@ -109,21 +90,14 @@ final class Version20200226192642 extends AbstractMigration
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
 
         $data = [
-            'pertenece_nucleo' => 0,
-            'nombre' => $nombreComponente,
-            'tipo' => 2,
-            'imagen' => 'fa fa-bar-chart-o',
-            'etiqueta' => 'Pendientes',
             'enlace' => 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector": "iframe","url": "views/buzones/grilla.php?idbusqueda_componente=' . $idbusquedaComponente . '"}]',
-            'cod_padre' => $idmodulo,
-            'orden' => 1
         ];
         $this->createModulo($data, $nombreComponente);
     }
 
-    protected function createComponenteProcesos(int $idbusqueda, int $idmodulo)
+    protected function createComponenteProcesos(int $idbusqueda)
     {
-        $nombreComponente = 'proceso_pqr';
+        $nombreComponente = 'rep_proceso_pqr';
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta' => 'En proceso',
@@ -147,21 +121,14 @@ final class Version20200226192642 extends AbstractMigration
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
 
         $data = [
-            'pertenece_nucleo' => 0,
-            'nombre' => $nombreComponente,
-            'tipo' => 2,
-            'imagen' => 'fa fa-bar-chart-o',
-            'etiqueta' => 'En proceso',
             'enlace' => 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector": "iframe","url": "views/buzones/grilla.php?idbusqueda_componente=' . $idbusquedaComponente . '"}]',
-            'cod_padre' => $idmodulo,
-            'orden' => 2
         ];
         $this->createModulo($data, $nombreComponente);
     }
 
-    protected function createComponenteTerminados(int $idbusqueda, int $idmodulo)
+    protected function createComponenteTerminados(int $idbusqueda)
     {
-        $nombreComponente = 'terminados_pqr';
+        $nombreComponente = 'rep_terminados_pqr';
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta' => 'Terminados',
@@ -186,14 +153,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
 
         $data = [
-            'pertenece_nucleo' => 0,
-            'nombre' => $nombreComponente,
-            'tipo' => 2,
-            'imagen' => 'fa fa-bar-chart-o',
-            'etiqueta' => 'Terminados',
             'enlace' => 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector": "iframe","url": "views/buzones/grilla.php?idbusqueda_componente=' . $idbusquedaComponente . '"}]',
-            'cod_padre' => $idmodulo,
-            'orden' => 3
         ];
         $this->createModulo($data, $nombreComponente);
     }

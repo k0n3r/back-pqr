@@ -33,6 +33,15 @@ trait TMigrations
         }
     }
 
+    /**
+     * Crea o actualiza un modulo
+     *
+     * @param array $data
+     * @param string $search
+     * @return integer
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function createModulo(array $data, string $search): int
     {
         $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '{$search}'";
