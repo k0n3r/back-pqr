@@ -1,13 +1,19 @@
 <?php
+$max_salida = 10;
+$rootPath = $ruta = '';
 
-require '../../../vendor/autoload.php';
+while ($max_salida > 0) {
+    if (is_file($ruta . 'sw.js')) {
+        $rootPath = $ruta;
+        break;
+    }
 
-use Doctrine\DBAL\Tools\Console\Helper\ConnectionHelper;
-use Saia\core\DatabaseConnection;
-use Symfony\Component\Console\Helper\HelperSet;
+    $ruta .= '../';
+    $max_salida--;
+}
 
-$Connection = DatabaseConnection::getInstance();
+include_once $rootPath . 'app/vendor/autoload.php';
 
-return new HelperSet([
-    'db' => new ConnectionHelper($Connection)
-]);
+use Saia\doctrine\DoctrineConfiguration;
+
+return DoctrineConfiguration::getMigrationsHelper();

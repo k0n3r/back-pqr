@@ -21,10 +21,6 @@ final class Version20200103155146 extends AbstractMigration
     public function up(Schema $schema): void
     {
 
-        if ($this->connection->getDatabasePlatform()->getName() == "mysql") {
-            $this->platform->registerDoctrineTypeMapping('enum', 'string');
-        }
-
         $table = $schema->createTable('pqr_form_fields');
         $this->tablePqrFormFields($table);
 
@@ -166,11 +162,6 @@ final class Version20200103155146 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-
-        if ($this->connection->getDatabasePlatform()->getName() == "mysql") {
-            $this->platform->registerDoctrineTypeMapping('enum', 'string');
-        }
-
         $data = [
             'pqr_form_fields',
             'pqr_html_fields',

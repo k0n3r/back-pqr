@@ -215,10 +215,6 @@ final class Version20200310032827 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        if ($this->connection->getDatabasePlatform()->getName() == "mysql") {
-            $this->platform->registerDoctrineTypeMapping('enum', 'string');
-        }
-
         $this->deleteFormat($this->formatName, $schema);
     }
 }
