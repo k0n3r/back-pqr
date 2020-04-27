@@ -109,6 +109,10 @@ final class Version20200103155146 extends AbstractMigration
             'length' => 50
         ]);
 
+        $table->addColumn('uniq', 'boolean', [
+            'default' => false
+        ]);
+
         $table->addColumn('active', 'boolean', [
             'default' => 1
         ]);

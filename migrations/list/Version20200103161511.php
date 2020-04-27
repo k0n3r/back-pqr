@@ -61,32 +61,56 @@ final class Version20200103161511 extends AbstractMigration
             [
                 'label' => 'Cuadro de texto',
                 'type' => 'input',
-                'active' => 1
+                'active' => 1,
+                'uniq' => 0
             ],
             [
                 'label' => 'Área de texto',
                 'type' => 'textarea',
-                'active' => 1
+                'active' => 1,
+                'uniq' => 0
             ],
             [
                 'label' => 'E-mail',
                 'type' => 'email',
-                'active' => 1
+                'active' => 1,
+                'uniq' => 0
             ],
             [
                 'label' => 'Lista desplegable',
                 'type' => 'select',
-                'active' => 1
+                'active' => 1,
+                'uniq' => 0
             ],
             [
                 'label' => 'Selección Única',
                 'type' => 'radio',
-                'active' => 1
+                'active' => 1,
+                'uniq' => 0
             ],
             [
                 'label' => 'Selección múltiple',
                 'type' => 'checkbox',
-                'active' => 1
+                'active' => 1,
+                'uniq' => 0
+            ],
+            [
+                'label' => 'Localidad',
+                'type' => 'localidad',
+                'active' => 1,
+                'uniq' => 0
+            ],
+            [
+                'label' => 'Dependencia',
+                'type' => 'dependencia',
+                'active' => 1,
+                'uniq' => 1
+            ],
+            [
+                'label' => 'Tratamiento de datos',
+                'type' => 'tratamiento',
+                'active' => 1,
+                'uniq' => 1
             ]
         ];
     }
