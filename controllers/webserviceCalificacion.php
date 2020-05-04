@@ -68,6 +68,7 @@ class WebserviceCalificacion extends WebserviceGenerator
     ];
     return $data;
   }
+
   /**
    * Obtiene el nombre del formulario
    *
@@ -91,8 +92,6 @@ class WebserviceCalificacion extends WebserviceGenerator
   protected function getContent(): string
   {
     $code = parent::getContentDefault();
-
-
 
     return $code;
   }

@@ -6,10 +6,11 @@ use Exception;
 use Saia\Pqr\Helpers\UtilitiesPqr;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Text;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Radio;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Number;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Select;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Checkbox;
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\FieldFormatGeneratorInterface;
 use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Textarea;
+use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\FieldFormatGeneratorInterface;
 
 abstract class WebserviceGenerator
 {
@@ -31,7 +32,9 @@ abstract class WebserviceGenerator
         'Checkbox' => Checkbox::class,
         'Select' => Select::class,
         'Text' => Text::class,
-        'input' => Text::class
+        'input' => Text::class,
+        'Number' => Text::class,
+        'Hidden' => Text::class,
     ];
 
 
@@ -662,7 +665,7 @@ PHP;
     protected function resolveClass(string $type): string
     {
         if (!array_key_exists($type, self::FIELD_TYPE)) {
-            throw new Exception("El tipo de campo no ha sido registrado", 1);
+            throw new Exception("El tipo de campo no ha sido registrado {$type}", 1);
         }
         return self::FIELD_TYPE[$type];
     }

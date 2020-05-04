@@ -23,7 +23,6 @@ final class Version20200226192642 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        //,app/modules/back_pqr/formatos/pqr/accionesSeleccionados.php
         $this->init();
 
         $busqueda = [
@@ -160,11 +159,6 @@ final class Version20200226192642 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        $this->deleteModulo('reporte_pqr');
-        $this->deleteModulo('pendientes_pqr');
-        $this->deleteModulo('proceso_pqr');
-        $this->deleteModulo('terminados_pqr');
-
         $this->deleteBusqueda('reporte_pqr');
     }
 }
