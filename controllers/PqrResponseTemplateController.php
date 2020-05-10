@@ -63,7 +63,7 @@ class PqrResponseTemplateController
             if (PqrResponseTemplate::findByAttributes([
                 'name' => $params['name']
             ])) {
-                throw new Exception("El nombre de la plantilla ya existe", 1);
+                throw new Exception("El nombre de la plantilla ya existe", 200);
             }
 
             $Template = new PqrResponseTemplate();
@@ -72,7 +72,7 @@ class PqrResponseTemplateController
                 $conn->commit();
                 $Response->data = $Template->getAttributes();
             } else {
-                throw new Exception("No fue posible crear la plantilla", 1);
+                throw new Exception("No fue posible crear la plantilla", 200);
             }
         } catch (Exception $th) {
             $conn->rollBack();

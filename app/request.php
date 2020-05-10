@@ -36,7 +36,7 @@ try {
     }
     unset($newData['class'], $newData['method']);
 
-    $Reflection = new ReflectionClass("Saia\\Pqr\\Controllers\\$class");
+    $Reflection = new ReflectionClass("Saia\\Pqr\\controllers\\$class");
     if ($Reflection->hasMethod($method)) {
 
         $Instancia = $Reflection->newInstanceArgs($newData);

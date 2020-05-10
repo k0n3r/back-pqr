@@ -32,8 +32,6 @@ $Response = (object) [
 try {
     $Connection = DatabaseConnection::beginTransaction();
 
-    //SessionController::refresh(new Funcionario(Funcionario::RADICADOR_WEB));
-
     $formatId = $_REQUEST['formatId'];
     $PqrForm = PqrForm::getPqrFormActive();
 
@@ -67,7 +65,5 @@ try {
     $Response->message = $th->getMessage();
     $Response->code = $th->getCode();
 }
-
-//SessionController::sessionDestroy();
 
 echo json_encode($Response);

@@ -59,14 +59,8 @@ final class Version20200103161511 extends AbstractMigration
     {
         return [
             [
-                'label' => 'Cuadro de texto',
+                'label' => 'Linea de texto',
                 'type' => 'input',
-                'active' => 1,
-                'uniq' => 0
-            ],
-            [
-                'label' => 'Área de texto',
-                'type' => 'textarea',
                 'active' => 1,
                 'uniq' => 0
             ],
@@ -77,10 +71,28 @@ final class Version20200103161511 extends AbstractMigration
                 'uniq' => 0
             ],
             [
-                'label' => 'Lista desplegable',
+                'label' => 'Numérico',
+                'type' => 'number',
+                'active' => 1,
+                'uniq' => 0
+            ],
+            [
+                'label' => 'Área de texto',
+                'type' => 'textarea',
+                'active' => 1,
+                'uniq' => 0
+            ],
+            [
+                'label' => 'Listado',
                 'type' => 'select',
                 'active' => 1,
                 'uniq' => 0
+            ],
+            [
+                'label' => 'Listado de Dependencia',
+                'type' => 'dependencia',
+                'active' => 1,
+                'uniq' => 1
             ],
             [
                 'label' => 'Selección Única',
@@ -95,16 +107,10 @@ final class Version20200103161511 extends AbstractMigration
                 'uniq' => 0
             ],
             [
-                'label' => 'Localidad',
+                'label' => 'Autompletar de municipios',
                 'type' => 'localidad',
                 'active' => 1,
                 'uniq' => 0
-            ],
-            [
-                'label' => 'Dependencia',
-                'type' => 'dependencia',
-                'active' => 1,
-                'uniq' => 1
             ],
             [
                 'label' => 'Tratamiento de datos',

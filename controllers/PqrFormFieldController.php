@@ -3,8 +3,9 @@
 namespace Saia\Pqr\controllers;
 
 use Exception;
-use Saia\core\DatabaseConnection;
 use Saia\Pqr\models\PqrForm;
+use Doctrine\DBAL\Types\Type;
+use Saia\core\DatabaseConnection;
 use Saia\Pqr\models\PqrFormField;
 
 class PqrFormFieldController
@@ -68,26 +69,27 @@ class PqrFormFieldController
             'success' => 1,
             'data' => []
         ];
-        $params = $this->request['params'];
+        $requestFormField = $this->request['params'];
+        if ($requestFormField['setting']) {
+            $requestFormField['setting'] = json_encode($requestFormField['setting']);
+        }
 
-        $PqrForm = new PqrForm($params['fk_pqr_form']);
-        $cant = $PqrForm->countFields();
-
+        $PqrForm = new PqrForm($requestFormField['fk_pqr_form']);
         $defaultFields = [
-            'name' => $this->generateName($params['label']),
-            'active' => 1,
-            'setting' => json_encode($params['setting']),
+            'name' => $this->generateName($requestFormField['label']),
+            'required' => 0,
+            'show_anonymous' => 1,
             'fk_pqr_form' => $PqrForm->getPK(),
-            'orden' => $cant + self::INITIAL_ORDER,
             'fk_campos_formato' => 0,
             'system' => 0,
-            'show_anonymous' => 1
+            'orden' => ($PqrForm->countFields()) + self::INITIAL_ORDER,
+            'active' => 1
         ];
 
         try {
             $conn = DatabaseConnection::beginTransaction();
 
-            $attributes = array_merge($params, $defaultFields);
+            $attributes = array_merge($defaultFields, $requestFormField);
 
             $PqrFormField = new PqrFormField();
             $PqrFormField->setAttributes($attributes);
@@ -96,11 +98,82 @@ class PqrFormFieldController
                 $conn->commit();
                 $Response->data = $PqrFormField->getDataAttributes();
             } else {
-                throw new Exception("No fue posible guardar", 1);
+                throw new Exception("No fue posible guardar", 200);
             }
         } catch (Exception $th) {
             $conn->rollBack();
             $Response->success = 0;
+            $Response->message = $th->getMessage();
+        }
+
+        return $Response;
+    }
+
+    /**
+     * Actualiza un campo del formulario
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function update(): object
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+
+        $id = $this->request['id'];
+        $requestFormField = $this->request['params'];
+        if ($requestFormField['setting']) {
+            $requestFormField['setting'] = json_encode($requestFormField['setting']);
+        }
+
+        try {
+            $conn = DatabaseConnection::beginTransaction();
+
+            $PqrFormField = new PqrFormField($id);
+            $PqrFormField->setAttributes($requestFormField);
+
+            if ($PqrFormField->update()) {
+                $conn->commit();
+                $Response->success = 1;
+                $Response->data = $PqrFormField->getDataAttributes();
+            } else {
+                throw new Exception("No fue posible actualizar", 200);
+            }
+        } catch (Exception $th) {
+            $conn->rollBack();
+            $Response->message = $th->getMessage();
+        }
+
+        return $Response;
+    }
+
+    /**
+     * Elimina un campo del formulario
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function destroy(): object
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+
+        try {
+            $conn = DatabaseConnection::beginTransaction();
+
+            $PqrFormField = new PqrFormField($this->request['id']);
+            if ($PqrFormField->delete()) {
+                $conn->commit();
+                $Response->success = 1;
+            } else {
+                throw new Exception("No fue posible eliminar", 200);
+            }
+        } catch (Exception $th) {
+            $conn->rollBack();
             $Response->message = $th->getMessage();
         }
 
@@ -131,76 +204,6 @@ class PqrFormFieldController
             $name = $this->generateName($name, $pref);
         }
         return $name;
-    }
-
-    /**
-     * Elimina un campo del formulario
-     *
-     * @return object
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function destroy(): object
-    {
-        $Response = (object) [
-            'success' => 0
-        ];
-
-        try {
-            $conn = DatabaseConnection::beginTransaction();
-
-            $PqrFormField = new PqrFormField($this->request['id']);
-            if ($PqrFormField->delete()) {
-                $conn->commit();
-                $Response->success = 1;
-            } else {
-                throw new Exception("No fue posible eliminar", 1);
-            }
-        } catch (Exception $th) {
-            $conn->rollBack();
-            $Response->message = $th->getMessage();
-        }
-
-        return $Response;
-    }
-
-    /**
-     * Actualiza un campo del formulario
-     *
-     * @return object
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function update(): object
-    {
-        $Response = (object) [
-            'success' => 0
-        ];
-
-        $params = $this->request['params']['dataField'];
-        $id = $this->request['params']['id'];
-
-        $params['setting'] = json_encode($params['setting']);
-
-        try {
-            $conn = DatabaseConnection::beginTransaction();
-
-            $PqrFormField = new PqrFormField($id);
-            $PqrFormField->setAttributes($params);
-
-            if ($PqrFormField->update()) {
-                $conn->commit();
-                $Response->success = 1;
-                $Response->data = $PqrFormField->getDataAttributes();
-            } else {
-                throw new Exception("No fue posible actualizar", 1);
-            }
-        } catch (Exception $th) {
-            $conn->rollBack();
-            $Response->message = $th->getMessage();
-        }
-
-        return $Response;
     }
 
     /**
@@ -250,15 +253,14 @@ class PqrFormFieldController
 
         try {
             $conn = DatabaseConnection::beginTransaction();
-            $params = $this->request['params'];
 
-            $PqrFormField = new PqrFormField($params['id']);
+            $PqrFormField = new PqrFormField($this->request['id']);
             $PqrFormField->setAttributes([
-                'active' => (int) $params['active']
+                'active' => (int) $this->request['active']
             ]);
 
             if (!$PqrFormField->update()) {
-                throw new Exception("No fue posible actualizar el campo", 1);
+                throw new Exception("No fue posible actualizar el campo", 200);
             }
             $Response->data = $PqrFormField->getDataAttributes();
 
@@ -269,5 +271,115 @@ class PqrFormFieldController
             $Response->message = $th->getMessage();
         }
         return $Response;
+    }
+
+    /**
+     * Obtiene una lista de datos
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getList(): array
+    {
+        $list = [];
+        switch ($this->request['type']) {
+            case 'dependencia':
+                $records = $this->getListDependency();
+                break;
+            case 'pais':
+                $records = $this->getListPais();
+                break;
+            case 'departamento':
+                $records = $this->getListDepartamento();
+                break;
+        }
+
+        foreach ($records as $row) {
+            $list[] = [
+                'id' => $row['id'],
+                'text' => $row['nombre']
+            ];
+        }
+
+        return ['results' => $list];
+    }
+
+    /**
+     * Obtiene una lista de dependencias
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function getListDependency(): array
+    {
+        $Qb = DatabaseConnection::getQueryBuilder()
+            ->select('iddependencia as id,nombre')
+            ->from('dependencia')
+            ->where('estado=1')
+            ->orderBy('nombre', 'ASC')
+            ->setFirstResult(0)
+            ->setMaxResults(40);
+
+        if ($this->request['term']) {
+            $Qb->andWhere('nombre like :nombre')
+                ->setParameter(':nombre', '%' . $this->request['term'] . '%', Type::getType('string'));
+        }
+        return $Qb->execute()->fetchAll();
+    }
+
+    /**
+     * Obtiene una lista de paises
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function getListPais(): array
+    {
+        $Qb = DatabaseConnection::getQueryBuilder()
+            ->select('idpais as id,nombre')
+            ->from('pais')
+            ->where('estado=1')
+            ->orderBy('nombre', 'ASC')
+            ->setFirstResult(0)
+            ->setMaxResults(40);
+
+        if ($this->request['term']) {
+            $Qb->andWhere('nombre like :nombre')
+                ->setParameter(':nombre', '%' . $this->request['term'] . '%', Type::getType('string'));
+        }
+        return $Qb->execute()->fetchAll();
+    }
+
+    /**
+     * Obtiene una lista de departamentos
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function getListDepartamento(): array
+    {
+        $Qb = DatabaseConnection::getQueryBuilder()
+            ->select('iddepartamento as id,nombre')
+            ->from('departamento')
+            ->where('estado=1')
+            ->orderBy('nombre', 'ASC')
+            ->setFirstResult(0)
+            ->setMaxResults(40);
+
+        if ($this->request['idpais']) {
+            $Qb->andWhere('pais_idpais=:pais')
+                ->setParameter(':pais', $this->request['idpais'], Type::getType('integer'));
+        }
+
+        if ($this->request['term']) {
+            $Qb->andWhere('nombre like :nombre')
+                ->setParameter(':nombre', '%' . $this->request['term'] . '%', Type::getType('string'));
+        }
+
+        return $Qb->execute()->fetchAll();
     }
 }
