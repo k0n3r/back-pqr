@@ -1,10 +1,10 @@
 <?php
 
-namespace Saia\Pqr\Controllers;
+namespace Saia\Pqr\controllers;
 
 use Exception;
 use Saia\core\DatabaseConnection;
-use Saia\Pqr\Models\PqrResponseTemplate;
+use Saia\Pqr\models\PqrResponseTemplate;
 
 class PqrResponseTemplateController
 {

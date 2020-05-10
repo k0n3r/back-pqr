@@ -1,8 +1,8 @@
 <?php
 
-namespace Saia\Pqr\Controllers\AddEditFormat;
+namespace Saia\Pqr\controllers\addEditFormat;
 
-use Saia\Pqr\Controllers\AddEditFormat\IAddEditFormat;
+use Saia\Pqr\controllers\addEditFormat\IAddEditFormat;
 
 class AddEditFormat
 {

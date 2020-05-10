@@ -2,7 +2,7 @@
 
 return [
     'name' => 'SAIA Migrations',
-    'migrations_namespace' => 'Saia\Pqr\Migrations',
+    'migrations_namespace' => 'Saia\Pqr\migrations',
     'table_name' => 'pqr_migrations',
     'column_name' => 'version',
     'column_length' => 14,

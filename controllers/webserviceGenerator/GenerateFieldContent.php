@@ -1,8 +1,8 @@
 <?php
 
-namespace Saia\Pqr\Controllers\WebserviceGenerator;
+namespace Saia\Pqr\controllers\webserviceGenerator;
 
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\FieldFormatGeneratorInterface;
+use Saia\Pqr\controllers\webserviceGenerator\fieldGenerator\FieldFormatGeneratorInterface;
 
 class GenerateFieldContent
 {

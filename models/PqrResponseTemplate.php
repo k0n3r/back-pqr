@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\Models;
+namespace Saia\Pqr\models;
 
 use Saia\core\model\Model;
 

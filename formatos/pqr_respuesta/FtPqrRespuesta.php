@@ -6,7 +6,7 @@ use Exception;
 use Saia\controllers\CryptController;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\Helpers\UtilitiesPqr;
-use Saia\Pqr\Controllers\WebserviceCalificacion;
+use Saia\Pqr\controllers\WebserviceCalificacion;
 use Saia\controllers\SendMailController;
 use Saia\controllers\pdf\DocumentPdfGenerator;
 use Saia\Pqr\formatos\pqr_calificacion\FtPqrCalificacion;

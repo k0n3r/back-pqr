@@ -1,9 +1,9 @@
 <?php
 
-namespace Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator;
+namespace Saia\Pqr\controllers\webserviceGenerator\fieldGenerator;
 
 use Saia\models\formatos\CamposFormato;
-use Saia\Pqr\Controllers\WebserviceGenerator\WebserviceGenerator;
+use Saia\Pqr\controllers\webserviceGenerator\WebserviceGenerator;
 
 class Select extends FieldGenerator implements FieldFormatGeneratorInterface
 {

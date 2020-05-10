@@ -1,10 +1,10 @@
 <?php
 
-namespace Saia\Pqr\Models;
+namespace Saia\Pqr\models;
 
 use Saia\core\model\Model;
 use Saia\models\formatos\CamposFormato;
-use Saia\Pqr\Models\PqrHtmlField;
+use Saia\Pqr\models\PqrHtmlField;
 
 class PqrFormField extends Model
 {

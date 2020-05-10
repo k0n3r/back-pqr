@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Saia\Pqr\Migrations;
+namespace Saia\Pqr\migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Saia\Pqr\formatos\pqr\FtPqr;
-use Saia\Pqr\Migrations\TMigrations;
+use Saia\Pqr\migrations\TMigrations;
 use Doctrine\Migrations\AbstractMigration;
 
 /**

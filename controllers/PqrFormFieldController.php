@@ -1,11 +1,11 @@
 <?php
 
-namespace Saia\Pqr\Controllers;
+namespace Saia\Pqr\controllers;
 
 use Exception;
 use Saia\core\DatabaseConnection;
-use Saia\Pqr\Models\PqrForm;
-use Saia\Pqr\Models\PqrFormField;
+use Saia\Pqr\models\PqrForm;
+use Saia\Pqr\models\PqrFormField;
 
 class PqrFormFieldController
 {

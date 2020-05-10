@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Saia\Pqr\Migrations;
+namespace Saia\Pqr\migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
@@ -60,7 +60,6 @@ final class Version20200310032827 extends AbstractMigration
             'margenes' => '25,25,50,25',
             'orientacion' => 0,
             'papel' => 'Letter',
-            'exportar' => 'mpdf',
             'funcionario_idfuncionario' => $funcionario[0]['idfuncionario'],
             'detalle' => 1,
             'tipo_edicion' => 0,
@@ -68,9 +67,7 @@ final class Version20200310032827 extends AbstractMigration
             'font_size' => 11,
             'mostrar_pdf' => 1,
             'orden' => NULL,
-            'firma_digital' => 0,
             'fk_categoria_formato' => NULL,
-            'funcion_predeterminada' => 0,
             'paginar' => 0,
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Formulario utilizado para responder las PQRSF',

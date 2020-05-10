@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\Controllers;
+namespace Saia\Pqr\controllers;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;

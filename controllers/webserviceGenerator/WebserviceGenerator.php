@@ -1,16 +1,16 @@
 <?php
 
-namespace Saia\Pqr\Controllers\WebserviceGenerator;
+namespace Saia\Pqr\controllers\webserviceGenerator;
 
 use Exception;
 use Saia\Pqr\Helpers\UtilitiesPqr;
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Text;
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Radio;
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Number;
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Select;
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Checkbox;
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\Textarea;
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\FieldFormatGeneratorInterface;
+use Saia\Pqr\controllers\webserviceGenerator\fieldGenerator\Text;
+use Saia\Pqr\controllers\webserviceGenerator\fieldGenerator\Radio;
+use Saia\Pqr\controllers\webserviceGenerator\fieldGenerator\Number;
+use Saia\Pqr\controllers\webserviceGenerator\fieldGenerator\Select;
+use Saia\Pqr\controllers\webserviceGenerator\fieldGenerator\Checkbox;
+use Saia\Pqr\controllers\webserviceGenerator\fieldGenerator\Textarea;
+use Saia\Pqr\controllers\webserviceGenerator\fieldGenerator\FieldFormatGeneratorInterface;
 
 abstract class WebserviceGenerator
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator;
+namespace Saia\Pqr\controllers\webserviceGenerator\fieldGenerator;
 
 class HiddenCustom implements FieldFormatGeneratorInterface
 {

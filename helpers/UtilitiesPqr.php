@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\Helpers;
+namespace Saia\Pqr\helpers;
 
 use Saia\models\Configuracion;
 use Saia\models\tarea\TareaEstado;

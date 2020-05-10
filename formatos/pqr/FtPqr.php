@@ -3,8 +3,8 @@
 namespace Saia\Pqr\formatos\pqr;
 
 use Exception;
-use Saia\Pqr\Models\PqrForm;
-use Saia\Pqr\Models\PqrBackup;
+use Saia\Pqr\models\PqrForm;
+use Saia\Pqr\models\PqrBackup;
 use Saia\Pqr\Helpers\UtilitiesPqr;
 use Saia\controllers\SendMailController;
 use Saia\models\formatos\CampoSeleccionados;

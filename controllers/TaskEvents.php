@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\Controllers;
+namespace Saia\Pqr\controllers;
 
 use Saia\core\model\Model;
 use Saia\models\documento\Documento;

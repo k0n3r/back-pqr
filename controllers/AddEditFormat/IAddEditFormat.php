@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\Controllers\AddEditFormat;
+namespace Saia\Pqr\controllers\addEditFormat;
 
 
 interface IAddEditFormat

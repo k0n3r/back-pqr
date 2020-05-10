@@ -1,9 +1,9 @@
 <?php
 
-namespace Saia\Pqr\Controllers;
+namespace Saia\Pqr\controllers;
 
 use Saia\Pqr\formatos\pqr\FtPqr;
-use Saia\Pqr\Models\PqrResponseTemplate;
+use Saia\Pqr\models\PqrResponseTemplate;
 
 class FtPqrController
 {

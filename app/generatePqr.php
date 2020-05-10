@@ -16,7 +16,7 @@ include_once $rootPath . 'app/vendor/autoload.php';
 
 use Exception;
 use Saia\models\Funcionario;
-use Saia\Pqr\Models\PqrForm;
+use Saia\Pqr\models\PqrForm;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
 use Saia\controllers\SaveDocument;

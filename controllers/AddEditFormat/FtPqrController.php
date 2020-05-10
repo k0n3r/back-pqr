@@ -1,16 +1,16 @@
 <?php
 
-namespace Saia\Pqr\Controllers\AddEditFormat;
+namespace Saia\Pqr\controllers\addEditFormat;
 
 use Exception;
-use Saia\Pqr\Models\PqrForm;
+use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\models\formatos\Formato;
-use Saia\Pqr\Models\PqrFormField;
+use Saia\Pqr\models\PqrFormField;
 use Saia\controllers\SessionController;
 use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
-use Saia\Pqr\Controllers\AddEditFormat\TAddEditFormat;
+use Saia\Pqr\controllers\addEditFormat\TAddEditFormat;
 
 class FtPqrController implements IAddEditFormat
 {
@@ -94,7 +94,7 @@ class FtPqrController implements IAddEditFormat
             'firma_digital' => 0,
             'tipo_edicion' => 0,
             'item' => 0,
-            'class_name' => 'Saia\Pqr\Controllers\TaskEvents'
+            'class_name' => 'Saia\Pqr\controllers\TaskEvents'
         ];
 
         if ($edit) {

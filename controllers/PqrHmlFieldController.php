@@ -1,8 +1,8 @@
 <?php
 
-namespace Saia\Pqr\Controllers;
+namespace Saia\Pqr\controllers;
 
-use Saia\Pqr\Models\PqrHtmlField;
+use Saia\Pqr\models\PqrHtmlField;
 
 class PqrHtmlFieldController
 {

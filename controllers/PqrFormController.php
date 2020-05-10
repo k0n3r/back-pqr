@@ -1,20 +1,20 @@
 <?php
 
-namespace Saia\Pqr\Controllers;
+namespace Saia\Pqr\controllers;
 
 use Exception;
 use Saia\models\Contador;
-use Saia\Pqr\Models\PqrForm;
+use Saia\Pqr\models\PqrForm;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
-use Saia\Pqr\Models\PqrFormField;
-use Saia\Pqr\Models\PqrHtmlField;
-use Saia\Pqr\Controllers\WebservicePqr;
-use Saia\Pqr\Controllers\WebserviceCalificacion;
-use Saia\Pqr\Controllers\AddEditFormat\AddEditFormat;
-use Saia\Pqr\Controllers\AddEditFormat\IAddEditFormat;
-use Saia\Pqr\Controllers\AddEditFormat\TAddEditFormat;
-use Saia\Pqr\Controllers\AddEditFormat\FtPqrController;
+use Saia\Pqr\models\PqrFormField;
+use Saia\Pqr\models\PqrHtmlField;
+use Saia\Pqr\controllers\WebservicePqr;
+use Saia\Pqr\controllers\WebserviceCalificacion;
+use Saia\Pqr\controllers\addEditFormat\AddEditFormat;
+use Saia\Pqr\controllers\addEditFormat\IAddEditFormat;
+use Saia\Pqr\controllers\addEditFormat\TAddEditFormat;
+use Saia\Pqr\controllers\addEditFormat\FtPqrController;
 
 
 class PqrFormController

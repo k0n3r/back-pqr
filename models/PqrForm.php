@@ -1,11 +1,11 @@
 <?php
 
-namespace Saia\Pqr\Models;
+namespace Saia\Pqr\models;
 
 use Saia\core\model\Model;
 use Saia\models\Contador;
 use Saia\models\formatos\Formato;
-use Saia\Pqr\Models\PqrFormField;
+use Saia\Pqr\models\PqrFormField;
 
 class PqrForm extends Model
 {

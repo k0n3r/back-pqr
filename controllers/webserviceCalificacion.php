@@ -1,10 +1,10 @@
 <?php
 
-namespace Saia\Pqr\Controllers;
+namespace Saia\Pqr\controllers;
 
 use Saia\models\formatos\Formato;
-use Saia\Pqr\Controllers\WebserviceGenerator\FieldGenerator\HiddenCustom;
-use Saia\Pqr\Controllers\WebserviceGenerator\WebserviceGenerator;
+use Saia\Pqr\controllers\webserviceGenerator\fieldGenerator\HiddenCustom;
+use Saia\Pqr\controllers\webserviceGenerator\WebserviceGenerator;
 
 class WebserviceCalificacion extends WebserviceGenerator
 {

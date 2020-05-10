@@ -1,9 +1,9 @@
 <?php
 
-namespace Saia\Pqr\Controllers;
+namespace Saia\Pqr\controllers;
 
-use Saia\Pqr\Models\PqrForm;
-use Saia\Pqr\Controllers\WebserviceGenerator\WebserviceGenerator;
+use Saia\Pqr\models\PqrForm;
+use Saia\Pqr\controllers\webserviceGenerator\WebserviceGenerator;
 
 class WebservicePqr extends WebserviceGenerator
 {
