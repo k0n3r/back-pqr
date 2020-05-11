@@ -60,19 +60,19 @@ final class Version20200103161511 extends AbstractMigration
         return [
             [
                 'label' => 'Linea de texto',
-                'type' => 'input',
-                'active' => 1,
-                'uniq' => 0
-            ],
-            [
-                'label' => 'E-mail',
-                'type' => 'email',
+                'type' => 'text',
                 'active' => 1,
                 'uniq' => 0
             ],
             [
                 'label' => 'Numérico',
                 'type' => 'number',
+                'active' => 1,
+                'uniq' => 0
+            ],
+            [
+                'label' => 'E-mail',
+                'type' => 'email',
                 'active' => 1,
                 'uniq' => 0
             ],

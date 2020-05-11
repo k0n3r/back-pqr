@@ -6,6 +6,8 @@ use Saia\core\model\Model;
 
 class PqrHtmlField extends Model
 {
+    const TYPE_DEPENDENCIA = 'dependencia';
+    const TYPE_LOCALIDAD = 'localidad';
 
     public function __construct($id = null)
     {

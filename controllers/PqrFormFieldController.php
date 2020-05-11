@@ -78,7 +78,7 @@ class PqrFormFieldController
         $defaultFields = [
             'name' => $this->generateName($requestFormField['label']),
             'required' => 0,
-            'show_anonymous' => 1,
+            'show_anonymous' => 0,
             'fk_pqr_form' => $PqrForm->getPK(),
             'fk_campos_formato' => 0,
             'system' => 0,

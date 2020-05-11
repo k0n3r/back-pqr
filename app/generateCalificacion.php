@@ -31,8 +31,6 @@ $Response = (object) [
 try {
     $Connection = DatabaseConnection::beginTransaction();
 
-    //SessionController::refresh(new Funcionario(Funcionario::RADICADOR_WEB));
-
     if (!$_REQUEST['anterior']) {
         throw new Exception("Error Processing Request");
     }
@@ -69,7 +67,5 @@ try {
     $Response->message = $th->getMessage();
     $Response->code = $th->getCode();
 }
-
-//SessionController::sessionDestroy();
 
 echo json_encode($Response);
