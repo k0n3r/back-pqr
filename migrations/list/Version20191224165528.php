@@ -58,8 +58,8 @@ final class Version20191224165528 extends AbstractMigration
                                 'nombre' => 'conf_formulario_pqr',
                                 'tipo' => 2,
                                 'imagen' => 'fa fa-cogs',
-                                'etiqueta' => 'Formulario',
-                                'enlace' => 'views/modules/pqr/dist/pqr/index.html',
+                                'etiqueta' => 'General',
+                                'enlace' => 'views/modules/pqr/dist/configuracionPqr/index.html',
                                 'orden' => 1
                             ]
                         ]

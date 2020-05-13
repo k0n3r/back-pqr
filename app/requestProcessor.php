@@ -28,6 +28,7 @@ $Response = (object) [
 
 try {
     SessionController::refresh(new Funcionario(Funcionario::RADICADOR_WEB));
+
     RequestProcessor::removeCredentials();
 
     $newData = RequestProcessor::cleanForm($_REQUEST);

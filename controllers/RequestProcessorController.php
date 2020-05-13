@@ -66,6 +66,7 @@ class RequestProcessorController
         $ObjSettings = $PqrFormField->getSetting();
         $Qb = DatabaseConnection::getQueryBuilder();
 
+
         switch ($PqrHtmlField->type) {
             case PqrHtmlField::TYPE_DEPENDENCIA:
                 $Qb->select('iddependencia as id,nombre as text')
@@ -81,8 +82,10 @@ class RequestProcessorController
                 }
 
                 if (!$ObjSettings->allDependency) {
-                    $ids = $ObjSettings->options;
-                    print_r($ids);
+                    $records = $ObjSettings->options;
+                    foreach ($records as $row) {
+                        $ids[] = $row->id;
+                    }
                     $Qb->andWhere('iddependencia in (:ids)')
                         ->setParameter(':ids', $ids, Connection::PARAM_INT_ARRAY);
                 }
@@ -111,7 +114,9 @@ class RequestProcessorController
                     ->where("CONCAT(a.nombre,CONCAT(' ',b.nombre)) like :query")
                     ->andWhere('a.estado = 1 AND b.estado = 1 AND c.estado = 1')
                     ->setParameter('query', "%{$this->request['term']}%")
-                    ->orderBy('a.nombre', 'ASC');
+                    ->orderBy('a.nombre', 'ASC')
+                    ->setFirstResult(0)
+                    ->setMaxResults(40);
 
                 if (!$ObjSettings->allCountry) {
                     $Qb->andWhere('c.idpais=:idpais')
