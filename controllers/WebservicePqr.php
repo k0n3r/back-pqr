@@ -8,7 +8,8 @@ use Saia\Pqr\controllers\webserviceGenerator\WebserviceGenerator;
 class WebservicePqr extends WebserviceGenerator
 {
 
-    const DIRECTORY_PQR = '../ws/pqr/';
+    const DIRECTORY_PQR = '../' . SettingController::DIRECTORY_PQR;
+
     /**
      * Instancia de PqrForm
      *

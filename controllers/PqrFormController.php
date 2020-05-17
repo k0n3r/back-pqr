@@ -17,18 +17,10 @@ use Saia\Pqr\controllers\addEditFormat\TAddEditFormat;
 use Saia\Pqr\controllers\addEditFormat\FtPqrController;
 
 
-class PqrFormController
+class PqrFormController extends Controller
 {
     use TAddEditFormat;
 
-    /**
-     * Variable que contiene todo el request que llega de las peticiones
-     *
-     * @var array|null
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public $request;
     /**
      *
      * @var PqrForm

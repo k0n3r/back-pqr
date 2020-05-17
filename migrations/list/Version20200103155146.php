@@ -125,6 +125,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('fk_contador', 'integer');
         $table->addColumn('label', 'string');
         $table->addColumn('name', 'string');
+        $table->addColumn('anonymous', 'boolean', ['default' => 0]);
 
         $table->addColumn('active', 'boolean', [
             'default' => 1

@@ -20,7 +20,6 @@ class PqrHtmlField extends Model
             'safe' => [
                 'label',
                 'type',
-                'type_saia',
                 'active'
             ],
             'primary' => 'id',

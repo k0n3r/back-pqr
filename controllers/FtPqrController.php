@@ -5,17 +5,8 @@ namespace Saia\Pqr\controllers;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\models\PqrResponseTemplate;
 
-class FtPqrController
+class FtPqrController extends Controller
 {
-
-    /**
-     * Variable que contiene todo el request que llega de las peticiones
-     *
-     * @var array|null
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public $request;
 
     /**
      *
@@ -24,7 +15,6 @@ class FtPqrController
      * @date 2020
      */
     public $FtPqr;
-
 
     public function __construct(array $request = null)
     {

@@ -6,16 +6,8 @@ use Exception;
 use Saia\core\DatabaseConnection;
 use Saia\Pqr\models\PqrResponseTemplate;
 
-class PqrResponseTemplateController
+class PqrResponseTemplateController extends Controller
 {
-    /**
-     * Variable que contiene todo el request que llega de las peticiones
-     *
-     * @var array|null
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public $request;
 
     public function __construct(array $request = null)
     {

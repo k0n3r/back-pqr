@@ -9,7 +9,7 @@ use Saia\Pqr\controllers\webserviceGenerator\WebserviceGenerator;
 class WebserviceCalificacion extends WebserviceGenerator
 {
 
-  const DIRECTORY = '../ws/calificacion/';
+  const DIRECTORY = '../' . SettingController::DIRECTORY_CLASIFICACION;
 
   protected $Formato;
 

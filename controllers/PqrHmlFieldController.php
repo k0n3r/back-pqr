@@ -4,16 +4,8 @@ namespace Saia\Pqr\controllers;
 
 use Saia\Pqr\models\PqrHtmlField;
 
-class PqrHtmlFieldController
+class PqrHtmlFieldController extends Controller
 {
-    /**
-     * Variable que contiene todo el request que llega de las peticiones
-     *
-     * @var array|null
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public $request;
 
     public function __construct(array $request = null)
     {

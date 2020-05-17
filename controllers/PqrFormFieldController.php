@@ -8,21 +8,12 @@ use Doctrine\DBAL\Types\Type;
 use Saia\core\DatabaseConnection;
 use Saia\Pqr\models\PqrFormField;
 
-class PqrFormFieldController
+class PqrFormFieldController extends Controller
 {
     /**
      * Bandera que indica el numero minimo donde empezara el orden de los campos
      */
     const INITIAL_ORDER = 2;
-
-    /**
-     * Variable que contiene todo el request que llega de las peticiones
-     *
-     * @var array|null
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public $request;
 
     public function __construct(array $request = null)
     {
