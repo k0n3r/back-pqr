@@ -53,14 +53,19 @@ final class Version20200103155146 extends AbstractMigration
             'length' => 50
         ]);
 
-        $table->addColumn('required', 'integer', [
-            'length' => 1,
-            'default' => 0
+        $table->addColumn('required', 'boolean', [
+            'default' => 0,
+            'notnull' => false
         ]);
 
-        $table->addColumn('show_anonymous', 'integer', [
-            'length' => 1,
-            'default' => 1
+        $table->addColumn('anonymous', 'boolean', [
+            'default' => 0,
+            'notnull' => false
+        ]);
+
+        $table->addColumn('required_anonymous', 'boolean', [
+            'default' => 0,
+            'notnull' => false
         ]);
 
         $table->addColumn('setting', 'text');
@@ -125,7 +130,8 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('fk_contador', 'integer');
         $table->addColumn('label', 'string');
         $table->addColumn('name', 'string');
-        $table->addColumn('anonymous', 'boolean', ['default' => 0]);
+        $table->addColumn('show_anonymous', 'boolean', ['default' => 0]);
+        $table->addColumn('show_label', 'boolean', ['default' => 1]);
 
         $table->addColumn('active', 'boolean', [
             'default' => 1

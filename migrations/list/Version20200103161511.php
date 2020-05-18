@@ -117,6 +117,12 @@ final class Version20200103161511 extends AbstractMigration
                 'type' => 'tratamiento',
                 'active' => 1,
                 'uniq' => 1
+            ],
+            [
+                'label' => 'Anexos',
+                'type' => 'file',
+                'active' => 1,
+                'uniq' => 0
             ]
         ];
     }

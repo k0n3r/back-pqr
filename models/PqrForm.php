@@ -30,7 +30,8 @@ class PqrForm extends Model
             'safe' => [
                 'fk_formato',
                 'fk_contador',
-                'anonymous',
+                'show_anonymous',
+                'show_label',
                 'label',
                 'name',
                 'active'
