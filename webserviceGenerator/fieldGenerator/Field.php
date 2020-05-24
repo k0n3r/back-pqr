@@ -1,10 +1,10 @@
 <?php
 
-namespace Saia\Pqr\controllers\webserviceGenerator\fieldGenerator;
+namespace Saia\Pqr\webserviceGenerator\fieldGenerator;
 
 use Saia\models\formatos\CamposFormato;
 
-class FieldGenerator
+class Field
 {
     /**
      * Instancia de CamposFormato
@@ -13,7 +13,7 @@ class FieldGenerator
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected $CamposFormato;
+    protected CamposFormato $CamposFormato;
 
     public function __construct(CamposFormato $CamposFormato)
     {
@@ -47,25 +47,12 @@ class FieldGenerator
     /**
      * Devuelve la etiqueta del campo
      *
-     * @return void
+     * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function getLabel()
+    protected function getLabel(): string
     {
         return strtoupper($this->CamposFormato->etiqueta);
-    }
-
-    /**
-     * Adiciona tabulaciones al contenido
-     *
-     * @param string $code
-     * @return void
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    protected function addTab(string $code): string
-    {
-        return str_replace("{n}", "\n", $code);
     }
 }

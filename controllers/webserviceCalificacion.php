@@ -3,8 +3,8 @@
 namespace Saia\Pqr\controllers;
 
 use Saia\models\formatos\Formato;
-use Saia\Pqr\controllers\webserviceGenerator\fieldGenerator\HiddenCustom;
-use Saia\Pqr\controllers\webserviceGenerator\WebserviceGenerator;
+use Saia\Pqr\webserviceGenerator\fieldGenerator\HiddenCustom;
+use Saia\Pqr\webserviceGenerator\WebserviceGenerator;
 
 class WebserviceCalificacion extends WebserviceGenerator
 {

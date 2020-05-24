@@ -17,7 +17,7 @@ class PqrForm extends Model
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public $pqrFormFieldsActive;
+    public array $pqrFormFieldsActive = [];
 
     public function __construct($id = null)
     {
@@ -66,7 +66,7 @@ class PqrForm extends Model
      * obtiene las instancias activas del modelo PqrFormField
      *
      * @param boolean $force : true => forza a consultar nuevamente
-     * @return array
+     * @return PqrFormField[]
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
@@ -97,6 +97,34 @@ class PqrForm extends Model
         $fields = $this->PqrFormFields;
 
         return $fields ? count($fields) : 0;
+    }
+
+    /**
+     * Obtiene los valores de los campos que conforman el 
+     * formulario
+     *
+     * @param integer $type => 1: Solo campos Activos, 2: Todos
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getAttributesFormFields(int $type = 2): array
+    {
+        switch ($type) {
+            case 1: //active
+                $instances = $this->getPqrFormFieldsActive(true);
+                break;
+            default: //all
+                $instances = $this->PqrFormFields;
+                break;
+        }
+
+        $data = [];
+        foreach ($instances as $PqrFormField) {
+            $data[] = $PqrFormField->getDataAttributes();
+        }
+
+        return $data;
     }
 
     /**

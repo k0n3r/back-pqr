@@ -1,34 +1,25 @@
 <?php
 
-namespace Saia\Pqr\controllers\webserviceGenerator\fieldGenerator;
+namespace Saia\Pqr\webserviceGenerator\fieldGenerator;
 
 use Saia\models\formatos\CamposFormato;
+use Saia\Pqr\webserviceGenerator\IWsFields;
 
-class Textarea extends FieldGenerator implements FieldFormatGeneratorInterface
+class Textarea extends Field implements IWsFields
 {
-    public function __construct(CamposFormato $CamposFormato)
-    {
-        parent::__construct($CamposFormato);
-    }
-
-    public function getAditionalFiles(): array
+    public function aditionalFiles(): array
     {
         return [];
     }
 
-    public function getJsAditionalContent(): string
-    {
-        return '';
-    }
-
-    public function getFieldContent(): string
+    public function htmlContent(): string
     {
         $requiredClass = $this->getRequiredClass();
         $title = $this->CamposFormato->ayuda ? " title='{$this->CamposFormato->ayuda}'" : '';
         $placeholder = $this->CamposFormato->placeholder ? "placeholder='{$this->CamposFormato->placeholder}'" : '';
 
         $code = <<<PHP
-        {n}<div class="form-group form-group-default {$requiredClass}" id="group_{$this->CamposFormato->nombre}">
+        <div class="form-group form-group-default {$requiredClass}" id="group_{$this->CamposFormato->nombre}">
             <label{$title}">
                 {$this->getLabel()}
             </label>
@@ -40,6 +31,11 @@ class Textarea extends FieldGenerator implements FieldFormatGeneratorInterface
         </div>
 PHP;
 
-        return $this->addTab($code);
+        return $code;
+    }
+
+    public function jsContent()
+    {
+        return;
     }
 }

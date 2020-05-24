@@ -1,28 +1,24 @@
 <?php
 
-namespace Saia\Pqr\controllers\webserviceGenerator\fieldGenerator;
+namespace Saia\Pqr\webserviceGenerator\fieldGenerator;
 
 use Saia\models\formatos\CamposFormato;
+use Saia\Pqr\webserviceGenerator\IWsFields;
 
-class Radio extends FieldGenerator implements FieldFormatGeneratorInterface
+class Radio extends Field implements IWsFields
 {
-    public function __construct(CamposFormato $CamposFormato)
-    {
-        parent::__construct($CamposFormato);
-    }
-
-    public function getAditionalFiles(): array
+    public function aditionalFiles(): array
     {
         return [];
     }
 
-    public function getJsAditionalContent(): string
+    public function htmlContent(): string
     {
-        return '';
-    }
+        $options = $this->CamposFormato->getActiveRadioOptions();
+        if (!$options) {
+            throw new \Exception("Debe indicar las opciones de {$this->CamposFormato->etiqueta}", 200);
+        }
 
-    public function getFieldContent(): string
-    {
         $requiredClass = $this->getRequiredClass();
         $labelRequired = $requiredClass ?
             "<label id='{$this->CamposFormato->nombre}-error' class='error' for='{$this->CamposFormato->nombre}' style='display: none;'></label>"
@@ -31,11 +27,11 @@ class Radio extends FieldGenerator implements FieldFormatGeneratorInterface
         $title = $this->CamposFormato->ayuda ? " title='{$this->CamposFormato->ayuda}'" : '';
 
 
-        $code = "{n}<div class='form-group form-group-default {$requiredClass}' id='group_{$this->CamposFormato->nombre}'>
+        $code = "<div class='form-group form-group-default {$requiredClass}' id='group_{$this->CamposFormato->nombre}'>
             <label{$title}>{$this->getLabel()}</label>
             <div class='radio radio-success input-group'>";
 
-        foreach ($this->CamposFormato->getActiveRadioOptions() as $key => $CampoOpciones) {
+        foreach ($options as $key => $CampoOpciones) {
             $code .= "<input {$requiredClass} type='radio' name='{$this->CamposFormato->nombre}' id='{$this->CamposFormato->nombre}{$key}' value='{$CampoOpciones->getPK()}' aria-required='true'>
             <label for='{$this->CamposFormato->nombre}{$key}' class='mr-3'>
                 {$CampoOpciones->valor}
@@ -46,6 +42,11 @@ class Radio extends FieldGenerator implements FieldFormatGeneratorInterface
             {$labelRequired}
         </div>";
 
-        return $this->addTab($code);
+        return $code;
+    }
+
+    public function jsContent()
+    {
+        return;
     }
 }

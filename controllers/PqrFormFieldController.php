@@ -34,15 +34,8 @@ class PqrFormFieldController extends Controller
             'data' => []
         ];
 
-        $Instances = PqrFormField::findAllByAttributes([
-            //'active' => 1
-        ], [], 'orden asc');
-
-        $data = [];
-        foreach ($Instances as $Instance) {
-            $data[] = $Instance->getDataAttributes();
-        }
-        $Response->data = $data;
+        $PqrForm = PqrForm::getPqrFormActive();
+        $Response->data = $PqrForm->getAttributesFormFields();
 
         return $Response;
     }

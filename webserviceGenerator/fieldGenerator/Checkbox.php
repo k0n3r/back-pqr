@@ -1,28 +1,23 @@
 <?php
 
-namespace Saia\Pqr\controllers\webserviceGenerator\fieldGenerator;
+namespace Saia\Pqr\webserviceGenerator\fieldGenerator;
 
 use Saia\models\formatos\CamposFormato;
+use Saia\Pqr\webserviceGenerator\IWsFields;
 
-class Checkbox extends FieldGenerator implements FieldFormatGeneratorInterface
+class Checkbox extends Field implements IWsFields
 {
-    public function __construct(CamposFormato $CamposFormato)
-    {
-        parent::__construct($CamposFormato);
-    }
-
-    public function getAditionalFiles(): array
+    public function aditionalFiles(): array
     {
         return [];
     }
 
-    public function getJsAditionalContent(): string
+    public function htmlContent(): string
     {
-        return '';
-    }
-
-    public function getFieldContent(): string
-    {
+        $options = $this->CamposFormato->getActiveRadioOptions();
+        if (!$options) {
+            throw new \Exception("Debe indicar las opciones de {$this->CamposFormato->etiqueta}", 200);
+        }
 
         $requiredClass = $this->getRequiredClass();
         $labelRequired = $requiredClass ?
@@ -31,11 +26,11 @@ class Checkbox extends FieldGenerator implements FieldFormatGeneratorInterface
 
         $title = $this->CamposFormato->ayuda ? " title='{$this->CamposFormato->ayuda}'" : '';
 
-        $code = "{n}<div class='form-group form-group-default {$requiredClass}' id='group_{$this->CamposFormato->nombre}'>
+        $code = "<div class='form-group form-group-default {$requiredClass}' id='group_{$this->CamposFormato->nombre}'>
             <label{$title}>{$this->getLabel()}</label>
             <div class='checkbox check-success input-group'>";
 
-        foreach ($this->CamposFormato->getActiveRadioOptions() as $key => $CampoOpciones) {
+        foreach ($options as $key => $CampoOpciones) {
             $code .= "<input {$requiredClass} type='checkbox' name='{$this->CamposFormato->nombre}[]' id='{$this->CamposFormato->nombre}{$key}' value='{$CampoOpciones->getPK()}' aria-required='true'>
             <label for='{$this->CamposFormato->nombre}{$key}' class='mr-3'>
                 {$CampoOpciones->valor}
@@ -46,6 +41,11 @@ class Checkbox extends FieldGenerator implements FieldFormatGeneratorInterface
             {$labelRequired}
         </div>";
 
-        return $this->addTab($code);
+        return $code;
+    }
+
+    public function jsContent()
+    {
+        return;
     }
 }

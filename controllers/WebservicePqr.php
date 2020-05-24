@@ -3,7 +3,7 @@
 namespace Saia\Pqr\controllers;
 
 use Saia\Pqr\models\PqrForm;
-use Saia\Pqr\controllers\webserviceGenerator\WebserviceGenerator;
+use Saia\Pqr\webserviceGenerator\WebserviceGenerator;
 
 class WebservicePqr extends WebserviceGenerator
 {

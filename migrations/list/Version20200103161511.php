@@ -169,10 +169,7 @@ final class Version20200103161511 extends AbstractMigration
                 'label' => 'Tipo',
                 'name' => 'sys_tipo',
                 'required' => 1,
-                'system' => 1,
-                'orden' => 2,
-                'fk_pqr_html_field' => $idsHtmlFields['select'],
-                'fk_pqr_form' => $idform,
+                'anonymous' => 1,
                 'setting' => json_encode([
                     'options' => [
                         'Petición',
@@ -181,19 +178,25 @@ final class Version20200103161511 extends AbstractMigration
                         'Sugerencia',
                         'Felicitación'
                     ]
-                ])
+                ]),
+                'fk_pqr_html_field' => $idsHtmlFields['select'],
+                'fk_pqr_form' => $idform,
+                'system' => 1,
+                'orden' => 2,
+                'required_anonymous' => 1
             ],
             [
                 'label' => 'E-mail',
                 'name' => 'sys_email',
                 'required' => 1,
-                'system' => 1,
-                'orden' => 3,
-                'fk_pqr_html_field' => $idsHtmlFields['email'],
-                'fk_pqr_form' => $idform,
+                'anonymous' => 1,
                 'setting' => json_encode([
                     'placeholder' => 'example@pqr.com'
-                ])
+                ]),
+                'fk_pqr_html_field' => $idsHtmlFields['email'],
+                'fk_pqr_form' => $idform,
+                'system' => 1,
+                'orden' => 3
             ]
         ];
     }
