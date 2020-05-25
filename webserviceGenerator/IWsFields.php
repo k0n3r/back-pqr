@@ -2,7 +2,6 @@
 
 namespace Saia\Pqr\webserviceGenerator;
 
-
 interface IWsFields
 {
 
