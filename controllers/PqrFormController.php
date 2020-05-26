@@ -119,27 +119,27 @@ class PqrFormController extends Controller
                 $option
             );
 
-            if (!$FormatoR = Formato::findByAttributes([
-                'nombre' => 'pqr_respuesta'
-            ])) {
-                throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
-            }
-            $this->FormatGenerator($FormatoR->getPK());
+            // if (!$FormatoR = Formato::findByAttributes([
+            //     'nombre' => 'pqr_respuesta'
+            // ])) {
+            //     throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
+            // }
+            // $this->FormatGenerator($FormatoR->getPK());
 
-            if (!$FormatoC = Formato::findByAttributes([
-                'nombre' => 'pqr_calificacion'
-            ])) {
-                throw new Exception("El formato de calificacion PQR no fue encontrado", 1);
-            }
-            $this->FormatGenerator($FormatoC->getPK());
+            // if (!$FormatoC = Formato::findByAttributes([
+            //     'nombre' => 'pqr_calificacion'
+            // ])) {
+            //     throw new Exception("El formato de calificacion PQR no fue encontrado", 1);
+            // }
+            // $this->FormatGenerator($FormatoC->getPK());
 
-            $this->generateView();
+            // $this->generateView();
 
-            $Web = new WebservicePqr($this->PqrForm);
-            $Web->generate();
+            // $Web = new WebservicePqr($this->PqrForm);
+            // $Web->generate();
 
-            $WebCal = new WebserviceCalificacion($FormatoC);
-            $WebCal->generate();
+            // $WebCal = new WebserviceCalificacion($FormatoC);
+            // $WebCal->generate();
 
             $Response->data = $this->PqrForm->getAttributes();
             $conn->commit();
