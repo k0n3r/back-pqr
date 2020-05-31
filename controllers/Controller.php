@@ -2,7 +2,7 @@
 
 namespace Saia\Pqr\controllers;
 
-class Controller
+abstract class Controller
 {
     /**
      * Variable que contiene todo el request que llega de las peticiones
@@ -13,13 +13,8 @@ class Controller
      */
     public $request;
 
-    // public static function __callStatic($name, $arguments): ?object
-    // {
-    //     $caller = get_called_class();
-    //     $Controller = new $caller($arguments);
-    //     if (method_exists($Controller, $name)) {
-    //         return $Controller->$name();
-    //     }
-    //     return null;
-    // }
+    public function __construct(array $request = null)
+    {
+        $this->request = $request;
+    }
 }

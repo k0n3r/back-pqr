@@ -9,19 +9,6 @@ class FtPqrController extends Controller
 {
 
     /**
-     *
-     * @var FtPqr
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public $FtPqr;
-
-    public function __construct(array $request = null)
-    {
-        $this->request = $request;
-    }
-
-    /**
      * Obtiene los datos de la PQR
      *
      * @return object
@@ -37,7 +24,7 @@ class FtPqrController extends Controller
         if ($id = $this->request['id']) {
             if ($FtPqr = FtPqr::findByDocumentId($id)) {
                 $Response->success = 1;
-                $Response->data = $FtPqr->getAttributes();
+                $Response->data = $FtPqr->getDataAttributes();
             }
         }
 

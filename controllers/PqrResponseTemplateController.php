@@ -9,11 +9,6 @@ use Saia\Pqr\models\PqrResponseTemplate;
 class PqrResponseTemplateController extends Controller
 {
 
-    public function __construct(array $request = null)
-    {
-        $this->request = $request;
-    }
-
     /**
      * Obtiene las plantillas
      *
@@ -23,15 +18,17 @@ class PqrResponseTemplateController extends Controller
      */
     public function index(): object
     {
-        $Response = (object) [
+        $data = [];
+
+        $records = PqrResponseTemplate::findAllByAttributes([]);
+        foreach ($records as $PqrResponseTemplate) {
+            $data[] = $PqrResponseTemplate->getDataAttributes();
+        }
+
+        return (object) [
             'success' => 1,
-            'data' => []
+            'data' => $data
         ];
-
-        $data = PqrResponseTemplate::findAllByAttributes([]);
-        $Response->data = $data;
-
-        return $Response;
     }
 
     /**
@@ -47,25 +44,25 @@ class PqrResponseTemplateController extends Controller
             'success' => 1,
             'data' => []
         ];
-        $params = $this->request['params'];
 
         try {
-            $conn = DatabaseConnection::beginTransaction();
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
 
             if (PqrResponseTemplate::findByAttributes([
-                'name' => $params['name']
+                'name' => $this->request['name']
             ])) {
                 throw new Exception("El nombre de la plantilla ya existe", 200);
             }
 
             $Template = new PqrResponseTemplate();
-            $Template->setAttributes($params);
-            if ($Template->save()) {
-                $conn->commit();
-                $Response->data = $Template->getAttributes();
-            } else {
+            $Template->setAttributes($this->request);
+
+            if (!$Template->save()) {
                 throw new Exception("No fue posible crear la plantilla", 200);
             }
+            $conn->commit();
+            $Response->data = $Template->getDataAttributes();
         } catch (Exception $th) {
             $conn->rollBack();
             $Response->success = 0;
@@ -74,7 +71,6 @@ class PqrResponseTemplateController extends Controller
 
         return $Response;
     }
-
 
     /**
      * Actualiza una plantilla
@@ -89,22 +85,23 @@ class PqrResponseTemplateController extends Controller
             'success' => 0
         ];
 
-        $params = $this->request['params']['dataField'];
-        $id = $this->request['params']['id'];
+        $params = $this->request['dataField'];
+        $id = $this->request['id'];
 
         try {
-            $conn = DatabaseConnection::beginTransaction();
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
 
             $Template = new PqrResponseTemplate($id);
             $Template->setAttributes($params);
 
-            if ($Template->update()) {
-                $conn->commit();
-                $Response->success = 1;
-                $Response->data = $Template->getAttributes();
-            } else {
+            if (!$Template->update()) {
                 throw new Exception("No fue posible actualizar", 1);
             }
+
+            $Response->success = 1;
+            $Response->data = $Template->getDataAttributes();
+            $conn->commit();
         } catch (Exception $th) {
             $conn->rollBack();
             $Response->message = $th->getMessage();
@@ -127,15 +124,17 @@ class PqrResponseTemplateController extends Controller
         ];
 
         try {
-            $conn = DatabaseConnection::beginTransaction();
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
 
             $Template = new PqrResponseTemplate($this->request['id']);
-            if ($Template->delete()) {
-                $conn->commit();
-                $Response->success = 1;
-            } else {
+
+            if (!$Template->delete()) {
                 throw new Exception("No fue posible eliminar", 1);
             }
+
+            $Response->success = 1;
+            $conn->commit();
         } catch (Exception $th) {
             $conn->rollBack();
             $Response->message = $th->getMessage();

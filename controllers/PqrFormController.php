@@ -3,14 +3,10 @@
 namespace Saia\Pqr\controllers;
 
 use Exception;
-use Saia\models\Contador;
 use Saia\Pqr\models\PqrForm;
 use Saia\core\DatabaseConnection;
-use Saia\models\formatos\Formato;
 use Saia\Pqr\models\PqrFormField;
-use Saia\Pqr\models\PqrHtmlField;
-use Saia\Pqr\controllers\WebservicePqr;
-use Saia\Pqr\controllers\WebserviceCalificacion;
+use Saia\Pqr\controllers\services\PqrFormService;
 use Saia\Pqr\controllers\addEditFormat\AddEditFormat;
 use Saia\Pqr\controllers\addEditFormat\IAddEditFormat;
 use Saia\Pqr\controllers\addEditFormat\TAddEditFormat;
@@ -21,78 +17,94 @@ class PqrFormController extends Controller
 {
     use TAddEditFormat;
 
-    /**
-     *
-     * @var PqrForm
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public $PqrForm;
-
-
-    public function __construct(array $request = null)
-    {
-        $this->request = $request;
-    }
+    const  DIRECTORY_PQR = 'ws/pqr/';
+    const DIRECTORY_CLASIFICACION = 'ws/calificacion/';
 
     /**
-     * Obtiene el formulario activo
+     * Obtiene todos los datos del modulo de configuracion
      *
      * @return object
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function index(): object
+    public function getSetting(): object
     {
         $Response = (object) [
             'success' => 1,
-            'data' => []
+            'data' => [
+                'urlWs' => PROTOCOLO_CONEXION . DOMINIO . '/' . self::DIRECTORY_PQR
+            ]
         ];
-
-        if ($PqrForm = PqrForm::getPqrFormActive()) {
-            $Response->data = $PqrForm->getAttributes();
-        };
 
         return $Response;
     }
 
     /**
-     * Actualiza el formulario
+     * Actualiza los datos de configuracion del formulario
      *
      * @return object
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function update(): object
+    public function updateSetting(): object
     {
         $Response = (object) [
             'success' => 0
         ];
 
-        $params = $this->request['params']['data'];
-        $id = $this->request['params']['id'];
-
         try {
-            $conn = DatabaseConnection::beginTransaction();
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
 
-            $PqrForm = new PqrForm($id);
-            $PqrForm->setAttributes($params);
-            if ($PqrForm->update()) {
+            DatabaseConnection::getQueryBuilder()
+                ->update('pqr_form_fields')
+                ->set('anonymous', 0)
+                ->set('required_anonymous', 0)
+                ->where("name<>'sys_tipo'")->execute();
 
-                $conn->commit();
-                $Response->success = 1;
-                $Response->data = $PqrForm->getAttributes();
+            if ($PqrForm = PqrForm::getPqrFormActive()) {
+                $PqrForm->setAttributes($this->request['pqrForm']);
+                if (!$PqrForm->update()) {
+                    throw new \Exception("No fue posible actualizar", 200);
+                };
             } else {
-                throw new Exception("No fue posible actualizar el formulario", 1);
+                throw new \Exception("No se encontro un formulario activo");
             }
-        } catch (Exception $th) {
+
+            if ($PqrForm->show_anonymous) {
+                if ($formFields = $this->request['formFields']) {
+                    foreach ($formFields['dataShowAnonymous'] as $id) {
+                        $PqrFormField = new PqrFormField($id);
+                        $PqrFormField->anonymous = 1;
+                        if ($dataRequired = $formFields['dataRequiredAnonymous']) {
+                            if (in_array($id, $dataRequired)) {
+                                $PqrFormField->required_anonymous = 1;
+                            }
+                        }
+                        if (!$PqrFormField->update()) {
+                            throw new \Exception("No fue posible actualizar", 200);
+                        };
+                    }
+                }
+            }
+
+            $PqrFormService = new PqrFormService($PqrForm);
+            $Response->data = [
+                'pqrForm' => $PqrFormService->getDataPqrForm(),
+                'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
+            ];
+            $Response->success = 1;
+            $conn->commit();
+        } catch (\Exception $th) {
             $conn->rollBack();
-            $Response->success = 0;
             $Response->message = $th->getMessage();
         }
 
         return $Response;
     }
+
+
+    /*-------------------------------------------- */
 
     /**
      * publica o crea el formulario en el webservice
@@ -109,7 +121,8 @@ class PqrFormController extends Controller
         ];
 
         try {
-            $conn = DatabaseConnection::beginTransaction();
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
 
             $this->PqrForm = PqrForm::getPqrFormActive();
 

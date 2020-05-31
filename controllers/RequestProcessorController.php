@@ -3,6 +3,7 @@
 namespace Saia\Pqr\controllers;
 
 use Saia\models\Funcionario;
+use Saia\Pqr\models\PqrForm;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use Saia\core\DatabaseConnection;
@@ -10,14 +11,63 @@ use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\models\PqrHtmlField;
 use Saia\models\vistas\VfuncionarioDc;
 use Saia\controllers\FuncionarioController;
+use Saia\Pqr\controllers\services\PqrFormService;
 
-class RequestProcessorController extends Controller
+class ProcessRequestController extends Controller
 {
 
-    public function __construct(array $request = null)
+    /**
+     * Obtiene la informacion que sera utilizada en el front
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getAllData(): array
     {
-        $this->request = $request;
+        $PqrForm = PqrForm::getPqrFormActive();
+        $PqrFormService = new PqrFormService($PqrForm);
+
+        $data = [
+            'pqrForm' => $PqrFormService->getDataPqrForm(),
+            'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
+            'pqrHtmlFields' => $this->getDataHtmlFields(),
+        ];
+
+        return [
+            'success' => 1,
+            'data' => $data
+        ];
     }
+
+    /**
+     * Obtiene los componentes para creacoin del formato
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getDataHtmlFields(): array
+    {
+        $data = [];
+
+        if ($records = PqrHtmlField::findAllByAttributes([
+            'active' => 1
+        ])) {
+            foreach ($records as $PqrHtmlField) {
+                $data[] = $PqrHtmlField->getDataAttributes();
+            }
+        }
+
+        return $data;
+    }
+
+    //----------------
+
+
+
+
+
 
     /**
      * Genera las credenciales de radicador web

@@ -15,31 +15,6 @@ class PqrFormFieldController extends Controller
      */
     const INITIAL_ORDER = 2;
 
-    public function __construct(array $request = null)
-    {
-        $this->request = $request;
-    }
-
-    /**
-     * Obtiene los campos del formulario activos
-     *
-     * @return object
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function index(): object
-    {
-        $Response = (object) [
-            'success' => 1,
-            'data' => []
-        ];
-
-        $PqrForm = PqrForm::getPqrFormActive();
-        $Response->data = $PqrForm->getAttributesFormFields();
-
-        return $Response;
-    }
-
     /**
      * Almacena un nuevo campo del formulario
      *
@@ -53,14 +28,14 @@ class PqrFormFieldController extends Controller
             'success' => 1,
             'data' => []
         ];
-        $requestFormField = $this->request['params'];
-        if ($requestFormField['setting']) {
-            $requestFormField['setting'] = json_encode($requestFormField['setting']);
+
+        if ($this->request['setting']) {
+            $this->request['setting'] = json_encode($this->request['setting']);
         }
 
-        $PqrForm = new PqrForm($requestFormField['fk_pqr_form']);
+        $PqrForm = new PqrForm($this->request['fk_pqr_form']);
         $defaultFields = [
-            'name' => $this->generateName($requestFormField['label']),
+            'name' => $this->generateName($this->request['label']),
             'required' => 0,
             'show_anonymous' => 0,
             'fk_pqr_form' => $PqrForm->getPK(),
@@ -71,9 +46,10 @@ class PqrFormFieldController extends Controller
         ];
 
         try {
-            $conn = DatabaseConnection::beginTransaction();
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
 
-            $attributes = array_merge($defaultFields, $requestFormField);
+            $attributes = array_merge($defaultFields, $this->request);
 
             $PqrFormField = new PqrFormField();
             $PqrFormField->setAttributes($attributes);
@@ -107,13 +83,15 @@ class PqrFormFieldController extends Controller
         ];
 
         $id = $this->request['id'];
-        $requestFormField = $this->request['params'];
+        $requestFormField = $this->request['dataField'];
+
         if ($requestFormField['setting']) {
             $requestFormField['setting'] = json_encode($requestFormField['setting']);
         }
 
         try {
-            $conn = DatabaseConnection::beginTransaction();
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
 
             $PqrFormField = new PqrFormField($id);
             $PqrFormField->setAttributes($requestFormField);
@@ -147,7 +125,8 @@ class PqrFormFieldController extends Controller
         ];
 
         try {
-            $conn = DatabaseConnection::beginTransaction();
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
 
             $PqrFormField = new PqrFormField($this->request['id']);
             if ($PqrFormField->delete()) {
@@ -173,7 +152,7 @@ class PqrFormFieldController extends Controller
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function generateName(string $label, int $pref = 0): string
+    private function generateName(string $label, int $pref = 0): string
     {
         $cadena = trim(preg_replace('/[^a-z]/', '_', strtolower($label)));
         $cadena = implode('_', array_filter(explode('_', $cadena)));
@@ -204,7 +183,8 @@ class PqrFormFieldController extends Controller
         ];
 
         try {
-            $conn = DatabaseConnection::beginTransaction();
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
 
             foreach ($this->request['params'] as $record) {
                 $PqrFormField = new PqrFormField($record['id']);
@@ -236,7 +216,8 @@ class PqrFormFieldController extends Controller
         ];
 
         try {
-            $conn = DatabaseConnection::beginTransaction();
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
 
             $PqrFormField = new PqrFormField($this->request['id']);
             $PqrFormField->setAttributes([
@@ -256,6 +237,8 @@ class PqrFormFieldController extends Controller
         }
         return $Response;
     }
+
+    /**------------------------------------------------ */
 
     /**
      * Obtiene una lista de datos

@@ -18,11 +18,6 @@ class FtPqr extends FtPqrProperties
     const ESTADO_PROCESO = 'PROCESO';
     const ESTADO_TERMINADO = 'TERMINADO';
 
-    public function __construct($id = null)
-    {
-        parent::__construct($id);
-    }
-
     protected function defineMoreAttributes(): array
     {
         return [

@@ -4,14 +4,11 @@ namespace Saia\Pqr\models;
 
 use Saia\core\model\Model;
 use Saia\models\documento\Documento;
+use Saia\Pqr\formatos\pqr\FtPqr;
 
 class PqrBackup extends Model
 {
-
-    public function __construct($id = null)
-    {
-        parent::__construct($id);
-    }
+    use TModel;
 
     protected function defineAttributes(): void
     {
@@ -29,8 +26,26 @@ class PqrBackup extends Model
                     'attribute' => 'iddocumento',
                     'primary' => 'fk_documento',
                     'relation' => self::BELONGS_TO_ONE
+                ],
+                'FtPqr' => [
+                    'model' => FtPqr::class,
+                    'attribute' => 'idft_pqr',
+                    'primary' => 'fk_pqr',
+                    'relation' => self::BELONGS_TO_ONE
                 ]
             ]
         ];
+    }
+
+    /**
+     * Obtiene los valores de data decodificado
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getData(): object
+    {
+        return json_decode($this->data);
     }
 }

@@ -6,11 +6,7 @@ use Saia\core\model\Model;
 
 class PqrResponseTemplate extends Model
 {
-
-    public function __construct($id = null)
-    {
-        parent::__construct($id);
-    }
+    use TModel;
 
     protected function defineAttributes(): void
     {
