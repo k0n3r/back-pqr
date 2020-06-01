@@ -110,6 +110,10 @@ final class Version20200103155146 extends AbstractMigration
             'length' => 50
         ]);
 
+        $table->addColumn('type_saia', 'string', [
+            'length' => 50
+        ]);
+
         $table->addColumn('uniq', 'boolean', [
             'default' => false
         ]);
@@ -132,6 +136,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('name', 'string');
         $table->addColumn('show_anonymous', 'boolean', ['default' => 0]);
         $table->addColumn('show_label', 'boolean', ['default' => 1]);
+        $table->addColumn('rad_email', 'boolean', ['default' => 0]);
 
         $table->addColumn('active', 'boolean', [
             'default' => 1

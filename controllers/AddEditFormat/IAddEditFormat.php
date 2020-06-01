@@ -6,29 +6,20 @@ namespace Saia\Pqr\controllers\addEditFormat;
 interface IAddEditFormat
 {
     /**
-     * Crea el formulario
-     *
-     * @return void
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function createForm(): void;
-
-    /**
      * Actualiza el formulario
      *
-     * @return void
+     * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function updateForm(): void;
+    public function updateChange(): bool;
 
     /**
      * Genera los archivos mostrar, editar etc
      *
-     * @return void
+     * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function generateForm(): void;
+    public function generateForm(): bool;
 }

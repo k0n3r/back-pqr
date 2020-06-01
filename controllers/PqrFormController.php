@@ -7,16 +7,13 @@ use Saia\Pqr\models\PqrForm;
 use Saia\core\DatabaseConnection;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\controllers\services\PqrFormService;
+use Saia\Pqr\controllers\addEditFormat\AddEditFtPqr;
 use Saia\Pqr\controllers\addEditFormat\AddEditFormat;
 use Saia\Pqr\controllers\addEditFormat\IAddEditFormat;
-use Saia\Pqr\controllers\addEditFormat\TAddEditFormat;
-use Saia\Pqr\controllers\addEditFormat\FtPqrController;
 
 
 class PqrFormController extends Controller
 {
-    use TAddEditFormat;
-
     const  DIRECTORY_PQR = 'ws/pqr/';
     const DIRECTORY_CLASIFICACION = 'ws/calificacion/';
 
@@ -126,10 +123,8 @@ class PqrFormController extends Controller
 
             $this->PqrForm = PqrForm::getPqrFormActive();
 
-            $option = $this->PqrForm->fk_formato ? AddEditFormat::ADIT : AddEditFormat::ADD;
             $this->addEditFormat(
-                new FtPqrController($this->PqrForm),
-                $option
+                new AddEditFtPqr($this->PqrForm)
             );
 
             // if (!$FormatoR = Formato::findByAttributes([
@@ -154,7 +149,7 @@ class PqrFormController extends Controller
             // $WebCal = new WebserviceCalificacion($FormatoC);
             // $WebCal->generate();
 
-            $Response->data = $this->PqrForm->getAttributes();
+            $Response->data = (new PqrFormService($this->PqrForm))->getDataPqrForm();
             $conn->commit();
         } catch (\Throwable $th) {
             var_dump($th);
@@ -167,18 +162,17 @@ class PqrFormController extends Controller
     }
 
     /**
-     * Encargado de genera el formato recibido
+     * Genera el formulario recibido
      *
-     * @param IAddEditFormat $Controller
-     * @param string $addEdit
-     * @return void
+     * @param IAddEditFormat $Instance
+     * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function addEditFormat(IAddEditFormat $Controller, string $addEdit): void
+    protected function addEditFormat(IAddEditFormat $Instance): bool
     {
-        $Generate = new AddEditFormat($Controller, $addEdit);
-        $Generate->generate();
+        return $Instance->updateChange() &&
+            $Instance->generateForm();
     }
 
     /**

@@ -61,66 +61,77 @@ final class Version20200103161511 extends AbstractMigration
             [
                 'label' => 'Linea de texto',
                 'type' => 'text',
+                'type_saia' => 'Text',
                 'active' => 1,
                 'uniq' => 0
             ],
             [
                 'label' => 'Numérico',
                 'type' => 'number',
+                'type_saia' => 'Text',
                 'active' => 1,
                 'uniq' => 0
             ],
             [
                 'label' => 'E-mail',
                 'type' => 'email',
+                'type_saia' => 'Text',
                 'active' => 1,
                 'uniq' => 0
             ],
             [
                 'label' => 'Área de texto',
                 'type' => 'textarea',
+                'type_saia' => 'Textarea',
                 'active' => 1,
                 'uniq' => 0
             ],
             [
                 'label' => 'Listado',
                 'type' => 'select',
+                'type_saia' => 'Select',
                 'active' => 1,
                 'uniq' => 0
             ],
             [
                 'label' => 'Listado de Dependencia',
                 'type' => 'dependencia',
+                'type_saia' => 'AutocompleteD',
                 'active' => 1,
                 'uniq' => 1
             ],
             [
                 'label' => 'Selección Única',
                 'type' => 'radio',
+                'type_saia' => 'Radio',
                 'active' => 1,
                 'uniq' => 0
             ],
             [
                 'label' => 'Selección múltiple',
                 'type' => 'checkbox',
+                'type_saia' => 'Checkbox',
                 'active' => 1,
                 'uniq' => 0
             ],
             [
                 'label' => 'Autompletar de municipios',
                 'type' => 'localidad',
+                'type_saia' => 'AutocompleteM',
                 'active' => 1,
                 'uniq' => 0
             ],
             [
                 'label' => 'Tratamiento de datos',
                 'type' => 'tratamiento',
+                'type_saia' => 'Hidden',
                 'active' => 1,
                 'uniq' => 1
             ],
             [
                 'label' => 'Anexos',
                 'type' => 'file',
+                'type_saia' => 'Attached',
                 'active' => 1,
                 'uniq' => 0
             ]
