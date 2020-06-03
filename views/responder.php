@@ -12,10 +12,6 @@ while ($max_salida > 0) {
 }
 
 include_once $rootPath . 'views/assets/librerias.php';
-
-// TODO: ERROR EN BASE URL
-$_REQUEST['baseUrl'] = "../../";
-
 $params = json_encode($_REQUEST);
 ?>
 
@@ -48,4 +44,4 @@ $params = json_encode($_REQUEST);
     </div>
 </div>
 <?= select2() ?>
-<script id="scriptResponder" src="<?= $_REQUEST['baseUrl'] ?>app/modules/back_pqr/views/js/responder.js" data-params='<?= $params ?>'></script>
+<script id="scriptResponder" src="../../app/modules/back_pqr/views/js/responder.js" data-params='<?= $params ?>'></script>

@@ -20,7 +20,7 @@ trait TField
             'ayuda' => NULL,
             'predeterminado' => NULL,
             'banderas' => NULL,
-            'etiqueta_html' => get_class($this),
+            'etiqueta_html' => (new \ReflectionClass($this))->getShortName(),
             'orden' => $PqrFormField->orden,
             'adicionales' => NULL,
             'fila_visible' => 1,

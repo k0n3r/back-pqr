@@ -11,10 +11,11 @@ class AutocompleteD extends Field implements IField
      */
     public function getValues(): array
     {
-        throw new \Exception("HACER FIELD METHOD PARA DEPENDENCIA", 1);
-
         return array_merge($this->getDefaultValues(), [
-            'opciones' => '{"type":"hidden"}'
+            'tipo_dato' => 'integer',
+            'longitud' => 11,
+            'valor' => '{*autocompleteD*}',
+            'etiqueta_html' => 'Method'
         ]);
     }
 }

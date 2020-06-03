@@ -15,7 +15,7 @@ use Saia\controllers\generator\FormatGenerator;
 class AddEditFtPqr implements IAddEditFormat
 {
 
-    protected PqrForm $PqrForm;
+    private PqrForm $PqrForm;
 
     public function __construct(PqrForm $PqrForm)
     {

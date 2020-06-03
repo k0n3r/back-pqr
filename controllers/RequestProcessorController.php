@@ -13,7 +13,7 @@ use Saia\models\vistas\VfuncionarioDc;
 use Saia\controllers\FuncionarioController;
 use Saia\Pqr\controllers\services\PqrFormService;
 
-class ProcessRequestController extends Controller
+class RequestProcessorController extends Controller
 {
 
     /**
@@ -62,30 +62,6 @@ class ProcessRequestController extends Controller
         return $data;
     }
 
-    //----------------
-
-
-
-
-
-
-    /**
-     * Genera las credenciales de radicador web
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function generateTemporalCredentials(): array
-    {
-        $Funcionario = new Funcionario(Funcionario::RADICADOR_WEB);
-        return [
-            'token' => FuncionarioController::generateToken($Funcionario, 0, true),
-            'key' => $Funcionario->getPK(),
-            'rol' => VfuncionarioDc::getFirstUserRole(Funcionario::RADICADOR_WEB)
-        ];
-    }
-
     public function getListForField(): array
     {
         $response = [
@@ -111,63 +87,115 @@ class ProcessRequestController extends Controller
 
         switch ($PqrHtmlField->type) {
             case PqrHtmlField::TYPE_DEPENDENCIA:
-                $Qb->select('iddependencia as id,nombre as text')
-                    ->from('dependencia')
-                    ->where('estado=1')
-                    ->orderBy('nombre', 'ASC')
-                    ->setFirstResult(0)
-                    ->setMaxResults(40);
-
-                if ($this->request['term']) {
-                    $Qb->andWhere('nombre like :nombre')
-                        ->setParameter(':nombre', '%' . $this->request['term'] . '%', Type::getType('string'));
-                }
-
-                if (!$ObjSettings->allDependency) {
-                    $records = $ObjSettings->options;
-                    foreach ($records as $row) {
-                        $ids[] = $row->id;
-                    }
-                    $Qb->andWhere('iddependencia in (:ids)')
-                        ->setParameter(':ids', $ids, Connection::PARAM_INT_ARRAY);
-                }
-
-                $response['results'] = $Qb->execute()->fetchAll();
+                $response['results'] = $this->getDependencys($ObjSettings);
                 break;
 
             case PqrHtmlField::TYPE_LOCALIDAD:
-                $Qb->select("
-                CONCAT(a.nombre,
-                    CONCAT(
-                        ' - ',
-                        CONCAT(
-                            b.nombre,
-                            CONCAT(
-                                ' - ',
-                                c.nombre   
-                            )
-                        )
-                    )
-                ) AS text
-            ", "a.idmunicipio as id")
-                    ->from('municipio', 'a')
-                    ->join('a', 'departamento', 'b', 'a.departamento_iddepartamento = b.iddepartamento')
-                    ->join('b', 'pais', 'c', 'b.pais_idpais = c.idpais')
-                    ->where("CONCAT(a.nombre,CONCAT(' ',b.nombre)) like :query")
-                    ->andWhere('a.estado = 1 AND b.estado = 1 AND c.estado = 1')
-                    ->setParameter('query', "%{$this->request['term']}%")
-                    ->orderBy('a.nombre', 'ASC')
-                    ->setFirstResult(0)
-                    ->setMaxResults(40);
-
-                if (!$ObjSettings->allCountry) {
-                    $Qb->andWhere('c.idpais=:idpais')
-                        ->setParameter(':idpais', $ObjSettings->country->id);
-                }
-                $response['results'] = $Qb->execute()->fetchAll();
+                $response['results'] = $this->getListLocalidad($ObjSettings);
                 break;
         }
 
         return $response;
+    }
+
+    /**
+     * Obtiene listado de localidades basados en la configuracion
+     * del campo
+     *
+     * @param object $ObjSettings
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getDependencys(object $ObjSettings): array
+    {
+        $Qb = DatabaseConnection::getQueryBuilder();
+
+        $Qb->select('iddependencia as id,nombre as text')
+            ->from('dependencia')
+            ->where('estado=1')
+            ->orderBy('nombre', 'ASC')
+            ->setFirstResult(0)
+            ->setMaxResults(40);
+
+        if ($this->request['term']) {
+            $Qb->andWhere('nombre like :nombre')
+                ->setParameter(':nombre', '%' . $this->request['term'] . '%', Type::getType('string'));
+        }
+
+        if (!$ObjSettings->allDependency) {
+            $records = $ObjSettings->options;
+            foreach ($records as $row) {
+                $ids[] = $row->id;
+            }
+            $Qb->andWhere('iddependencia in (:ids)')
+                ->setParameter(':ids', $ids, Connection::PARAM_INT_ARRAY);
+        }
+
+        return $Qb->execute()->fetchAll();
+    }
+
+    /**
+     * Obtiene las localidades basados en la configuracion
+     * del campo
+     *
+     * @param object $ObjSettings
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getListLocalidad(object $ObjSettings): array
+    {
+        $Qb = DatabaseConnection::getQueryBuilder();
+
+        $Qb->select("CONCAT(a.nombre,
+            CONCAT(
+                ' - ',
+                CONCAT(
+                    b.nombre,
+                    CONCAT(
+                        ' - ',
+                        c.nombre   
+                    )
+                )
+            )
+        ) AS text", "a.idmunicipio as id")
+            ->from('municipio', 'a')
+            ->join('a', 'departamento', 'b', 'a.departamento_iddepartamento = b.iddepartamento')
+            ->join('b', 'pais', 'c', 'b.pais_idpais = c.idpais')
+            ->where("CONCAT(a.nombre,CONCAT(' ',b.nombre)) like :query")
+            ->andWhere('a.estado = 1 AND b.estado = 1 AND c.estado = 1')
+            ->setParameter('query', "%{$this->request['term']}%")
+            ->orderBy('a.nombre', 'ASC')
+            ->setFirstResult(0)
+            ->setMaxResults(40);
+
+        if (!$ObjSettings->allCountry) {
+            $Qb->andWhere('c.idpais=:idpais')
+                ->setParameter(':idpais', $ObjSettings->country->id);
+        }
+
+        return $Qb->execute()->fetchAll();
+    }
+
+    //----------------
+
+
+
+    /**
+     * Genera las credenciales de radicador web
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function generateTemporalCredentials(): array
+    {
+        $Funcionario = new Funcionario(Funcionario::RADICADOR_WEB);
+        return [
+            'token' => FuncionarioController::generateToken($Funcionario, 0, true),
+            'key' => $Funcionario->getPK(),
+            'rol' => VfuncionarioDc::getFirstUserRole(Funcionario::RADICADOR_WEB)
+        ];
     }
 }

@@ -2,6 +2,8 @@ $(function () {
     let params = $('#scriptResponder').data('params');
     $('#scriptResponder').removeAttr('data-params');
 
+    var baseUrl = localStorage.getItem('baseUrl');
+
     $("#iddocumento").select2({
         language: "es",
         multiple: false,
@@ -9,7 +11,7 @@ $(function () {
         dropdownParent: "#dinamic_modal",
         ajax: {
             delay: 400,
-            url: `${params.baseUrl}app/modules/back_pqr/app/request.php`,
+            url: `${baseUrl}app/modules/back_pqr/app/request.php`,
             dataType: 'json',
             data: function (params) {
                 var query = {
@@ -46,7 +48,7 @@ $(function () {
             if (+iddocumento) {
                 $.ajax({
                     type: 'POST',
-                    url: `${params.baseUrl}app/modules/back_pqr/app/request.php`,
+                    url: `${baseUrl}app/modules/back_pqr/app/request.php`,
                     data: {
                         key: localStorage.getItem('key'),
                         token: localStorage.getItem('token'),

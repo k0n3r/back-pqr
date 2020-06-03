@@ -37,7 +37,7 @@ class PqrFormField extends Model
                     'relation' => self::BELONGS_TO_ONE
                 ],
                 'PqrForm' => [
-                    'model' => PqrHtmlField::class,
+                    'model' => PqrForm::class,
                     'attribute' => 'id',
                     'primary' => 'fk_pqr_form',
                     'relation' => self::BELONGS_TO_ONE
