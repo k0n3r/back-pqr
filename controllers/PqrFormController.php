@@ -5,7 +5,9 @@ namespace Saia\Pqr\controllers;
 use Exception;
 use Saia\Pqr\models\PqrForm;
 use Saia\core\DatabaseConnection;
+use Saia\models\formatos\Formato;
 use Saia\Pqr\models\PqrFormField;
+use Saia\controllers\generator\FormatGenerator;
 use Saia\Pqr\controllers\services\PqrFormService;
 use Saia\Pqr\controllers\addEditFormat\AddEditFtPqr;
 use Saia\Pqr\controllers\addEditFormat\IAddEditFormat;
@@ -126,21 +128,21 @@ class PqrFormController extends Controller
                 new AddEditFtPqr($this->PqrForm)
             );
 
-            // if (!$FormatoR = Formato::findByAttributes([
-            //     'nombre' => 'pqr_respuesta'
-            // ])) {
-            //     throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
-            // }
-            // $this->FormatGenerator($FormatoR->getPK());
+            if (!$FormatoR = Formato::findByAttributes([
+                'nombre' => 'pqr_respuesta'
+            ])) {
+                throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
+            }
+            $this->generateForm($FormatoR->getPK());
 
-            // if (!$FormatoC = Formato::findByAttributes([
-            //     'nombre' => 'pqr_calificacion'
-            // ])) {
-            //     throw new Exception("El formato de calificacion PQR no fue encontrado", 1);
-            // }
-            // $this->FormatGenerator($FormatoC->getPK());
+            if (!$FormatoC = Formato::findByAttributes([
+                'nombre' => 'pqr_calificacion'
+            ])) {
+                throw new Exception("El formato de calificacion PQR no fue encontrado", 1);
+            }
+            $this->generateForm($FormatoC->getPK());
 
-            // $this->generateView();
+            $this->generateView();
 
             // $Web = new WebservicePqr($this->PqrForm);
             // $Web->generate();
@@ -148,7 +150,11 @@ class PqrFormController extends Controller
             // $WebCal = new WebserviceCalificacion($FormatoC);
             // $WebCal->generate();
 
-            $Response->data = (new PqrFormService($this->PqrForm))->getDataPqrForm();
+            $PqrFormService = new PqrFormService($this->PqrForm);
+            $Response->data = [
+                'pqrForm' => $PqrFormService->getDataPqrForm(),
+                'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
+            ];
             $conn->commit();
         } catch (\Throwable $th) {
             var_dump($th);
@@ -171,7 +177,16 @@ class PqrFormController extends Controller
     protected function addEditFormat(IAddEditFormat $Instance): bool
     {
         return $Instance->updateChange() &&
-            $Instance->generateForm();
+            $this->generateForm($this->PqrForm->fk_formato);
+    }
+
+    protected function generateForm(int $idformato): bool
+    {
+        $FormatGenerator = new FormatGenerator($idformato);
+        $FormatGenerator->generate();
+        $FormatGenerator->createModule();
+
+        return true;
     }
 
     /**
@@ -242,7 +257,6 @@ class PqrFormController extends Controller
             case 'SqlServer':
                 $drop = "DROP VIEW {$name}";
                 $conn->executeQuery($drop);
-
 
                 $create = "CREATE VIEW {$name} AS {$select}";
                 $conn->executeQuery($create);

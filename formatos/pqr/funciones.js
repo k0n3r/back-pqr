@@ -1,6 +1,6 @@
 //evento ejecutado en el adicionar
 function add(data) {
-
+  addEdit(data);
 }
 
 //evento ejecutado en el editar
@@ -10,6 +10,41 @@ function edit(data) {
     message: 'El documento ya se encuentra radicado, NO se puede editar'
   });
   window.history.back();
+
+  addEdit(data);
+}
+
+function addEdit(data) {
+  var baseUrl = localStorage.getItem("baseUrl");
+
+  $(".pqrAutocomplete").each(function (index, element) {
+    $("#" + element.id).select2({
+      language: "es",
+      placeholder: "Ingrese el nombre",
+      multiple: false,
+      ajax: {
+        delay: 400,
+        url: `${baseUrl}app/modules/back_pqr/app/request.php`,
+        dataType: "json",
+        data: function (p) {
+          var query = {
+            key: localStorage.getItem("key"),
+            token: localStorage.getItem("token"),
+            class: "RequestProcessorController",
+            method: "getListForField",
+            data: {
+              name: element.id,
+              term: p.term
+            }
+          };
+          return query;
+        }
+      }
+    });
+
+  });
+
+
 }
 
 //evento ejecutado en el mostrar

@@ -5,12 +5,14 @@ namespace Saia\Pqr\formatos\pqr;
 use Exception;
 use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\models\PqrBackup;
+use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\Helpers\UtilitiesPqr;
+use Saia\controllers\anexos\FileJson;
 use Saia\controllers\SendMailController;
 use Saia\models\formatos\CampoSeleccionados;
 use Saia\controllers\functions\CoreFunctions;
-use Saia\controllers\pdf\DocumentPdfGenerator;
 use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+use Saia\Pqr\controllers\services\PqrFormFieldService;
 
 class FtPqr extends FtPqrProperties
 {
@@ -44,20 +46,20 @@ class FtPqr extends FtPqrProperties
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function getDataRow(): array
+    private function getDataRow(): array
     {
         if (!$PqrForm = PqrForm::getPqrFormActive()) {
             throw new Exception("No se encuentra el formulario activo", 1);
         }
         $data = [];
 
-        $Fields = $PqrForm->getPqrFormFieldsActive();
+        $Fields = $PqrForm->PqrFormFields;
         foreach ($Fields as  $PqrFormField) {
             $PqrHtmlField = $PqrFormField->PqrHtmlField;
-            if (in_array($PqrHtmlField->type, [
-                'radio',
-                'checkbox',
-                'select'
+            if (in_array($PqrHtmlField->type_saia, [
+                'Radio',
+                'Checkbox',
+                'Select'
             ])) {
                 $data[$PqrFormField->label] = CampoSeleccionados::findColumn('valor', [
                     'fk_campos_formato' => $PqrFormField->fk_campos_formato,
@@ -71,49 +73,46 @@ class FtPqr extends FtPqrProperties
         return $data;
     }
 
+    private function validSysEmail()
+    {
+        if ($this->sys_email) {
+            if (!$this->isEmailValid($this->sys_email)) {
+                throw new Exception("Esta dirección de correo ({$this->sys_email}) no es válida.", 200);
+            }
+        }
+        return true;
+    }
+
+    private function isEmailValid(string $email): bool
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Funcion ejecutada posterior al adicionar una PQR
      *
-     * @return void
+     * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function afterAdd()
+    public function afterAdd(): bool
     {
-        if (!filter_var($this->sys_email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Esta dirección de correo ({$this->sys_email}) no es válida.", 200);
-        }
-
-        if (!PqrBackup::newRecord([
-            'fk_documento' => $this->documento_iddocumento,
-            'fk_pqr' => $this->getPK(),
-            'data' => json_encode($this->getDataRow())
-        ])) {
-            throw new Exception("No fue posible registrar el backup", 1);
-        }
+        return $this->validSysEmail();
     }
 
     /**
      * Funcion ejecutada despues de editar un documento
      *
-     * @return void
+     * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function afterEdit()
+    public function afterEdit(): bool
     {
-        if ($PqrBAckup = PqrBackup::findByAttributes([
-            'fk_documento' => $this->documento_iddocumento
-        ])) {
-            $PqrBAckup->setAttributes([
-                'data' => json_encode($this->getDataRow())
-            ]);
-            if (!$this->update()) {
-                throw new Exception("No fue posible actualizar el backup", 1);
-            }
-        } else {
-            $this->afterAdd();
-        }
+        return $this->validSysEmail();
     }
 
     /**
@@ -143,13 +142,35 @@ class FtPqr extends FtPqrProperties
         return $code;
     }
 
-    public function afterRad(): void
+    /**
+     *@inheritDoc
+     */
+    public function afterRad(): bool
     {
-        $this->notifyEmail();
+        $this->Documento->getPdfJson(true);
+
+        return $this->createBackup() &&
+            $this->notifyEmail();
     }
 
-    public function notifyEmail()
+    private function createBackup(): bool
     {
+        if (!PqrBackup::newRecord([
+            'fk_documento' => $this->documento_iddocumento,
+            'fk_pqr' => $this->getPK(),
+            'data' => json_encode($this->getDataRow())
+        ])) {
+            throw new Exception("No fue posible registrar el backup", 1);
+        }
+        return true;
+    }
+
+    private function notifyEmail(): bool
+    {
+        if (!$this->sys_email) {
+            return true;
+        }
+
         $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {$this->Documento->numero}, adjunto encontrará una copia de la PQR diligenciada el día de hoy.<br/><br/>
         El seguimiento lo puede realizar escaneando el código QR";
 
@@ -163,26 +184,8 @@ class FtPqr extends FtPqrProperties
             [$this->sys_email]
         );
 
-        if (!$this->Documento->pdf) {
-            $DocumentPdfGenerator = new DocumentPdfGenerator($this->Documento);
-            $route = $DocumentPdfGenerator->refreshFile();
-
-            if (!$route) {
-                $log = [
-                    'error' => "MpdfController NO genero el PDF, iddoc: {$this->Documento->getPK()}",
-                    'message' => "No fue posible generar el PDF para el formato PQR"
-                ];
-                UtilitiesPqr::notifyAdministrator(
-                    "No fue posible generar el PDF para la PQR # {$this->Documento->numero}",
-                    $log
-                );
-            } else {
-                $SendMailController->setAttachments(
-                    $SendMailController::ATTACHMENT_TYPE_JSON,
-                    [$this->Documento->pdf]
-                );
-            }
-        }
+        $File = new FileJson($this->Documento->getPdfJson());
+        $SendMailController->setAttachments([$File]);
 
         $send = $SendMailController->send();
         if ($send !== true) {
@@ -209,5 +212,48 @@ class FtPqr extends FtPqrProperties
         }
 
         return $data;
+    }
+
+    public function autocompleteD(int $idCamposFormato): string
+    {
+        $PqrFormField = PqrFormField::findByAttributes([
+            'fk_campos_formato' => $idCamposFormato
+        ]);
+        return $this->generateField($PqrFormField);
+    }
+
+    public function autocompleteM(int $idCamposFormato): string
+    {
+        $PqrFormField = PqrFormField::findByAttributes([
+            'fk_campos_formato' => $idCamposFormato
+        ]);
+
+        return $this->generateField($PqrFormField);
+    }
+
+    private function generateField(PqrFormField $PqrFormField): string
+    {
+        $name = $PqrFormField->name;
+        $required = $PqrFormField->required ? 'required' : '';
+
+        $options = '';
+        if ($this->$name) {
+            $list = (new PqrFormFieldService($PqrFormField))->getListField(['id' => $this->$name]);
+            if ($list) {
+                $options .= "<option value='{$list[0]['id']}' selected='selected'>{$list[0]['text']}</option>";
+            }
+        }
+
+        $code = <<<HTML
+    <div class='form-group form-group-default form-group-default-select2 {$required}' id='group_{$name}'>
+        <label>{$PqrFormField->label}</label>
+        <div class='form-group'>
+            <select class='full-width pqrAutocomplete {$required}' name='{$name}' id='{$name}'>
+                {$options}
+            </select>
+        </div>
+    </div>
+HTML;
+        return $code;
     }
 }

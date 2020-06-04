@@ -14,7 +14,7 @@ class AutocompleteM extends Field implements IField
         return array_merge($this->getDefaultValues(), [
             'tipo_dato' => 'integer',
             'longitud' => 11,
-            'valor' => '{*autocompleteD*}',
+            'valor' => '{*autocompleteM*}',
             'etiqueta_html' => 'Method'
         ]);
     }

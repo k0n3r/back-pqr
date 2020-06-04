@@ -17,10 +17,11 @@ class PqrForm extends Model
             'safe' => [
                 'fk_formato',
                 'fk_contador',
-                'show_anonymous',
-                'show_label',
                 'label',
                 'name',
+                'show_anonymous',
+                'show_label',
+                'rad_email',
                 'active'
             ],
             'primary' => 'id',

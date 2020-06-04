@@ -10,13 +10,20 @@ use Saia\Pqr\models\PqrFormField;
 use Saia\controllers\SessionController;
 use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
-use Saia\controllers\generator\FormatGenerator;
 
 class AddEditFtPqr implements IAddEditFormat
 {
-
+    /**
+     * Intancia de PqrForm
+     */
     private PqrForm $PqrForm;
 
+    /**
+     *
+     * @param PqrForm $PqrForm
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function __construct(PqrForm $PqrForm)
     {
         $this->PqrForm = $PqrForm;
@@ -34,17 +41,12 @@ class AddEditFtPqr implements IAddEditFormat
     }
 
     /**
-     * @inheritDoc
+     * Genera la creacion del formato
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
      */
-    public function generateForm(): bool
-    {
-        $FormatGenerator = new FormatGenerator($this->PqrForm->fk_formato);
-        $FormatGenerator->generate();
-        $FormatGenerator->createModule();
-
-        return true;
-    }
-
     private function createForm(): void
     {
         $this->createRecordInFormat()
@@ -52,6 +54,13 @@ class AddEditFtPqr implements IAddEditFormat
             ->addOtherFields();
     }
 
+    /**
+     * Actualiza la generacion del formato
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     private function updateForm(): void
     {
         $this->updateRecordInFormat()
@@ -167,6 +176,11 @@ class AddEditFtPqr implements IAddEditFormat
      */
     private function addEditRecordsInFormatFields(): self
     {
+        $allowOptions = [
+            'Select',
+            'Radio',
+            'Checkbox'
+        ];
         $fields = $this->PqrForm->PqrFormFields;
         foreach ($fields as $PqrFormField) {
             if (!$PqrFormField->fk_campos_formato) {
@@ -175,13 +189,15 @@ class AddEditFtPqr implements IAddEditFormat
                 $this->updateRecordInFormatFields($PqrFormField);
             }
 
-            if ($PqrFormField->name != 'sys_dependencia' && $PqrFormField->getSetting()->options) {
+            if (
+                in_array($PqrFormField->PqrHtmlField->type_saia, $allowOptions)
+                && $PqrFormField->getSetting()->options
+            ) {
                 $this->addEditformatOptions($PqrFormField);
             }
         }
         return $this;
     }
-
 
     /**
      * Crea o edita las opciones de los campos tipo select, radio o checkbxo

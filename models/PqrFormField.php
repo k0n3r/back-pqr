@@ -21,10 +21,10 @@ class PqrFormField extends Model
                 'required_anonymous',
                 'setting',
                 'fk_pqr_html_field',
+                'fk_pqr_form',
                 'fk_campos_formato',
                 'system',
                 'orden',
-                'fk_pqr_form',
                 'active'
             ],
             'primary' => 'id',

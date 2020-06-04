@@ -15,7 +15,7 @@ class Attached extends Field implements IField
 
         return array_merge($this->getDefaultValues(), [
             'valor' => $setting->typeFiles,
-            'opciones' => '{"tipos":"' . $setting->typeFiles . '","longitud":"3","cantidad":"' . $$setting->numberFiles . '","ruta_consulta":"app/anexos/consultar_anexos_campo.php"}'
+            'opciones' => '{"tipos":"' . $setting->typeFiles . '","longitud":"3","cantidad":"' . $setting->numberFiles . '","ruta_consulta":"app/anexos/consultar_anexos_campo.php"}'
         ]);
     }
 }
