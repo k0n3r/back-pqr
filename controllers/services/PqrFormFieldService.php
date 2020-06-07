@@ -77,6 +77,13 @@ class PqrFormFieldService
             ->setFirstResult(0)
             ->setMaxResults(40);
 
+        if ($data['id']) {
+            $Qb->andWhere('iddependencia=:iddependencia')
+                ->setParameter(':iddependencia', $data['id'], Type::getType('integer'));
+
+            return $Qb->execute()->fetchAll();
+        }
+
         if ($data['term']) {
             $Qb->andWhere('nombre like :nombre')
                 ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
@@ -133,6 +140,13 @@ class PqrFormFieldService
             ->orderBy('a.nombre', 'ASC')
             ->setFirstResult(0)
             ->setMaxResults(40);
+
+        if ($data['id']) {
+            $Qb->andWhere('idmunicipio=:idmunicipio')
+                ->setParameter(':idmunicipio', $data['id'], Type::getType('integer'));
+
+            return $Qb->execute()->fetchAll();
+        }
 
         if (!$ObjSettings->allCountry) {
             $Qb->andWhere('c.idpais=:idpais')

@@ -76,4 +76,14 @@ class PqrForm extends Model
     {
         return PqrForm::findByAttributes(['active' => 1]);
     }
+
+
+    public function getRow(string $name): PqrFormField
+    {
+        foreach ($this->PqrFormFields as $PqrFormField) {
+            if ($PqrFormField->name == $name) {
+                return $PqrFormField;
+            }
+        }
+    }
 }

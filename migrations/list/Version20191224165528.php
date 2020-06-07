@@ -53,6 +53,24 @@ final class Version20191224165528 extends AbstractMigration
                         'enlace' => NULL,
                         'orden' => 1,
                         'children' => [
+                            'conf_plantilla_pqr' => [
+                                'pertenece_nucleo' => 0,
+                                'nombre' => 'conf_plantilla_pqr',
+                                'tipo' => 2,
+                                'imagen' => 'fa fa-newspaper-o',
+                                'etiqueta' => 'Formulario PQRSF',
+                                'enlace' => 'views/modules/pqr/dist/pqr/index.html',
+                                'orden' => 1
+                            ],
+                            'conf_respuesta_pqr' => [
+                                'pertenece_nucleo' => 0,
+                                'nombre' => 'conf_respuesta_pqr',
+                                'tipo' => 2,
+                                'imagen' => 'fa fa-mail-reply',
+                                'etiqueta' => 'Respuestas PQRSF',
+                                'enlace' => 'views/modules/pqr/dist/respuestaPqr/index.html',
+                                'orden' => 1
+                            ],
                             'conf_formulario_pqr' => [
                                 'pertenece_nucleo' => 0,
                                 'nombre' => 'conf_formulario_pqr',
@@ -60,35 +78,6 @@ final class Version20191224165528 extends AbstractMigration
                                 'imagen' => 'fa fa-cogs',
                                 'etiqueta' => 'General',
                                 'enlace' => 'views/modules/pqr/dist/configuracionPqr/index.html',
-                                'orden' => 1
-                            ]
-                        ]
-                    ],
-                    'formulario_pqr' => [
-                        'pertenece_nucleo' => 0,
-                        'nombre' => 'formulario_pqr',
-                        'tipo' => 1,
-                        'imagen' => 'fa fa-bars',
-                        'etiqueta' => 'Formularios',
-                        'enlace' => NULL,
-                        'orden' => 2,
-                        'children' => [
-                            'form_plantilla_pqr' => [
-                                'pertenece_nucleo' => 0,
-                                'nombre' => 'form_plantilla_pqr',
-                                'tipo' => 2,
-                                'imagen' => 'fa fa-newspaper-o',
-                                'etiqueta' => 'Formulario PQRSF',
-                                'enlace' => 'views/modules/pqr/dist/pqr/index.html',
-                                'orden' => 1
-                            ],
-                            'form_respuesta_pqr' => [
-                                'pertenece_nucleo' => 0,
-                                'nombre' => 'form_respuesta_pqr',
-                                'tipo' => 2,
-                                'imagen' => 'fa fa-mail-reply',
-                                'etiqueta' => 'Respuestas PQRSF',
-                                'enlace' => 'views/modules/pqr/dist/respuestaPqr/index.html',
                                 'orden' => 1
                             ]
                         ]

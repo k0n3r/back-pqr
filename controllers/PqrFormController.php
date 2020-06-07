@@ -18,6 +18,14 @@ class PqrFormController extends Controller
     const  DIRECTORY_PQR = 'ws/pqr/';
     const DIRECTORY_CLASIFICACION = 'ws/calificacion/';
 
+    private PqrForm $PqrForm;
+
+    public function __construct(array $request = null)
+    {
+        parent::__construct($request);
+        $this->PqrForm = PqrForm::getPqrFormActive();
+    }
+
     /**
      * Obtiene todos los datos del modulo de configuracion
      *
@@ -27,12 +35,90 @@ class PqrFormController extends Controller
      */
     public function getSetting(): object
     {
+        $PqrForm = PqrForm::getPqrFormActive();
+        $PqrFormService = new PqrFormService($PqrForm);
+
         $Response = (object) [
             'success' => 1,
             'data' => [
-                'urlWs' => PROTOCOLO_CONEXION . DOMINIO . '/' . self::DIRECTORY_PQR
+                'urlWs' => PROTOCOLO_CONEXION . DOMINIO . '/' . self::DIRECTORY_PQR,
+                'publish' => $this->PqrForm->fk_formato ? 1 : 0,
+                'pqrForm' => $PqrFormService->getDataPqrForm(),
+                'pqrTypes' => $PqrFormService->getTypes(),
+                'pqrFormFields' => $PqrFormService->getDataPqrFormFields()
             ]
         ];
+
+        return $Response;
+    }
+
+    /**
+     * Actualiza los dias de vencimientos de los tipo de PQR
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function updatePqrTypes(): object
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+
+        try {
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
+
+            $PqrFormField = $this->PqrForm->getRow('sys_tipo');
+            $PqrFormField->setAttributes([
+                'setting' => json_encode($this->request)
+            ]);
+            $PqrFormField->update();
+
+            $PqrFormService = new PqrFormService($this->PqrForm);
+
+            $Response->success = 1;
+            $Response->pqrTypes = $PqrFormService->getTypes();
+            $conn->commit();
+        } catch (\Exception $th) {
+            $conn->rollBack();
+            $Response->message = $th->getMessage();
+        }
+
+        return $Response;
+    }
+
+
+    /**
+     * Habilita/deshabilita la radicacion por Email
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function updatePqrForm(): object
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+
+        try {
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
+
+            $this->PqrForm->setAttributes($this->request['pqrForm']);
+            if (!$this->PqrForm->update()) {
+                throw new \Exception("No fue posible actualizar", 200);
+            };
+            $PqrFormService = new PqrFormService($this->PqrForm);
+
+            $Response->pqrForm = $PqrFormService->getDataPqrForm();
+            $Response->success = 1;
+            $conn->commit();
+        } catch (\Exception $th) {
+            $conn->rollBack();
+            $Response->message = $th->getMessage();
+        }
 
         return $Response;
     }
@@ -60,16 +146,13 @@ class PqrFormController extends Controller
                 ->set('required_anonymous', 0)
                 ->where("name<>'sys_tipo'")->execute();
 
-            if ($PqrForm = PqrForm::getPqrFormActive()) {
-                $PqrForm->setAttributes($this->request['pqrForm']);
-                if (!$PqrForm->update()) {
-                    throw new \Exception("No fue posible actualizar", 200);
-                };
-            } else {
-                throw new \Exception("No se encontro un formulario activo");
-            }
 
-            if ($PqrForm->show_anonymous) {
+            $this->PqrForm->setAttributes($this->request['pqrForm']);
+            if (!$this->PqrForm->update()) {
+                throw new \Exception("No fue posible actualizar", 200);
+            };
+
+            if ($this->PqrForm->show_anonymous) {
                 if ($formFields = $this->request['formFields']) {
                     foreach ($formFields['dataShowAnonymous'] as $id) {
                         $PqrFormField = new PqrFormField($id);
@@ -86,7 +169,7 @@ class PqrFormController extends Controller
                 }
             }
 
-            $PqrFormService = new PqrFormService($PqrForm);
+            $PqrFormService = new PqrFormService($this->PqrForm);
             $Response->data = [
                 'pqrForm' => $PqrFormService->getDataPqrForm(),
                 'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
@@ -100,9 +183,6 @@ class PqrFormController extends Controller
 
         return $Response;
     }
-
-
-    /*-------------------------------------------- */
 
     /**
      * publica o crea el formulario en el webservice
@@ -121,8 +201,6 @@ class PqrFormController extends Controller
         try {
             $conn = DatabaseConnection::getDefaultConnection();
             $conn->beginTransaction();
-
-            $this->PqrForm = PqrForm::getPqrFormActive();
 
             $this->addEditFormat(
                 new AddEditFtPqr($this->PqrForm)

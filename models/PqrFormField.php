@@ -18,6 +18,7 @@ class PqrFormField extends Model
                 'label',
                 'required',
                 'anonymous',
+                'show_report',
                 'required_anonymous',
                 'setting',
                 'fk_pqr_html_field',

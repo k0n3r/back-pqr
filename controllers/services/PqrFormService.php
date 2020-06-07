@@ -55,4 +55,16 @@ class PqrFormService
     {
         return $this->PqrForm->getDataAttributes();
     }
+
+    /**
+     * Obtiene los tipos de PQR
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getTypes(): array
+    {
+        return $this->PqrForm->getRow('sys_tipo')->getSetting()->options;
+    }
 }

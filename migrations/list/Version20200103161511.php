@@ -181,13 +181,34 @@ final class Version20200103161511 extends AbstractMigration
                 'name' => 'sys_tipo',
                 'required' => 1,
                 'anonymous' => 1,
+                'show_report' => 1,
                 'setting' => json_encode([
                     'options' => [
-                        'Petición',
-                        'Queja',
-                        'Reclamo',
-                        'Sugerencia',
-                        'Felicitación'
+                        [
+                            'id' => 1,
+                            'text' => 'Petición',
+                            'dias' => 15
+                        ],
+                        [
+                            'id' => 2,
+                            'text' => 'Queja',
+                            'dias' => 15
+                        ],
+                        [
+                            'id' => 3,
+                            'text' => 'Reclamo',
+                            'dias' => 15
+                        ],
+                        [
+                            'id' => 4,
+                            'text' => 'Sugerencia',
+                            'dias' => 15
+                        ],
+                        [
+                            'id' => 5,
+                            'text' => 'Felicitación',
+                            'dias' => 15
+                        ]
                     ]
                 ]),
                 'fk_pqr_html_field' => $idsHtmlFields['select'],
@@ -201,6 +222,7 @@ final class Version20200103161511 extends AbstractMigration
                 'name' => 'sys_email',
                 'required' => 1,
                 'anonymous' => 1,
+                'show_report' => 1,
                 'setting' => json_encode([
                     'placeholder' => 'example@pqr.com'
                 ]),

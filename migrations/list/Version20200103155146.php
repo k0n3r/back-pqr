@@ -63,6 +63,11 @@ final class Version20200103155146 extends AbstractMigration
             'notnull' => false
         ]);
 
+        $table->addColumn('show_report', 'boolean', [
+            'default' => 0,
+            'notnull' => false
+        ]);
+
         $table->addColumn('required_anonymous', 'boolean', [
             'default' => 0,
             'notnull' => false
@@ -154,7 +159,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addIndex(['fk_documento'], 'i_fk_documento');
         $table->addColumn('fk_pqr', 'integer');
         $table->addIndex(['fk_pqr'], 'i_fk_pqr');
-        $table->addColumn('data', 'text');
+        $table->addColumn('data_json', 'text');
     }
 
     public function tablePqrResponseTemplate(Table $table)

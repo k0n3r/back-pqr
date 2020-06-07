@@ -7,6 +7,7 @@ use Saia\Pqr\models\PqrForm;
 use Doctrine\DBAL\Types\Type;
 use Saia\core\DatabaseConnection;
 use Saia\Pqr\models\PqrFormField;
+use Saia\Pqr\controllers\services\PqrFormService;
 
 class PqrFormFieldController extends Controller
 {
@@ -202,6 +203,44 @@ class PqrFormFieldController extends Controller
         return $Response;
     }
 
+    public function updateShowReport()
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+
+        try {
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
+
+            DatabaseConnection::getQueryBuilder()
+                ->update('pqr_form_fields')
+                ->set('show_report', 0)
+                ->where("name<>'sys_tipo'")->execute();
+
+            if ($this->request['ids']) {
+                foreach ($this->request['ids'] as $id) {
+                    $PqrFormField = new PqrFormField($id);
+                    $PqrFormField->show_report = 1;
+                    if (!$PqrFormField->update()) {
+                        throw new \Exception("No fue posible actualizar", 200);
+                    };
+                }
+            }
+
+            $PqrFormService = new PqrFormService(PqrForm::getPqrFormActive());
+            $Response->pqrFormFields = $PqrFormService->getDataPqrFormFields();
+
+            $Response->success = 1;
+            $conn->commit();
+        } catch (\Exception $th) {
+            $conn->rollBack();
+            $Response->message = $th->getMessage();
+        }
+
+        return $Response;
+    }
+
     /**
      * Actualiza el estado(active) del campo
      *
@@ -238,12 +277,10 @@ class PqrFormFieldController extends Controller
         return $Response;
     }
 
-    /**------------------------------------------------ */
-
     /**
      * Obtiene una lista de datos
      *
-     * @return void
+     * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */

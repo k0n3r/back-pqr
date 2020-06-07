@@ -55,21 +55,45 @@ class FtPqr extends FtPqrProperties
 
         $Fields = $PqrForm->PqrFormFields;
         foreach ($Fields as  $PqrFormField) {
-            $PqrHtmlField = $PqrFormField->PqrHtmlField;
-            if (in_array($PqrHtmlField->type_saia, [
-                'Radio',
-                'Checkbox',
-                'Select'
-            ])) {
-                $data[$PqrFormField->label] = CampoSeleccionados::findColumn('valor', [
-                    'fk_campos_formato' => $PqrFormField->fk_campos_formato,
-                    'fk_documento' => $this->documento_iddocumento
-                ]);
-            } else {
-                $fieldName = $PqrFormField->name;
-                $data[$PqrFormField->label] = $this->$fieldName;
+
+            if ($value = $this->getValue($PqrFormField)) {
+                $data = array_merge($data, $value);
             }
         }
+
+        return $data;
+    }
+
+    private function getValue($PqrFormField)
+    {
+        $PqrHtmlField = $PqrFormField->PqrHtmlField;
+        $fieldName = $PqrFormField->name;
+        $label = strtoupper($PqrFormField->label);
+
+        switch ($PqrHtmlField->type_saia) {
+            case 'Hidden':
+            case 'Attached':
+                continue;
+                break;
+
+            case 'Radio':
+            case 'Checkbox':
+            case 'Select':
+                $data[$label] = $this->getFieldValue($fieldName);
+                break;
+            case 'AutocompleteD';
+            case 'AutocompleteM';
+                if ($this->$fieldName) {
+                    $value = (new PqrFormFieldService($PqrFormField))
+                        ->getListField(['id' => $this->$fieldName]);
+                }
+                $data[$label] = $value ? $value[0]['text'] : '';
+                break;
+            default:
+                $data[$label] = $this->$fieldName;
+                break;
+        }
+
         return $data;
     }
 
@@ -124,17 +148,17 @@ class FtPqr extends FtPqrProperties
      */
     public function showContent(): string
     {
-        $data = json_decode($this->PqrBackup->data);
+        $data = $this->PqrBackup->getDataJson();
         $Qr = CoreFunctions::mostrar_qr($this);
+
         $code = "<table class='table table-bordered' style='width:100%'>
         <tr>
             <td colspan='2' align='right'>{$Qr}</td>
         </tr>";
         foreach ($data as $key => $value) {
-            $val = (is_array($value)) ? implode(',', $value) : $value;
             $code .= "<tr>
-                <td class='text-uppercase font-weight-bold' style='width:35%'>{$key} :</td>
-                <td style='width:65%'>{$val}</td>
+                <td style='width:50%'><strong>{$key}</strong></td>
+                <td style='width:50%'>{$value}</td>
             <tr>";
         }
         $code .= '</table>';
@@ -147,10 +171,10 @@ class FtPqr extends FtPqrProperties
      */
     public function afterRad(): bool
     {
+        $this->createBackup();
         $this->Documento->getPdfJson(true);
 
-        return $this->createBackup() &&
-            $this->notifyEmail();
+        return $this->notifyEmail();
     }
 
     private function createBackup(): bool
@@ -158,7 +182,7 @@ class FtPqr extends FtPqrProperties
         if (!PqrBackup::newRecord([
             'fk_documento' => $this->documento_iddocumento,
             'fk_pqr' => $this->getPK(),
-            'data' => json_encode($this->getDataRow())
+            'data_json' => json_encode($this->getDataRow())
         ])) {
             throw new Exception("No fue posible registrar el backup", 1);
         }

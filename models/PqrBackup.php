@@ -16,7 +16,7 @@ class PqrBackup extends Model
             'safe' => [
                 'fk_documento',
                 'fk_pqr',
-                'data'
+                'data_json'
             ],
             'primary' => 'id',
             'table' => 'pqr_backups',
@@ -44,8 +44,8 @@ class PqrBackup extends Model
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function getData(): object
+    public function getDataJson(): object
     {
-        return json_decode($this->data);
+        return json_decode($this->data_json);
     }
 }
