@@ -30,7 +30,10 @@ HTML;
     return $enlace;
 }
 
-function dateRadication($date): string
+function dateRadication($date, string $format = null): string
 {
-    return DateController::convertDate($date);
+    if (!$format) {
+        $format = DateController::PUBLIC_DATETIME_FORMAT;
+    }
+    return DateController::convertDate($date, $format);
 }

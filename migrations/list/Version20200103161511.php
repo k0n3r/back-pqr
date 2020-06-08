@@ -185,27 +185,22 @@ final class Version20200103161511 extends AbstractMigration
                 'setting' => json_encode([
                     'options' => [
                         [
-                            'id' => 1,
                             'text' => 'Petición',
                             'dias' => 15
                         ],
                         [
-                            'id' => 2,
                             'text' => 'Queja',
                             'dias' => 15
                         ],
                         [
-                            'id' => 3,
                             'text' => 'Reclamo',
                             'dias' => 15
                         ],
                         [
-                            'id' => 4,
                             'text' => 'Sugerencia',
                             'dias' => 15
                         ],
                         [
-                            'id' => 5,
                             'text' => 'Felicitación',
                             'dias' => 15
                         ]

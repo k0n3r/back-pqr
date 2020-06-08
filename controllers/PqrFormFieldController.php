@@ -218,15 +218,20 @@ class PqrFormFieldController extends Controller
                 ->set('show_report', 0)
                 ->where("name<>'sys_tipo'")->execute();
 
+            $fields = $fieldsFt = [];
             if ($this->request['ids']) {
                 foreach ($this->request['ids'] as $id) {
                     $PqrFormField = new PqrFormField($id);
                     $PqrFormField->show_report = 1;
+                    $fields[] = $PqrFormField;
+                    $fieldsFt[] = "ft.{$PqrFormField->name}";
                     if (!$PqrFormField->update()) {
                         throw new \Exception("No fue posible actualizar", 200);
                     };
                 }
             }
+
+            $this->updateInfoReport($fields, $fieldsFt);
 
             $PqrFormService = new PqrFormService(PqrForm::getPqrFormActive());
             $Response->pqrFormFields = $PqrFormService->getDataPqrFormFields();
@@ -239,6 +244,84 @@ class PqrFormFieldController extends Controller
         }
 
         return $Response;
+    }
+
+    private function updateInfoReport(array $fields, array $fieldsFt): bool
+    {
+        (new PqrFormController())->viewPqr($fieldsFt);
+
+        return $this->generateFuncionReport($fields) &&
+            $this->updateReport($fields);
+    }
+
+    private function updateReport(array $fields)
+    {
+        $code = [];
+        foreach ($fields as $PqrFormField) {
+            $type = $PqrFormField->PqrHtmlField->type_saia;
+            switch ($type) {
+                case 'Text':
+                    $code[] = '{"title":"' . strtoupper($PqrFormField->label) . '","field":"{*' . $PqrFormField->name . '*}","align":"center"}';
+                    break;
+                default:
+                    $code[] = '{"title":"' . strtoupper($PqrFormField->label) . '","field":"{*get_' . $PqrFormField->name . '@idft,' . $PqrFormField->name . '*}","align":"center"}';
+                    break;
+            }
+        }
+        return $code;
+    }
+
+    private function generateFuncionReport(array $fields): bool
+    {
+        global $rootPath;
+
+        $fieldCode = [];
+        foreach ($fields as $PqrFormField) {
+            $code = 'function get_{$PqrFormField->name}(int \$idft,\$value){';
+
+            switch ($PqrFormField->PqrHtmlField->type_saia) {
+                case 'Textarea':
+                    $code .= '$response=substr($value, -3, 1);';
+                    break;
+                case 'Select':
+                case 'Radio':
+                    $code .= <<<PHP
+                    \$response = '';
+                    if (\$valor = CampoSeleccionados::findColumn('valor', [
+                        'fk_campo_opciones' => \$value,
+                        'fk_documento' => \$this->documento_iddocumento
+                    ])) {
+                        \$response = \$valor[0];
+                    }
+PHP;
+                    break;
+                case 'Checkbox':
+                    $code .= <<<PHP
+PHP;
+                    break;
+                case 'AutocompleteD':
+                    $code .= <<<PHP
+PHP;
+                    break;
+                case 'AutocompleteM':
+                    $code .= <<<PHP
+PHP;
+                    break;
+            }
+            $code .= 'return \$response;}';
+            $fieldCode[] = $code;
+        }
+
+        extract($params);
+        ob_start();
+        include $rootPath . $template;
+        $content = ob_get_clean();
+
+        if (!file_put_contents($rootPath . 'app/modules/back_pqr/formatos/pqr/functionsReport.php', $content)) {
+            throw new \Exception("No fue posible crear el js del formulario", 200);
+        }
+
+        return true;
     }
 
     /**

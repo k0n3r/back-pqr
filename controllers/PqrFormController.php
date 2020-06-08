@@ -75,10 +75,9 @@ class PqrFormController extends Controller
             ]);
             $PqrFormField->update();
 
-            $PqrFormService = new PqrFormService($this->PqrForm);
+            AddEditFtPqr::addEditformatOptions($PqrFormField);
 
             $Response->success = 1;
-            $Response->pqrTypes = $PqrFormService->getTypes();
             $conn->commit();
         } catch (\Exception $th) {
             $conn->rollBack();
@@ -287,14 +286,30 @@ class PqrFormController extends Controller
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function viewPqr()
+    public function viewPqr(array $fields = [])
     {
-        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.sys_email,ft.sys_tipo,ft.sys_estado,ft.idft_pqr as idft
+        $fields = implode(',', array_merge($this->defaultFieldsReport(), $fields));
+
+        $sql = "SELECT {$fields}
         FROM ft_pqr ft,documento d
         WHERE ft.documento_iddocumento=d.iddocumento
         AND d.estado NOT IN ('ELIMINADO','ANULADO')";
 
         $this->createView('vpqr', $sql);
+    }
+
+    private function defaultFieldsReport()
+    {
+        return [
+            'd.iddocumento',
+            'd.numero',
+            'd.fecha',
+            'ft.sys_tipo',
+            'ft.sys_estado',
+            'ft.sys_fecha_vencimiento',
+            'ft.sys_fecha_terminado',
+            'ft.idft_pqr as idft'
+        ];
     }
 
     /**
@@ -342,7 +357,7 @@ class PqrFormController extends Controller
                 break;
 
             default:
-                throw new Exception("No fue posible generar la vista {$name}", 1);
+                throw new \Exception("No fue posible generar la vista {$name}", 200);
                 break;
         }
     }

@@ -2,4 +2,5 @@ formatos/*/mostrar.php
 formatos/*/adicionar.php
 formatos/*/editar.php
 formatos/*/buscar.php
+formatos/*/functionsReport.php
 logs/*

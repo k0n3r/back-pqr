@@ -31,10 +31,13 @@ class FtPqrProperties extends ModelFormat
 				'sys_dependencia',
 				'sys_email',
 				'sys_estado',
+				'sys_fecha_terminado',
+				'sys_fecha_vencimiento',
 				'sys_tipo',
 				'sys_tratamiento' 
             ],
-            'date' => [],
+            'date' => ['sys_fecha_vencimiento',
+				'sys_fecha_terminado'],
             'table' => 'ft_pqr',
             'primary' => 'idft_pqr'
         ];

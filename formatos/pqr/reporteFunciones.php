@@ -14,11 +14,40 @@ while ($max_salida > 0) {
 
 include_once $rootPath . 'app/vendor/autoload.php';
 
+$fileAdditionalFunctions = $rootPath . 'app/modules/back_pqr/formatos/pqr/functionsReport.php';
+if (file_exists($fileAdditionalFunctions)) {
+    include_once $fileAdditionalFunctions;
+}
+
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\Helpers\UtilitiesPqr;
 use Saia\models\documento\Documento;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CampoSeleccionados;
+
+function viewFtPqr(int $idft, $numero): String
+{
+    global $FtPqr;
+
+    $GLOBALS['FtPqr'] = new FtPqr($idft);
+
+    $enlace = <<<HTML
+    <div class='kenlace_saia'
+    enlace='views/documento/index_acordeon.php?documentId={$FtPqr->documento_iddocumento}' 
+    conector='iframe'
+    titulo='No Registro {$numero}'>
+        <button class='btn btn-complete' style='margin:auto'>{$numero}</button>
+    </div>
+HTML;
+    return $enlace;
+}
+
+function getExpiration(int $idft)
+{
+    global $FtPqr;
+
+    return $FtPqr->getColorExpiration();
+}
 
 function getValueSysTipo(int $iddocumento, int $fkCampoOpciones)
 {
@@ -42,7 +71,7 @@ function totalTask(int $iddocumento): string
 
 function totalAnswers(int $idft): string
 {
-    global $idbusquedaComponenteRespuesta;
+    global $idbusquedaComponenteRespuesta, $FtPqr;
 
     if (!$idbusquedaComponenteRespuesta) {
         $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
@@ -50,7 +79,6 @@ function totalAnswers(int $idft): string
         ])[0];
     }
 
-    $FtPqr = new FtPqr($idft);
     $cant = count($FtPqr->getPqrAnswers());
     if (!$cant) {
         return 0;

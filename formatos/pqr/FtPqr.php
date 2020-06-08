@@ -2,15 +2,18 @@
 
 namespace Saia\Pqr\formatos\pqr;
 
+use DateTime;
 use Exception;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\models\PqrBackup;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\Helpers\UtilitiesPqr;
 use Saia\controllers\anexos\FileJson;
+use Saia\controllers\DateController;
 use Saia\controllers\SendMailController;
-use Saia\models\formatos\CampoSeleccionados;
 use Saia\controllers\functions\CoreFunctions;
+use Saia\Pqr\controllers\services\PqrFormService;
 use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use Saia\Pqr\controllers\services\PqrFormFieldService;
 
@@ -19,6 +22,19 @@ class FtPqr extends FtPqrProperties
     const ESTADO_PENDIENTE = 'PENDIENTE';
     const ESTADO_PROCESO = 'PROCESO';
     const ESTADO_TERMINADO = 'TERMINADO';
+
+    const VENCIMIENTO_ROJO = 1; //DIAS
+    const VENCIMIENTO_AMARILLO = 5; //DIAS
+
+    private PqrForm $PqrForm;
+
+    public function __construct($id = null)
+    {
+        parent::__construct($id);
+        if (!$this->PqrForm = PqrForm::getPqrFormActive()) {
+            throw new Exception("No se encuentra el formulario activo", 200);
+        }
+    }
 
     protected function defineMoreAttributes(): array
     {
@@ -35,7 +51,7 @@ class FtPqr extends FtPqrProperties
                     'attribute' => 'ft_pqr',
                     'primary' => 'idft_pqr',
                     'relation' => self::BELONGS_TO_MANY
-                ],
+                ]
             ]
         ];
     }
@@ -48,12 +64,10 @@ class FtPqr extends FtPqrProperties
      */
     private function getDataRow(): array
     {
-        if (!$PqrForm = PqrForm::getPqrFormActive()) {
-            throw new Exception("No se encuentra el formulario activo", 1);
-        }
+
         $data = [];
 
-        $Fields = $PqrForm->PqrFormFields;
+        $Fields = $this->PqrForm->PqrFormFields;
         foreach ($Fields as  $PqrFormField) {
 
             if ($value = $this->getValue($PqrFormField)) {
@@ -172,9 +186,32 @@ class FtPqr extends FtPqrProperties
     public function afterRad(): bool
     {
         $this->createBackup();
+        $this->updateFechaVencimiento();
         $this->Documento->getPdfJson(true);
 
         return $this->notifyEmail();
+    }
+
+    private function updateFechaVencimiento(): bool
+    {
+        $options = json_decode($this->PqrForm->getRow('sys_tipo')->CamposFormato->opciones);
+
+        $dias = 1;
+        foreach ($options as $option) {
+            if ($option->idcampo_opciones == $this->sys_tipo) {
+                $dias = $option->dias;
+                break;
+            }
+        }
+
+        $fecha = (DateController::addBusinessDays(new DateTime(), $dias))->format('Y-m-d H:i:s');
+        $this->sys_fecha_vencimiento = $fecha;
+        $this->update();
+
+        $this->Documento->fecha_limite = $fecha;
+        $this->Documento->update();
+
+        return true;
     }
 
     private function createBackup(): bool
@@ -279,5 +316,29 @@ class FtPqr extends FtPqrProperties
     </div>
 HTML;
         return $code;
+    }
+
+    public function getColorExpiration(): string
+    {
+        if (!$this->sys_fecha_vencimiento) {
+            return 'Fecha no configurada';
+        }
+
+        $now = $this->sys_fecha_terminado ? new DateTime($this->sys_fecha_terminado) : new DateTime();
+        $diff = $now->diff(new DateTime($this->sys_fecha_vencimiento));
+
+        $color = "success";
+        if ($diff->invert || $diff->days <= self::VENCIMIENTO_ROJO) {
+            $color = 'danger';
+        } else if ($diff->days <= self::VENCIMIENTO_AMARILLO) {
+            $color = 'warning';
+        }
+
+        $date = DateController::convertDate(
+            $this->sys_fecha_vencimiento,
+            DateController::PUBLIC_DATE_FORMAT
+        );
+
+        return "<span class='badge badge-{$color}'>{$date}</span>";
     }
 }

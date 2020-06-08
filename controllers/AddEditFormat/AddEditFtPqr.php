@@ -200,14 +200,14 @@ class AddEditFtPqr implements IAddEditFormat
     }
 
     /**
-     * Crea o edita las opciones de los campos tipo select, radio o checkbxo
+     * Crea o edita las opciones de los campos tipo select, radio o checkbox
      *
      * @param PqrFormField $PqrFormField
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function addEditformatOptions(PqrFormField $PqrFormField): void
+    public static function addEditformatOptions(PqrFormField $PqrFormField): void
     {
         $CampoFormato = $PqrFormField->CamposFormato;
         $llave = 0;
@@ -229,7 +229,7 @@ class AddEditFtPqr implements IAddEditFormat
         foreach ($PqrFormField->getSetting()->options as $option) {
 
             if ($CampoOpciones = CampoOpciones::findByAttributes([
-                'valor' => $option,
+                'valor' => $option->text,
                 'fk_campos_formato' => $CampoFormato->getPk()
             ])) {
                 $CampoOpciones->setAttributes([
@@ -237,22 +237,31 @@ class AddEditFtPqr implements IAddEditFormat
                 ]);
                 $CampoOpciones->update();
                 $id = $CampoOpciones->llave;
+                $idCampoOpcion = $CampoOpciones->getPK();
             } else {
                 $id = $llave + 1;
                 $llave = $id;
-                CampoOpciones::newRecord([
+                $idCampoOpcion = CampoOpciones::newRecord([
                     'llave' => $id,
-                    'valor' => $option,
+                    'valor' => $option->text,
                     'fk_campos_formato' => $CampoFormato->getPK(),
                     'estado' => 1
                 ]);
             }
-
-            $data[] = [
-                'llave' => $id,
-                'item' => $option
-            ];
-            $values[] = "{$id},{$option}";
+            if ($PqrFormField->name == 'sys_tipo') {
+                $data[] = [
+                    'idcampo_opciones' => $idCampoOpcion,
+                    'llave' => $id,
+                    'item' => $option->text,
+                    'dias' => $option->dias
+                ];
+            } else {
+                $data[] = [
+                    'llave' => $id,
+                    'item' => $option->text
+                ];
+            }
+            $values[] = "{$id},{$option->text}";
         }
         $CampoFormato->setAttributes([
             'opciones' => json_encode($data),
@@ -329,33 +338,73 @@ class AddEditFtPqr implements IAddEditFormat
      */
     private function addOtherFields(): self
     {
-        $data = [
-            'formato_idformato' => $this->PqrForm->fk_formato,
-            'fila_visible' => 0,
-            'obligatoriedad' => 0,
-            'orden' => 0,
-            'nombre' => 'sys_estado',
-            'etiqueta' => 'Estado de la PQR',
-            'tipo_dato' => 'string',
-            'longitud' => '30',
-            'predeterminado' => FtPqr::ESTADO_PENDIENTE,
-            'etiqueta_html' => 'hidden',
-            'acciones' => NULL,
-            'placeholder' => 'Estado de la PQR',
-            'listable' => 1,
-            'opciones' => NULL,
-            'ayuda' => NULL,
-            'longitud_vis' => NULL
+        $fields = [
+            'sys_estado' => [
+                'formato_idformato' => $this->PqrForm->fk_formato,
+                'fila_visible' => 0,
+                'obligatoriedad' => 0,
+                'orden' => 0,
+                'nombre' => 'sys_estado',
+                'etiqueta' => 'Estado de la PQR',
+                'tipo_dato' => 'string',
+                'longitud' => '30',
+                'predeterminado' => FtPqr::ESTADO_PENDIENTE,
+                'etiqueta_html' => 'Hidden',
+                'acciones' => NULL,
+                'placeholder' => 'Estado de la PQR',
+                'listable' => 1,
+                'opciones' => NULL,
+                'ayuda' => NULL,
+                'longitud_vis' => NULL
+            ],
+            'sys_fecha_vencimiento' => [
+                'formato_idformato' => $this->PqrForm->fk_formato,
+                'fila_visible' => 0,
+                'obligatoriedad' => 0,
+                'orden' => 0,
+                'nombre' => 'sys_fecha_vencimiento',
+                'etiqueta' => 'Fecha vecimiento PQR',
+                'tipo_dato' => 'datetime',
+                'longitud' => NULL,
+                'predeterminado' => NULL,
+                'etiqueta_html' => 'Hidden',
+                'acciones' => NULL,
+                'placeholder' => NULL,
+                'listable' => 1,
+                'opciones' => '{"hoy":false,"tipo":"date"}',
+                'ayuda' => NULL,
+                'longitud_vis' => NULL
+            ],
+            'sys_fecha_terminado' => [
+                'formato_idformato' => $this->PqrForm->fk_formato,
+                'fila_visible' => 0,
+                'obligatoriedad' => 0,
+                'orden' => 0,
+                'nombre' => 'sys_fecha_terminado',
+                'etiqueta' => 'Fecha Terminacion PQR',
+                'tipo_dato' => 'datetime',
+                'longitud' => NULL,
+                'predeterminado' => NULL,
+                'etiqueta_html' => 'Hidden',
+                'acciones' => NULL,
+                'placeholder' => NULL,
+                'listable' => 1,
+                'opciones' => '{"hoy":false,"tipo":"date"}',
+                'ayuda' => NULL,
+                'longitud_vis' => NULL
+            ]
         ];
 
-        if ($CamposFormato = CamposFormato::findByAttributes([
-            'nombre' => 'sys_estado',
-            'formato_idformato' => $this->PqrForm->fk_formato
-        ])) {
-            $CamposFormato->setAttributes($data);
-            $CamposFormato->update(true);
-        } else {
-            CamposFormato::newRecord($data);
+        foreach ($fields as $name => $data) {
+            if ($CamposFormato = CamposFormato::findByAttributes([
+                'nombre' => $name,
+                'formato_idformato' => $this->PqrForm->fk_formato
+            ])) {
+                $CamposFormato->setAttributes($data);
+                $CamposFormato->update(true);
+            } else {
+                CamposFormato::newRecord($data);
+            }
         }
 
         return $this;

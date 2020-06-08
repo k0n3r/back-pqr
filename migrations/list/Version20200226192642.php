@@ -50,7 +50,7 @@ final class Version20200226192642 extends AbstractMigration
 
         return [
             'url' => NULL,
-            'info' => '[{"title":"RADICADO","field":"{*view@iddocumento,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},{"title":"E-MAIL","field":"{*sys_email*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
+            'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},{"title":"E-MAIL","field":"{*sys_email*}","align":"center"},{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
             'encabezado_componente' => NULL,
             'campos_adicionales' => 'v.numero,v.fecha,v.sys_email,v.sys_tipo,v.sys_estado,v.idft',
             'tablas_adicionales' => NULL,
