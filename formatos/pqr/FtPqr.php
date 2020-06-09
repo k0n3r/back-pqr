@@ -13,7 +13,6 @@ use Saia\controllers\anexos\FileJson;
 use Saia\controllers\DateController;
 use Saia\controllers\SendMailController;
 use Saia\controllers\functions\CoreFunctions;
-use Saia\Pqr\controllers\services\PqrFormService;
 use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use Saia\Pqr\controllers\services\PqrFormFieldService;
 
@@ -36,6 +35,13 @@ class FtPqr extends FtPqrProperties
         }
     }
 
+    /**
+     * more Attributes
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     protected function defineMoreAttributes(): array
     {
         return [
@@ -55,73 +61,16 @@ class FtPqr extends FtPqrProperties
             ]
         ];
     }
+
     /**
-     * Obtiene las valores del modelo para guardarlos en el backup
+     * Valida si un email es valido
      *
-     * @return array
+     * @param string $email
+     * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function getDataRow(): array
-    {
-
-        $data = [];
-
-        $Fields = $this->PqrForm->PqrFormFields;
-        foreach ($Fields as  $PqrFormField) {
-
-            if ($value = $this->getValue($PqrFormField)) {
-                $data = array_merge($data, $value);
-            }
-        }
-
-        return $data;
-    }
-
-    private function getValue($PqrFormField)
-    {
-        $PqrHtmlField = $PqrFormField->PqrHtmlField;
-        $fieldName = $PqrFormField->name;
-        $label = strtoupper($PqrFormField->label);
-
-        switch ($PqrHtmlField->type_saia) {
-            case 'Hidden':
-            case 'Attached':
-                continue;
-                break;
-
-            case 'Radio':
-            case 'Checkbox':
-            case 'Select':
-                $data[$label] = $this->getFieldValue($fieldName);
-                break;
-            case 'AutocompleteD';
-            case 'AutocompleteM';
-                if ($this->$fieldName) {
-                    $value = (new PqrFormFieldService($PqrFormField))
-                        ->getListField(['id' => $this->$fieldName]);
-                }
-                $data[$label] = $value ? $value[0]['text'] : '';
-                break;
-            default:
-                $data[$label] = $this->$fieldName;
-                break;
-        }
-
-        return $data;
-    }
-
-    private function validSysEmail()
-    {
-        if ($this->sys_email) {
-            if (!$this->isEmailValid($this->sys_email)) {
-                throw new Exception("Esta dirección de correo ({$this->sys_email}) no es válida.", 200);
-            }
-        }
-        return true;
-    }
-
-    private function isEmailValid(string $email): bool
+    public function isEmailValid(string $email): bool
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return false;
@@ -156,7 +105,7 @@ class FtPqr extends FtPqrProperties
     /**
      * Carga todo el mostrar del formulario
      *
-     * @return void
+     * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
@@ -192,6 +141,212 @@ class FtPqr extends FtPqrProperties
         return $this->notifyEmail();
     }
 
+    /**
+     * Obtiene Instancias de las respuestas a la PQR
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getPqrAnswers(): array
+    {
+        $data = [];
+        foreach ($this->PqrRespuesta as $FtPqrRespuesta) {
+            if (!$FtPqrRespuesta->Documento->isActive()) {
+                $data[] = $FtPqrRespuesta;
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Carga el HTML del adicionar/editar para los campos
+     *  AutompleteD
+     *
+     * @param integer $idCamposFormato
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function autocompleteD(int $idCamposFormato): string
+    {
+        $PqrFormField = PqrFormField::findByAttributes([
+            'fk_campos_formato' => $idCamposFormato
+        ]);
+        return $this->generateField($PqrFormField);
+    }
+
+    /**
+     * Carga el HTML del adicionar/editar para los campos
+     *  AutompleteMw
+     *
+     * @param integer $idCamposFormato
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function autocompleteM(int $idCamposFormato): string
+    {
+        $PqrFormField = PqrFormField::findByAttributes([
+            'fk_campos_formato' => $idCamposFormato
+        ]);
+
+        return $this->generateField($PqrFormField);
+    }
+
+    /**
+     * Obtiene la fecha de vencimiento con el color que identifica
+     * el tiempo pendiente por responder la PQR
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getColorExpiration(): string
+    {
+        if (!$this->sys_fecha_vencimiento) {
+            return 'Fecha no configurada';
+        }
+
+        $now = $this->sys_fecha_terminado ? new DateTime($this->sys_fecha_terminado) : new DateTime();
+        $diff = $now->diff(new DateTime($this->sys_fecha_vencimiento));
+
+        $color = "success";
+        if ($diff->invert || $diff->days <= self::VENCIMIENTO_ROJO) {
+            $color = 'danger';
+        } else if ($diff->days <= self::VENCIMIENTO_AMARILLO) {
+            $color = 'warning';
+        }
+
+        $date = DateController::convertDate(
+            $this->sys_fecha_vencimiento,
+            DateController::PUBLIC_DATE_FORMAT
+        );
+
+        return "<span class='badge badge-{$color}'>{$date}</span>";
+    }
+
+    /**
+     * Obtiene el valor del campo que mostrara en el reporte
+     *
+     * @param string $name
+     * @return string|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getValueForReport(string $name): ?string
+    {
+        $value = $this->getValue($this->PqrForm->getRow($name));
+
+        return $value ? implode(',', $value) : null;
+    }
+
+    /**
+     * Genera el backup del formulario
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function createBackup(): bool
+    {
+        if (!PqrBackup::newRecord([
+            'fk_documento' => $this->documento_iddocumento,
+            'fk_pqr' => $this->getPK(),
+            'data_json' => json_encode($this->getDataRow())
+        ])) {
+            throw new Exception("No fue posible registrar el backup", 1);
+        }
+        return true;
+    }
+
+    /**
+     * Obtiene las valores del modelo para guardarlos en el backup
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getDataRow(): array
+    {
+        $data = [];
+
+        $Fields = $this->PqrForm->PqrFormFields;
+        foreach ($Fields as  $PqrFormField) {
+
+            if ($value = $this->getValue($PqrFormField)) {
+                $data = array_merge($data, $value);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Obtiene el valor de un campo
+     *
+     * @param PqrFormField $PqrFormField
+     * @return array|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getValue(PqrFormField $PqrFormField): ?array
+    {
+        $PqrHtmlField = $PqrFormField->PqrHtmlField;
+        $fieldName = $PqrFormField->name;
+        $label = strtoupper($PqrFormField->label);
+
+        switch ($PqrHtmlField->type_saia) {
+            case 'Hidden':
+            case 'Attached':
+                continue;
+                break;
+
+            case 'Radio':
+            case 'Checkbox':
+            case 'Select':
+                $data[$label] = $this->getFieldValue($fieldName);
+                break;
+            case 'AutocompleteD';
+            case 'AutocompleteM';
+                if ($this->$fieldName) {
+                    $value = (new PqrFormFieldService($PqrFormField))
+                        ->getListField(['id' => $this->$fieldName]);
+                }
+                $data[$label] = $value ? $value[0]['text'] : '';
+                break;
+            default:
+                $data[$label] = $this->$fieldName;
+                break;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Valida si el campo sys_email es valido
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function validSysEmail(): bool
+    {
+        if ($this->sys_email) {
+            if (!$this->isEmailValid($this->sys_email)) {
+                throw new Exception("Esta dirección de correo ({$this->sys_email}) no es válida.", 200);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Actualiza la fecha de vencimiento
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     private function updateFechaVencimiento(): bool
     {
         $options = json_decode($this->PqrForm->getRow('sys_tipo')->CamposFormato->opciones);
@@ -214,18 +369,13 @@ class FtPqr extends FtPqrProperties
         return true;
     }
 
-    private function createBackup(): bool
-    {
-        if (!PqrBackup::newRecord([
-            'fk_documento' => $this->documento_iddocumento,
-            'fk_pqr' => $this->getPK(),
-            'data_json' => json_encode($this->getDataRow())
-        ])) {
-            throw new Exception("No fue posible registrar el backup", 1);
-        }
-        return true;
-    }
-
+    /**
+     * Notifica al email registrado
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     private function notifyEmail(): bool
     {
         if (!$this->sys_email) {
@@ -263,35 +413,15 @@ class FtPqr extends FtPqrProperties
         return true;
     }
 
-    public function getPqrAnswers(): array
-    {
-        $data = [];
-        foreach ($this->PqrRespuesta as $FtPqrRespuesta) {
-            if (!$FtPqrRespuesta->Documento->isActive()) {
-                $data[] = $FtPqrRespuesta;
-            }
-        }
-
-        return $data;
-    }
-
-    public function autocompleteD(int $idCamposFormato): string
-    {
-        $PqrFormField = PqrFormField::findByAttributes([
-            'fk_campos_formato' => $idCamposFormato
-        ]);
-        return $this->generateField($PqrFormField);
-    }
-
-    public function autocompleteM(int $idCamposFormato): string
-    {
-        $PqrFormField = PqrFormField::findByAttributes([
-            'fk_campos_formato' => $idCamposFormato
-        ]);
-
-        return $this->generateField($PqrFormField);
-    }
-
+    /**
+     * Html de los campos Automplete
+     * 
+     *
+     * @param PqrFormField $PqrFormField
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     private function generateField(PqrFormField $PqrFormField): string
     {
         $name = $PqrFormField->name;
@@ -316,29 +446,5 @@ class FtPqr extends FtPqrProperties
     </div>
 HTML;
         return $code;
-    }
-
-    public function getColorExpiration(): string
-    {
-        if (!$this->sys_fecha_vencimiento) {
-            return 'Fecha no configurada';
-        }
-
-        $now = $this->sys_fecha_terminado ? new DateTime($this->sys_fecha_terminado) : new DateTime();
-        $diff = $now->diff(new DateTime($this->sys_fecha_vencimiento));
-
-        $color = "success";
-        if ($diff->invert || $diff->days <= self::VENCIMIENTO_ROJO) {
-            $color = 'danger';
-        } else if ($diff->days <= self::VENCIMIENTO_AMARILLO) {
-            $color = 'warning';
-        }
-
-        $date = DateController::convertDate(
-            $this->sys_fecha_vencimiento,
-            DateController::PUBLIC_DATE_FORMAT
-        );
-
-        return "<span class='badge badge-{$color}'>{$date}</span>";
     }
 }

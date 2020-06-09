@@ -7,6 +7,7 @@ use Saia\Pqr\models\PqrForm;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
 use Saia\Pqr\models\PqrFormField;
+use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
 use Saia\Pqr\controllers\services\PqrFormService;
 use Saia\Pqr\controllers\addEditFormat\AddEditFtPqr;
@@ -219,7 +220,8 @@ class PqrFormController extends Controller
             }
             $this->generateForm($FormatoC->getPK());
 
-            $this->generateView();
+            $this->generaReport();
+            $this->viewRespuestaPqr();
 
             // $Web = new WebservicePqr($this->PqrForm);
             // $Web->generate();
@@ -267,28 +269,15 @@ class PqrFormController extends Controller
     }
 
     /**
-     * Genera las vista del proceso
-     *
-     * @return void
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    protected function generateView(): void
-    {
-        $this->viewPqr();
-        $this->viewRespuestaPqr();
-    }
-
-    /**
      * Genera el SQL de la vista PQR
      *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function viewPqr(array $fields = [])
+    public function viewPqr()
     {
-        $fields = implode(',', array_merge($this->defaultFieldsReport(), $fields));
+        $fields = implode(',', array_merge($this->defaultFieldsReport(), $this->getFieldsReport()));
 
         $sql = "SELECT {$fields}
         FROM ft_pqr ft,documento d
@@ -296,6 +285,32 @@ class PqrFormController extends Controller
         AND d.estado NOT IN ('ELIMINADO','ANULADO')";
 
         $this->createView('vpqr', $sql);
+    }
+
+    /**
+     * Obtiene los campos adicionales que seran cargado
+     * en la vista y en el reporte
+     *
+     * @param boolean $instance :obtener instancia o campos
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getFieldsReport(bool $instance = false): array
+    {
+        $data = [];
+        $fields = $this->PqrForm->PqrFormFields;
+        foreach ($fields as $PqrFormField) {
+            if ($PqrFormField->show_report) {
+                if ($instance) {
+                    $data[] = $PqrFormField;
+                } else {
+                    $data[] = "ft.{$PqrFormField->name}";
+                }
+            }
+        }
+
+        return $data;
     }
 
     private function defaultFieldsReport()
@@ -360,5 +375,173 @@ class PqrFormController extends Controller
                 throw new \Exception("No fue posible generar la vista {$name}", 200);
                 break;
         }
+    }
+
+    /**
+     * Actualiza el reporte
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function generaReport(): void
+    {
+        $fields = $this->getFieldsReport(true);
+        $this->viewPqr();
+        $this->generateFuncionReport($fields);
+        $this->updateReport($fields);
+    }
+
+    /**
+     * actualiza el reporte (busqueda componente)
+     *
+     * @param PqrFormField[] $fields
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function updateReport(array $fields): bool
+    {
+        $code = $nameFields = [];
+        foreach ($fields as $PqrFormField) {
+            $nameFields[] = $PqrFormField->name;
+            $type = $PqrFormField->PqrHtmlField->type_saia;
+            switch ($type) {
+                case 'Text':
+                    $code[] = '{"title":"' . strtoupper($PqrFormField->label) . '","field":"{*' . $PqrFormField->name . '*}","align":"center"}';
+                    break;
+                default:
+                    $code[] = '{"title":"' . strtoupper($PqrFormField->label) . '","field":"{*get_' . $PqrFormField->name . '@idft,' . $PqrFormField->name . '*}","align":"center"}';
+                    break;
+            }
+        }
+
+        //REPORTE PENDIENTE
+        $Pendiente = BusquedaComponente::findByAttributes([
+            'nombre' => PqrForm::NOMBRE_REPORTE_PENDIENTE
+        ]);
+        $Pendiente->setAttributes(
+            $this->getDefaultDataComponente($code, $nameFields)
+        );
+        $Pendiente->update();
+
+        //REPORTE PROCESO
+        $Proceso = BusquedaComponente::findByAttributes([
+            'nombre' => PqrForm::NOMBRE_REPORTE_PROCESO
+        ]);
+        $Proceso->setAttributes(
+            $this->getDefaultDataComponente($code, $nameFields, true)
+        );
+        $Proceso->update();
+
+        //REPORTE TERMINADO
+        $Terminado = BusquedaComponente::findByAttributes([
+            'nombre' => PqrForm::NOMBRE_REPORTE_TERMINADO
+        ]);
+        $Terminado->setAttributes(
+            $this->getDefaultDataComponente($code, $nameFields, true)
+        );
+        $Terminado->update();
+
+        return true;
+    }
+
+    /**
+     * Obtiene los campos y el info por defecto
+     * de los reportes (busqueda componente)
+     *
+     * @param array $infoFields
+     * @param array $nameFields
+     * @param boolean $viewTaskInfo
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getDefaultDataComponente(
+        array $infoFields,
+        array $nameFields,
+        bool $viewTaskInfo = false
+    ): array {
+        $aditionalInfo = implode(',', $infoFields) . ',';
+        $taskInfo = $viewTaskInfo ? '{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},' : '';
+
+        return [
+            'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},' . $taskInfo . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
+            'campos_adicionales' => 'v.numero,v.fecha,v.sys_tipo,v.sys_estado,v.idft,' . implode(',', $nameFields),
+        ];
+    }
+
+
+    /**
+     * Genera el archivo de funciones para el reporte
+     *
+     * @param PqrFormField[] $fields
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function generateFuncionReport(array $fields): bool
+    {
+        global $rootPath;
+
+        $fieldCode = [];
+        foreach ($fields as $PqrFormField) {
+            $code = '';
+            switch ($PqrFormField->PqrHtmlField->type_saia) {
+                case 'Textarea':
+                    $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                        return substr(\$value, 0, 30).' ...';
+                    }";
+                    break;
+                case 'Select':
+                case 'Radio':
+                    $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                        global \$FtPqr;
+                        \$response = '';
+                        if (\$valor = Saia\\models\\formatos\\CampoSeleccionados::findColumn('valor', [
+                            'fk_campo_opciones' => \$value,
+                            'fk_documento' => \$FtPqr->documento_iddocumento
+                        ])) {
+                            \$response = \$valor[0];
+                        }
+                        return \$response;
+                    }";
+                    break;
+                case 'Checkbox':
+                    $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                        global \$FtPqr;
+                        \$response = '';
+                        if (\$valor = Saia\\models\\formatos\\CampoSeleccionados::findColumn('valor', [
+                            'fk_campos_formato' => {$PqrFormField->fk_campos_formato},
+                            'fk_documento' => \$FtPqr->documento_iddocumento
+                        ])) {
+                            \$response = implode(',',\$valor);
+                        }
+                        return \$response;
+                    }";
+                    break;
+                case 'AutocompleteM':
+                case 'AutocompleteD':
+                    $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                        global \$FtPqr;
+                        return \$FtPqr->getValueForReport('{$PqrFormField->name}');
+                    }";
+                    break;
+            }
+            if ($code) {
+                $fieldCode[] = $code;
+            }
+        }
+        $file = $rootPath . 'app/modules/back_pqr/formatos/pqr/functionsReport.php';
+        if (file_exists($file)) {
+            unlink($file);
+        }
+        $codeFunction = "<?php \n\n" . implode("\n", $fieldCode) . "\n ?>";
+
+        if (!file_put_contents($file, $codeFunction)) {
+            throw new \Exception("No fue posible crear las funciones del formulario", 200);
+        }
+
+        return true;
     }
 }

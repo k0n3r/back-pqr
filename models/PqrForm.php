@@ -11,6 +11,10 @@ class PqrForm extends Model
 {
     use TModel;
 
+    const NOMBRE_REPORTE_PENDIENTE = 'rep_pendientes_pqr';
+    const NOMBRE_REPORTE_PROCESO = 'rep_proceso_pqr';
+    const NOMBRE_REPORTE_TERMINADO = 'rep_terminados_pqr';
+
     protected function defineAttributes(): void
     {
         $this->dbAttributes = (object) [

@@ -8,6 +8,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\migrations\TMigrations;
 use Doctrine\Migrations\AbstractMigration;
+use Saia\Pqr\models\PqrForm;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -65,7 +66,8 @@ final class Version20200226192642 extends AbstractMigration
 
     protected function createComponentePendientes(int $idbusqueda)
     {
-        $nombreComponente = 'rep_pendientes_pqr';
+        $nombreComponente = PqrForm::NOMBRE_REPORTE_PENDIENTE;
+
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta' => 'Pendientes',
@@ -96,7 +98,8 @@ final class Version20200226192642 extends AbstractMigration
 
     protected function createComponenteProcesos(int $idbusqueda)
     {
-        $nombreComponente = 'rep_proceso_pqr';
+        $nombreComponente = PqrForm::NOMBRE_REPORTE_PROCESO;
+
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta' => 'En proceso',
@@ -127,7 +130,7 @@ final class Version20200226192642 extends AbstractMigration
 
     protected function createComponenteTerminados(int $idbusqueda)
     {
-        $nombreComponente = 'rep_terminados_pqr';
+        $nombreComponente = PqrForm::NOMBRE_REPORTE_TERMINADO;
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta' => 'Terminados',
