@@ -46,7 +46,8 @@ class PqrFormController extends Controller
                 'publish' => $this->PqrForm->fk_formato ? 1 : 0,
                 'pqrForm' => $PqrFormService->getDataPqrForm(),
                 'pqrTypes' => $PqrFormService->getTypes(),
-                'pqrFormFields' => $PqrFormService->getDataPqrFormFields()
+                'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
+                'pqrNotifications' => $PqrFormService->getDataPqrNotifications()
             ]
         ];
 

@@ -2,10 +2,11 @@
 
 namespace Saia\Pqr\models;
 
-use Saia\core\model\Model;
 use Saia\models\Contador;
+use Saia\core\model\Model;
 use Saia\models\formatos\Formato;
 use Saia\Pqr\models\PqrFormField;
+use Saia\Pqr\models\PqrNotification;
 
 class PqrForm extends Model
 {
@@ -49,6 +50,12 @@ class PqrForm extends Model
                     'primary' => 'id',
                     'relation' => self::BELONGS_TO_MANY,
                     'order' => 'orden ASC'
+                ],
+                'PqrNotifications' => [
+                    'model' => PqrNotification::class,
+                    'attribute' => 'fk_pqr_form',
+                    'primary' => 'id',
+                    'relation' => self::BELONGS_TO_MANY
                 ]
             ]
         ];

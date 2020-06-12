@@ -76,13 +76,17 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('setting', 'text');
 
         $table->addColumn('fk_pqr_html_field', 'integer');
+        $table->addIndex(['fk_pqr_html_field'], 'i_fk_pqr_html_field');
 
         $table->addColumn('fk_pqr_form', 'integer');
+        $table->addIndex(['fk_pqr_form'], 'i_fk_pqr_form');
 
         $table->addColumn('fk_campos_formato', 'integer', [
             'default' => 0,
             'notnull' => false
         ]);
+        $table->addIndex(['fk_campos_formato'], 'i_fk_campos_formato');
+
 
         $table->addColumn('system', 'boolean', [
             'default' => 0,
@@ -136,7 +140,11 @@ final class Version20200103155146 extends AbstractMigration
         $table->setPrimaryKey(['id']);
 
         $table->addColumn('fk_formato', 'integer');
+        $table->addIndex(['fk_formato'], 'i_fk_formato');
+
         $table->addColumn('fk_contador', 'integer');
+        $table->addIndex(['fk_contador'], 'i_fk_contador');
+
         $table->addColumn('label', 'string');
         $table->addColumn('name', 'string');
         $table->addColumn('show_anonymous', 'boolean', ['default' => 0]);
@@ -157,8 +165,10 @@ final class Version20200103155146 extends AbstractMigration
 
         $table->addColumn('fk_documento', 'integer');
         $table->addIndex(['fk_documento'], 'i_fk_documento');
+
         $table->addColumn('fk_pqr', 'integer');
         $table->addIndex(['fk_pqr'], 'i_fk_pqr');
+
         $table->addColumn('data_json', 'text');
     }
 
@@ -184,7 +194,8 @@ final class Version20200103155146 extends AbstractMigration
             'pqr_html_fields',
             'pqr_forms',
             'pqr_backups',
-            'pqr_response_templates'
+            'pqr_response_templates',
+            'pqr_notifications'
         ];
 
         foreach ($data as $table) {

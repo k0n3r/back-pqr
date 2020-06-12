@@ -29,7 +29,7 @@ class RequestProcessorController extends Controller
         $data = [
             'pqrForm' => $PqrFormService->getDataPqrForm(),
             'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
-            'pqrHtmlFields' => $this->getDataHtmlFields(),
+            'pqrHtmlFields' => $this->getDataHtmlFields()
         ];
 
         return [

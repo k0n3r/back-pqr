@@ -67,4 +67,22 @@ class PqrFormService
     {
         return $this->PqrForm->getRow('sys_tipo')->getSetting()->options;
     }
+
+    /**
+     * Obtiene las notificaciones
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getDataPqrNotifications(): array
+    {
+        $data = [];
+        if ($records = $this->PqrForm->PqrNotifications) {
+            foreach ($records as $PqrNotification) {
+                $data[] = $PqrNotification->getDataAttributes();
+            }
+        }
+        return $data;
+    }
 }
