@@ -12,9 +12,16 @@ class Select extends Field implements IField
      */
     public function getValues(): array
     {
-        return array_merge($this->getDefaultValues(), [
+        $data = array_merge($this->getDefaultValues(), [
             'tipo_dato' => 'integer',
             'longitud' => 11,
         ]);
+
+        if (!$this->PqrFormField->active) {
+            $data['etiqueta_html'] = 'Hidden';
+            $data['opciones'] = '{"type":"hidden"}';
+        }
+
+        return $data;
     }
 }

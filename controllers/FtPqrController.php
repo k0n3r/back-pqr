@@ -76,8 +76,12 @@ class FtPqrController extends Controller
         ];
         if ($id = $this->request['id']) {
             if ($PqrResponseTemplate = new PqrResponseTemplate($id)) {
+                $search = [
+                    '<figure class="table">',
+                    '</figure>'
+                ];
                 $Response->success = 1;
-                $Response->data = $PqrResponseTemplate->content;
+                $Response->data = str_replace($search, '', $PqrResponseTemplate->content);
             }
         }
 

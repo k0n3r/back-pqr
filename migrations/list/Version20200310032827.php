@@ -217,6 +217,5 @@ final class Version20200310032827 extends AbstractMigration
     public function down(Schema $schema): void
     {
         $this->deleteFormat($this->formatName, $schema);
-        $this->connection->executeQuery("DROP VIEW vpqr");
     }
 }

@@ -208,11 +208,11 @@ final class Version20200226192642 extends AbstractMigration
         ];
         $this->createModulo($data, 'indicadores_pqr');
 
-        $this->connection->update('grafico', [
-            'fk_busqueda_componente' => $idbusquedaComponente
-        ], [
-            'fk_pantalla_grafico' => $idPantallaGrafico
-        ]);
+        // $this->connection->update('grafico', [
+        //     'fk_busqueda_componente' => $idbusquedaComponente
+        // ], [
+        //     'fk_pantalla_grafico' => $idPantallaGrafico
+        // ]);
     }
 
 

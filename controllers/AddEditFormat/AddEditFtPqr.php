@@ -392,6 +392,24 @@ class AddEditFtPqr implements IAddEditFormat
                 'opciones' => '{"hoy":false,"tipo":"date"}',
                 'ayuda' => NULL,
                 'longitud_vis' => NULL
+            ],
+            'sys_anonimo' => [
+                'formato_idformato' => $this->PqrForm->fk_formato,
+                'fila_visible' => 0,
+                'obligatoriedad' => 0,
+                'orden' => 0,
+                'nombre' => 'sys_anonimo',
+                'etiqueta' => 'Anonimo',
+                'tipo_dato' => 'integer',
+                'longitud' => 1,
+                'predeterminado' => 0,
+                'etiqueta_html' => 'Hidden',
+                'acciones' => NULL,
+                'placeholder' => NULL,
+                'listable' => 1,
+                'opciones' => '{"type":"hidden"}',
+                'ayuda' => NULL,
+                'longitud_vis' => NULL
             ]
         ];
 

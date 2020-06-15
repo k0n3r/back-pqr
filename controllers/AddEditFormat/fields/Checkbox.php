@@ -12,6 +12,13 @@ class Checkbox extends Field implements IField
      */
     public function getValues(): array
     {
-        return $this->getDefaultValues();
+        $data = $this->getDefaultValues();
+
+        if (!$this->PqrFormField->active) {
+            $data['etiqueta_html'] = 'Hidden';
+            $data['opciones'] = '{"type":"hidden"}';
+        }
+
+        return $data;
     }
 }

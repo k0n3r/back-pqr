@@ -5,8 +5,8 @@ namespace Saia\Pqr\controllers;
 use Exception;
 use Saia\Pqr\models\PqrForm;
 use Doctrine\DBAL\Types\Type;
+use Saia\controllers\generator\FormatGenerator;
 use Saia\core\DatabaseConnection;
-use Saia\models\busqueda\BusquedaComponente;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\controllers\services\PqrFormService;
 
@@ -168,7 +168,20 @@ class PqrFormFieldController extends Controller
             $pref++;
             $name = $this->generateName($name, $pref);
         }
+
+        if ($this->existDB($name)) {
+            $pref++;
+            $name = $this->generateName($name, $pref);
+        }
+
         return $name;
+    }
+
+    private function existDB($name): bool
+    {
+        $Table = FormatGenerator::getSchema()->listTableDetails('ft_pqr');
+
+        return $Table->hasColumn($name);
     }
 
     /**
@@ -260,11 +273,12 @@ class PqrFormFieldController extends Controller
             $conn = DatabaseConnection::getDefaultConnection();
             $conn->beginTransaction();
 
-            $refreshReport = 0;
             $PqrFormField = new PqrFormField($this->request['id']);
             $PqrFormField->setAttributes([
                 'active' => (int) $this->request['active'],
-                'show_report' => 0
+                'show_report' => 0,
+                'required' => 0,
+                'required_anonymous' => 0
             ]);
 
             if (!$PqrFormField->update()) {

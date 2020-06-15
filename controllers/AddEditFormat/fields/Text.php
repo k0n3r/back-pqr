@@ -14,9 +14,16 @@ class Text extends Field implements IField
         $PqrFormField = $this->PqrFormField;
         $typeHtml = $PqrFormField->PqrHtmlField->type;
 
-        return array_merge($this->getDefaultValues(), [
+        $data = array_merge($this->getDefaultValues(), [
             'placeholder' => $PqrFormField->getSetting()->placeholder,
             'opciones' => '{"type":"' . $typeHtml . '"}'
         ]);
+
+        if (!$this->PqrFormField->active) {
+            $data['etiqueta_html'] = 'Hidden';
+            $data['opciones'] = '{"type":"hidden"}';
+        }
+
+        return $data;
     }
 }
