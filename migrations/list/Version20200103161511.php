@@ -181,7 +181,7 @@ final class Version20200103161511 extends AbstractMigration
                 'name' => 'sys_tipo',
                 'required' => 1,
                 'anonymous' => 1,
-                'show_report' => 1,
+                'show_report' => 0,
                 'setting' => json_encode([
                     'options' => [
                         [

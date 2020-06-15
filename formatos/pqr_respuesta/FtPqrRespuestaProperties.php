@@ -6,6 +6,8 @@ use Saia\core\model\ModelFormat;
 
 class FtPqrRespuestaProperties extends ModelFormat
 {
+    public $isPDF=false;
+
     public function __construct($id = null)
     {
         parent::__construct($id);

@@ -6,6 +6,8 @@ use Saia\core\model\ModelFormat;
 
 class FtPqrProperties extends ModelFormat
 {
+    public $isPDF=false;
+
     public function __construct($id = null)
     {
         parent::__construct($id);
@@ -16,7 +18,8 @@ class FtPqrProperties extends ModelFormat
         return [
             'safe' => [
                 'anexos',
-				'autocompletar_munici',
+				'area',
+				'checkbox',
 				'dependencia',
 				'documento_iddocumento',
 				'email',
@@ -25,7 +28,7 @@ class FtPqrProperties extends ModelFormat
 				'idft_pqr',
 				'linea',
 				'listado',
-				'multiple',
+				'municipio',
 				'numerico',
 				'radio',
 				'sys_dependencia',

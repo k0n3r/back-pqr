@@ -65,6 +65,7 @@ final class Version20200310032827 extends AbstractMigration
             'tipo_edicion' => 0,
             'item' => 0,
             'font_size' => 11,
+            'banderas' => 'e',
             'mostrar_pdf' => 1,
             'orden' => NULL,
             'fk_categoria_formato' => NULL,
@@ -72,8 +73,11 @@ final class Version20200310032827 extends AbstractMigration
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Formulario utilizado para responder las PQRSF',
             'version' => 1,
+            'publicar' => 1,
             'module' => 'pqr',
-            'banderas' => 'e'
+            'class_name' => NULL,
+            'rad_email' => 0,
+            'generador_pdf' => 'Mpdf'
         ];
 
         $this->connection->insert('formato', $data);
@@ -103,14 +107,14 @@ final class Version20200310032827 extends AbstractMigration
             'email' => [
                 'formato_idformato' => $idformato,
                 'fila_visible' => 1,
-                'obligatoriedad' => 1,
+                'obligatoriedad' => 0,
                 'orden' => 1,
                 'nombre' => 'email',
                 'etiqueta' => 'Responder a (E-mail):',
                 'tipo_dato' => 'string',
                 'longitud' => NULL,
                 'etiqueta_html' => 'Text',
-                'acciones' => 'a,e,p',
+                'acciones' => 'a,e',
                 'placeholder' => 'Ingrese el correo',
                 'listable' => 1,
                 'opciones' => '{"type":"email"}',
@@ -124,7 +128,7 @@ final class Version20200310032827 extends AbstractMigration
                 'orden' => 2,
                 'nombre' => 'email_copia',
                 'etiqueta' => 'Copia a (E-mail):',
-                'tipo_dato' => 'string',
+                'tipo_dato' => 'text',
                 'longitud' => NULL,
                 'etiqueta_html' => 'Text',
                 'acciones' => 'a,e',
@@ -138,7 +142,7 @@ final class Version20200310032827 extends AbstractMigration
                 'formato_idformato' => $idformato,
                 'fila_visible' => 1,
                 'obligatoriedad' => 0,
-                'orden' => 1,
+                'orden' => 3,
                 'nombre' => 'fk_response_template',
                 'etiqueta' => 'Plantilla',
                 'tipo_dato' => 'integer',
@@ -155,7 +159,7 @@ final class Version20200310032827 extends AbstractMigration
                 'formato_idformato' => $idformato,
                 'fila_visible' => 1,
                 'obligatoriedad' => 0,
-                'orden' => 1,
+                'orden' => 4,
                 'nombre' => 'fk_response_template_json',
                 'etiqueta' => 'fk_response_template_json',
                 'tipo_dato' => 'text',
@@ -172,13 +176,13 @@ final class Version20200310032827 extends AbstractMigration
                 'formato_idformato' => $idformato,
                 'fila_visible' => 1,
                 'obligatoriedad' => 1,
-                'orden' => 3,
+                'orden' => 5,
                 'nombre' => 'content',
                 'etiqueta' => 'Contenido',
                 'tipo_dato' => 'text',
                 'longitud' => NULL,
                 'etiqueta_html' => 'Textarea',
-                'acciones' => 'a,e',
+                'acciones' => 'a,e,p',
                 'placeholder' => NULL,
                 'listable' => 1,
                 'opciones' => '{"avanzado":true}',
@@ -189,11 +193,11 @@ final class Version20200310032827 extends AbstractMigration
                 'formato_idformato' => $idformato,
                 'fila_visible' => 1,
                 'obligatoriedad' => 0,
-                'orden' => 4,
+                'orden' => 6,
                 'valor' => '.pdf|.doc|.docx|.jpg|.jpeg|.gif|.png|.bmp|.xls|.xlsx|.ppt@multiple',
                 'nombre' => 'adjuntos',
                 'etiqueta' => 'Anexos',
-                'tipo_dato' => 'string',
+                'tipo_dato' => 'text',
                 'longitud' => NULL,
                 'etiqueta_html' => 'Attached',
                 'acciones' => 'a,e',
@@ -213,5 +217,6 @@ final class Version20200310032827 extends AbstractMigration
     public function down(Schema $schema): void
     {
         $this->deleteFormat($this->formatName, $schema);
+        $this->connection->executeQuery("DROP VIEW vpqr");
     }
 }

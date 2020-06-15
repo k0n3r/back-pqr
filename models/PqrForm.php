@@ -12,9 +12,14 @@ class PqrForm extends Model
 {
     use TModel;
 
+    /**
+     * TODO: PASAR A .ENV 
+     */
     const NOMBRE_REPORTE_PENDIENTE = 'rep_pendientes_pqr';
     const NOMBRE_REPORTE_PROCESO = 'rep_proceso_pqr';
     const NOMBRE_REPORTE_TERMINADO = 'rep_terminados_pqr';
+    const NOMBRE_REPORTE_TODOS = 'rep_todos_pqr';
+    const NOMBRE_PANTALLA_GRAFICO = 'PQRSF';
 
     protected function defineAttributes(): void
     {

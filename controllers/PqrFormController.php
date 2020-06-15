@@ -4,9 +4,12 @@ namespace Saia\Pqr\controllers;
 
 use Exception;
 use Saia\Pqr\models\PqrForm;
+use Doctrine\DBAL\Types\Type;
+use Saia\models\grafico\Grafico;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
 use Saia\Pqr\models\PqrFormField;
+use Saia\models\grafico\PantallaGrafico;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
 use Saia\Pqr\controllers\services\PqrFormService;
@@ -36,8 +39,7 @@ class PqrFormController extends Controller
      */
     public function getSetting(): object
     {
-        $PqrForm = PqrForm::getPqrFormActive();
-        $PqrFormService = new PqrFormService($PqrForm);
+        $PqrFormService = new PqrFormService($this->PqrForm);
 
         $Response = (object) [
             'success' => 1,
@@ -77,7 +79,9 @@ class PqrFormController extends Controller
             ]);
             $PqrFormField->update();
 
-            AddEditFtPqr::addEditformatOptions($PqrFormField);
+            if ($PqrFormField->fk_campos_formato) {
+                AddEditFtPqr::addEditformatOptions($PqrFormField);
+            }
 
             $Response->success = 1;
             $conn->commit();
@@ -203,6 +207,10 @@ class PqrFormController extends Controller
             $conn = DatabaseConnection::getDefaultConnection();
             $conn->beginTransaction();
 
+            if (!$this->PqrForm->fk_formato) {
+                $this->activeGraphics();
+            }
+
             $this->addEditFormat(
                 new AddEditFtPqr($this->PqrForm)
             );
@@ -244,6 +252,30 @@ class PqrFormController extends Controller
         }
 
         return $Response;
+    }
+
+    /**
+     * Activa los indicadores preestablecidos
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function activeGraphics()
+    {
+        if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
+            'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
+        ])) {
+            throw new \Exception("No se encuentra la pantalla de los grafico", 200);
+        }
+
+        DatabaseConnection::getQueryBuilder()
+            ->update('grafico')
+            ->set('estado', 1)
+            ->where('fk_pantalla_grafico=:idpantalla')
+            ->setParameter(':idpantalla', $PantallaGrafico->getPK(), Type::getType('integer'))
+            ->andWhere("nombre<>'Dependencia'")
+            ->execute();
     }
 
     /**
@@ -404,8 +436,12 @@ class PqrFormController extends Controller
     private function updateReport(array $fields): bool
     {
         $code = $nameFields = [];
+        $sysDependencia = false;
         foreach ($fields as $PqrFormField) {
             $nameFields[] = $PqrFormField->name;
+            if ($PqrFormField->name == 'sys_dependencia') {
+                $sysDependencia = true;
+            }
             $type = $PqrFormField->PqrHtmlField->type_saia;
             switch ($type) {
                 case 'Text':
@@ -416,33 +452,60 @@ class PqrFormController extends Controller
                     break;
             }
         }
+        if ($sysDependencia) {
+            if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
+                'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
+            ])) {
+                throw new \Exception("No se encuentra la pantalla de los grafico", 200);
+            }
+
+            $Grafico = Grafico::findByAttributes([
+                'fk_pantalla_grafico' => $PantallaGrafico->getPK(),
+                'nombre' => 'Dependencia'
+            ]);
+            $Grafico->estado = 1;
+            $Grafico->update();
+        }
 
         //REPORTE PENDIENTE
-        $Pendiente = BusquedaComponente::findByAttributes([
+        if ($Pendiente = BusquedaComponente::findByAttributes([
             'nombre' => PqrForm::NOMBRE_REPORTE_PENDIENTE
-        ]);
-        $Pendiente->setAttributes(
-            $this->getDefaultDataComponente($code, $nameFields)
-        );
-        $Pendiente->update();
+        ])) {
+            $Pendiente->setAttributes(
+                $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_PENDIENTE)
+            );
+            $Pendiente->update();
+        }
 
         //REPORTE PROCESO
-        $Proceso = BusquedaComponente::findByAttributes([
+        if ($Proceso = BusquedaComponente::findByAttributes([
             'nombre' => PqrForm::NOMBRE_REPORTE_PROCESO
-        ]);
-        $Proceso->setAttributes(
-            $this->getDefaultDataComponente($code, $nameFields, true)
-        );
-        $Proceso->update();
+        ])) {
+            $Proceso->setAttributes(
+                $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_PROCESO)
+            );
+            $Proceso->update();
+        }
 
         //REPORTE TERMINADO
-        $Terminado = BusquedaComponente::findByAttributes([
+        if ($Terminado = BusquedaComponente::findByAttributes([
             'nombre' => PqrForm::NOMBRE_REPORTE_TERMINADO
-        ]);
-        $Terminado->setAttributes(
-            $this->getDefaultDataComponente($code, $nameFields, true)
-        );
-        $Terminado->update();
+        ])) {
+            $Terminado->setAttributes(
+                $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_TERMINADO)
+            );
+            $Terminado->update();
+        }
+
+        //REPORTE TODOS
+        if ($Todos = BusquedaComponente::findByAttributes([
+            'nombre' => PqrForm::NOMBRE_REPORTE_TODOS
+        ])) {
+            $Todos->setAttributes(
+                $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_TODOS)
+            );
+            $Todos->update();
+        }
 
         return true;
     }
@@ -453,7 +516,7 @@ class PqrFormController extends Controller
      *
      * @param array $infoFields
      * @param array $nameFields
-     * @param boolean $viewTaskInfo
+     * @param string $nameReport
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
@@ -461,13 +524,26 @@ class PqrFormController extends Controller
     private function getDefaultDataComponente(
         array $infoFields,
         array $nameFields,
-        bool $viewTaskInfo = false
+        string $nameReport
     ): array {
         $aditionalInfo = implode(',', $infoFields) . ',';
-        $taskInfo = $viewTaskInfo ? '{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},' : '';
+
+        switch ($nameReport) {
+            case PqrForm::NOMBRE_REPORTE_TODOS:
+            case PqrForm::NOMBRE_REPORTE_PROCESO:
+                $NewField = '{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
+                break;
+            case PqrForm::NOMBRE_REPORTE_TERMINADO:
+                $NewField = '{"title":"FECHA FINALIZACIÓN","field":"{*getEndDate@idft*}","align":"center"},{"title":"DÍAS RETRASO","field":"{*getDaysLate@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
+                break;
+            case PqrForm::NOMBRE_REPORTE_PENDIENTE:
+            default:
+                $NewField = '{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},';
+                break;
+        }
 
         return [
-            'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},' . $taskInfo . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
+            'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
             'campos_adicionales' => 'v.numero,v.fecha,v.sys_tipo,v.sys_estado,v.idft,' . implode(',', $nameFields),
         ];
     }

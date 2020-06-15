@@ -71,6 +71,7 @@ final class Version20200321234633 extends AbstractMigration
             'tipo_edicion' => 0,
             'item' => 0,
             'font_size' => 11,
+            'banderas' => 'e',
             'mostrar_pdf' => 1,
             'orden' => NULL,
             'fk_categoria_formato' => NULL,
@@ -78,8 +79,11 @@ final class Version20200321234633 extends AbstractMigration
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Formulario de calificación de las PQR',
             'version' => 1,
+            'publicar' => 1,
             'module' => 'pqr',
-            'banderas' => 'e'
+            'class_name' => NULL,
+            'rad_email' => 0,
+            'generador_pdf' => 'Mpdf'
 
         ];
 

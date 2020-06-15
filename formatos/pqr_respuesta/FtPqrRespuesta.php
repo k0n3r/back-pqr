@@ -3,28 +3,27 @@
 namespace Saia\Pqr\formatos\pqr_respuesta;
 
 use Exception;
-use Saia\controllers\CryptController;
+use Saia\Pqr\models\PqrForm;
+use Saia\Pqr\models\PqrHistory;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\Helpers\UtilitiesPqr;
-use Saia\Pqr\controllers\WebserviceCalificacion;
+use Saia\controllers\anexos\FileJson;
+use Saia\controllers\CryptController;
 use Saia\controllers\SendMailController;
-use Saia\controllers\pdf\DocumentPdfGenerator;
+use Saia\controllers\SessionController;
 use Saia\Pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 
 class FtPqrRespuesta extends FtPqrRespuestaProperties
 {
 
-    /**
-     *
-     * @var FtPqrCalificacion
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    protected $PqrCalificacion;
+    private PqrForm $PqrForm;
 
     public function __construct($id = null)
     {
         parent::__construct($id);
+        if (!$this->PqrForm = PqrForm::getPqrFormActive()) {
+            throw new Exception("No se encuentra el formulario activo", 200);
+        }
     }
 
     protected function defineMoreAttributes(): array
@@ -48,27 +47,23 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     }
 
     /**
-     * Posterior al adicionar valido los emails
-     *
-     * @return void
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @inheritDoc
      */
-    public function afterAdd()
+    public function afterAdd(): bool
     {
         $this->validEmails();
+
+        return true;
     }
 
     /**
-     * Posterior al editar valido los emails
-     *
-     * @return void
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @inheritDoc
      */
-    public function afterEdit()
+    public function afterEdit(): bool
     {
         $this->validEmails();
+
+        return true;
     }
 
     /**
@@ -78,16 +73,19 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function validEmails()
+    private function validEmails(): void
     {
-        if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("El email ({$this->email}) NO es valido");
+        if ($this->email) {
+
+            if (!UtilitiesPqr::isEmailValid($this->email)) {
+                throw new Exception("El email ({$this->email}) NO es valido");
+            }
         }
 
         if ($this->email_copia) {
             $emails = explode(",", $this->email_copia);
             foreach ($emails as $copia) {
-                if (!filter_var($copia, FILTER_VALIDATE_EMAIL)) {
+                if (!UtilitiesPqr::isEmailValid($copia)) {
                     throw new Exception("El email ({$copia}) NO es valido");
                 }
             }
@@ -125,25 +123,58 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         return $data;
     }
 
-    public function afterRad(): void
+    /**
+     * @inheritDoc
+     */
+    public function afterRad(): bool
     {
-        $this->notifyEmail();
+        $this->Documento->getPdfJson(true);
+        $this->saveHistory();
+
+        return $this->notifyEmail();
     }
 
-    public function notifyEmail()
+    private function saveHistory(): bool
     {
+        $history = [
+            'fecha' => date('Y-m-d H:i:s'),
+            'idft' => $this->FtPqr->getPK(),
+            'nombre_funcionario' => SessionController::getUser()->getName(),
+            'descripcion' => "Se crea la respuesta # {$this->Documento->numero}"
+        ];
+        if (!PqrHistory::newRecord($history)) {
+            throw new \Exception("No fue posible guardar el historial del cambio", 200);
+        }
+        return true;
+    }
+
+    /**
+     * Notifica la respuesta via Email
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function notifyEmail(): bool
+    {
+        if (!$this->email && !$this->email_copia) {
+            return true;
+        }
+
         $DocumentoPqr = $this->FtPqr->Documento;
-        $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de PQR con número de radicado {$DocumentoPqr->numero}.<br/><br/>";
+        $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$this->PqrForm->label} con número de radicado {$DocumentoPqr->numero}.<br/><br/>";
 
         $SendMailController = new SendMailController(
-            "Respuesta solicitud de PQR # {$DocumentoPqr->numero}",
+            "Respuesta solicitud de {$this->PqrForm->label} # {$DocumentoPqr->numero}",
             $message
         );
 
-        $SendMailController->setDestinations(
-            SendMailController::DESTINATION_TYPE_EMAIL,
-            [$this->email]
-        );
+        if ($this->email) {
+            $SendMailController->setDestinations(
+                SendMailController::DESTINATION_TYPE_EMAIL,
+                [$this->email]
+            );
+        }
 
         if ($this->email_copia) {
             $SendMailController->setCopyDestinations(
@@ -152,38 +183,16 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
             );
         }
 
-        if (!$this->Documento->pdf) {
-            $DocumentPdfGenerator = new DocumentPdfGenerator($this->Documento);
-            $route = $DocumentPdfGenerator->refreshFile();
-
-            if (!$route) {
-                $log = [
-                    'error' => "MpdfController NO genero el PDF, iddoc: {$this->Documento->getPK()}",
-                    'message' => "No fue posible generar el PDF para el formato Respuesta PQR"
-                ];
-                UtilitiesPqr::notifyAdministrator(
-                    "No fue posible generar el PDF para la Respueta a la PQR # {$DocumentoPqr->numero}",
-                    $log
-                );
-            } else {
-                $SendMailController->setAttachments(
-                    $SendMailController::ATTACHMENT_TYPE_JSON,
-                    [$this->Documento->pdf]
-                );
-            }
-        }
+        $anexos = [];
+        $File = new FileJson($this->Documento->getPdfJson());
+        $anexos[] = $File;
 
         if ($records = $this->Documento->Anexos) {
-            $anexos = [];
             foreach ($records as $Anexo) {
-                $anexos[] = $Anexo->ruta;
+                $anexos[] = new FileJson($Anexo->ruta);
             }
-            $SendMailController->setAttachments(
-                $SendMailController::ATTACHMENT_TYPE_JSON,
-                $anexos,
-                true
-            );
         }
+        $SendMailController->setAttachments($anexos);
 
         $send = $SendMailController->send();
         if ($send !== true) {
@@ -201,12 +210,13 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
                 'ft_pqr_respuesta' => $this->getPK(),
                 'anterior' => $this->Documento->getPK()
             ]));
-            $url = ABSOLUTE_SAIA_ROUTE . WebserviceCalificacion::DIRECTORY . "/index.html?d={$params}";
+            $url = '';
+            //$url = ABSOLUTE_SAIA_ROUTE . WebserviceCalificacion::DIRECTORY . "/index.html?d={$params}";
             $message = "Cordial Saludo,<br/><br/>
             Nos gustaría recibir tus comentarios sobre el servicio que has recibido por parte de nuestro equipo.<br/><a href='{$url}'>Calificar el servicio</a>";
 
             $SendMailController = new SendMailController(
-                "Queremos conocer tu opinión! (Solicitud de PQR # {$DocumentoPqr->numero})",
+                "Queremos conocer tu opinión! (Solicitud de {$this->PqrForm->label} # {$DocumentoPqr->numero})",
                 $message
             );
 
@@ -231,6 +241,13 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         return true;
     }
 
+    /**
+     * Obtiene la Calificacion
+     *
+     * @return FtPqrCalificacion|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function getFtPqrCalificacion(): ?FtPqrCalificacion
     {
         if (!$this->PqrCalificacion) {

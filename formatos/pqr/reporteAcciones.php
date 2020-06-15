@@ -118,46 +118,46 @@
 
         });
 
-        //TODO: RESPONDER CON DOCUMENTO EXISTENTE => SIN UTILIZAR HASTA SABER COMO DESARROLLARSE
-        $(document).on('click', '.answer2', function() {
+        $(document).on('click', '.history', function() {
+            let idft = $(this).data('idft');
+            top.topModal({
+                url: `app/modules/back_pqr/views/viewHistory.php`,
+                params: {
+                    idft: idft
+                },
+                size: 'modal-lg',
+                title: 'Historial de cambios',
+                buttons: {}
+            });
+        });
 
-            let documentId = $(this).data('id');
+        $(document).on('click', '.edit', function() {
+
             let idft = $(this).data('idft');
 
             top.topModal({
-                url: `app/modules/back_pqr/views/responder.php`,
+                url: `app/modules/back_pqr/views/editType.php`,
                 params: {
-                    documentId: documentId
+                    idft: idft
                 },
-                size: 'modal-lg',
-                title: 'Responder',
-                buttons: {
-                    success: {
-                        label: 'Guardar',
-                        class: 'btn btn-complete'
-                    },
-                    cancel: {
-                        label: 'Cancelar',
-                        class: 'btn btn-danger'
-                    }
-                },
-                onSuccess(documentId) {
-                    answerPqr(documentId, idft);
-
-                    top.closeTopModal();
-                },
-                afterHide: function() {
-                    $('#table').bootstrapTable("refresh");
+                size: 'modal-md',
+                title: 'Actualizar tipo de PQRSF',
+                backdrop: 'static',
+                onSuccess() {
+                    top.closeTopModal()
+                    $('#table').bootstrapTable('refresh');
                 }
             });
 
         });
+
 
         $(document).on('click', '.answer', function() {
             let documentId = $(this).data('id');
             let idft = $(this).data('idft');
             answerPqr(documentId);
         });
+
 
         function answerPqr(documentId, idft) {
             $.post(

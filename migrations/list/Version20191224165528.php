@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Saia\Pqr\migrations;
 
 use Saia\models\Perfil;
+use Saia\Pqr\models\PqrForm;
 use Doctrine\DBAL\Schema\Schema;
 use Saia\Pqr\migrations\TMigrations;
 use Saia\controllers\CryptController;
@@ -29,6 +30,8 @@ final class Version20191224165528 extends AbstractMigration
         $this->createRadicadorWeb();
 
         $this->generateModules($this->modulesDefaultData());
+
+        $this->createIndicators();
     }
 
     protected function modulesDefaultData(): array
@@ -123,10 +126,10 @@ final class Version20191224165528 extends AbstractMigration
                     'indicadores_pqr' => [
                         'pertenece_nucleo' => 0,
                         'nombre' => 'indicadores_pqr',
-                        'tipo' => 1,
+                        'tipo' => 2,
                         'imagen' => 'fa fa-pie-chart',
                         'etiqueta' => 'Indicadores',
-                        'enlace' => 'views/modules/pqr/dist/pqr/index.html',
+                        'enlace' => NULL,
                         'orden' => 4,
                         'children' => []
                     ]
@@ -150,6 +153,101 @@ final class Version20191224165528 extends AbstractMigration
                     $this->generateModules($child, $idmodulo);
                 }
             }
+        }
+    }
+
+    protected function createIndicators()
+    {
+
+        $this->connection->insert('pantalla_grafico', [
+            'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
+        ]);
+
+        $id = $this->connection->lastInsertId();
+
+        $this->createGraphic($id);
+    }
+
+    protected function createGraphic($id)
+    {
+        $graphics = [
+            [
+                'fk_busqueda_componente' => NULL,
+                'fk_pantalla_grafico' => $id,
+                'nombre' => 'Dependencia',
+                'tipo' => '1',
+                'configuracion' => NULL,
+                'estado' => 0,
+                'modelo' => 'Saia\\Pqr\\formatos\\pqr\\FtPqr',
+                'columna' => '-',
+                'titulo_x' => 'Dependencia',
+                'titulo_y' => 'Cantidad',
+                'busqueda' => NULL,
+                'librerias' => NULL,
+                'titulo' => 'Estados por dependencia',
+                'children' => [
+                    ['fk_grafico' => 0, 'query' => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia GROUP BY sys_dependencia', 'etiqueta' => 'Total'],
+                    ['fk_grafico' => 0, 'query' => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'PENDIENTE\' GROUP BY sys_dependencia', 'etiqueta' => 'Pendiente'],
+                    ['fk_grafico' => 0, 'query' => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'PROCESO\' GROUP BY sys_dependencia', 'etiqueta' => 'Proceso'],
+                    ['fk_grafico' => 0, 'query' => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'TERMINADO\' GROUP BY sys_dependencia', 'etiqueta' => 'Terminado']
+                ]
+            ],
+            [
+                'fk_busqueda_componente' => NULL,
+                'fk_pantalla_grafico' => $id,
+                'nombre' => 'Tipo',
+                'tipo' => '2',
+                'configuracion' => NULL,
+                'estado' => 0,
+                'modelo' => 'Saia\\Pqr\\formatos\\pqr\\FtPqr',
+                'columna' => '-',
+                'titulo_x' => 'Tipo',
+                'titulo_y' => 'Cantidad',
+                'busqueda' => NULL,
+                'librerias' => NULL,
+                'titulo' => 'Tipos',
+                'children' => [
+                    ['fk_grafico' => 0, 'query' => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr v,campo_opciones c WHERE v.sys_tipo=c.idcampo_opciones GROUP BY c.valor', 'etiqueta' => 'Tipo']
+                ]
+            ],
+            [
+                'fk_busqueda_componente' => NULL,
+                'fk_pantalla_grafico' => $id,
+                'nombre' => 'Estado',
+                'tipo' => '2',
+                'configuracion' => NULL,
+                'estado' => 0,
+                'modelo' => 'Saia\\Pqr\\formatos\\pqr\\FtPqr',
+                'columna' => '-',
+                'titulo_x' => 'Estado',
+                'titulo_y' => 'Cantidad',
+                'busqueda' => NULL,
+                'librerias' => NULL,
+                'titulo' => 'Estados',
+                'children' => [
+                    ['fk_grafico' => '6', 'query' => 'SELECT sys_estado,count(sys_estado) AS cantidad FROM vpqr GROUP BY sys_estado', 'etiqueta' => 'Estados']
+                ]
+            ]
+        ];
+
+        foreach ($graphics as $graphic) {
+
+            $graphicSerie = $graphic['children'];
+            unset($graphic['children']);
+
+            $this->connection->insert('grafico', $graphic);
+
+            if ($graphicSerie) {
+                $this->createGraphicSerie($graphicSerie, $this->connection->lastInsertId());
+            }
+        }
+    }
+
+    protected function createGraphicSerie($data, $id)
+    {
+        foreach ($data as $serie) {
+            $serie['fk_grafico'] = $id;
+            $this->connection->insert('grafico_serie', $serie);
         }
     }
 
@@ -243,6 +341,24 @@ final class Version20191224165528 extends AbstractMigration
     public function down(Schema $schema): void
     {
         $this->delModules($this->modulesDefaultData());
+        $this->delGraphic();
+
+        //ELIMINAR DATOS DE PQR
+        $this->delOtherModules();
+        $this->deleteFormat('pqr', $schema);
+        $this->connection->executeQuery("DROP VIEW vpqr");
+    }
+
+    protected function delOtherModules()
+    {
+        $nameModules = [
+            'crear_pqr',
+            'crear_pqr_respuesta',
+            'crear_pqr_calificacion'
+        ];
+        foreach ($nameModules as $name) {
+            $this->deleteModulo($name);
+        }
     }
 
     protected function delModules(array $data): void
@@ -252,6 +368,37 @@ final class Version20191224165528 extends AbstractMigration
 
             if ($dataModule['children']) {
                 $this->delModules($dataModule['children']);
+            }
+        }
+    }
+
+    protected function delGraphic()
+    {
+        $screen = [
+            PqrForm::NOMBRE_PANTALLA_GRAFICO
+        ];
+
+        foreach ($screen as $name) {
+            $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE nombre='{$name}'";
+            $data = $this->connection->fetchColumn($sql);
+
+            if ($data['idpantalla_grafico']) {
+                $this->connection->delete('pantalla_grafico', [
+                    'idpantalla_grafico' => $data['idpantalla_grafico']
+                ]);
+
+                $sql = "SELECT idgrafico FROM grafico WHERE fk_pantalla_grafico='{$data['idpantalla_grafico']}'";
+                $records = $this->connection->fetchAll($sql);
+
+                foreach ($records as $graphic) {
+                    $this->connection->delete('grafico_serie', [
+                        'fk_grafico' => $graphic['idgrafico']
+                    ]);
+                }
+
+                $this->connection->delete('grafico', [
+                    'fk_pantalla_grafico' => $data['idpantalla_grafico']
+                ]);
             }
         }
     }

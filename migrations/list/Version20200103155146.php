@@ -35,6 +35,12 @@ final class Version20200103155146 extends AbstractMigration
 
         $table5 = $schema->createTable('pqr_response_templates');
         $this->tablePqrResponseTemplate($table5);
+
+        $table6 = $schema->createTable('pqr_notifications');
+        $this->tablePqrNotify($table6);
+
+        $table7 = $schema->createTable('pqr_history');
+        $this->tablePqrHistory($table7);
     }
 
     public function tablePqrFormFields(Table $table)
@@ -46,10 +52,14 @@ final class Version20200103155146 extends AbstractMigration
         $table->setPrimaryKey(['id']);
 
         $table->addColumn('name', 'string', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci',
             'length' => 50
         ]);
 
         $table->addColumn('label', 'string', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci',
             'length' => 50
         ]);
 
@@ -73,7 +83,10 @@ final class Version20200103155146 extends AbstractMigration
             'notnull' => false
         ]);
 
-        $table->addColumn('setting', 'text');
+        $table->addColumn('setting', 'text', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci'
+        ]);
 
         $table->addColumn('fk_pqr_html_field', 'integer');
         $table->addIndex(['fk_pqr_html_field'], 'i_fk_pqr_html_field');
@@ -112,14 +125,20 @@ final class Version20200103155146 extends AbstractMigration
         $table->setPrimaryKey(['id']);
 
         $table->addColumn('label', 'string', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci',
             'length' => 50
         ]);
 
         $table->addColumn('type', 'string', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci',
             'length' => 50
         ]);
 
         $table->addColumn('type_saia', 'string', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci',
             'length' => 50
         ]);
 
@@ -169,7 +188,10 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('fk_pqr', 'integer');
         $table->addIndex(['fk_pqr'], 'i_fk_pqr');
 
-        $table->addColumn('data_json', 'text');
+        $table->addColumn('data_json', 'text', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci'
+        ]);
     }
 
     public function tablePqrResponseTemplate(Table $table)
@@ -180,10 +202,53 @@ final class Version20200103155146 extends AbstractMigration
         $table->setPrimaryKey(['id']);
 
         $table->addColumn('name', 'string');
-        $table->addColumn('content', 'text');
+        $table->addColumn('content', 'text', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci'
+        ]);
         $table->addColumn('system', 'boolean', [
             'notnull' => false,
             'default' => 0
+        ]);
+    }
+
+    public function tablePqrNotify(Table $table)
+    {
+        $table->addColumn('id', 'integer', [
+            'autoincrement' => true
+        ]);
+        $table->setPrimaryKey(['id']);
+
+        $table->addColumn('fk_funcionario', 'integer');
+        $table->addIndex(['fk_funcionario'], 'i_fk_funcionario');
+
+        $table->addColumn('fk_pqr_form', 'integer');
+        $table->addIndex(['fk_pqr_form'], 'i_fk_pqr_form');
+
+        $table->addColumn('email', 'boolean', [
+            'default' => false
+        ]);
+        $table->addColumn('notify', 'boolean', [
+            'default' => false
+        ]);
+    }
+
+    public function tablePqrHistory(Table $table)
+    {
+        $table->addColumn('id', 'integer', [
+            'autoincrement' => true
+        ]);
+        $table->setPrimaryKey(['id']);
+
+        $table->addColumn('idft', 'integer');
+        $table->addColumn('fecha', 'datetime');
+        $table->addColumn('nombre_funcionario', 'string', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci'
+        ]);
+        $table->addColumn('descripcion', 'text', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci'
         ]);
     }
 
@@ -195,7 +260,8 @@ final class Version20200103155146 extends AbstractMigration
             'pqr_forms',
             'pqr_backups',
             'pqr_response_templates',
-            'pqr_notifications'
+            'pqr_notifications',
+            'pqr_history'
         ];
 
         foreach ($data as $table) {

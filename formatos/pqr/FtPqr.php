@@ -4,14 +4,17 @@ namespace Saia\Pqr\formatos\pqr;
 
 use DateTime;
 use Exception;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Saia\Pqr\models\PqrForm;
+use Saia\models\BuzonEntrada;
 use Saia\Pqr\models\PqrBackup;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\Helpers\UtilitiesPqr;
-use Saia\controllers\anexos\FileJson;
 use Saia\controllers\DateController;
+use Saia\controllers\anexos\FileJson;
+use Saia\controllers\SessionController;
+use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Saia\controllers\functions\CoreFunctions;
 use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use Saia\Pqr\controllers\services\PqrFormFieldService;
@@ -60,22 +63,6 @@ class FtPqr extends FtPqrProperties
                 ]
             ]
         ];
-    }
-
-    /**
-     * Valida si un email es valido
-     *
-     * @param string $email
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function isEmailValid(string $email): bool
-    {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -136,6 +123,7 @@ class FtPqr extends FtPqrProperties
     {
         $this->createBackup();
         $this->updateFechaVencimiento();
+        $this->sendNotifications();
         $this->Documento->getPdfJson(true);
 
         return $this->notifyEmail();
@@ -205,7 +193,7 @@ class FtPqr extends FtPqrProperties
     public function getColorExpiration(): string
     {
         if (!$this->sys_fecha_vencimiento) {
-            return 'Fecha no configurada';
+            return 'Fecha vencimiento no configurada';
         }
 
         $now = $this->sys_fecha_terminado ? new DateTime($this->sys_fecha_terminado) : new DateTime();
@@ -224,6 +212,46 @@ class FtPqr extends FtPqrProperties
         );
 
         return "<span class='badge badge-{$color}'>{$date}</span>";
+    }
+
+    /**
+     * Muestra la fecha finalizacion
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getEndDate(): string
+    {
+        if (!$this->sys_fecha_terminado) {
+            return 'Fecha fin no configurada';
+        }
+
+        return DateController::convertDate(
+            $this->sys_fecha_terminado,
+            DateController::PUBLIC_DATE_FORMAT
+        );
+    }
+
+    public function getDaysLate(): string
+    {
+        if (!$this->sys_fecha_vencimiento) {
+            return 'Fecha vencimiento no configurada';
+        }
+
+        if (!$this->sys_fecha_terminado) {
+            return 'Fecha fin no configurada';
+        }
+
+        $now = new DateTime($this->sys_fecha_terminado);
+        $diff = $now->diff(new DateTime($this->sys_fecha_vencimiento));
+
+        $dias = 0;
+        if ($diff->invert) {
+            $dias = "<span class='badge badge-danger'>{$diff->days}</span>";
+        }
+
+        return $dias;
     }
 
     /**
@@ -333,7 +361,7 @@ class FtPqr extends FtPqrProperties
     private function validSysEmail(): bool
     {
         if ($this->sys_email) {
-            if (!$this->isEmailValid($this->sys_email)) {
+            if (!UtilitiesPqr::isEmailValid($this->sys_email)) {
                 throw new Exception("Esta dirección de correo ({$this->sys_email}) no es válida.", 200);
             }
         }
@@ -347,7 +375,7 @@ class FtPqr extends FtPqrProperties
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function updateFechaVencimiento(): bool
+    public function updateFechaVencimiento(): bool
     {
         $options = json_decode($this->PqrForm->getRow('sys_tipo')->CamposFormato->opciones);
 
@@ -359,7 +387,10 @@ class FtPqr extends FtPqrProperties
             }
         }
 
-        $fecha = (DateController::addBusinessDays(new DateTime(), $dias))->format('Y-m-d H:i:s');
+        $fecha = (DateController::addBusinessDays(
+            new DateTime($this->Documento->fecha),
+            $dias
+        ))->format('Y-m-d H:i:s');
         $this->sys_fecha_vencimiento = $fecha;
         $this->update();
 
@@ -382,11 +413,11 @@ class FtPqr extends FtPqrProperties
             return true;
         }
 
-        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {$this->Documento->numero}, adjunto encontrará una copia de la PQR diligenciada el día de hoy.<br/><br/>
-        El seguimiento lo puede realizar escaneando el código QR";
+        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {$this->Documento->numero}, adjunto encontrará una copia de la {$this->PqrForm->label} diligenciada el día de hoy.<br/><br/>
+        El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado";
 
         $SendMailController = new SendMailController(
-            "Solicitud de PQR # {$this->Documento->numero}",
+            "Solicitud de {$this->PqrForm->label} # {$this->Documento->numero}",
             $message
         );
 
@@ -446,5 +477,71 @@ class FtPqr extends FtPqrProperties
     </div>
 HTML;
         return $code;
+    }
+
+    /**
+     * Notifica a los funcionarios configurados
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function sendNotifications(): bool
+    {
+        $emails = $codes = [];
+        $records = $this->PqrForm->PqrNotifications;
+        if ($records) {
+            foreach ($records as $PqrNotifications) {
+                if ($PqrNotifications->email) {
+                    $email = $PqrNotifications->Funcionario->email;
+                    if (UtilitiesPqr::isEmailValid($email)) {
+                        $emails[] = $email;
+                    }
+                }
+                if ($PqrNotifications->notify) {
+                    $codes[] = $PqrNotifications->Funcionario->funcionario_codigo;
+                }
+            }
+        }
+
+        if ($codes) {
+            $Transfer = new Transfer(
+                $this->Documento,
+                SessionController::getValue('funcionario_codigo'),
+                BuzonEntrada::TRANSFERIDO
+            );
+            $Transfer->setDestination($codes);
+            $Transfer->setDestinationType(Transfer::DESTINATION_TYPE_CODE);
+            $Transfer->execute();
+        }
+
+        if ($emails) {
+            $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->PqrForm->label} con radicado {$this->Documento->numero}.<br/><br/>
+            El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado";
+
+            $SendMailController = new SendMailController(
+                "Notificación de {$this->PqrForm->label} # {$this->Documento->numero}",
+                $message
+            );
+
+            $SendMailController->setDestinations(
+                SendMailController::DESTINATION_TYPE_EMAIL,
+                $emails
+            );
+
+            $send = $SendMailController->send();
+            if ($send !== true) {
+                $log = [
+                    'error' => $send,
+                    'message' => "No fue posible notificar a los funcionarios # {$this->Documento->numero}"
+                ];
+                UtilitiesPqr::notifyAdministrator(
+                    "No fue posible notificar a los funcionarios # {$this->Documento->numero}",
+                    $log
+                );
+            }
+        }
+
+        return true;
     }
 }

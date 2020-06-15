@@ -49,6 +49,20 @@ function getExpiration(int $idft)
     return $FtPqr->getColorExpiration();
 }
 
+function getEndDate(int $idft)
+{
+    global $FtPqr;
+
+    return $FtPqr->getEndDate();
+}
+
+function getDaysLate(int $idft)
+{
+    global $FtPqr;
+
+    return $FtPqr->getDaysLate();
+}
+
 function getValueSysTipo(int $iddocumento, int $fkCampoOpciones)
 {
     $tipo = '';
@@ -107,24 +121,11 @@ function options(int $iddocumento, string $estado, int $idft): string
 {
     switch ($estado) {
         case FtPqr::ESTADO_PROCESO:
-            $options = <<<HTML
-            <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}" data-idft="{$idft}">
-               <i class="fa fa-plus"></i> Asignar Tarea
-           </a>
-           <a href="#" class="dropdown-item viewTask" data-id="{$iddocumento}" data-idft="{$idft}">
-               <i class="fa fa-eye"></i> Tareas
-           </a>
-HTML;
-            break;
-
         case FtPqr::ESTADO_TERMINADO:
             $options = <<<HTML
             <a href="#" class="dropdown-item answer" data-id="{$iddocumento}" data-idft="{$idft}">
                <i class="fa fa-mail-reply"></i> Responder
            </a>
-           <!-- <a href="#" class="dropdown-item answer2" data-id="{$iddocumento}" data-idft="{$idft}">
-               <i class="fa fa-mail-reply"></i> Responder con documento existente
-           </a> -->
            <a href="#" class="dropdown-item viewTask" data-id="{$iddocumento}" data-idft="{$idft}">
                <i class="fa fa-eye"></i> Tareas
            </a>
@@ -133,9 +134,6 @@ HTML;
 
         default:
             $options = <<<HTML
-             <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}" data-idft="{$idft}">
-                <i class="fa fa-plus"></i> Asignar Tarea
-            </a>
             <a href="#" class="dropdown-item cancel" data-id="{$iddocumento}" data-idft="{$idft}">
                 <i class="fa fa-exclamation-triangle"></i> Anular
             </a>
@@ -149,6 +147,15 @@ HTML;
             <i class="fa fa-ellipsis-v"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-left bg-white" role="menu">
+            <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}" data-idft="{$idft}">
+                <i class="fa fa-plus"></i> Asignar Tarea
+            </a>
+           <a href="#" class="dropdown-item edit" data-id="{$iddocumento}" data-idft="{$idft}">
+                <i class="fa fa-edit"></i> Tipo de PQRSF
+            </a>
+            <a href="#" class="dropdown-item history" data-id="{$iddocumento}" data-idft="{$idft}">
+                <i class="fa fa-history"></i> Historial
+            </a>
            {$options}
         </div>
     </div>

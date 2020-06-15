@@ -122,4 +122,20 @@ class UtilitiesPqr
             'total' => $total
         ];
     }
+
+    /**
+     * Valida si un email es valido
+     *
+     * @param string $email
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public static function isEmailValid(string $email): bool
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -42,16 +42,28 @@ final class Version20200226192642 extends AbstractMigration
         $this->createComponentePendientes($idbusqueda);
         $this->createComponenteProcesos($idbusqueda);
         $this->createComponenteTerminados($idbusqueda);
+        $this->createComponenteTodos($idbusqueda);
     }
 
-    protected function getDefaultData(bool $ViewNewField = false)
+    protected function getDefaultData(string $nameReport)
     {
-
-        $NewField = $ViewNewField ? '{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},' : '';
+        switch ($nameReport) {
+            case PqrForm::NOMBRE_REPORTE_TODOS:
+            case PqrForm::NOMBRE_REPORTE_PROCESO:
+                $NewField = '{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
+                break;
+            case PqrForm::NOMBRE_REPORTE_TERMINADO:
+                $NewField = '{"title":"FECHA FINALIZACIÓN","field":"{*getEndDate@idft*}","align":"center"},{"title":"DÍAS RETRASO","field":"{*getDaysLate@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
+                break;
+            case PqrForm::NOMBRE_REPORTE_PENDIENTE:
+            default:
+                $NewField = '{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},';
+                break;
+        }
 
         return [
             'url' => NULL,
-            'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},{"title":"E-MAIL","field":"{*sys_email*}","align":"center"},{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
+            'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},{"title":"E-MAIL","field":"{*sys_email*}","align":"center"},{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
             'encabezado_componente' => NULL,
             'campos_adicionales' => 'v.numero,v.fecha,v.sys_email,v.sys_tipo,v.sys_estado,v.idft',
             'tablas_adicionales' => NULL,
@@ -74,7 +86,7 @@ final class Version20200226192642 extends AbstractMigration
             'nombre' => $nombreComponente,
             'orden' => 1
         ];
-        $busquedaComponente = array_merge($dataComponente, $this->getDefaultData());
+        $busquedaComponente = array_merge($dataComponente, $this->getDefaultData($nombreComponente));
 
         $idbusquedaComponente = $this->createBusquedaComponente(
             $idbusqueda,
@@ -106,7 +118,7 @@ final class Version20200226192642 extends AbstractMigration
             'nombre' => $nombreComponente,
             'orden' => 2
         ];
-        $busquedaComponente = array_merge($dataComponente, $this->getDefaultData(true));
+        $busquedaComponente = array_merge($dataComponente, $this->getDefaultData($nombreComponente));
 
         $idbusquedaComponente = $this->createBusquedaComponente(
             $idbusqueda,
@@ -137,8 +149,7 @@ final class Version20200226192642 extends AbstractMigration
             'nombre' => $nombreComponente,
             'orden' => 3
         ];
-        //'acciones_seleccionados' => 'answers'
-        $busquedaComponente = array_merge($dataComponente, $this->getDefaultData(true));
+        $busquedaComponente = array_merge($dataComponente, $this->getDefaultData($nombreComponente));
 
         $idbusquedaComponente = $this->createBusquedaComponente(
             $idbusqueda,
@@ -159,6 +170,51 @@ final class Version20200226192642 extends AbstractMigration
         ];
         $this->createModulo($data, $nombreComponente);
     }
+
+    protected function createComponenteTodos(int $idbusqueda)
+    {
+        $nombreComponente = PqrForm::NOMBRE_REPORTE_TODOS;
+        $dataComponente = [
+            'busqueda_idbusqueda' => $idbusqueda,
+            'etiqueta' => 'Todas',
+            'nombre' => $nombreComponente,
+            'orden' => 4
+        ];
+        $busquedaComponente = array_merge($dataComponente, $this->getDefaultData($nombreComponente));
+
+        $idbusquedaComponente = $this->createBusquedaComponente(
+            $idbusqueda,
+            $busquedaComponente,
+            $nombreComponente
+        );
+
+        $busquedaCondicion = [
+            'fk_busqueda_componente' => $idbusquedaComponente,
+            'codigo_where' => "1=1",
+            'etiqueta_condicion' => $nombreComponente
+        ];
+        $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
+
+        $nombre = PqrForm::NOMBRE_PANTALLA_GRAFICO;
+        $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE lower(nombre) like '{$nombre}'";
+        $pantallaGrafico = $this->connection->fetchAll($sql);
+
+        $idPantallaGrafico = $pantallaGrafico[0]['idpantalla_grafico'];
+
+        $this->abortIf(!$idPantallaGrafico, "No se encuentra la pantalla del grafico");
+
+        $data = [
+            'enlace' => 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector": "iframe","url": "views/buzones/listado_componentes.php?searchId=' . $idbusqueda . '"},{"kConnector": "iframe","url": "views/graficos/dashboard.php?screen=' . $idPantallaGrafico . '","kTitle": "Indicadores"}]',
+        ];
+        $this->createModulo($data, 'indicadores_pqr');
+
+        $this->connection->update('grafico', [
+            'fk_busqueda_componente' => $idbusquedaComponente
+        ], [
+            'fk_pantalla_grafico' => $idPantallaGrafico
+        ]);
+    }
+
 
     public function down(Schema $schema): void
     {
