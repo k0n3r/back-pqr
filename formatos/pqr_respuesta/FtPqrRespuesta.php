@@ -6,7 +6,7 @@ use Exception;
 use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\models\PqrHistory;
 use Saia\Pqr\formatos\pqr\FtPqr;
-use Saia\Pqr\Helpers\UtilitiesPqr;
+use Saia\Pqr\helpers\UtilitiesPqr;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
 use Saia\controllers\SendMailController;

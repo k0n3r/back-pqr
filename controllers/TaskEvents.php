@@ -5,7 +5,7 @@ namespace Saia\Pqr\controllers;
 use Saia\core\model\Model;
 use Saia\models\tarea\Tarea;
 use Saia\Pqr\formatos\pqr\FtPqr;
-use Saia\Pqr\Helpers\UtilitiesPqr;
+use Saia\Pqr\helpers\UtilitiesPqr;
 use Saia\models\documento\Documento;
 use Saia\controllers\SessionController;
 use Saia\models\tarea\IExternalEventsTask;

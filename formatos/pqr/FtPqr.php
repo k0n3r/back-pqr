@@ -8,7 +8,7 @@ use Saia\Pqr\models\PqrForm;
 use Saia\models\BuzonEntrada;
 use Saia\Pqr\models\PqrBackup;
 use Saia\Pqr\models\PqrFormField;
-use Saia\Pqr\Helpers\UtilitiesPqr;
+use Saia\Pqr\helpers\UtilitiesPqr;
 use Saia\controllers\DateController;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\SessionController;

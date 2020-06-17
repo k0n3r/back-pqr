@@ -20,7 +20,7 @@ if (file_exists($fileAdditionalFunctions)) {
 }
 
 use Saia\Pqr\formatos\pqr\FtPqr;
-use Saia\Pqr\Helpers\UtilitiesPqr;
+use Saia\Pqr\helpers\UtilitiesPqr;
 use Saia\models\documento\Documento;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CampoSeleccionados;

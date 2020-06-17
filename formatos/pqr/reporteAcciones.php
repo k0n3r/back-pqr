@@ -10,7 +10,7 @@
             top.topModal({
                 url: `views/tareas/crear.php`,
                 params: {
-                    className: 'Saia\\Pqr\\Controllers\\TaskEvents',
+                    className: 'Saia\\Pqr\\controllers\\TaskEvents',
                     documentId: documentId
                 },
                 size: 'modal-lg',
