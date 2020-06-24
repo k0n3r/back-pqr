@@ -28,7 +28,8 @@ class FtPqrRespuestaProperties extends ModelFormat
 				'fk_response_template',
 				'fk_response_template_json',
 				'ft_pqr',
-				'idft_pqr_respuesta' 
+				'idft_pqr_respuesta',
+				'sol_encuesta' 
             ],
             'date' => [],
             'table' => 'ft_pqr_respuesta',

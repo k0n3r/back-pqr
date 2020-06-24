@@ -206,6 +206,28 @@ final class Version20200310032827 extends AbstractMigration
                 'opciones' => '{"tipos":".pdf,.doc,.docx,.jpg,.jpeg,.gif,.png,.bmp,.xls,.xlsx,.ppt","longitud":"3","cantidad":"3"}',
                 'ayuda' => 'Anexos que se enviaran en la respuesta',
                 'longitud_vis' => NULL
+            ],
+            'sol_encuesta' => [
+                'formato_idformato' => $idformato,
+                'nombre' => 'sol_encuesta',
+                'etiqueta' => 'Solicitar la encuesta del servicio',
+                'tipo_dato' => 'integer',
+                'longitud' => 1,
+                'obligatoriedad' => NULL,
+                'valor' => '{*fieldSatisfactionSurvey*}',
+                'acciones' => 'a',
+                'ayuda' => NULL,
+                'predeterminado' => NULL,
+                'banderas' => NULL,
+                'etiqueta_html' => 'Method',
+                'orden' => 7,
+                'adicionales' => NULL,
+                'fila_visible' => 1,
+                'placeholder' => NULL,
+                'longitud_vis' => NULL,
+                'opciones' => NULL,
+                'estilo' => NULL,
+                'listable' => 1
             ]
         ];
 

@@ -101,15 +101,15 @@ class FtPqr extends FtPqrProperties
         $data = $this->PqrBackup->getDataJson();
         $Qr = CoreFunctions::mostrar_qr($this);
 
-        $code = "<table class='table table-bordered' style='width:100%'>
-        <tr>
-            <td colspan='2' align='right'>{$Qr}</td>
-        </tr>";
+        $code = '<table class="table table-bordered" style="width:100%">';
+        $code = '<tr>
+            <td colspan="2" align="right">' . $Qr . '</td>
+        </tr>';
         foreach ($data as $key => $value) {
-            $code .= "<tr>
-                <td style='width:50%'><strong>{$key}</strong></td>
-                <td style='width:50%'>{$value}</td>
-            <tr>";
+            $code .= '<tr>
+                <td style="width:50%"><strong>' . $key . '</strong></td>
+                <td style="width:50%">' . $value . '</td>
+            <tr>';
         }
         $code .= '</table>';
 

@@ -13,6 +13,7 @@ use Saia\models\grafico\PantallaGrafico;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
 use Saia\Pqr\controllers\services\PqrFormService;
+use Saia\controllers\generator\FormatFilesGenerator;
 use Saia\Pqr\controllers\addEditFormat\AddEditFtPqr;
 use Saia\Pqr\controllers\addEditFormat\IAddEditFormat;
 
@@ -231,6 +232,8 @@ class PqrFormController extends Controller
 
             $this->generaReport();
             $this->viewRespuestaPqr();
+
+            // FormatFilesGenerator::generateWs($this->PqrForm->Formato);
 
             // $Web = new WebservicePqr($this->PqrForm);
             // $Web->generate();
