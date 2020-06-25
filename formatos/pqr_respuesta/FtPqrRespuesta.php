@@ -72,10 +72,10 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     {
         $CamposFormato = new CamposFormato($idCamposFormato);
 
-        return "<div class='form-group form-group-default' id='group_{$CamposFormato->nombre}'>
+        return "<div class='form-group form-group-default' id='group_sol_encuesta'>
             <div class='checkbox check-success input-group'>
-                <input type='checkbox' name='{$CamposFormato->nombre}' id='{$CamposFormato->nombre}' value='1'>
-                <label for='{$CamposFormato->nombre}' class='mr-3'>
+                <input type='checkbox' name='sol_encuesta' id='sol_encuesta' value='1'>
+                <label for='sol_encuesta' class='mr-3'>
                     {$CamposFormato->etiqueta}
                 </label>
             </div>
@@ -181,9 +181,8 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$this->PqrForm->label} con número de radicado {$DocumentoPqr->numero}.<br/><br/>";
 
         if ($this->sol_encuesta) {
-            //Este correo le llega a todos los que estan en copia
             $url = $this->getUrlEncuesta();
-            $message = "Califica nuestro servicio haciendo clic en el siguiente enlace: <a href='{$url}'>Calificar el servicio</a> .<br/><br/>";
+            $message .= "Califica nuestro servicio haciendo clic en el siguiente enlace: <a href='{$url}'>Calificar el servicio</a> .<br/><br/>";
         }
 
         $SendMailController = new SendMailController(

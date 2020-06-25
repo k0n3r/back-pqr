@@ -3,96 +3,144 @@
 namespace Saia\Pqr\controllers;
 
 use Saia\Pqr\models\PqrForm;
-use Saia\controllers\generator\WebserviceGenerator;
+use Saia\models\formatos\Formato;
+use Saia\controllers\generator\webservice\WsFt;
+use Saia\controllers\generator\webservice\IWsHtml;
+use Saia\controllers\generator\webservice\WsGenerator;
 
-class WebservicePqr extends WebserviceGenerator
+class WebservicePqr extends WsFt implements IWsHtml
 {
 
-    const DIRECTORY_PQR = '../' . SettingController::DIRECTORY_PQR;
+    private string $jsContent;
+    private string $htmlContent;
+    private array $moreFiles = [];
+    private PqrForm $PqrForm;
 
-    /**
-     * Instancia de PqrForm
-     *
-     * @var PqrForm
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public $PqrForm;
 
-    public function __construct(PqrForm $PqrForm)
+    public function __construct(Formato $Formato)
     {
-        $this->PqrForm = $PqrForm;
-        $this->setDirectory(self::DIRECTORY_PQR);
+        parent::__construct($Formato);
+        $this->PqrForm = PqrForm::getPqrFormActive();
     }
 
     /**
-     * Obtiene el ID del formato
-     *
-     * @return int
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @inheritDoc
      */
-    protected function getFormatId(): int
+    public function getHtmlContentForm(array $filesToInclude, ?string $urlSearch): string
     {
-        return (int) $this->PqrForm->fk_formato;
-    }
-
-    /**
-     * Obtiene los campos del formulario que estaran en el adicionar del webservice
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    protected function getFormatFields(): array
-    {
-        $data = [];
-
-        foreach ($this->PqrForm->getPqrFormFieldsActive() as $PqrFormField) {
-            $data[] = [
-                'type' => 'camposFormato',
-                'instance' => $PqrFormField->CamposFormato
-            ];
+        $this->setContentForm($filesToInclude);
+        $moreFiles = [];
+        if ($this->moreFiles) {
+            $moreFiles = WsGenerator::getRouteFile($this->moreFiles);
+        }
+        if ($moreFiles) {
+            $lastFiles = array_slice($filesToInclude, -2);
+            array_splice($filesToInclude, -2, 2, $moreFiles);
+            $filesToInclude = array_merge($filesToInclude, $lastFiles);
         }
 
-        return $data;
-    }
-    /**
-     * Obtiene el nombre del formulario
-     *
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    protected function getNameForm(): string
-    {
-        return $this->PqrForm->label;
-    }
+        $this->addFilesToForm($filesToInclude);
 
-    /**
-     * Obtiene el contenido html de los campos que estaran en el adicionar
-     * del webservice
-     *
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    protected function getContent(): string
-    {
-        $code = parent::getContentDefault();
+        $html = $urlSearch ? "<a href='{$urlSearch}'>Consultar</a>" : '';
 
-        return $code;
+        $values = [
+            'fields' => $this->htmlContent,
+            'nameForm' => mb_strtoupper($this->Formato->etiqueta),
+            'linksCss' => $this->getCssLinks(),
+            'scripts' => $this->getScriptLinks(),
+            'hrefSearch' => $html
+        ];
+
+        return $this->getContent(
+            'app/modules/back_pqr/controllers/templates/formPqr.html.php',
+            $values
+        );
     }
 
     /**
-     * Crea el contenido js que sera cargado en el adicionar del webservice
+     * @inheritDoc
+     */
+    public function getJsContentForm(): string
+    {
+        $values = [
+            'baseUrl' => ABSOLUTE_SAIA_ROUTE,
+            'formatId' => $this->Formato->getPK(),
+            'content' => $this->jsContent
+        ];
+
+        return $this->getContent(
+            'app/modules/back_pqr/controllers/templates/formPqr.js.php',
+            $values
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getHtmlContentSearchForm(array $filesToInclude, string $urlForm): string
+    {
+        $this->addFilesToSearch($filesToInclude);
+        $html = $urlForm ? "<a href='{$urlForm}'>Crear solicitud</a>" : '';
+
+        $values = [
+            'linksCss' => $this->getCssLinks(false),
+            'scripts' => $this->getScriptLinks(false),
+            'hrefSolicitud' => $html
+        ];
+
+        return $this->getContent(
+            'app/controllers/generator/webservice/templates/search.html.php',
+            $values
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getJsContentSearchForm(): string
+    {
+        $values = [
+            'formatId' => $this->Formato->getPK()
+        ];
+
+        return $this->getContent(
+            'app/controllers/generator/webservice/templates/search.js.php',
+            $values
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMoreFilesToCopy(): array
+    {
+        return $this->moreFiles;
+    }
+
+
+    /**
+     * Setea las variables que tendran el contenido del formulario
      *
-     * @return string
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function createJsContent(): string
+    private function setContentForm(): void
     {
-        return parent::jsContentDefault('app/modules/back_pqr/app/generatePqr.php');
+        $codeHtml = $codeJs = '';
+        $fields = $this->getFormatFields();
+
+        foreach ($fields as $IWsFields) {
+            ($files = $IWsFields->aditionalFiles()) ?
+                $this->moreFiles = array_merge($this->moreFiles, $files) : '';
+
+            $codeHtml .= $IWsFields->htmlContent() . "\n";
+
+            $codeJs .= $IWsFields->jsContent() ?
+                $IWsFields->jsContent() . "\n" : '';
+        }
+
+        $this->jsContent = $codeJs;
+        $this->htmlContent = $codeHtml;
     }
 }

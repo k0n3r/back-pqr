@@ -12,6 +12,16 @@ function add(data) {
     getPlantilla($(this).val());
   });
 
+  $("#email").blur(function () {
+    let length = $(this).val().trim().length;
+    if (+length) {
+      $("#group_sol_encuesta").removeClass('d-none');
+    } else {
+      $("#sol_encuesta").prop('checked', false);
+      $("#group_sol_encuesta").addClass('d-none');
+    }
+  });
+
 
   function getEmail(id) {
     $.ajax({

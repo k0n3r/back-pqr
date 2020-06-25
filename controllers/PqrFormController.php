@@ -9,12 +9,15 @@ use Saia\models\grafico\Grafico;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
 use Saia\Pqr\models\PqrFormField;
+use Saia\controllers\SessionController;
 use Saia\models\grafico\PantallaGrafico;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
+use Saia\controllers\generator\webservice\WsFt;
 use Saia\Pqr\controllers\services\PqrFormService;
 use Saia\controllers\generator\FormatFilesGenerator;
 use Saia\Pqr\controllers\addEditFormat\AddEditFtPqr;
+use Saia\controllers\generator\webservice\WsGenerator;
 use Saia\Pqr\controllers\addEditFormat\IAddEditFormat;
 
 
@@ -233,13 +236,8 @@ class PqrFormController extends Controller
             $this->generaReport();
             $this->viewRespuestaPqr();
 
-            // FormatFilesGenerator::generateWs($this->PqrForm->Formato);
-
-            // $Web = new WebservicePqr($this->PqrForm);
-            // $Web->generate();
-
-            // $WebCal = new WebserviceCalificacion($FormatoC);
-            // $WebCal->generate();
+            $this->generatePqrWs();
+            $this->generateCalificacionWs();
 
             $PqrFormService = new PqrFormService($this->PqrForm);
             $Response->data = [
@@ -255,6 +253,47 @@ class PqrFormController extends Controller
         }
 
         return $Response;
+    }
+
+    /**
+     * Genera el WS de PQR
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function generatePqrWs(): bool
+    {
+        global $rootPath;
+
+        $values = [
+            'baseUrl' => ABSOLUTE_SAIA_ROUTE
+        ];
+
+        $content = WsFt::getContent(
+            'app/controllers/generator/webservice/templates/define.js.php',
+            $values
+        );
+        $fileName =  SessionController::getTemporalDir() . "/define.js";
+
+        if (!file_put_contents($rootPath . $fileName, $content)) {
+            throw new Exception("Imposible crear el archivo define.js para el ws", 1);
+        }
+
+        $IWsHtml = new WebservicePqr($this->PqrForm->Formato);
+        $WsGenerator = new WsGenerator(
+            $IWsHtml,
+            $this->PqrForm->Formato->nombre,
+            true
+        );
+        $WsGenerator->loadAdditionalFiles([$fileName]);
+
+        return $WsGenerator->create();
+    }
+
+    private function generateCalificacionWs(): bool
+    {
+        return true;
     }
 
     /**
