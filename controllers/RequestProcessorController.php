@@ -6,6 +6,7 @@ use Saia\models\Funcionario;
 use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\models\PqrHtmlField;
+use Saia\controllers\CryptController;
 use Saia\models\vistas\VfuncionarioDc;
 use Saia\controllers\FuncionarioController;
 use Saia\Pqr\controllers\services\PqrFormService;
@@ -60,6 +61,13 @@ class RequestProcessorController extends Controller
         return $data;
     }
 
+    /**
+     * Lista la informacion de los campos Dependencia y Municipio
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function getListForField(): array
     {
         $response = [
@@ -82,23 +90,19 @@ class RequestProcessorController extends Controller
         ];
     }
 
-    //----------------
-
-
     /**
-     * Genera las credenciales de radicador web
+     * Desencripta la informacion
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function generateTemporalCredentials(): array
+    public function decrypt(): array
     {
-        $Funcionario = new Funcionario(Funcionario::RADICADOR_WEB);
+        $data = json_decode(CryptController::decrypt($this->request['dataCrypt']), true);
+
         return [
-            'token' => FuncionarioController::generateToken($Funcionario, 0, true),
-            'key' => $Funcionario->getPK(),
-            'rol' => VfuncionarioDc::getFirstUserRole(Funcionario::RADICADOR_WEB)
+            'data' => $data
         ];
     }
 }

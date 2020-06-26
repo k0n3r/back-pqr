@@ -9,9 +9,10 @@ use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\helpers\UtilitiesPqr;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
-use Saia\controllers\SendMailController;
 use Saia\controllers\SessionController;
 use Saia\models\formatos\CamposFormato;
+use Saia\controllers\SendMailController;
+use Saia\Pqr\controllers\PqrFormController;
 use Saia\Pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 
 class FtPqrRespuesta extends FtPqrRespuestaProperties
@@ -243,10 +244,8 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
             'ft_pqr_respuesta' => $this->getPK(),
             'anterior' => $this->Documento->getPK()
         ]));
-        //$url = ABSOLUTE_SAIA_ROUTE . WebserviceCalificacion::DIRECTORY . "/index.html?d={$params}";
-        $url = "";
 
-        return $url;
+        return PqrFormController::URLWSCALIFICACION . "index.html?d={$params}";
     }
 
     /**
@@ -282,22 +281,22 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     }
 
     /**
-     * Obtiene la Calificacion
+     * Obtiene la Calificaciones
      *
-     * @return FtPqrCalificacion|null
+     * @return FtPqrCalificacion[]
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function getFtPqrCalificacion(): ?FtPqrCalificacion
+    public function getFtPqrCalificacion(): array
     {
-        if (!$this->PqrCalificacion) {
+        $data = [];
+        if ($this->FtPqrCalificacion) {
             foreach ($this->FtPqrCalificacion as $FtPqrCalificacion) {
                 if (!$FtPqrCalificacion->Documento->isActive()) {
-                    $this->PqrCalificacion = $FtPqrCalificacion;
-                    break;
+                    $data[] = $FtPqrCalificacion;
                 }
             }
         }
-        return $this->PqrCalificacion;
+        return $data;
     }
 }

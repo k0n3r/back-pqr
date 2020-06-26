@@ -61,7 +61,7 @@ final class Version20200321234633 extends AbstractMigration
             'ruta_adicionar' => "app/modules/back_pqr/formatos/{$name}/adicionar.php",
             'ruta_buscar' => "app/modules/back_pqr/formatos/{$name}/buscar.php",
             'encabezado' => 1,
-            'cuerpo' => '{*showCalification*}',
+            'cuerpo' => '<p>{*showCalification*}</p><p>{*mostrar_estado_proceso*}</p>',
             'pie_pagina' => 0,
             'margenes' => '25,25,50,25',
             'orientacion' => 0,

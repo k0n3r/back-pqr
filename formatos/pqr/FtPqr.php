@@ -102,14 +102,14 @@ class FtPqr extends FtPqrProperties
         $Qr = CoreFunctions::mostrar_qr($this);
 
         $code = '<table class="table table-bordered" style="width:100%">';
-        $code = '<tr>
-            <td colspan="2" align="right">' . $Qr . '</td>
+        $code .= '<tr>
+               <td colspan="2" align="right">' . $Qr . '</td>
         </tr>';
         foreach ($data as $key => $value) {
             $code .= '<tr>
                 <td style="width:50%"><strong>' . $key . '</strong></td>
                 <td style="width:50%">' . $value . '</td>
-            <tr>';
+            </tr>';
         }
         $code .= '</table>';
 

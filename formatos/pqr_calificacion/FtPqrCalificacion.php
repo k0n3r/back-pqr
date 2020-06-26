@@ -9,7 +9,7 @@ class FtPqrCalificacion extends FtPqrCalificacionProperties
     {
         $fields = $this->getFormat()->getFields();
 
-        $code = "<table class='table table-bordered' style='width:100%'>";
+        $code = '<table class="table table-bordered" style="width:100%">';
         foreach ($fields as $CamposFormato) {
             if ($CamposFormato->isSystemField()) {
                 continue;
@@ -17,9 +17,9 @@ class FtPqrCalificacion extends FtPqrCalificacionProperties
             $answer = $this->getFieldValue($CamposFormato->nombre);
             $text = $CamposFormato->etiqueta;
 
-            $code .= "<tr>
-                <td class='text-uppercase'>{$text}: <br/><strong>{$answer}</strong></td>
-            <tr>";
+            $code .= '<tr>
+                <td>' . mb_strtoupper($text) . ': <br/><strong>' . mb_strtoupper($answer) . '</strong><br/><br/></td>
+            </tr>';
         }
         $code .= '</table>';
 

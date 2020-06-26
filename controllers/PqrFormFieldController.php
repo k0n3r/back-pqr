@@ -132,6 +132,11 @@ class PqrFormFieldController extends Controller
 
             $PqrFormField = new PqrFormField($this->request['id']);
             if ($PqrFormField->delete()) {
+                if ($PqrFormField->fk_campos_formato) {
+                    if (!$PqrFormField->CamposFormato->delete()) {
+                        throw new Exception("No fue posible eliminar el campo", 200);
+                    }
+                }
                 $conn->commit();
                 $Response->success = 1;
             } else {
@@ -156,6 +161,7 @@ class PqrFormFieldController extends Controller
      */
     private function generateName(string $label, int $pref = 0): string
     {
+        $label = $this->excludeReservedWords($label);
         $cadena = trim(preg_replace('/[^a-z]/', '_', strtolower($label)));
         $cadena = implode('_', array_filter(explode('_', $cadena)));
         $cadena = trim(substr($cadena, 0, 20), '_');
@@ -175,6 +181,15 @@ class PqrFormFieldController extends Controller
         }
 
         return $name;
+    }
+
+    private function excludeReservedWords(string $label): string
+    {
+        $reservedWords = [
+            'select', 'from', 'where', 'uniq'
+        ];
+
+        return in_array($label, $reservedWords) ? $label . "_" : $label;
     }
 
     private function existDB($name): bool

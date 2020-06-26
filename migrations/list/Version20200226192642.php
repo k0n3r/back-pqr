@@ -19,7 +19,7 @@ final class Version20200226192642 extends AbstractMigration
 
     public function getDescription(): string
     {
-        return 'Creacion de los reportes pendiente, proceso y terminado';
+        return 'Creación de los reportes pendiente, proceso y terminado';
     }
 
     public function up(Schema $schema): void

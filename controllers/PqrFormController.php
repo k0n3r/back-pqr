@@ -23,8 +23,8 @@ use Saia\Pqr\controllers\addEditFormat\IAddEditFormat;
 
 class PqrFormController extends Controller
 {
-    const  DIRECTORY_PQR = 'ws/pqr/';
-    const DIRECTORY_CLASIFICACION = 'ws/calificacion/';
+    const URLWSPQR = PROTOCOLO_CONEXION . DOMINIO . '/' . CONTENEDOR_SAIA . '/ws/pqr/';
+    const URLWSCALIFICACION = PROTOCOLO_CONEXION . DOMINIO . '/' . CONTENEDOR_SAIA . '/ws/pqr_calificacion/';
 
     private PqrForm $PqrForm;
 
@@ -48,7 +48,7 @@ class PqrFormController extends Controller
         $Response = (object) [
             'success' => 1,
             'data' => [
-                'urlWs' => PROTOCOLO_CONEXION . DOMINIO . '/' . self::DIRECTORY_PQR,
+                'urlWs' => self::URLWSPQR,
                 'publish' => $this->PqrForm->fk_formato ? 1 : 0,
                 'pqrForm' => $PqrFormService->getDataPqrForm(),
                 'pqrTypes' => $PqrFormService->getTypes(),
@@ -96,7 +96,6 @@ class PqrFormController extends Controller
 
         return $Response;
     }
-
 
     /**
      * Habilita/deshabilita la radicacion por Email
@@ -235,9 +234,10 @@ class PqrFormController extends Controller
 
             $this->generaReport();
             $this->viewRespuestaPqr();
+            $this->viewCalificacionPqr();
 
             $this->generatePqrWs();
-            $this->generateCalificacionWs();
+            $this->generateCalificacionWs($FormatoC);
 
             $PqrFormService = new PqrFormService($this->PqrForm);
             $Response->data = [
@@ -266,6 +266,9 @@ class PqrFormController extends Controller
     {
         global $rootPath;
 
+        //FormatFilesGenerator::generateWs($this->PqrForm->Formato);
+        // return true;
+
         $values = [
             'baseUrl' => ABSOLUTE_SAIA_ROUTE
         ];
@@ -291,8 +294,10 @@ class PqrFormController extends Controller
         return $WsGenerator->create();
     }
 
-    private function generateCalificacionWs(): bool
+    private function generateCalificacionWs(Formato $FormatoC): bool
     {
+        FormatFilesGenerator::generateWs($FormatoC, false);
+
         return true;
     }
 
@@ -416,6 +421,22 @@ class PqrFormController extends Controller
         WHERE ft.documento_iddocumento=d.iddocumento AND d.estado NOT IN ('ELIMINADO')";
 
         $this->createView('vpqr_respuesta', $sql);
+    }
+
+    /**
+     * Genera el SQL de la vista calificacion a la PQR
+     *
+     * @return void
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    protected function viewCalificacionPqr()
+    {
+        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.idft_pqr_calificacion as idft,ft.ft_pqr_respuesta,ft.experiencia_gestion,ft.experiencia_servicio
+        FROM ft_pqr_calificacion ft,documento d
+        WHERE ft.documento_iddocumento=d.iddocumento AND d.estado NOT IN ('ELIMINADO')";
+
+        $this->createView('vpqr_calificacion', $sql);
     }
 
     /**

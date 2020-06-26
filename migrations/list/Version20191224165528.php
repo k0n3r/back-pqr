@@ -347,6 +347,8 @@ final class Version20191224165528 extends AbstractMigration
         $this->delOtherModules();
         $this->deleteFormat('pqr', $schema);
         $this->connection->executeQuery("DROP VIEW vpqr");
+        $this->connection->executeQuery("DROP VIEW vpqr_respuesta");
+        $this->connection->executeQuery("DROP VIEW vpqr_calificacion");
     }
 
     protected function delOtherModules()
