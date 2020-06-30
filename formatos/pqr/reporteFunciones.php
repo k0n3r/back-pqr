@@ -63,8 +63,12 @@ function getDaysLate(int $idft)
     return $FtPqr->getDaysLate();
 }
 
-function getValueSysTipo(int $iddocumento, int $fkCampoOpciones)
+function getValueSysTipo(int $iddocumento, $fkCampoOpciones)
 {
+    if ($fkCampoOpciones == 'sys_tipo') {
+        return 'Sin Tipo';
+    }
+
     $tipo = '';
     if ($valor = CampoSeleccionados::findColumn('valor', [
         'fk_campo_opciones' => $fkCampoOpciones,

@@ -297,7 +297,9 @@ class FtPqr extends FtPqrProperties
      */
     private function getDataRow(): array
     {
-        $data = [];
+        $data = [
+            'REGISTRADO COMO ANÓNIMO' => $this->sys_anonimo ? 'SI' : 'NO'
+        ];
 
         $Fields = $this->PqrForm->PqrFormFields;
         foreach ($Fields as  $PqrFormField) {

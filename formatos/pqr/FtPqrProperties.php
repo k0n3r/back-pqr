@@ -30,6 +30,7 @@ class FtPqrProperties extends ModelFormat
 				'numerico',
 				'radios',
 				'sys_anonimo',
+				'sys_dependencia',
 				'sys_email',
 				'sys_estado',
 				'sys_fecha_terminado',

@@ -210,20 +210,20 @@ class PqrFormController extends Controller
             $conn = DatabaseConnection::getDefaultConnection();
             $conn->beginTransaction();
 
-            if (!$this->PqrForm->fk_formato) {
-                $this->activeGraphics();
-            }
+            // if (!$this->PqrForm->fk_formato) {
+            //     $this->activeGraphics();
+            // }
 
-            $this->addEditFormat(
-                new AddEditFtPqr($this->PqrForm)
-            );
+            // $this->addEditFormat(
+            //     new AddEditFtPqr($this->PqrForm)
+            // );
 
-            if (!$FormatoR = Formato::findByAttributes([
-                'nombre' => 'pqr_respuesta'
-            ])) {
-                throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
-            }
-            $this->generateForm($FormatoR->getPK());
+            // if (!$FormatoR = Formato::findByAttributes([
+            //     'nombre' => 'pqr_respuesta'
+            // ])) {
+            //     throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
+            // }
+            // $this->generateForm($FormatoR->getPK());
 
             if (!$FormatoC = Formato::findByAttributes([
                 'nombre' => 'pqr_calificacion'
@@ -232,9 +232,9 @@ class PqrFormController extends Controller
             }
             $this->generateForm($FormatoC->getPK());
 
-            $this->generaReport();
-            $this->viewRespuestaPqr();
-            $this->viewCalificacionPqr();
+            // $this->generaReport();
+            // $this->viewRespuestaPqr();
+            // $this->viewCalificacionPqr();
 
             $this->generatePqrWs();
             $this->generateCalificacionWs($FormatoC);
@@ -256,18 +256,15 @@ class PqrFormController extends Controller
     }
 
     /**
-     * Genera el WS de PQR
+     * Genera el define.js que utilizara el ws
      *
-     * @return boolean
+     * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function generatePqrWs(): bool
+    private function generateDefineJs(): string
     {
         global $rootPath;
-
-        //FormatFilesGenerator::generateWs($this->PqrForm->Formato);
-        // return true;
 
         $values = [
             'baseUrl' => ABSOLUTE_SAIA_ROUTE
@@ -277,17 +274,31 @@ class PqrFormController extends Controller
             'app/controllers/generator/webservice/templates/define.js.php',
             $values
         );
-        $fileName =  SessionController::getTemporalDir() . "/define.js";
+        $fileName = SessionController::getTemporalDir() . "/define.js";
 
         if (!file_put_contents($rootPath . $fileName, $content)) {
             throw new Exception("Imposible crear el archivo define.js para el ws", 1);
         }
 
+        return $fileName;
+    }
+
+    /**
+     * Genera el WS de PQR
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function generatePqrWs(): bool
+    {
+        $fileName = $this->generateDefineJs();
+
         $IWsHtml = new WebservicePqr($this->PqrForm->Formato);
         $WsGenerator = new WsGenerator(
             $IWsHtml,
             $this->PqrForm->Formato->nombre,
-            true
+            false
         );
         $WsGenerator->loadAdditionalFiles([$fileName]);
 
@@ -296,9 +307,28 @@ class PqrFormController extends Controller
 
     private function generateCalificacionWs(Formato $FormatoC): bool
     {
-        FormatFilesGenerator::generateWs($FormatoC, false);
+        global $rootPath;
 
-        return true;
+        $content = WsFt::getContent(
+            'app/modules/back_pqr/controllers/templates/404.html.php'
+        );
+        $errorPage = SessionController::getTemporalDir() . "/404.html";
+
+        if (!file_put_contents($rootPath . $errorPage, $content)) {
+            throw new Exception("Imposible crear el archivo 404.html para el ws", 1);
+        }
+
+        $fileName = $this->generateDefineJs();
+        $IWsHtml = new WebserviceCalificacion($FormatoC);
+        $WsGenerator = new WsGenerator(
+            $IWsHtml,
+            $FormatoC->nombre,
+            false
+        );
+        $WsGenerator->addFiles([$errorPage]);
+        $WsGenerator->loadAdditionalFiles([$fileName]);
+
+        return $WsGenerator->create();
     }
 
     /**
