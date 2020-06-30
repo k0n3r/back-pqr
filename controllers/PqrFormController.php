@@ -210,20 +210,20 @@ class PqrFormController extends Controller
             $conn = DatabaseConnection::getDefaultConnection();
             $conn->beginTransaction();
 
-            // if (!$this->PqrForm->fk_formato) {
-            //     $this->activeGraphics();
-            // }
+            if (!$this->PqrForm->fk_formato) {
+                $this->activeGraphics();
+            }
 
-            // $this->addEditFormat(
-            //     new AddEditFtPqr($this->PqrForm)
-            // );
+            $this->addEditFormat(
+                new AddEditFtPqr($this->PqrForm)
+            );
 
-            // if (!$FormatoR = Formato::findByAttributes([
-            //     'nombre' => 'pqr_respuesta'
-            // ])) {
-            //     throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
-            // }
-            // $this->generateForm($FormatoR->getPK());
+            if (!$FormatoR = Formato::findByAttributes([
+                'nombre' => 'pqr_respuesta'
+            ])) {
+                throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
+            }
+            $this->generateForm($FormatoR->getPK());
 
             if (!$FormatoC = Formato::findByAttributes([
                 'nombre' => 'pqr_calificacion'
@@ -232,9 +232,9 @@ class PqrFormController extends Controller
             }
             $this->generateForm($FormatoC->getPK());
 
-            // $this->generaReport();
-            // $this->viewRespuestaPqr();
-            // $this->viewCalificacionPqr();
+            $this->generaReport();
+            $this->viewRespuestaPqr();
+            $this->viewCalificacionPqr();
 
             $this->generatePqrWs();
             $this->generateCalificacionWs($FormatoC);
