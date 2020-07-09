@@ -12,7 +12,6 @@
 
 <body>
     <div class='container-fluid col-lg-8 pt-2'>
-
         <!-- Modal -->
         <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="modalSearchLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -62,6 +61,7 @@
         </div>
 
         <div class="card">
+            <img src="http://saia_pqr.com/saia_2020/saia/app/modules/back_pqr/controllers/templates/encabezadoWs.jpeg">
             <?php if ($showLabel) : ?>
                 <div class="card-header text-center">
                     <div class="card-title">

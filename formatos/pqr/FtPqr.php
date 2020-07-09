@@ -101,9 +101,23 @@ class FtPqr extends FtPqrProperties
         $data = $this->PqrBackup->getDataJson();
         $Qr = CoreFunctions::mostrar_qr($this);
 
+        $fecha = DateController::convertDate($this->Documento->fecha, 'Ymd');
+        $text = sprintf(
+            '%s %s-%s',
+            'Radicado:',
+            $fecha,
+            $this->Documento->numero
+        );
+        $labelPQR = strtoupper($this->PqrForm->label);
         $code = '<table class="table table-bordered" style="width:100%">';
         $code .= '<tr>
-               <td colspan="2" align="right">' . $Qr . '</td>
+            <td style="width:50%;">
+                <p>
+                    Hemos recibido su ' . $labelPQR . '.<br/><br/>
+                    Puede hacer seguimiento en la opción CONSULTAR MI ' . $labelPQR . ' de nuestro sitio Web.
+                </p>
+            </td>
+            <td style="width:50%;text-align:center">' . $Qr . '<br /> ' . $text . ' </td>
         </tr>';
         foreach ($data as $key => $value) {
             $code .= '<tr>

@@ -93,7 +93,7 @@ class AddEditFtPqr implements IAddEditFormat
             'encabezado' => 1,
             'cuerpo' => '<p>{*showContent*}</p><p>{*mostrar_estado_proceso*}</p>',
             'pie_pagina' => 0,
-            'margenes' => '25,25,50,25',
+            'margenes' => '25,25,30,25',
             'orientacion' => 0,
             'papel' => 'Letter',
             'funcionario_idfuncionario' => SessionController::getValue('idfuncionario'),
