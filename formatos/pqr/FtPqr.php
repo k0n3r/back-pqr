@@ -117,8 +117,9 @@ class FtPqr extends FtPqrProperties
                     Puede hacer seguimiento en la opción CONSULTAR MI ' . $labelPQR . ' de nuestro sitio Web.
                 </p>
             </td>
-            <td style="width:50%;text-align:center">' . $Qr . '<br /> ' . $text . ' </td>
-        </tr>';
+            <td style="width:50%;text-align:center">' . $Qr  . $text . ' </td>
+        </tr>
+        <tr><td colspan="2">&nbsp;</td></tr>';
         foreach ($data as $key => $value) {
             $code .= '<tr>
                 <td style="width:50%"><strong>' . $key . '</strong></td>
