@@ -15,7 +15,7 @@ while ($max_salida > 0) {
 
 include_once $rootPath . 'app/vendor/autoload.php';
 
-use Saia\models\ruta\Ruta;
+use Saia\controllers\documento\RutaService;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CampoSeleccionados;
 use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
@@ -50,8 +50,8 @@ function getResponsable(int $iddocumento): string
     $FtPqrRespuesta = FtPqrRespuesta::findByDocumentId($iddocumento);
     $GLOBALS['FtPqrRespuesta'] = $FtPqrRespuesta;
 
-    $Aprobador = Ruta::lastRouteFinished($iddocumento);
-    return $Aprobador->getName();
+    $Funcionario = RutaService::getApprover($iddocumento);
+    return $Funcionario->getName();
 }
 
 /**

@@ -148,7 +148,8 @@ class PqrFormController extends Controller
             $conn = DatabaseConnection::getDefaultConnection();
             $conn->beginTransaction();
 
-            DatabaseConnection::getQueryBuilder()
+            DatabaseConnection::getDefaultConnection()
+                ->createQueryBuilder()
                 ->update('pqr_form_fields')
                 ->set('anonymous', 0)
                 ->set('required_anonymous', 0)
@@ -223,14 +224,14 @@ class PqrFormController extends Controller
             ])) {
                 throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
             }
-            $this->generateForm($FormatoR->getPK());
+            $this->generateForm($FormatoR);
 
             if (!$FormatoC = Formato::findByAttributes([
                 'nombre' => 'pqr_calificacion'
             ])) {
                 throw new Exception("El formato de calificacion PQR no fue encontrado", 1);
             }
-            $this->generateForm($FormatoC->getPK());
+            $this->generateForm($FormatoC);
 
             $this->generaReport();
             $this->viewRespuestaPqr();
@@ -346,7 +347,8 @@ class PqrFormController extends Controller
             throw new \Exception("No se encuentra la pantalla de los grafico", 200);
         }
 
-        DatabaseConnection::getQueryBuilder()
+        DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder()
             ->update('grafico')
             ->set('estado', 1)
             ->where('fk_pantalla_grafico=:idpantalla')
@@ -366,12 +368,12 @@ class PqrFormController extends Controller
     protected function addEditFormat(IAddEditFormat $Instance): bool
     {
         return $Instance->updateChange() &&
-            $this->generateForm($this->PqrForm->fk_formato);
+            $this->generateForm($this->PqrForm->Formato);
     }
 
-    protected function generateForm(int $idformato): bool
+    protected function generateForm(Formato $Formato): bool
     {
-        $FormatGenerator = new FormatGenerator($idformato);
+        $FormatGenerator = new FormatGenerator($Formato);
         $FormatGenerator->generate();
         $FormatGenerator->createModule();
 

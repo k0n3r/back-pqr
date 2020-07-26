@@ -32,17 +32,17 @@ class TaskEvents implements IExternalEventsTask
     public function afterUpdateTarea(): bool
     {
         if (!$this->Tarea->estado) {
-            if ($DocumentoTarea = $this->Tarea->getDocument()) {
+            if ($Documento = $this->Tarea->getService()->getDocument()) {
                 $history = [
                     'fecha' => date('Y-m-d H:i:s'),
-                    'idft' => $DocumentoTarea->Documento->getFt()->getPK(),
+                    'idft' => $Documento->getFt()->getPK(),
                     'nombre_funcionario' => $this->nameFuncionario,
                     'descripcion' => "Se elimina la tarea ({$this->Tarea->nombre})"
                 ];
                 if (!PqrHistory::newRecord($history)) {
                     throw new \Exception("No fue posible guardar el historial de la eliminación de la tarea", 200);
                 }
-                $this->updateEstado($DocumentoTarea->Documento);
+                $this->updateEstado($Documento);
             }
         }
         return true;
@@ -50,10 +50,10 @@ class TaskEvents implements IExternalEventsTask
 
     public function afterDeleteTarea(): bool
     {
-        if ($DocumentoTarea = $this->Tarea->getDocument()) {
+        if ($Documento = $this->Tarea->getService()->getDocument()) {
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
-                'idft' => $DocumentoTarea->Documento->getFt()->getPK(),
+                'idft' => $Documento->getFt()->getPK(),
                 'nombre_funcionario' => $this->nameFuncionario,
                 'descripcion' => "Se elimina la tarea ({$this->Tarea->nombre})"
             ];
@@ -61,7 +61,7 @@ class TaskEvents implements IExternalEventsTask
                 throw new \Exception("No fue posible guardar el historial de la eliminación de la tarea", 200);
             }
 
-            $this->updateEstado($DocumentoTarea->Documento);
+            $this->updateEstado($Documento);
         }
         return true;
     }
@@ -78,17 +78,17 @@ class TaskEvents implements IExternalEventsTask
 
     public function afterCreateTareaEstado(): bool
     {
-        if ($DocumentoTarea = $this->Tarea->getDocument()) {
+        if ($Documento = $this->Tarea->getService()->getDocument()) {
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
-                'idft' => $DocumentoTarea->Documento->getFt()->getPK(),
+                'idft' => $Documento->getFt()->getPK(),
                 'nombre_funcionario' => $this->nameFuncionario,
                 'descripcion' => "Se actualiza el estado de la tarea ({$this->Tarea->nombre}) a ({$this->Instance->getValueLabel('valor')})"
             ];
             if (!PqrHistory::newRecord($history)) {
                 throw new \Exception("No fue posible guardar el historial del cambio", 200);
             }
-            $this->updateEstado($DocumentoTarea->Documento);
+            $this->updateEstado($Documento);
         }
         return true;
     }

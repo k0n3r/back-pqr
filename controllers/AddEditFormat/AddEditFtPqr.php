@@ -2,7 +2,6 @@
 
 namespace Saia\Pqr\controllers\addEditFormat;
 
-use Exception;
 use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\models\formatos\Formato;
@@ -140,7 +139,7 @@ class AddEditFtPqr implements IAddEditFormat
         if (!$Respuesta = Formato::findByAttributes([
             'nombre' => 'pqr_respuesta'
         ])) {
-            throw new Exception("No se encontro el formato RESPUESTA PQR", 1);
+            throw new \Exception("No se encontro el formato RESPUESTA PQR", 1);
         }
 
         $Respuesta->setAttributes([

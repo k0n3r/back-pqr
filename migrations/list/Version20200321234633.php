@@ -75,7 +75,6 @@ final class Version20200321234633 extends AbstractMigration
             'mostrar_pdf' => 1,
             'orden' => NULL,
             'fk_categoria_formato' => NULL,
-            'paginar' => 0,
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Formulario de calificación de las PQR',
             'version' => 1,

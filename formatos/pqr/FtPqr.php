@@ -4,8 +4,8 @@ namespace Saia\Pqr\formatos\pqr;
 
 use DateTime;
 use Exception;
+use Saia\models\BuzonSalida;
 use Saia\Pqr\models\PqrForm;
-use Saia\models\BuzonEntrada;
 use Saia\Pqr\models\PqrBackup;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\helpers\UtilitiesPqr;
@@ -399,7 +399,7 @@ class FtPqr extends FtPqrProperties
         $dias = 1;
         foreach ($options as $option) {
             if ($option->idcampo_opciones == $this->sys_tipo) {
-                $dias = $option->dias;
+                $dias = $option->dias ?? 0;
                 break;
             }
         }
@@ -525,7 +525,7 @@ HTML;
             $Transfer = new Transfer(
                 $this->Documento,
                 SessionController::getValue('funcionario_codigo'),
-                BuzonEntrada::TRANSFERIDO
+                BuzonSalida::NOMBRE_TRANSFERIDO
             );
             $Transfer->setDestination($codes);
             $Transfer->setDestinationType(Transfer::DESTINATION_TYPE_CODE);

@@ -96,7 +96,7 @@ $baseUrl = "../../";
     <?= select2() ?>
     <?= fancyTree() ?>
     <?= dateTimePicker() ?>
-    <script src="<?= $baseUrl ?>app/modules/back_pqr/formatos/pqr/busqueda.js" data-baseurl="<?= $baseUrl ?>"></script>
+    <script src="<?= $baseUrl ?>app/modules/back_pqr/formatos/pqr/busqueda.js"></script>
 </body>
 
 </html>

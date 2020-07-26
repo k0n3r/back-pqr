@@ -17,20 +17,15 @@ class FtPqrProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'anexos',
-				'area_de_texto',
-				'autocmpoletar_munici',
-				'checkbox',
+                'anexo',
 				'dependencia',
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
 				'idft_pqr',
-				'listado',
-				'numerico',
-				'radios',
+				'numero1',
+				'select_multiple',
 				'sys_anonimo',
-				'sys_dependencia',
 				'sys_email',
 				'sys_estado',
 				'sys_fecha_terminado',
@@ -38,8 +33,8 @@ class FtPqrProperties extends ModelFormat
 				'sys_tipo',
 				'sys_tratamiento' 
             ],
-            'date' => ['sys_fecha_terminado',
-				'sys_fecha_vencimiento'],
+            'date' => ['sys_fecha_vencimiento',
+				'sys_fecha_terminado'],
             'table' => 'ft_pqr',
             'primary' => 'idft_pqr'
         ];

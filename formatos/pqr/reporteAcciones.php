@@ -155,7 +155,7 @@
         $(document).on('click', '.answer', function() {
             let documentId = $(this).data('id');
             let idft = $(this).data('idft');
-            answerPqr(documentId);
+            answerPqr(documentId, idft);
         });
 
 

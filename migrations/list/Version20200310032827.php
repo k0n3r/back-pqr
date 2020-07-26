@@ -69,7 +69,6 @@ final class Version20200310032827 extends AbstractMigration
             'mostrar_pdf' => 1,
             'orden' => NULL,
             'fk_categoria_formato' => NULL,
-            'paginar' => 0,
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Formulario utilizado para responder las PQRSF',
             'version' => 1,

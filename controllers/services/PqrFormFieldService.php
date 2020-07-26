@@ -25,7 +25,7 @@ class PqrFormFieldService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function getPqrFormField(): PqrFormField
+    public function getModel(): PqrFormField
     {
         return $this->PqrFormField;
     }
@@ -68,7 +68,8 @@ class PqrFormFieldService
      */
     private function getDependencys(object $ObjSettings, array $data = []): array
     {
-        $Qb = DatabaseConnection::getQueryBuilder();
+        $Qb = DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder();
 
         $Qb->select('iddependencia as id,nombre as text')
             ->from('dependencia')
@@ -117,7 +118,8 @@ class PqrFormFieldService
      */
     private function getListLocalidad(object $ObjSettings, array $data = []): array
     {
-        $Qb = DatabaseConnection::getQueryBuilder();
+        $Qb = DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder();
 
         $Qb->select("CONCAT(a.nombre,
             CONCAT(

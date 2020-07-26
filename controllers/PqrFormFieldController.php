@@ -186,7 +186,7 @@ class PqrFormFieldController extends Controller
     private function excludeReservedWords(string $label): string
     {
         $reservedWords = [
-            'select', 'from', 'where', 'uniq'
+            'select', 'from', 'where', 'uniq', 'numero', 'fecha'
         ];
 
         return in_array($label, $reservedWords) ? $label . "_" : $label;
@@ -242,7 +242,8 @@ class PqrFormFieldController extends Controller
             $conn = DatabaseConnection::getDefaultConnection();
             $conn->beginTransaction();
 
-            DatabaseConnection::getQueryBuilder()
+            DatabaseConnection::getDefaultConnection()
+                ->createQueryBuilder()
                 ->update('pqr_form_fields')
                 ->set('show_report', 0)->execute();
 
@@ -351,7 +352,8 @@ class PqrFormFieldController extends Controller
      */
     protected function getListDependency(): array
     {
-        $Qb = DatabaseConnection::getQueryBuilder()
+        $Qb = DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder()
             ->select('iddependencia as id,nombre')
             ->from('dependencia')
             ->where('estado=1')
@@ -375,7 +377,8 @@ class PqrFormFieldController extends Controller
      */
     protected function getListPais(): array
     {
-        $Qb = DatabaseConnection::getQueryBuilder()
+        $Qb = DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder()
             ->select('idpais as id,nombre')
             ->from('pais')
             ->where('estado=1')
@@ -399,7 +402,8 @@ class PqrFormFieldController extends Controller
      */
     protected function getListDepartamento(): array
     {
-        $Qb = DatabaseConnection::getQueryBuilder()
+        $Qb = DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder()
             ->select('iddepartamento as id,nombre')
             ->from('departamento')
             ->where('estado=1')

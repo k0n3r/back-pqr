@@ -14,8 +14,6 @@ while ($max_salida > 0) {
 
 include_once $rootPath . 'app/vendor/autoload.php';
 
-use Exception;
-use ReflectionClass;
 use Saia\controllers\SessionController;
 use Saia\controllers\functions\RequestProcessor;
 use Saia\controllers\notificaciones\NotifierController;
@@ -32,17 +30,17 @@ try {
     $newData = RequestProcessor::cleanForm($_REQUEST);
 
     if (empty($method = $newData['method']) || empty($class = $newData['class'])) {
-        throw new Exception("Error Processing Request", 1);
+        throw new \Exception("Error Processing Request", 1);
     }
     unset($newData['class'], $newData['method']);
 
-    $Reflection = new ReflectionClass("Saia\\Pqr\\controllers\\$class");
+    $Reflection = new \ReflectionClass("Saia\\Pqr\\controllers\\$class");
     if ($Reflection->hasMethod($method)) {
         $Instancia = $Reflection->newInstanceArgs($newData);
         $Response = $Instancia->$method();
         $Response->notifications = NotifierController::prepare();
     } else {
-        throw new Exception("Error Processing Request", 1);
+        throw new \Exception("Error Processing Request", 1);
     }
 } catch (Throwable $th) {
     $Response->message = $th->getMessage();

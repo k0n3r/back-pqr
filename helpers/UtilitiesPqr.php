@@ -6,6 +6,7 @@ use Saia\models\Configuracion;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\documento\Documento;
 use Saia\controllers\SendMailController;
+use Saia\controllers\TemporalController;
 
 class UtilitiesPqr
 {
@@ -30,7 +31,7 @@ class UtilitiesPqr
         }
 
         if (!is_dir($dest)) {
-            crear_destino($dest);
+            TemporalController::createFolder($dest);
         }
 
         $dir = dir($source);
@@ -82,7 +83,7 @@ class UtilitiesPqr
         global $rootPath;
 
         $path = $rootPath . 'app/modules/back_pqr/logs/';
-        crear_destino($path);
+        TemporalController::createFolder($path);
 
         $data = [
             'date' => date('Y-m-d H:i:s'),
@@ -104,13 +105,14 @@ class UtilitiesPqr
     {
         $finish = $total = 0;
 
-        if ($Tareas = $Documento->getTasks()) {
+        if ($Tareas = $Documento->getService()->getTasks()) {
             $total = count($Tareas);
 
             foreach ($Tareas as $Tarea) {
+                $TareaService = $Tarea->getService();
                 if (
-                    $Tarea->getState() == TareaEstado::REALIZADA ||
-                    $Tarea->getState() == TareaEstado::CANCELADA
+                    $TareaService->getState()->valor == TareaEstado::REALIZADA ||
+                    $TareaService->getState()->valor == TareaEstado::CANCELADA
                 ) {
                     $finish = $finish + 1;
                 }

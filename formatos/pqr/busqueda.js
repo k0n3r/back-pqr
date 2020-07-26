@@ -1,5 +1,5 @@
 $(function () {
-    let baseUrl = $('script[data-baseurl]').data('baseurl');
+    let baseUrl = localStorage.getItem('baseUrl');
     (function init() {
 
         $('#filtro_fecha').select2();
@@ -25,9 +25,14 @@ $(function () {
             .clear();
     });
 
+    let request = $('#find_document_form').serialize() + "&" + $.param({
+        key: localStorage.getItem('key'),
+        token: localStorage.getItem('token'),
+    });
+
     $('#btn_success').on('click', function () {
         $.post(`${baseUrl}app/busquedas/procesa_filtro_busqueda.php`,
-            $("#find_document_form").serialize(),
+            request,
             function (data) {
                 if (data.exito) {
                     top.successModalEvent(data);
