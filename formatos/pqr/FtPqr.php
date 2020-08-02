@@ -66,11 +66,7 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
-     * Funcion ejecutada posterior al adicionar una PQR
-     *
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     *@inheritDoc
      */
     public function afterAdd(): bool
     {
@@ -78,15 +74,30 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
-     * Funcion ejecutada despues de editar un documento
-     *
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     *@inheritDoc
      */
     public function afterEdit(): bool
     {
         return $this->validSysEmail();
+    }
+
+    /**
+     *@inheritDoc
+     */
+    public function beforeRad(): bool
+    {
+        $this->createBackup();
+        $this->updateFechaVencimiento();
+
+        return true;
+    }
+
+    /**
+     *@inheritDoc
+     */
+    public function afterRad(): bool
+    {
+        return $this->sendNotifications() && $this->notifyEmail();
     }
 
     /**
@@ -129,19 +140,6 @@ class FtPqr extends FtPqrProperties
         $code .= '</table>';
 
         return $code;
-    }
-
-    /**
-     *@inheritDoc
-     */
-    public function afterRad(): bool
-    {
-        $this->createBackup();
-        $this->updateFechaVencimiento();
-        $this->sendNotifications();
-        $this->Documento->getPdfJson(true);
-
-        return $this->notifyEmail();
     }
 
     /**

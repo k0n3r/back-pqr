@@ -1,91 +1,9 @@
 //evento ejecutado en el adicionar
 function add(data) {
-  let iddocPqr = +data.anterior;
-  if (iddocPqr) {
-    getEmail(iddocPqr)
-  } else {
-    console.error("No ha llegado el identificador");
-    return false;
-  }
-
-  $("#fk_response_template").change(function () {
-    getPlantilla($(this).val());
-  });
-
-  $("#email").blur(function () {
-    let length = $(this).val().trim().length;
-    if (+length) {
-      $("#group_sol_encuesta").removeClass('d-none');
-    } else {
-      $("#sol_encuesta").prop('checked', false);
-      $("#group_sol_encuesta").addClass('d-none');
-    }
-  });
-
-
-  function getEmail(id) {
-    $.ajax({
-      type: "POST",
-      url: `${data.baseUrl}app/modules/back_pqr/app/request.php`,
-      data: {
-        key: localStorage.getItem("key"),
-        token: localStorage.getItem("token"),
-        class: "FtPqrController",
-        method: "getEmail",
-        params: {
-          id: id
-        }
-      },
-      dataType: "json",
-      success(response) {
-        if (response.success) {
-          $("#email").val(response.data);
-        } else {
-          top.notification({
-            message: response.message,
-            type: "error"
-          });
-        }
-      },
-      error(error) {
-        console.error(error);
-      }
-    });
-  }
-
-  function getPlantilla(id) {
-    $.ajax({
-      type: "POST",
-      url: `${data.baseUrl}app/modules/back_pqr/app/request.php`,
-      data: {
-        key: localStorage.getItem("key"),
-        token: localStorage.getItem("token"),
-        class: "FtPqrController",
-        method: "getPlantilla",
-        params: {
-          id: id
-        }
-      },
-      dataType: "json",
-      success(response) {
-        if (response.success) {
-          let editor = CKEDITOR.instances['content'];
-          editor.setData(response.data);
-          $("#content").val(response.data);
-        } else {
-          top.notification({
-            message: response.message,
-            type: "error"
-          });
-        }
-      },
-      error(error) {
-        console.error(error);
-      }
-    });
-  }
+  $("#group_otra_despedida").hide();
+  addEdit(data);
 }
-//evento ejecutado en el editar
+
 function edit(data) {
   if (data.numero) {
     top.notification({
@@ -94,6 +12,48 @@ function edit(data) {
     });
     window.history.back();
   }
+  addEdit(data);
+}
+
+function addEdit(data) {
+
+  $('#ciudad_origen').select2({
+    minimumInputLength: 2,
+    language: 'es',
+    ajax: {
+      type: 'POST',
+      dataType: 'json',
+      url: `${data.baseUrl}app/configuracion/autocompletar_municipios.php`,
+      data: function (params) {
+        return {
+          term: params.term,
+          key: localStorage.getItem('key'),
+          token: localStorage.getItem('token')
+        };
+      },
+      processResults: function (response) {
+        return { results: response.data }
+      }
+    }
+  });
+
+  $("#group_otra_despedida").hide();
+  if ($("#otra_despedida").val() != "") {
+    $("#group_otra_despedida").show();
+  }
+
+  $("#despedida").on('select2:select', function (e) {
+    let key = e.params.data.element.dataset.key;
+    if (+key == 3) {
+      $("#group_otra_despedida").show();
+    } else {
+      $("#otra_despedida").val('');
+      $("#group_otra_despedida").hide();
+    }
+  });
+
+
+
 }
 
 //evento ejecutado en el mostrar

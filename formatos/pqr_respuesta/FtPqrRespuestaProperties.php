@@ -17,18 +17,21 @@ class FtPqrRespuestaProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'adjuntos',
-				'content',
+                'anexos_digitales',
+				'anexos_fisicos',
+				'asunto',
+				'ciudad_origen',
+				'contenido',
+				'copia',
 				'dependencia',
+				'despedida',
+				'destino',
 				'documento_iddocumento',
-				'email',
-				'email_copia',
 				'encabezado',
 				'firma',
-				'fk_response_template',
-				'fk_response_template_json',
 				'ft_pqr',
 				'idft_pqr_respuesta',
+				'otra_despedida',
 				'sol_encuesta' 
             ],
             'date' => [],
