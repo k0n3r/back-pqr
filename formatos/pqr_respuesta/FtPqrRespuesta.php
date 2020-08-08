@@ -4,6 +4,7 @@ namespace Saia\Pqr\formatos\pqr_respuesta;
 
 use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
+use Saia\models\Funcionario;
 use Saia\Pqr\models\PqrForm;
 use Saia\models\Distribucion;
 use Saia\models\anexos\Anexos;
@@ -29,7 +30,20 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     const CORDIALMENTE_DESPEDIDA = 2;
     const OTRA_DESPEDIDA = 3;
 
+    const DISTRIBUCION_RECOGIDA_ENTREGA = 1;
+    const DISTRIBUCION_SOLO_ENTREGA = 2;
+    const DISTRIBUCION_NO_REQUIERE_MENSAJERIA = 3;
+    const DISTRIBUCION_ENVIAR_EMAIL = 4;
+
+    /**
+     * @var PqrForm
+     */
     private PqrForm $PqrForm;
+
+    /**
+     * @var Funcionario
+     */
+    private Funcionario $Funcionario;
 
     public function __construct($id = null)
     {
@@ -38,6 +52,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         if (!$this->PqrForm = PqrForm::getPqrFormActive()) {
             throw new \Exception("No se encuentra el formulario activo", 200);
         }
+        $this->Funcionario = SessionController::getUser();
     }
 
     /**
@@ -80,8 +95,9 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
      */
     public function afterAdd(): bool
     {
-        // $this->validEmails();
-
+        if ($this->sendByEmail()) {
+            $this->validEmails();
+        }
         return true;
     }
 
@@ -90,8 +106,9 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
      */
     public function afterEdit(): bool
     {
-        // $this->validEmails();
-
+        if ($this->sendByEmail()) {
+            $this->validEmails();
+        }
         return true;
     }
 
@@ -100,9 +117,10 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
      */
     public function afterRad(): bool
     {
-        return $this->saveHistory() &&
-            $this->saveDistribution() &&
+        $description = "Se crea la respuesta # {$this->Documento->numero}";
+        return $this->saveHistory($description) &&
             $this->transferCopiaInterna() &&
+            $this->saveDistribution() &&
             $this->notifyEmail();
     }
 
@@ -280,7 +298,6 @@ HTML;
             $this->otra_despedida : $this->getFieldValue('despedida');
     }
 
-
     /**
      * Obtiene mas informacion que va en el mostrar
      *
@@ -303,7 +320,7 @@ HTML;
             $data .= "Copia externa: {$copiaExterna}<br/>";
         }
 
-        $data .= "Proyectó: {$this->getProyecto()}";
+        $data .= "Proyectó: {$this->getCreador()}";
 
         return $data;
     }
@@ -350,13 +367,13 @@ HTML;
     }
 
     /**
-     * Obtiene el nombre del creador o de quien proyecto
+     * Obtiene el nombre del creador o de quien proyectó
      *
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function getProyecto(): string
+    private function getCreador(): string
     {
         return $this->Documento->Funcionario->getName();
     }
@@ -367,32 +384,38 @@ HTML;
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
+     * 
+     * @throws Exception
      */
     private function validEmails(): void
     {
-        if ($this->email) {
-
-            if (!UtilitiesPqr::isEmailValid($this->email)) {
-                throw new \Exception("El email ({$this->email}) NO es valido");
-            }
+        $email = $this->Tercero->correo;
+        if (!$email) {
+            throw new \Exception("Debe ingresar el email (Destino)");
         }
 
-        if ($this->email_copia) {
-            $emails = explode(",", $this->email_copia);
-            foreach ($emails as $copia) {
+        if (!UtilitiesPqr::isEmailValid($email)) {
+            throw new \Exception("El email ({$email}) NO es valido");
+        }
+
+        if ($emailCopy = $this->getCopyEmail()) {
+            foreach ($emailCopy as $copia) {
+                if (!$copia) {
+                    throw new \Exception("Debe ingresar el email (Con copia a)");
+                }
+
                 if (!UtilitiesPqr::isEmailValid($copia)) {
-                    throw new \Exception("El email ({$copia}) NO es valido");
+                    throw new \Exception("El email en copia externa ({$copia}) NO es valido");
                 }
             }
         }
     }
 
-
     /**
      * Seteo la funcion principal y devuelvo solo
      * los parametros necesarios al editar
      *
-     * @return void
+     * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
@@ -404,9 +427,9 @@ HTML;
                 'numero' => (int) $this->Documento->numero
             ];
         }
+
         return $data;
     }
-
 
     /**
      * Crea un registro de historial de Pqr
@@ -414,40 +437,51 @@ HTML;
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
+     * 
+     * @throws Exception
      */
-    private function saveHistory(): bool
+    private function saveHistory(string $description): bool
     {
         $history = [
             'fecha' => date('Y-m-d H:i:s'),
             'idft' => $this->FtPqr->getPK(),
-            'nombre_funcionario' => SessionController::getUser()->getName(),
-            'descripcion' => "Se crea la respuesta # {$this->Documento->numero}"
+            'nombre_funcionario' => $this->Funcionario->getName(),
+            'descripcion' => $description
         ];
 
         if (!PqrHistory::newRecord($history)) {
-            throw new \Exception("No fue posible guardar el historial del cambio", 200);
+            throw new \Exception("No fue posible guardar el historial", 200);
         }
 
         return true;
     }
 
+    /**
+     * Registra la distribucion
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     private function saveDistribution(): bool
     {
         switch ((int) $this->getKeyField('tipo_distribucion')) {
-            case 1:
+            case self::DISTRIBUCION_RECOGIDA_ENTREGA:
                 $recogida = Distribucion::REQUIRE_RECOGIDA;
                 $estado = Distribucion::ESTADO_POR_RECEPCIONAR;
                 break;
 
-            case 2:
+            case self::DISTRIBUCION_SOLO_ENTREGA:
                 $recogida = Distribucion::NO_REQUIRE_RECOGIDA;
                 $estado = Distribucion::ESTADO_POR_DISTRIBUIR;
                 break;
 
-            case 3:
+            case self::DISTRIBUCION_NO_REQUIERE_MENSAJERIA:
+            case self::DISTRIBUCION_ENVIAR_EMAIL:
                 $recogida = Distribucion::NO_REQUIRE_RECOGIDA;
                 $estado = Distribucion::ESTADO_FINALIZADO;
                 break;
+
             default:
                 throw new \Exception("Tipo de distribucion no definida", 200);
                 break;
@@ -467,6 +501,18 @@ HTML;
     }
 
     /**
+     * Valida si la respuesta se envia por E-mail
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function sendByEmail(): bool
+    {
+        return (int) $this->getKeyField('tipo_distribucion') == self::DISTRIBUCION_ENVIAR_EMAIL;
+    }
+
+    /**
      * Transfiere a los ingresados
      * en copia interna
      *
@@ -479,7 +525,7 @@ HTML;
         if ($this->copia_interna) {
             $Transfer = new Transfer(
                 $this->Documento,
-                SessionController::getValue('funcionario_codigo'),
+                $this->Funcionario->funcionario_codigo,
                 BuzonSalida::NOMBRE_COPIA
             );
             $destinations = explode(',', $this->copia_interna);
@@ -500,7 +546,7 @@ HTML;
      */
     private function notifyEmail(): bool
     {
-        if (!$this->email && !$this->email_copia) {
+        if (!$this->sendByEmail()) {
             return true;
         }
 
@@ -517,17 +563,15 @@ HTML;
             $message
         );
 
-        if ($this->email) {
-            $SendMailController->setDestinations(
-                SendMailController::DESTINATION_TYPE_EMAIL,
-                [$this->email]
-            );
-        }
+        $SendMailController->setDestinations(
+            SendMailController::DESTINATION_TYPE_EMAIL,
+            [$this->Tercero->correo]
+        );
 
-        if ($this->email_copia) {
+        if ($emailCopy = $this->getCopyEmail()) {
             $SendMailController->setCopyDestinations(
                 SendMailController::DESTINATION_TYPE_EMAIL,
-                explode(",", $this->email_copia)
+                $emailCopy
             );
         }
 
@@ -552,9 +596,37 @@ HTML;
                 "No fue posible notificar la Respuesta a la PQR # {$DocumentoPqr->numero}",
                 $log
             );
+
+            throw new \Exception("No fue posible notificar la respuesta", 200);
         }
 
-        return true;
+        $description = "Se le notificó a: (" . implode(", ", $SendMailController->getDestinations()) . ")";
+        if ($copia = $SendMailController->getCopyDestinations()) {
+            $texCopia = implode(", ", $copia);
+            $description .= " con copia a: ({$texCopia})";
+        }
+
+        return $this->saveHistory($description);
+    }
+
+    /**
+     * Obtiene los email de copia
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getCopyEmail(): array
+    {
+        $emails = [];
+        if ($this->copia) {
+            $records = explode(',', $this->copia);
+            foreach ($records as $destino) {
+                $emails[] = (new Tercero($destino))->correo;
+            }
+        }
+
+        return $emails;
     }
 
     /**
@@ -575,40 +647,9 @@ HTML;
     }
 
     /**
-     * Solicita via email la encuesta de satisfaccion
-     *
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function requestSurvey(): bool
-    {
-        if (!$this->email) {
-            return false;
-        }
-
-        $DocumentoPqr = $this->FtPqr->Documento;
-
-        $url = $this->getUrlEncuesta();
-        $message = "Cordial Saludo,<br/><br/>
-        Nos gustaría recibir tus comentarios sobre el servicio que has recibido por parte de nuestro equipo.<br/><a href='{$url}'>Calificar el servicio</a>";
-
-        $SendMailController = new SendMailController(
-            "Queremos conocer tu opinión! (Solicitud de {$this->PqrForm->label} # {$DocumentoPqr->numero})",
-            $message
-        );
-
-        $SendMailController->setDestinations(
-            SendMailController::DESTINATION_TYPE_EMAIL,
-            [$this->email]
-        );
-
-        return $SendMailController->send();
-    }
-
-    /**
      * Obtiene la Calificaciones
-     *
+     * Utilizado en reporteFunciones.php
+     * 
      * @return FtPqrCalificacion[]
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
@@ -624,5 +665,57 @@ HTML;
             }
         }
         return $data;
+    }
+
+    /**
+     * Solicita via email la encuesta de satisfaccion
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     * 
+     * @throws Exception
+     */
+    public function requestSurvey(): bool
+    {
+        $email = $this->Tercero->correo;
+        if (!UtilitiesPqr::isEmailValid($email)) {
+            throw new \Exception("El email ({$email}) NO es valido");
+        }
+
+        $nameFormat = $this->Formato->etiqueta;
+        $DocumentoPqr = $this->FtPqr->Documento;
+
+        $url = $this->getUrlEncuesta();
+        $message = "Cordial Saludo,<br/><br/>
+        Nos gustaría recibir tus comentarios sobre el servicio que has recibido por parte de nuestro equipo.<br/><a href='{$url}'>Calificar el servicio</a>";
+
+        $SendMailController = new SendMailController(
+            "Queremos conocer tu opinión! (Solicitud de {$this->PqrForm->label} # {$DocumentoPqr->numero})",
+            $message
+        );
+
+        $SendMailController->setDestinations(
+            SendMailController::DESTINATION_TYPE_EMAIL,
+            [$email]
+        );
+
+        $send = $SendMailController->send();
+        if ($send !== true) {
+            $message = "No fue posible solicitar la calificacion de la ({$nameFormat}) # {$this->Documento->numero}";
+            $log = [
+                'error' => $send,
+                'message' => $message
+            ];
+
+            UtilitiesPqr::notifyAdministrator(
+                $message,
+                $log
+            );
+            throw new \Exception($message);
+        }
+
+        $description = "Se solicita la calificación de la ({$nameFormat}) # {$this->Documento->numero} al e-mail: ({$email})";
+        return $this->saveHistory($description);
     }
 }

@@ -23,6 +23,7 @@ class FtPqrRespuestaProperties extends ModelFormat
 				'ciudad_origen',
 				'contenido',
 				'copia',
+				'copia_interna',
 				'dependencia',
 				'despedida',
 				'destino',
@@ -32,7 +33,8 @@ class FtPqrRespuestaProperties extends ModelFormat
 				'ft_pqr',
 				'idft_pqr_respuesta',
 				'otra_despedida',
-				'sol_encuesta' 
+				'sol_encuesta',
+				'tipo_distribucion' 
             ],
             'date' => [],
             'table' => 'ft_pqr_respuesta',

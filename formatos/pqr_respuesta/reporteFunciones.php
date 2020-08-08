@@ -70,7 +70,8 @@ function viewCalificacion(int $idft): string
     $records = $FtPqrRespuesta->getFtPqrCalificacion();
 
     if (!$cant = count($records)) {
-        return 'PENDIENTE';
+        $email = $FtPqrRespuesta->Tercero->correo ?? '';
+        return '<a class="requestSurvey" href="#" data-email="' . $email . '" data-idft="' . $idft . '">SOLICITAR CALIFICACIÓN</a>';
     }
 
     if (!$idbusquedaComponenteCalificacion) {
@@ -88,12 +89,13 @@ function viewCalificacion(int $idft): string
         'idbusqueda_componente' => $idbusquedaComponenteCalificacion
     ]);
     $numero = $FtPqrRespuesta->Documento->numero;
+    $nombreFormato = $FtPqrRespuesta->Formato->etiqueta;
 
     $enlace = <<<HTML
     <div class='kenlace_saia'
     enlace='{$url}' 
     conector='iframe'
-    titulo='Calificación a Respuesta PQR No {$numero}'>
+    titulo='Calificación a {$nombreFormato} No {$numero}'>
         <button class='btn btn-complete' style='margin:auto'>{$cant}</button>
     </div>
 HTML;

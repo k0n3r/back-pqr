@@ -1,6 +1,5 @@
 //evento ejecutado en el adicionar
 function add(data) {
-  $("#group_otra_despedida").hide();
   addEdit(data);
 }
 
@@ -45,14 +44,26 @@ function addEdit(data) {
   $("#despedida").on('select2:select', function (e) {
     let key = e.params.data.element.dataset.key;
     if (+key == 3) {
+      $("#otra_despedida").addClass("required");
       $("#group_otra_despedida").show();
     } else {
+      $("#otra_despedida").removeClass("required");
       $("#otra_despedida").val('');
       $("#group_otra_despedida").hide();
     }
   });
 
-
+  $("#group_sol_encuesta").hide();
+  $("#tipo_distribucion").on('select2:select', function (e) {
+    let key = e.params.data.element.dataset.key;
+    if (+key == 4) {//Enviar por email
+      $("#group_sol_encuesta").show();
+      $("#sol_encuesta").val(1);
+    } else {
+      $("#sol_encuesta").val(0);
+      $("#group_sol_encuesta").hide();
+    }
+  });
 
 }
 

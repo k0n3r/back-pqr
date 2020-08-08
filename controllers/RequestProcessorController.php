@@ -2,13 +2,10 @@
 
 namespace Saia\Pqr\controllers;
 
-use Saia\models\Funcionario;
 use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\models\PqrHtmlField;
 use Saia\controllers\CryptController;
-use Saia\models\vistas\VfuncionarioDc;
-use Saia\controllers\FuncionarioController;
 use Saia\Pqr\controllers\services\PqrFormService;
 use Saia\Pqr\controllers\services\PqrFormFieldService;
 

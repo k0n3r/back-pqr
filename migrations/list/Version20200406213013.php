@@ -30,7 +30,7 @@ final class Version20200406213013 extends AbstractMigration
             'campos' => NULL,
             'tablas' => NULL,
             'ruta_libreria' => 'app/modules/back_pqr/formatos/pqr_respuesta/reporteFunciones.php,app/modules/back_pqr/formatos/reporteFuncionesGenerales.php',
-            'ruta_libreria_pantalla' => NULL,
+            'ruta_libreria_pantalla' => 'app/modules/back_pqr/formatos/pqr_respuesta/reporteAcciones.php',
             'cantidad_registros' => 20,
             'tipo_busqueda' => 2
         ];

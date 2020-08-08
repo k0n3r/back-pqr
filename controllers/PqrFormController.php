@@ -15,7 +15,6 @@ use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
 use Saia\controllers\generator\webservice\WsFt;
 use Saia\Pqr\controllers\services\PqrFormService;
-use Saia\controllers\generator\FormatFilesGenerator;
 use Saia\Pqr\controllers\addEditFormat\AddEditFtPqr;
 use Saia\controllers\generator\webservice\WsGenerator;
 use Saia\Pqr\controllers\addEditFormat\IAddEditFormat;
@@ -223,6 +222,11 @@ class PqrFormController extends Controller
                 'nombre' => 'pqr_respuesta'
             ])) {
                 throw new Exception("El formato de respuesta PQR no fue encontrado", 1);
+            }
+            $formatNameR = "COMUNICACIÓN EXTERNA ({$this->PqrForm->label})";
+            if ($FormatoR->etiqueta != $formatNameR) {
+                $FormatoR->etiqueta = $formatNameR;
+                $FormatoR->save();
             }
             $this->generateForm($FormatoR);
 
