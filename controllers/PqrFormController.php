@@ -193,6 +193,60 @@ class PqrFormController extends Controller
     }
 
     /**
+     * Actualiza la configuracion para la respuesta
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function updateResponseConfiguration(): object
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+
+        try {
+            $conn = DatabaseConnection::getDefaultConnection();
+            $conn->beginTransaction();
+            $data = [];
+            foreach ($this->request['tercero'] as $name => $value) {
+                $data[] = [
+                    'name' => $name,
+                    'value' => $value
+                ];
+            }
+
+            $this->PqrForm->response_configuration = json_encode(['tercero' => $data]);
+            if (!$this->PqrForm->update()) {
+                throw new \Exception("No fue posible actualizar", 200);
+            };
+
+            $Response->success = 1;
+            $conn->commit();
+        } catch (\Exception $th) {
+            $conn->rollBack();
+            $Response->message = $th->getMessage();
+        }
+
+        return $Response;
+    }
+
+    /**
+     * Obtiene la configuracion de la respuesta
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getResponseConfiguration(): object
+    {
+        return (object) [
+            'success' => 1,
+            'data' => $this->PqrForm->getResponseConfiguration()
+        ];
+    }
+
+    /**
      * publica o crea el formulario en el webservice
      *
      * @return object

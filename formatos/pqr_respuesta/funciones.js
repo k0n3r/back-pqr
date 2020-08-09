@@ -1,5 +1,35 @@
 //evento ejecutado en el adicionar
 function add(data) {
+  $.post(
+    `${data.baseUrl}app/modules/back_pqr/app/request.php`,
+    {
+      class: 'FtPqrRespuestaController',
+      method: 'loadField',
+      key: localStorage.getItem('key'),
+      token: localStorage.getItem('token'),
+      data: {
+        idft: data.padre
+      }
+    },
+    function (response) {
+      if (response.success) {
+        let data = response.data;
+        if (typeof data.destino === 'object') {
+          $("#destino").select2('close');
+          let option = new Option(data.destino.text, data.destino.id, true, true);
+          $("#destino").append(option).trigger('change');
+        }
+
+        if (data.asunto) {
+          $("#asunto").val(data.asunto);
+        }
+      } else {
+        console.error(response)
+      }
+    },
+    'json'
+  );
+
   addEdit(data);
 }
 

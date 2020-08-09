@@ -356,6 +356,24 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda' => NULL,
                 'longitud_vis' => NULL
             ],
+            'sys_tercero' => [
+                'formato_idformato' => $this->PqrForm->fk_formato,
+                'fila_visible' => 0,
+                'obligatoriedad' => 0,
+                'orden' => 0,
+                'nombre' => 'sys_tercero',
+                'etiqueta' => 'Destinatario de la Respuesta',
+                'tipo_dato' => 'integer',
+                'longitud' => '11',
+                'predeterminado' => 0,
+                'etiqueta_html' => 'Hidden',
+                'acciones' => NULL,
+                'placeholder' => 'Destinatario de la respuesta',
+                'listable' => 1,
+                'opciones' => NULL,
+                'ayuda' => NULL,
+                'longitud_vis' => NULL
+            ],
             'sys_fecha_vencimiento' => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'fila_visible' => 0,

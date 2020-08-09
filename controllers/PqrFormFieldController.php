@@ -423,4 +423,38 @@ class PqrFormFieldController extends Controller
 
         return $Qb->execute()->fetchAll();
     }
+
+    /**
+     * Obtiene los campos que se podran utilizar para la
+     * carga automatica del destino de la respuesta
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getTextFields(): object
+    {
+        $Qb = DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder()
+            ->select('ff.*')
+            ->from('pqr_form_fields', 'ff')
+            ->join('ff', 'pqr_html_fields', 'hf', 'ff.fk_pqr_html_field=hf.id')
+            ->where("hf.type_saia='Text' and ff.active=1")
+            ->orderBy('ff.orden');
+
+        $data = [];
+        if ($records = PqrFormField::findByQueryBuilder($Qb)) {
+            foreach ($records as $PqrFormField) {
+                $data[] = [
+                    'id' => $PqrFormField->getPK(),
+                    'text' => $PqrFormField->label
+                ];
+            }
+        }
+
+        return (object) [
+            'success' => 1,
+            'data' => $data
+        ];
+    }
 }

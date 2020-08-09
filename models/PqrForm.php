@@ -32,7 +32,8 @@ class PqrForm extends Model
                 'show_anonymous',
                 'show_label',
                 'rad_email',
-                'active'
+                'active',
+                'response_configuration'
             ],
             'primary' => 'id',
             'table' => 'pqr_forms',
@@ -93,7 +94,14 @@ class PqrForm extends Model
         return PqrForm::findByAttributes(['active' => 1]);
     }
 
-
+    /**
+     * Obtiene el campo de la pqr segun el nombre
+     *
+     * @param string $name
+     * @return PqrFormField
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function getRow(string $name): PqrFormField
     {
         foreach ($this->PqrFormFields as $PqrFormField) {
@@ -101,5 +109,19 @@ class PqrForm extends Model
                 return $PqrFormField;
             }
         }
+    }
+
+    /**
+     * Obtiene decodificada la configuracion 
+     * de la respuesta
+     *
+     * @param boolean $inArray: Retorna como array
+     * @return null|object|array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getResponseConfiguration(bool $inArray = false)
+    {
+        return json_decode($this->response_configuration, $inArray);
     }
 }

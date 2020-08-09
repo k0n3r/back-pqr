@@ -33,9 +33,6 @@ final class Version20200103155146 extends AbstractMigration
         $table4 = $schema->createTable('pqr_backups');
         $this->tablePqrBackup($table4);
 
-        $table5 = $schema->createTable('pqr_response_templates');
-        $this->tablePqrResponseTemplate($table5);
-
         $table6 = $schema->createTable('pqr_notifications');
         $this->tablePqrNotify($table6);
 
@@ -169,6 +166,9 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('show_anonymous', 'boolean', ['default' => 0]);
         $table->addColumn('show_label', 'boolean', ['default' => 1]);
         $table->addColumn('rad_email', 'boolean', ['default' => 0]);
+        $table->addColumn('response_configuration', 'text', [
+            'notnull' => false
+        ]);
 
         $table->addColumn('active', 'boolean', [
             'default' => 1
@@ -191,24 +191,6 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('data_json', 'text', [
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_general_ci'
-        ]);
-    }
-
-    public function tablePqrResponseTemplate(Table $table)
-    {
-        $table->addColumn('id', 'integer', [
-            'autoincrement' => true
-        ]);
-        $table->setPrimaryKey(['id']);
-
-        $table->addColumn('name', 'string');
-        $table->addColumn('content', 'text', [
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_general_ci'
-        ]);
-        $table->addColumn('system', 'boolean', [
-            'notnull' => false,
-            'default' => 0
         ]);
     }
 

@@ -46,7 +46,7 @@ final class Version20200310032827 extends AbstractMigration
         $name = $this->formatName;
         $data = [
             'nombre' => $name,
-            'etiqueta' => 'RESPUESTAS PQRSF',
+            'etiqueta' => 'COMUNICACIÓN EXTERNA (PQRSF)',
             'cod_padre' => 0,
             'contador_idcontador' => $contador[0]['idcontador'],
             'nombre_tabla' => "ft_{$name}",
@@ -89,149 +89,212 @@ final class Version20200310032827 extends AbstractMigration
         $data = [
             'ft_pqr' => [
                 'formato_idformato' => $idformato,
-                'fila_visible' => 1,
-                'obligatoriedad' => 1,
-                'orden' => 0,
                 'nombre' => 'ft_pqr',
                 'etiqueta' => 'pqr',
                 'tipo_dato' => 'integer',
+                'longitud' => '11',
+                'obligatoriedad' => '1',
+                'acciones' => 'a',
                 'banderas' => 'i',
-                'longitud' => 11,
                 'etiqueta_html' => 'Method',
-                'acciones' => 'a',
-                'listable' => 1,
-                'ayuda' => NULL,
-                'longitud_vis' => NULL
+                'orden' => '1',
+                'fila_visible' => '1',
+                'listable' => '1'
             ],
-            'email' => [
+            'ciudad_origen' => [
                 'formato_idformato' => $idformato,
-                'fila_visible' => 1,
-                'obligatoriedad' => 0,
-                'orden' => 1,
-                'nombre' => 'email',
-                'etiqueta' => 'Responder a (E-mail):',
+                'nombre' => 'ciudad_origen',
+                'etiqueta' => 'Ciudad de Origen',
                 'tipo_dato' => 'string',
-                'longitud' => NULL,
-                'etiqueta_html' => 'Text',
+                'longitud' => '255',
+                'obligatoriedad' => '1',
+                'valor' => '{*selectCity*}',
                 'acciones' => 'a,e',
-                'placeholder' => 'Ingrese el correo',
-                'listable' => 1,
-                'opciones' => '{"type":"email"}',
-                'ayuda' => 'Ingrese el correo del remitente a la cual dara respuesta a la PQR',
-                'longitud_vis' => NULL
+                'etiqueta_html' => 'Method',
+                'orden' => '2',
+                'fila_visible' => '1',
+                'listable' => '1'
             ],
-            'email_copia' => [
+            'destino' => [
                 'formato_idformato' => $idformato,
-                'fila_visible' => 1,
-                'obligatoriedad' => 0,
-                'orden' => 2,
-                'nombre' => 'email_copia',
-                'etiqueta' => 'Copia a (E-mail):',
-                'tipo_dato' => 'text',
-                'longitud' => NULL,
-                'etiqueta_html' => 'Text',
+                'nombre' => 'destino',
+                'etiqueta' => 'Destino',
+                'tipo_dato' => 'string',
+                'longitud' => '255',
+                'obligatoriedad' => '1',
                 'acciones' => 'a,e',
-                'placeholder' => 'Ingrese los correos',
-                'listable' => 1,
-                'opciones' => NULL,
-                'ayuda' => 'Ingrese los correos separados por coma, a los cuales se le copiara la respuesta',
-                'longitud_vis' => NULL
+                'etiqueta_html' => 'ExternalUser',
+                'orden' => '3',
+                'fila_visible' => '1',
+                'opciones' => '{"tipo_seleccion":"unico","tipo":true,"nombre":true,"correo":true,"tipo_identificacion":true,"identificacion":true,"ciudad":true,"titulo":true,"cargo":false,"direccion":true,"telefono":true,"sede":false,"empresa":false}',
+                'listable' => '1'
             ],
-            'fk_response_template' => [
+            'tipo_distribucion' => [
                 'formato_idformato' => $idformato,
-                'fila_visible' => 1,
-                'obligatoriedad' => 0,
-                'orden' => 3,
-                'nombre' => 'fk_response_template',
-                'etiqueta' => 'Plantilla',
-                'tipo_dato' => 'integer',
-                'longitud' => 11,
-                'etiqueta_html' => 'SqlOptions',
-                'acciones' => 'a',
-                'placeholder' => '',
-                'listable' => 1,
-                'opciones' => '{"tipo":"select","sql":"SELECT id,name as nombre FROM pqr_response_templates"}',
-                'ayuda' => NULL,
-                'longitud_vis' => NULL
+                'nombre' => 'tipo_distribucion',
+                'etiqueta' => 'Tipo distribución',
+                'tipo_dato' => 'string',
+                'longitud' => '255',
+                'obligatoriedad' => '1',
+                'valor' => '1,1;2,2;3,3;4,4',
+                'acciones' => 'a,e',
+                'etiqueta_html' => 'Select',
+                'orden' => '4',
+                'fila_visible' => '1',
+                'placeholder' => 'seleccionar..',
+                'listable' => '1',
+                'campoOpciones' => [
+                    ['llave' => '4', 'valor' => 'Enviar por E-mail', 'estado' => '1', 'orden' => '0'],
+                    ['llave' => '1', 'valor' => 'Requiero recogida de documento y entrega al destinatario', 'estado' => '1', 'orden' => '1'],
+                    ['llave' => '2', 'valor' => 'Requiero sólo entrega al destinatario', 'estado' => '1', 'orden' => '2'],
+                    ['llave' => '3', 'valor' => 'No requiero servicio de mensajería, lo entregaré yo mismo', 'estado' => '1', 'orden' => '3'],
+                ]
             ],
-            'fk_response_template_json' => [
+            'copia' => [
                 'formato_idformato' => $idformato,
-                'fila_visible' => 1,
-                'obligatoriedad' => 0,
-                'orden' => 4,
-                'nombre' => 'fk_response_template_json',
-                'etiqueta' => 'fk_response_template_json',
-                'tipo_dato' => 'text',
-                'longitud' => NULL,
-                'etiqueta_html' => 'SystemField',
-                'acciones' => NULL,
-                'placeholder' => NULL,
-                'listable' => 0,
-                'opciones' => NULL,
-                'ayuda' => NULL,
-                'longitud_vis' => NULL
+                'nombre' => 'copia',
+                'etiqueta' => 'Con copia a',
+                'tipo_dato' => 'string',
+                'longitud' => '255',
+                'obligatoriedad' => '0',
+                'acciones' => 'a,e',
+                'etiqueta_html' => 'ExternalUser',
+                'orden' => '5',
+                'fila_visible' => '1',
+                'opciones' => '{"tipo_seleccion":"unico","tipo":true,"nombre":true,"correo":true,"tipo_identificacion":true,"identificacion":true,"ciudad":true,"titulo":true,"cargo":false,"direccion":true,"telefono":true,"sede":false,"empresa":false}',
+                'listable' => '1'
             ],
-            'content' => [
+            'asunto' => [
                 'formato_idformato' => $idformato,
-                'fila_visible' => 1,
-                'obligatoriedad' => 1,
-                'orden' => 5,
-                'nombre' => 'content',
+                'nombre' => 'asunto',
+                'etiqueta' => 'Asunto',
+                'tipo_dato' => 'string',
+                'longitud' => '255',
+                'obligatoriedad' => '1',
+                'acciones' => 'a,e,p,b',
+                'etiqueta_html' => 'Text',
+                'orden' => '6',
+                'fila_visible' => '1',
+                'longitud_vis' => '255',
+                'listable' => '1'
+            ],
+            'contenido' => [
+                'formato_idformato' => $idformato,
+                'nombre' => 'contenido',
                 'etiqueta' => 'Contenido',
                 'tipo_dato' => 'text',
-                'longitud' => NULL,
-                'etiqueta_html' => 'Textarea',
+                'obligatoriedad' => '1',
+                'valor' => 'avanzado',
                 'acciones' => 'a,e,p',
-                'placeholder' => NULL,
-                'listable' => 1,
+                'etiqueta_html' => 'Textarea',
+                'orden' => '7',
+                'fila_visible' => '1',
                 'opciones' => '{"avanzado":true}',
-                'ayuda' => NULL,
-                'longitud_vis' => NULL
+                'listable' => '1'
             ],
-            'adjuntos' => [
+            'despedida' => [
                 'formato_idformato' => $idformato,
-                'fila_visible' => 1,
-                'obligatoriedad' => 0,
-                'orden' => 6,
-                'valor' => '.pdf|.doc|.docx|.jpg|.jpeg|.gif|.png|.bmp|.xls|.xlsx|.ppt@multiple',
-                'nombre' => 'adjuntos',
-                'etiqueta' => 'Anexos',
-                'tipo_dato' => 'text',
-                'longitud' => NULL,
-                'etiqueta_html' => 'Attached',
+                'nombre' => 'despedida',
+                'etiqueta' => 'Despedida',
+                'tipo_dato' => 'string',
+                'longitud' => '255',
+                'obligatoriedad' => '1',
+                'valor' => '1,1;2,2;3,3;4,4',
                 'acciones' => 'a,e',
-                'placeholder' => NULL,
-                'listable' => 1,
-                'opciones' => '{"tipos":".pdf,.doc,.docx,.jpg,.jpeg,.gif,.png,.bmp,.xls,.xlsx,.ppt","longitud":"3","cantidad":"3"}',
-                'ayuda' => 'Anexos que se enviaran en la respuesta',
-                'longitud_vis' => NULL
+                'etiqueta_html' => 'Select',
+                'orden' => '8',
+                'fila_visible' => '1',
+                'placeholder' => 'seleccionar..',
+                'listable' => '1'
+            ],
+            'otra_despedida' => [
+                'formato_idformato' => $idformato,
+                'nombre' => 'otra_despedida',
+                'etiqueta' => 'Escribe la despedida',
+                'tipo_dato' => 'string',
+                'longitud' => '255',
+                'obligatoriedad' => '0',
+                'acciones' => 'a,e',
+                'etiqueta_html' => 'Text',
+                'orden' => '9',
+                'fila_visible' => '1',
+                'longitud_vis' => '255',
+                'listable' => '1'
+            ],
+            'anexos_digitales' => [
+                'formato_idformato' => $idformato,
+                'nombre' => 'anexos_digitales',
+                'etiqueta' => 'Anexos Digitales',
+                'tipo_dato' => 'string',
+                'longitud' => '255',
+                'obligatoriedad' => '0',
+                'valor' => '.pdf|.doc|.docx|.jpg|.jpeg|.gif|.png|.bmp|.xls|.xlsx|.ppt@multiple',
+                'acciones' => 'a,e,b',
+                'banderas' => 'a',
+                'etiqueta_html' => 'Attached',
+                'orden' => '10',
+                'fila_visible' => '1',
+                'opciones' => '{"tipos":".pdf,.doc,.docx,.jpg,.jpeg,.gif,.png,.bmp,.xls,.xlsx,.ppt","longitud":"3","cantidad":"10","ruta_consulta":"app\\/anexos\\/consultar_anexos_campo.php"}',
+                'listable' => '1'
+            ],
+            'anexos_fisicos' => [
+                'formato_idformato' => $idformato,
+                'nombre' => 'anexos_fisicos',
+                'etiqueta' => 'Anexos Fisicos',
+                'tipo_dato' => 'text',
+                'obligatoriedad' => '0',
+                'acciones' => 'a,e',
+                'ayuda' => 'Por favor separar los anexos con comas ","',
+                'etiqueta_html' => 'Text',
+                'orden' => '11',
+                'fila_visible' => '1',
+                'listable' => '1'
+            ],
+            'copia_interna' => [
+                'formato_idformato' => $idformato,
+                'nombre' => 'copia_interna',
+                'etiqueta' => 'Con copia interna a',
+                'tipo_dato' => 'string',
+                'longitud' => '255',
+                'obligatoriedad' => '0',
+                'acciones' => 'a,e',
+                'etiqueta_html' => 'UserAutocomplete',
+                'orden' => '12',
+                'fila_visible' => '1',
+                'opciones' => '{"dependenciaCargo":true}',
+                'listable' => '1'
             ],
             'sol_encuesta' => [
                 'formato_idformato' => $idformato,
                 'nombre' => 'sol_encuesta',
                 'etiqueta' => 'Solicitar la encuesta del servicio',
                 'tipo_dato' => 'integer',
-                'longitud' => 1,
-                'obligatoriedad' => NULL,
+                'longitud' => '1',
+                'obligatoriedad' => 0,
                 'valor' => '{*fieldSatisfactionSurvey*}',
                 'acciones' => 'a',
-                'ayuda' => NULL,
-                'predeterminado' => NULL,
-                'banderas' => NULL,
                 'etiqueta_html' => 'Method',
-                'orden' => 7,
-                'adicionales' => NULL,
-                'fila_visible' => 1,
-                'placeholder' => NULL,
-                'longitud_vis' => NULL,
-                'opciones' => NULL,
-                'estilo' => NULL,
-                'listable' => 1
+                'orden' => '13',
+                'fila_visible' => '1',
+                'listable' => '1'
             ]
         ];
 
-        foreach ($data as $field) {
+        foreach ($data as $nameField => $field) {
+            $campoOpciones = [];
+            if ($nameField == "tipo_distribucion") {
+                $campoOpciones = $field['campoOpciones'];
+                unset($field['campoOpciones']);
+            }
+
             $this->connection->insert('campos_formato', $field);
+            $id = $this->connection->lastInsertId();
+            if ($campoOpciones) {
+                foreach ($campoOpciones as $row) {
+                    $row['fk_campos_formato'] = $id;
+                    $this->connection->insert('campo_opciones', $row);
+                }
+            }
         }
     }
 

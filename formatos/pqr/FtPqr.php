@@ -4,12 +4,14 @@ namespace Saia\Pqr\formatos\pqr;
 
 use DateTime;
 use Exception;
+use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
 use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\models\PqrBackup;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\helpers\UtilitiesPqr;
 use Saia\controllers\DateController;
+use Saia\controllers\TerceroService;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\SessionController;
 use Saia\controllers\documento\Transfer;
@@ -60,6 +62,12 @@ class FtPqr extends FtPqrProperties
                     'attribute' => 'ft_pqr',
                     'primary' => 'idft_pqr',
                     'relation' => self::BELONGS_TO_MANY
+                ],
+                'Tercero' => [
+                    'model' => Tercero::class,
+                    'attribute' => 'idtercero',
+                    'primary' => 'sys_tercero',
+                    'relation' => self::BELONGS_TO_ONE
                 ]
             ]
         ];
@@ -86,10 +94,9 @@ class FtPqr extends FtPqrProperties
      */
     public function beforeRad(): bool
     {
-        $this->createBackup();
-        $this->updateFechaVencimiento();
-
-        return true;
+        return $this->createBackup() &&
+            $this->updateFechaVencimiento() &&
+            $this->createTercero();
     }
 
     /**
@@ -555,6 +562,55 @@ HTML;
                     $log
                 );
             }
+        }
+
+        return true;
+    }
+
+    /**
+     * Crea el tercero segun la configuracion del funcionario
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function createTercero(): bool
+    {
+        $config = $this->PqrForm->getResponseConfiguration(true);
+
+        if ($config['tercero']) {
+            $data = [
+                'nombre' => 'Anónimo',
+                'identificacion' => -1,
+                'tipo' => Tercero::TIPO_NATURAL,
+                'tipo_identificacion' => 'CC',
+                'correo' => $this->sys_email
+            ];
+            foreach ($config['tercero'] as $row) {
+                $value = [];
+                foreach ($row['value'] as $idPqrFormField) {
+                    $name = (new PqrFormField($idPqrFormField))->name;
+                    $value[] = trim($this->$name);
+                }
+                $data[$row['name']] = implode(' ', $value);
+            }
+
+            if ($this->sys_anonimo) {
+                $data['identificacion'] = -1;
+                $data['nombre'] = 'Anónimo';
+            }
+
+            $Tercero = Tercero::findByAttributes([
+                'identificacion' => $data['identificacion'],
+                'estado' => 1
+            ]);
+
+            $Tercero ??= new Tercero();
+            $TerceroService = new TerceroService($Tercero);
+            $TerceroService->update($data);
+
+            $this->sys_tercero = $TerceroService->getModel()->getPK();
+            $this->update();
         }
 
         return true;
