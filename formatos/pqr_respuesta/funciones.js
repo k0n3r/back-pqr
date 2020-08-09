@@ -14,15 +14,27 @@ function add(data) {
     function (response) {
       if (response.success) {
         let data = response.data;
+
         if (typeof data.destino === 'object') {
           $("#destino").select2('close');
           let option = new Option(data.destino.text, data.destino.id, true, true);
           $("#destino").append(option).trigger('change');
         }
 
+        if (data.tipo_distribucion) {
+          $("#tipo_distribucion").val(data.tipo_distribucion)
+            .trigger('change');
+        }
+
+        if (data.despedida) {
+          $("#despedida").val(data.despedida)
+            .trigger('change');
+        }
+
         if (data.asunto) {
           $("#asunto").val(data.asunto);
         }
+
       } else {
         console.error(response)
       }

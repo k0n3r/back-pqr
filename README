@@ -1,6 +1,5 @@
 MEJORAS PENDIENTES
 
-1. REPORTE DINAMICO (OK)
 2. CONFIGURAR RADICACION POR EMAIL
 3. ENCABEZADO Y FOOTER
 4. RADICACION RAPIDA
@@ -21,4 +20,3 @@ TERMINADO: Si todas la TAREAS estan finalizadas (Canceladas/Realizadas)
 Si crean una TAREA posterior a la terminacion, automaticamente se cambiara a estado PROCESO y la fecha de finalizacion
 se borrara.
 
-4. Se pueden hacer tantas respuestas se deseen, esto NO afecta el estado de la PQR

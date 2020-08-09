@@ -205,7 +205,12 @@ final class Version20200310032827 extends AbstractMigration
                 'orden' => '8',
                 'fila_visible' => '1',
                 'placeholder' => 'seleccionar..',
-                'listable' => '1'
+                'listable' => '1',
+                'campoOpciones' => [
+                    ['llave' => '1', 'valor' => 'Atentamente,', 'estado' => '1', 'orden' => '0'],
+                    ['llave' => '2', 'valor' => 'Cordialmente,', 'estado' => '1', 'orden' => '1'],
+                    ['llave' => '3', 'valor' => 'Otro', 'estado' => '1', 'orden' => '2'],
+                ]
             ],
             'otra_despedida' => [
                 'formato_idformato' => $idformato,
@@ -282,7 +287,7 @@ final class Version20200310032827 extends AbstractMigration
 
         foreach ($data as $nameField => $field) {
             $campoOpciones = [];
-            if ($nameField == "tipo_distribucion") {
+            if ($field['campoOpciones']) {
                 $campoOpciones = $field['campoOpciones'];
                 unset($field['campoOpciones']);
             }

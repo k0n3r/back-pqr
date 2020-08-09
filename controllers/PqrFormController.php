@@ -242,7 +242,7 @@ class PqrFormController extends Controller
     {
         return (object) [
             'success' => 1,
-            'data' => $this->PqrForm->getResponseConfiguration()
+            'data' => $this->PqrForm->getResponseConfiguration(true) ?? []
         ];
     }
 

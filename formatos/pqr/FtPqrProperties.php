@@ -17,22 +17,18 @@ class FtPqrProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'anexo',
-				'dependencia',
+                'dependencia',
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
 				'idft_pqr',
-				'numero1',
-				'select_multiple',
 				'sys_anonimo',
 				'sys_email',
 				'sys_estado',
 				'sys_fecha_terminado',
 				'sys_fecha_vencimiento',
 				'sys_tercero',
-				'sys_tipo',
-				'sys_tratamiento' 
+				'sys_tipo' 
             ],
             'date' => ['sys_fecha_vencimiento',
 				'sys_fecha_terminado'],

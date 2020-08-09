@@ -580,7 +580,7 @@ HTML;
 
         if ($config['tercero']) {
             $data = [
-                'nombre' => 'Anónimo',
+                'nombre' => '-',
                 'identificacion' => -1,
                 'tipo' => Tercero::TIPO_NATURAL,
                 'tipo_identificacion' => 'CC',

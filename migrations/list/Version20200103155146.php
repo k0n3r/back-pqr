@@ -241,7 +241,6 @@ final class Version20200103155146 extends AbstractMigration
             'pqr_html_fields',
             'pqr_forms',
             'pqr_backups',
-            'pqr_response_templates',
             'pqr_notifications',
             'pqr_history'
         ];

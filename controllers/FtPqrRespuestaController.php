@@ -3,6 +3,8 @@
 namespace Saia\Pqr\controllers;
 
 use Saia\Pqr\formatos\pqr\FtPqr;
+use Saia\models\formatos\CamposFormato;
+use Saia\models\formatos\Formato;
 use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 
 class FtPqrRespuestaController extends Controller
@@ -43,25 +45,49 @@ class FtPqrRespuestaController extends Controller
      */
     public function loadField(): object
     {
-        $data = [
-            'destino' => 0
-        ];
+        $id = $this->request['idft'];
+        if (!$id) {
+            throw new \Exception("Falta el identificador de la PQR", 200);
+        }
 
-        if ($id = $this->request['idft']) {
-            $FtPqr = new FtPqr($id);
-            if ($Tercero = $FtPqr->Tercero) {
-                $data['destino'] = [
-                    'id' => $Tercero->getPK(),
-                    'text' => "{$Tercero->identificacion} - {$Tercero->nombre}"
-                ];
-            };
+        $FtPqr = new FtPqr($id);
+        if ($Tercero = $FtPqr->Tercero) {
+            $destino = [
+                'id' => $Tercero->getPK(),
+                'text' => "{$Tercero->identificacion} - {$Tercero->nombre}"
+            ];
+        };
 
-            $data['asunto'] = "Respondiendo a la {$FtPqr->getFormat()->etiqueta} No {$FtPqr->Documento->numero}";
+        $Formato = Formato::findByAttributes([
+            'nombre' => 'pqr_respuesta'
+        ]);
+
+        if ($records = $Formato->getField('tipo_distribucion')->CampoOpciones) {
+            foreach ($records as $CampoOpciones) {
+                if ($CampoOpciones->llave == FtPqrRespuesta::DISTRIBUCION_ENVIAR_EMAIL) {
+                    $tipoDistribucion = $CampoOpciones->getPK();
+                    break;
+                }
+            }
+        }
+
+        if ($records = $Formato->getField('despedida')->CampoOpciones) {
+            foreach ($records as $CampoOpciones) {
+                if ($CampoOpciones->llave == FtPqrRespuesta::ATENTAMENTE_DESPEDIDA) {
+                    $despedida = $CampoOpciones->getPK();
+                    break;
+                }
+            }
         }
 
         return (object) [
             'success' => 1,
-            'data' => $data
+            'data' => [
+                'destino' => $destino ?? 0,
+                'tipo_distribucion' => $tipoDistribucion ?? 0,
+                'despedida' => $despedida ?? 0,
+                'asunto' => "Respondiendo a la {$FtPqr->getFormat()->etiqueta} No {$FtPqr->Documento->numero}"
+            ]
         ];
     }
 }

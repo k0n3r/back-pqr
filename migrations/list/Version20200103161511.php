@@ -209,7 +209,6 @@ final class Version20200103161511 extends AbstractMigration
     {
         $tables = [
             'pqr_html_fields',
-            'pqr_response_templates',
             'pqr_forms',
             'pqr_form_fields'
         ];
