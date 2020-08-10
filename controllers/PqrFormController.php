@@ -679,7 +679,16 @@ class PqrFormController extends Controller
         array $nameFields,
         string $nameReport
     ): array {
-        $aditionalInfo = implode(',', $infoFields) . ',';
+
+        $aditionalInfo = '';
+        if ($infoFields) {
+            $aditionalInfo = implode(',', $infoFields) . ',';
+        }
+
+        $otherFields = '';
+        if ($nameFields) {
+            $otherFields .= "," . implode(',', $nameFields);
+        }
 
         switch ($nameReport) {
             case PqrForm::NOMBRE_REPORTE_TODOS:
@@ -697,7 +706,7 @@ class PqrFormController extends Controller
 
         return [
             'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
-            'campos_adicionales' => 'v.numero,v.fecha,v.sys_tipo,v.sys_estado,v.idft,' . implode(',', $nameFields),
+            'campos_adicionales' => 'v.numero,v.fecha,v.sys_tipo,v.sys_estado,v.idft' . $otherFields
         ];
     }
 

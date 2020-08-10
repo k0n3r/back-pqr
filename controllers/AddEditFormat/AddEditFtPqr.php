@@ -103,7 +103,7 @@ class AddEditFtPqr implements IAddEditFormat
             'banderas' => 'e', //Aprobacion automatica
             'mostrar_pdf' => 1,
             'orden' => 0,
-            'fk_categoria_formato' => '2,3',
+            'fk_categoria_formato' => '3',
             'paginar' => 0,
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Modulo de PQR',

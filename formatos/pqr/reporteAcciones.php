@@ -2,22 +2,25 @@
     $(function() {
         let params = $('#script_grid').data('params');
         $('#script_grid').removeAttr('data-params');
+        let baseUrl = localStorage.getItem('baseUrl');
 
         $(document).on('click', '.addTask', function() {
 
             let documentId = $(this).data('id');
-
-            top.topModal({
-                url: `views/tareas/crear.php`,
-                params: {
-                    className: 'Saia\\Pqr\\controllers\\TaskEvents',
-                    documentId: documentId
+            top.topJsPanel({
+                id: 'tarea',
+                headerTitle: 'Tarea o Recordatorio',
+                contentOverflow: 'scroll',
+                callback: function() {
+                    $(this.content).load(baseUrl + 'views/tareas/crear.php', {
+                        className: 'Saia\\Pqr\\controllers\\TaskEvents',
+                        documentId: documentId,
+                        modalName: 'tarea'
+                    })
                 },
-                size: 'modal-lg',
-                title: 'Tarea',
-                buttons: {},
-                afterHide: function() {
+                onbeforeclose: function() {
                     $('#table').bootstrapTable("refresh");
+                    return true;
                 }
             });
 
