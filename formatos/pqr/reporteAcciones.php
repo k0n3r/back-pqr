@@ -57,7 +57,7 @@
             top.confirm({
                 id: 'question',
                 type: 'warning',
-                message: '¿Está seguro de anular la PQR?',
+                message: '¿Está seguro de anular el registro?',
                 position: 'center',
                 timeout: 0,
                 overlay: true,
