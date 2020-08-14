@@ -5,18 +5,26 @@
         let baseUrl = localStorage.getItem('baseUrl');
 
         $(document).on('click', '.addTask', function() {
+            let paramsTarea = {
+                className: 'Saia\\Pqr\\controllers\\TaskEvents',
+                documentId: $(this).data('id'),
+                modalName: 'tarea'
+            };
+            let iframe = $('<iframe>', {
+                src: baseUrl + 'views/tareas/crear.php?' + $.param(paramsTarea)
+            }).css({
+                width: '100%',
+                height: '100%',
+                border: 'none'
+            });
 
-            let documentId = $(this).data('id');
             top.topJsPanel({
                 id: 'tarea',
                 headerTitle: 'Tarea o Recordatorio',
-                contentOverflow: 'scroll',
-                callback: function() {
-                    $(this.content).load(baseUrl + 'views/tareas/crear.php', {
-                        className: 'Saia\\Pqr\\controllers\\TaskEvents',
-                        documentId: documentId,
-                        modalName: 'tarea'
-                    })
+                content: iframe.prop('outerHTML'),
+                contentSize: {
+                    width: () => Math.min(730, window.innerWidth * 0.9),
+                    height: () => Math.min(500, window.innerHeight * 0.9)
                 },
                 onbeforeclose: function() {
                     $('#table').bootstrapTable("refresh");
