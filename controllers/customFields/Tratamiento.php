@@ -40,14 +40,18 @@ class Tratamiento implements IWsFields
         }
 
         $code = <<<HTML
-         <div class="form-group" id="group_{$this->PqrFormField->name}">
-        <h5 class="text-center">AUTORIZACIÓN PARA EL TRATAMIENTO DE INFORMACIÓN</h5>
-        <p class="text-justify">{$setting->tratamiento}</p>
-        {$infoUrl}
-        <p class="text-right">
-          <input type="checkbox" name="{$this->PqrFormField->name}" value="1" class="required" /> ACEPTO LOS TERMINOS Y CONDICIONES
-        </p>
-      </div>
+        <div class="form-group" id="group_{$this->PqrFormField->name}">
+            <h5 class="text-center">AUTORIZACIÓN PARA EL TRATAMIENTO DE INFORMACIÓN</h5>
+            <p class="text-justify">{$setting->tratamiento}</p>
+            {$infoUrl}
+            <div class="checkbox check-danger input-group">
+                <input type="checkbox" name="{$this->PqrFormField->name}" id="{$this->PqrFormField->name}_0" value="1" aria-required="true" class="required">
+                <label for="{$this->PqrFormField->name}_0" class="mr-3">
+                    ACEPTO LOS TERMINOS Y CONDICIONES
+                </label>
+            </div>
+            <label id="{$this->PqrFormField->name}-error" class="error" for="{$this->PqrFormField->name}" style="display: none;"></label>
+        </div>
 HTML;
         return $code;
     }
