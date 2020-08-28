@@ -4,6 +4,7 @@ $rootPath = $ruta = "";
 while ($max_salida > 0) {
     if (is_file($ruta . "index.php")) {
         $rootPath = $ruta;
+        break;
     }
     $ruta .= "../";
     $max_salida--;
