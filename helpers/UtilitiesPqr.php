@@ -3,10 +3,12 @@
 namespace Saia\Pqr\helpers;
 
 use Saia\models\Configuracion;
+use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\documento\Documento;
 use Saia\controllers\SendMailController;
 use Saia\controllers\TemporalController;
+use Saia\Pqr\controllers\QRDocumentoPqrController;
 
 class UtilitiesPqr
 {
@@ -139,5 +141,19 @@ class UtilitiesPqr
             return false;
         }
         return true;
+    }
+
+    /**
+     * Retorna la imagen del QR
+     *
+     * @param FtPqr $FtPqr
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public static function showQr(FtPqr $FtPqr): string
+    {
+        $QRDocumentoPqrController = new QRDocumentoPqrController($FtPqr);
+        return $QRDocumentoPqrController->getImageQR();
     }
 }

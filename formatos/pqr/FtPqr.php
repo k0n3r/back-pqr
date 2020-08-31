@@ -13,6 +13,7 @@ use Saia\Pqr\helpers\UtilitiesPqr;
 use Saia\controllers\DateController;
 use Saia\controllers\TerceroService;
 use Saia\controllers\anexos\FileJson;
+use Saia\controllers\CryptController;
 use Saia\controllers\SessionController;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
@@ -117,7 +118,7 @@ class FtPqr extends FtPqrProperties
     public function showContent(): string
     {
         $data = $this->PqrBackup->getDataJson();
-        $Qr = CoreFunctions::mostrar_qr($this);
+        $Qr = UtilitiesPqr::showQr($this);
 
         $fecha = DateController::convertDate($this->Documento->fecha, 'Ymd');
         $text = sprintf(
@@ -614,5 +615,27 @@ HTML;
         }
 
         return true;
+    }
+
+    /**
+     * Retorna la URL de QR
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getUrlQR(): string
+    {
+        $params = [
+            'id' => $this->getPK(),
+            'documentId' => $this->Documento->getPK()
+        ];
+        $data = CryptController::encrypt(json_encode($params));
+
+        return sprintf(
+            "%sviews/modules/pqr/src/pqr/modals/infoQR/infoQr.php?data=%s",
+            ABSOLUTE_SAIA_ROUTE,
+            $data
+        );
     }
 }

@@ -91,13 +91,10 @@ $(function () {
 
     $("#formSearch").validate({
         submitHandler: function (form) {
-            let dataForm = window.getFormObject($('#formSearch').serializeArray());
-            let data=Object.assign(dataForm, {
-                formatId: {$formatId}
-            });
+            let data = window.getFormObject($('#formSearch').serializeArray());
 
             $.ajax({
-                url: baseUrl + `app/ws/search.php`,
+                url: baseUrl + `app/modules/back_pqr/app/search.php`,
                 data
             }).done((response) => {
                 $("#result").removeClass('d-none');
