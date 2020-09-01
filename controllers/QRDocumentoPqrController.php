@@ -4,7 +4,6 @@ namespace Saia\Pqr\controllers;
 
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\controllers\QRController;
-use Saia\controllers\CryptController;
 use Saia\controllers\documento\QRDocumentoController;
 
 class QRDocumentoPqrController extends QRDocumentoController
@@ -14,9 +13,7 @@ class QRDocumentoPqrController extends QRDocumentoController
     public function __construct(FtPqr $FtPqr)
     {
         $this->FtPqr = $FtPqr;
-        $this->Documento = $FtPqr->Documento;
-
-        $this->configureQR();
+        parent::__construct($FtPqr->Documento);
     }
 
     /**

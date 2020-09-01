@@ -53,14 +53,12 @@ try {
     $records = FtPqr::findByQueryBuilder($Qb);
 
     $data = [];
-    if ($records) {
-        foreach ($records as $Ftpqr) {
-            $data[] = [
-                'fecha' => DateController::convertDate($Ftpqr->Documento->fecha),
-                'descripcion' => array_filter(explode("<br>", $FtPqr->Documento->getDescription())),
-                'url' => $Ftpqr->getUrlQR()
-            ];
-        }
+    foreach ($records as $FtPqr) {
+        $data[] = [
+            'fecha' => DateController::convertDate($FtPqr->Documento->fecha),
+            'descripcion' => array_filter(explode("<br>", $FtPqr->Documento->getDescription())),
+            'url' => $FtPqr->getUrlQR()
+        ];
     }
 
     $Response->data = $data;

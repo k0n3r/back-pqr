@@ -343,6 +343,34 @@ class PqrFormController extends Controller
     }
 
     /**
+     * Genera el infoQR.html que utilizara en la busqueda del ws
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function generateFile(string $templateName): string
+    {
+        global $rootPath;
+
+        $values = [
+            'baseUrl' => ABSOLUTE_SAIA_ROUTE
+        ];
+
+        $content = WsFt::getContent(
+            "app/modules/back_pqr/controllers/templates/{$templateName}.php",
+            $values
+        );
+        $fileName = SessionController::getTemporalDir() . "/{$templateName}";
+
+        if (!file_put_contents($rootPath . $fileName, $content)) {
+            throw new Exception("Imposible crear el archivo {$templateName} para el ws", 1);
+        }
+
+        return $fileName;
+    }
+
+    /**
      * Genera el WS de PQR
      *
      * @return boolean
@@ -351,7 +379,10 @@ class PqrFormController extends Controller
      */
     private function generatePqrWs(): bool
     {
-        $fileName = $this->generateDefineJs();
+        $defineFile = $this->generateDefineJs();
+        $infoQrFile = $this->generateFile('infoQR.html');
+        $infoQRJsFile = $this->generateFile('infoQR.js');
+        $timelineFile = $this->generateFile('TimeLine.js');
 
         $IWsHtml = new WebservicePqr($this->PqrForm->Formato);
         $WsGenerator = new WsGenerator(
@@ -359,11 +390,19 @@ class PqrFormController extends Controller
             $this->PqrForm->Formato->nombre,
             false
         );
-        $WsGenerator->loadAdditionalFiles([$fileName]);
+        $WsGenerator->loadAdditionalFiles([$defineFile]);
+        $WsGenerator->addFiles([$infoQrFile, $infoQRJsFile, $timelineFile]);
 
         return $WsGenerator->create();
     }
 
+    /**
+     * Genera el WS de Calificacion PQR
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     private function generateCalificacionWs(Formato $FormatoC): bool
     {
         global $rootPath;
@@ -397,7 +436,7 @@ class PqrFormController extends Controller
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function activeGraphics()
+    protected function activeGraphics(): void
     {
         if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO

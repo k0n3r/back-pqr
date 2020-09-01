@@ -128,15 +128,14 @@ class FtPqr extends FtPqrProperties
             $this->Documento->numero
         );
         $labelPQR = strtoupper($this->PqrForm->label);
-        $code = '<table class="table table-bordered" style="width:100%">';
+        $code = '<table class="table table-borderless" style="width:100%">';
         $code .= '<tr>
             <td style="width:50%;">
-                <p>
-                    Hemos recibido su ' . $labelPQR . '.<br/><br/>
+                <p>Hemos recibido su ' . $labelPQR . '.<br/><br/>
                     Puede hacer seguimiento en la opción CONSULTAR MI ' . $labelPQR . ' de nuestro sitio Web.
                 </p>
             </td>
-            <td style="width:50%;text-align:center">' . $Qr  . $text . ' </td>
+            <td style="width:50%;text-align:center">' . $Qr  . '<br/>' . $text . ' </td>
         </tr>
         <tr><td colspan="2">&nbsp;</td></tr>';
         foreach ($data as $key => $value) {
@@ -633,8 +632,9 @@ HTML;
         $data = CryptController::encrypt(json_encode($params));
 
         return sprintf(
-            "%sviews/modules/pqr/src/pqr/modals/infoQR/infoQr.php?data=%s",
-            ABSOLUTE_SAIA_ROUTE,
+            "%s/ws/%s/infoQr.html?data=%s",
+            PROTOCOLO_CONEXION . DOMINIO . "/" . CONTENEDOR_SAIA,
+            $this->getFormat()->nombre,
             $data
         );
     }
