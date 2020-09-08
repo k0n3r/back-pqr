@@ -2,13 +2,16 @@
 
 namespace Saia\Pqr\controllers;
 
-use Saia\controllers\documento\SaveFt;
-use Saia\controllers\SessionController;
+use DateTime;
+use Saia\Pqr\models\PqrHistory;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\core\DatabaseConnection;
+use Saia\controllers\CryptController;
+use Saia\controllers\DateController;
+use Saia\controllers\documento\SaveFt;
+use Saia\controllers\SessionController;
+use Saia\models\Configuracion;
 use Saia\models\formatos\CamposFormato;
-use Saia\Pqr\models\PqrHistory;
-use Saia\Pqr\models\PqrResponseTemplate;
 
 class FtPqrController extends Controller
 {
@@ -36,7 +39,6 @@ class FtPqrController extends Controller
         return $Response;
     }
 
-
     /**
      * Obtiene el email
      *
@@ -54,34 +56,6 @@ class FtPqrController extends Controller
             if ($FtPqr = FtPqr::findByDocumentId($id)) {
                 $Response->success = 1;
                 $Response->data = $FtPqr->sys_email;
-            }
-        }
-
-        return $Response;
-    }
-
-
-    /**
-     * Obtiene el contenido de la plantilla
-     *
-     * @return object
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function getPlantilla(): object
-    {
-        $Response = (object) [
-            'success' => 0,
-            'data' => []
-        ];
-        if ($id = $this->request['id']) {
-            if ($PqrResponseTemplate = new PqrResponseTemplate($id)) {
-                $search = [
-                    '<figure class="table">',
-                    '</figure>'
-                ];
-                $Response->success = 1;
-                $Response->data = str_replace($search, '', $PqrResponseTemplate->content);
             }
         }
 
@@ -169,6 +143,90 @@ class FtPqrController extends Controller
             $conn->rollBack();
             $Response->message = $th->getMessage();
         }
+
+        return $Response;
+    }
+
+    /**
+     * Obtiene el email
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getHistoryForTimeLine(): object
+    {
+        $Response = (object) [
+            'success' => 0,
+            'data' => []
+        ];
+
+        $data = json_decode(CryptController::decrypt($this->request['infoCryp']));
+        $FtPqr = FtPqr::findByDocumentId($data->documentId);
+
+        if ($FtPqr->getPK() != $data->id) {
+            throw new \Exception("La URL ingresada NO existe o ha sido eliminada", 200);
+        }
+
+        $rows = [];
+        $records = $FtPqr->getHistory();
+        $Configuracion = Configuracion::findByNames(['nombre'])[0];
+
+        $expiration = DateController::convertDate($FtPqr->sys_fecha_vencimiento, 'Y-m-d');
+        $expirationDate = new DateTime($expiration);
+        $addExpiration = false;
+
+        $rows[] = [
+            'iconPoint' => 'fa fa-comment',
+            'iconPointColor' => 'success',
+            'iconProfile' => 'fa-2x fa fa-user',
+            'business' => 'Solicitante',
+            'userName' => '',
+            'date' => DateController::convertDate($FtPqr->Documento->fecha),
+            'description' => 'Se registra la solicitud de '
+        ];
+
+        foreach ($records as $PqrHistory) {
+            $action = DateController::convertDate($PqrHistory->fecha, 'Y-m-d');
+            $actionDate = new DateTime($action);
+
+            if ($actionDate > $expirationDate && !$addExpiration) {
+                $rows[] = [
+                    'iconPoint' => 'fa fa-flag-checkered',
+                    'iconPointColor' => 'danger',
+                    'iconProfile' => 'fa-2x fa fa-users',
+                    'business' => $Configuracion ? $Configuracion->getValue() : '',
+                    'userName' => '',
+                    'date' => DateController::convertDate($expirationDate),
+                    'description' => ''
+                ];
+                $addExpiration = true;
+            }
+
+            $rows[] = [
+                'iconPoint' => 'fa fa-users',
+                'iconPointColor' => 'warning',
+                'iconProfile' => 'fa-2x fa fa-users',
+                'business' => $Configuracion ? $Configuracion->getValue() : '',
+                'userName' => $PqrHistory->nombre_funcionario,
+                'date' => DateController::convertDate($PqrHistory->fecha),
+                'description' => $PqrHistory->descripcion
+            ];
+        }
+        if (!$addExpiration) {
+            $rows[] = [
+                'iconPoint' => 'fa fa-flag-checkered',
+                'iconPointColor' => 'danger',
+                'iconProfile' => 'fa-2x fa fa-users',
+                'business' => $Configuracion ? $Configuracion->getValue() : '',
+                'userName' => '',
+                'date' => DateController::convertDate($PqrHistory->fecha),
+                'description' => ''
+            ];
+        }
+
+        $Response->data = $rows;
+        $Response->success = 1;
 
         return $Response;
     }

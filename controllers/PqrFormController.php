@@ -315,13 +315,15 @@ class PqrFormController extends Controller
     }
 
     /**
-     * Genera el define.js que utilizara el ws
+     * Genera un archivo basado en el template recibido
      *
+     * @param string $templateName
+     * @param string $urlFolderTemplate
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function generateDefineJs(): string
+    private function generateFile(string $templateName, string $urlFolderTemplate): string
     {
         global $rootPath;
 
@@ -330,35 +332,7 @@ class PqrFormController extends Controller
         ];
 
         $content = WsFt::getContent(
-            'app/controllers/generator/webservice/templates/define.js.php',
-            $values
-        );
-        $fileName = SessionController::getTemporalDir() . "/define.js";
-
-        if (!file_put_contents($rootPath . $fileName, $content)) {
-            throw new Exception("Imposible crear el archivo define.js para el ws", 1);
-        }
-
-        return $fileName;
-    }
-
-    /**
-     * Genera el infoQR.html que utilizara en la busqueda del ws
-     *
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    private function generateFile(string $templateName): string
-    {
-        global $rootPath;
-
-        $values = [
-            'baseUrl' => ABSOLUTE_SAIA_ROUTE
-        ];
-
-        $content = WsFt::getContent(
-            "app/modules/back_pqr/controllers/templates/{$templateName}.php",
+            "{$urlFolderTemplate}{$templateName}.php",
             $values
         );
         $fileName = SessionController::getTemporalDir() . "/{$templateName}";
@@ -379,10 +353,14 @@ class PqrFormController extends Controller
      */
     private function generatePqrWs(): bool
     {
-        $defineFile = $this->generateDefineJs();
-        $infoQrFile = $this->generateFile('infoQR.html');
-        $infoQRJsFile = $this->generateFile('infoQR.js');
-        $timelineFile = $this->generateFile('TimeLine.js');
+
+        $urlFolderTemplate = "app/modules/back_pqr/controllers/templates/";
+
+        $defineFile = $this->generateFile('define.js', 'app/controllers/generator/webservice/templates/');
+        $page404 = $this->generateFile('404.html', $urlFolderTemplate);
+        $infoQrFile = $this->generateFile('infoQR.html', $urlFolderTemplate);
+        $infoQRJsFile = $this->generateFile('infoQR.js', $urlFolderTemplate);
+        $timelineFile = $this->generateFile('TimeLine.js', $urlFolderTemplate);
 
         $IWsHtml = new WebservicePqr($this->PqrForm->Formato);
         $WsGenerator = new WsGenerator(
@@ -391,7 +369,7 @@ class PqrFormController extends Controller
             false
         );
         $WsGenerator->loadAdditionalFiles([$defineFile]);
-        $WsGenerator->addFiles([$infoQrFile, $infoQRJsFile, $timelineFile]);
+        $WsGenerator->addFiles([$infoQrFile, $infoQRJsFile, $timelineFile, $page404]);
 
         return $WsGenerator->create();
     }
@@ -405,18 +383,9 @@ class PqrFormController extends Controller
      */
     private function generateCalificacionWs(Formato $FormatoC): bool
     {
-        global $rootPath;
+        $errorPage = $this->generateFile('404.html', 'app/modules/back_pqr/controllers/templates/');
+        $fileName = $this->generateFile('define.js', 'app/controllers/generator/webservice/templates/');
 
-        $content = WsFt::getContent(
-            'app/modules/back_pqr/controllers/templates/404.html.php'
-        );
-        $errorPage = SessionController::getTemporalDir() . "/404.html";
-
-        if (!file_put_contents($rootPath . $errorPage, $content)) {
-            throw new Exception("Imposible crear el archivo 404.html para el ws", 1);
-        }
-
-        $fileName = $this->generateDefineJs();
         $IWsHtml = new WebserviceCalificacion($FormatoC);
         $WsGenerator = new WsGenerator(
             $IWsHtml,

@@ -22,8 +22,12 @@ $(function () {
                     url: window.baseUrl + `app/modules/back_pqr/app/request.php`,
                     async: false,
                     data: {
-                        infoCryp: d
-                    }
+                        key: localStorage.getItem('WsKey'),
+                        token: localStorage.getItem('WsToken'),
+                        class: 'FtPqrController',
+                        method: 'getHistoryForTimeLine',
+                        data: {infoCryp: d}
+                    },
                 }).done((response) => {
                     if (!response.success) {
                         window.notification({
@@ -46,7 +50,7 @@ $(function () {
             }
         };
 
-        let TimeLine = new TimeLine(options);
+        TimeLine = new TimeLine(options);
         TimeLine.init();
 
 });

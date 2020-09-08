@@ -8,6 +8,7 @@ use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
 use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\models\PqrBackup;
+use Saia\Pqr\models\PqrHistory;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\helpers\UtilitiesPqr;
 use Saia\controllers\DateController;
@@ -18,7 +19,6 @@ use Saia\controllers\SessionController;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
-use Saia\controllers\functions\CoreFunctions;
 use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use Saia\Pqr\controllers\services\PqrFormFieldService;
 
@@ -637,5 +637,20 @@ HTML;
             $this->getFormat()->nombre,
             $data
         );
+    }
+
+    /**
+     * Obtiene el historial de cambios de la PQR
+     *
+     * @param string $order
+     * @return PqrHistory[]
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getHistory(string $order = 'id desc'): array
+    {
+        return PqrHistory::findAllByAttributes([
+            'idft' => $this->getPK()
+        ], [], $order);
     }
 }

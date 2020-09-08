@@ -37,30 +37,29 @@ class TimeLine {
     createItem() {
 
         let response = `<div class="timeline-block" style="margin:2em 0">
-            <div class="timeline-point complete">
-                <i class="${this . activeItem . icon}"></i>
+            <div class="timeline-point \${this.activeItem.iconPointColor}">
+                <i class="\${this.activeItem.iconPoint}"></i>
             </div>
-            <div class="timeline-content" data-action="${this . activeItem . action}" data-url="${this . activeItem . url}">
+            <div class="timeline-content">
                 <div class="card social-card share full-width">
                     <div class="circle" data-toggle="tooltip" title="Label" data-container="body">
                     </div>
+
                     <div class="card-header clearfix">
                         <div class="user-pic">
-                            <img alt="Profile Image" width="33" height="33"
-                                src="${baseUrl + this . activeItem . imgRoute}">
+                             <i class="\${this.activeItem.iconProfile}"></i>
                         </div>
-                        <span class="my-auto">
-                        ${this . activeItem . userName} (${this . activeItem . login}) - ${this . activeItem . title}
-                        </span>
-                    </div>
-                    <label class="card-description
-                        ${!this . activeItem . content ? 'd-none' : ''}">
-                        <p class="fs-11">${this . activeItem . content}</p>
-                    </label>
+                        <h5>\${this.activeItem.business}</h5>
+                        <h6>\${this.activeItem.userName}</h6>
+                      </div>
+                      <div class="card-description">
+                        <p>\${this.activeItem.description}</p>
+                      </div>
                 </div>
                 <div class="event-date">
+                    <h6 class="font-montserrat all-caps hint-text m-t-0">Apple Inc</h6>
                     <small class="fs-12 hint-text">
-                        ${this . activeItem . date}
+                        \${this.activeItem.date}
                     </small>
                 </div>
             </div>

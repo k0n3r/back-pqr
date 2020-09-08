@@ -4,7 +4,7 @@ $code = <<<JAVASCRIPT
 $(function () {
     var baseUrl = window.baseUrl;
 
-    var d = getVariableFromUrl('d');
+    var d = window.getVariableFromUrl('d');
     if (!d) {
         window.notification({
             title:'Error!',
@@ -102,18 +102,6 @@ $(function () {
             $("select").val("");
             $('select').select2().trigger('change');
         }
-    }
-
-    function getVariableFromUrl(variable) {
-        var query = window.location.search.substring(1);
-        var vars = query.split("&");
-        for (var i = 0; i < vars.length; i++) {
-            var pair = vars[i].split("=");
-            if (pair[0] == variable) {
-                return pair[1];
-            }
-        }
-        return false;
     }
 
     function decrypt(d){

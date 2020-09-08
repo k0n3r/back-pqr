@@ -2,6 +2,7 @@
 
 namespace Saia\Pqr\controllers;
 
+use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\models\PqrHistory;
 
 class PqrHistoryController extends Controller
@@ -24,11 +25,9 @@ class PqrHistoryController extends Controller
         if (!$this->request['idft']) {
             return $Response;
         }
-
+        $FtPqr = new FtPqr($this->request['idft']);
         $rows = [];
-        $records = PqrHistory::findAllByAttributes([
-            'idft' => $this->request['idft']
-        ], [], 'id desc');
+        $records = $FtPqr->getHistory();
 
         foreach ($records as $PqrHistory) {
             $rows[] = $PqrHistory->getDataAttributes();

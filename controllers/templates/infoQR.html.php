@@ -17,43 +17,6 @@
     <div class="content">
         <div class="container-fluid sm-p-l-5 bg-master-lighter">
             <div class="timeline-container top-circle" id="timeline-container">
-
-                <section class="timeline">
-                    <div class="timeline-block">
-                        <div class="timeline-point success">
-                            <i class="pg-map"></i>
-                        </div>
-                        <!-- <div class="timeline-point small">
-                        </div> -->
-                        <!-- timeline-point -->
-                        <div class="timeline-content">
-                            <div class="card social-card share full-width">
-                                <div class="circle" data-toggle="tooltip" title="Label" data-container="body">
-                                </div>
-                                <div class="card-header clearfix">
-                                    <div class="user-pic">
-                                        <img alt="Profile Image" width="33" height="33" data-src-retina="assets/img/profiles/8x.jpg" data-src="assets/img/profiles/8.jpg" src="assets/img/profiles/8x.jpg">
-                                    </div>
-                                    <h5>Jeff Curtis</h5>
-                                    <h6>Shared a Tweet
-                                        <span class="location semi-bold"><i class="fa fa-map-marker"></i> SF,
-                                            California</span>
-                                    </h6>
-                                </div>
-                                <div class="card-description">
-                                    <p>What you think, you become. What you feel, you attract. What you imagine, you
-                                        create - Buddha. <a href="#">#quote</a> </p>
-                                    <div class="via">via Twitter</div>
-                                </div>
-                            </div>
-                            <div class="event-date">
-                                <h6 class="font-montserrat all-caps hint-text m-t-0">Apple Inc</h6>
-                                <small class="fs-12 hint-text">15 January 2015, 06:50 PM</small>
-                            </div>
-                        </div>
-                        <!-- timeline-content -->
-                    </div>
-                </section>
             </div>
         </div>
     </div>
