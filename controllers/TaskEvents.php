@@ -3,25 +3,26 @@
 namespace Saia\Pqr\controllers;
 
 use Saia\core\model\Model;
+use Saia\models\Funcionario;
 use Saia\models\tarea\Tarea;
+use Saia\Pqr\models\PqrHistory;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\helpers\UtilitiesPqr;
 use Saia\models\documento\Documento;
 use Saia\controllers\SessionController;
 use Saia\models\tarea\IExternalEventsTask;
-use Saia\Pqr\models\PqrHistory;
 
 class TaskEvents implements IExternalEventsTask
 {
-    private $Tarea;
+    private Tarea $Tarea;
     private $Instance;
-    private $nameFuncionario;
+    private Funcionario $Funcionario;
 
     public function __construct(Model $Instance, Tarea $Tarea)
     {
         $this->Tarea = $Tarea;
         $this->Instance = $Instance;
-        $this->nameFuncionario = SessionController::getUser()->getName();
+        $this->Funcionario = SessionController::getUser();
     }
 
     public function afterCreateTarea(): bool
@@ -36,8 +37,10 @@ class TaskEvents implements IExternalEventsTask
                 $history = [
                     'fecha' => date('Y-m-d H:i:s'),
                     'idft' => $Documento->getFt()->getPK(),
-                    'nombre_funcionario' => $this->nameFuncionario,
-                    'descripcion' => "Se elimina la tarea ({$this->Tarea->nombre})"
+                    'fk_funcionario' => $this->Funcionario->getPK(),
+                    'tipo' => PqrHistory::TIPO_TAREA,
+                    'idfk' => $this->Tarea->getPK(),
+                    'descripcion' => "Se elimina la tarea: {$this->Tarea->nombre}"
                 ];
                 if (!PqrHistory::newRecord($history)) {
                     throw new \Exception("No fue posible guardar el historial de la eliminación de la tarea", 200);
@@ -54,8 +57,10 @@ class TaskEvents implements IExternalEventsTask
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
                 'idft' => $Documento->getFt()->getPK(),
-                'nombre_funcionario' => $this->nameFuncionario,
-                'descripcion' => "Se elimina la tarea ({$this->Tarea->nombre})"
+                'fk_funcionario' => $this->Funcionario->getPK(),
+                'tipo' => PqrHistory::TIPO_TAREA,
+                'idfk' => $this->Tarea->getPK(),
+                'descripcion' => "Se elimina la tarea: {$this->Tarea->nombre}"
             ];
             if (!PqrHistory::newRecord($history)) {
                 throw new \Exception("No fue posible guardar el historial de la eliminación de la tarea", 200);
@@ -82,8 +87,10 @@ class TaskEvents implements IExternalEventsTask
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
                 'idft' => $Documento->getFt()->getPK(),
-                'nombre_funcionario' => $this->nameFuncionario,
-                'descripcion' => "Se actualiza el estado de la tarea ({$this->Tarea->nombre}) a ({$this->Instance->getValueLabel('valor')})"
+                'fk_funcionario' => $this->Funcionario->getPK(),
+                'tipo' => PqrHistory::TIPO_TAREA,
+                'idfk' => $this->Tarea->getPK(),
+                'descripcion' => "Se actualiza el estado de la tarea de {$this->Tarea->nombre} a {$this->Instance->getValueLabel('valor')}"
             ];
             if (!PqrHistory::newRecord($history)) {
                 throw new \Exception("No fue posible guardar el historial del cambio", 200);
@@ -123,8 +130,11 @@ class TaskEvents implements IExternalEventsTask
         $history = [
             'fecha' => date('Y-m-d H:i:s'),
             'idft' => $this->Instance->Documento->getFt()->getPK(),
-            'nombre_funcionario' => $this->nameFuncionario,
-            'descripcion' => "Se crea la tarea ({$this->Tarea->nombre})"
+            'fk_funcionario' => $this->Funcionario->getPK(),
+            'tipo' => PqrHistory::TIPO_TAREA,
+            'idfk' => $this->Tarea->getPK(),
+            'descripcion' => "Se crea la tarea: {$this->Tarea->nombre}"
+
         ];
         if (!PqrHistory::newRecord($history)) {
             throw new \Exception("No fue posible guardar el historial del cambio", 200);
@@ -166,8 +176,10 @@ class TaskEvents implements IExternalEventsTask
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
                 'idft' => $Ft->getPK(),
-                'nombre_funcionario' => $this->nameFuncionario,
-                'descripcion' => "Se actualiza el estado de PQRSF de ({$estadoActual}) a ({$estado})"
+                'fk_funcionario' => $this->Funcionario->getPK(),
+                'tipo' => PqrHistory::TIPO_CAMBIO_ESTADO,
+                'idfk' => 0,
+                'descripcion' => "Se actualiza el estado de la solicitud de {$estadoActual} a {$estado}"
             ];
             if (!PqrHistory::newRecord($history)) {
                 throw new \Exception("No fue posible guardar el historial del cambio", 200);

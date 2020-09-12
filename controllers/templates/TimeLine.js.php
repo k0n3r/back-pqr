@@ -35,36 +35,63 @@ class TimeLine {
     }
 
     createItem() {
-
-        let response = `<div class="timeline-block" style="margin:2em 0">
-            <div class="timeline-point \${this.activeItem.iconPointColor}">
+        let response='';
+        let iconPoint = `<div class="timeline-point small"></div>`;
+        if(typeof this.activeItem.iconPoint!='undefined'){
+            iconPoint = `<div class="timeline-point \${this.activeItem.iconPointColor}">
                 <i class="\${this.activeItem.iconPoint}"></i>
-            </div>
+            </div>`;
+        }
+
+        let download='';
+        if(typeof this.activeItem.url!='undefined'){
+            download = `<div class="card-footer clearfix">
+                <ul class="reactions">
+                    <li>
+                        <a href="\${this.activeItem.url}" targe="_blank">Descargar <i class="fa fa-cloud-download"></i></a>
+                    </li>
+                </ul>
+            </div>`;
+        }
+
+        let header='';
+        if(typeof this.activeItem.header!='undefined'){
+            header = `<div class="card-header clearfix">
+                <div class="user-pic">
+                    <img alt="\${this.activeItem.userName}" src="\${this.activeItem.imgRoute}" width="33" height="33">
+                </div>
+                <h5>\${this.activeItem.business}</h5>
+                <h6>\${this.activeItem.userName}</h6>
+            </div>`;
+        }
+
+        response = `<div class="timeline-block" style="margin:2em 0">
+            \${iconPoint}
+
             <div class="timeline-content">
+
                 <div class="card social-card share full-width">
-                    <div class="circle" data-toggle="tooltip" title="Label" data-container="body">
+
+                    \${header}
+
+                    <div class="card-description">
+                        <p>\${this.activeItem.description}</p>
                     </div>
 
-                    <div class="card-header clearfix">
-                        <div class="user-pic">
-                             <i class="\${this.activeItem.iconProfile}"></i>
-                        </div>
-                        <h5>\${this.activeItem.business}</h5>
-                        <h6>\${this.activeItem.userName}</h6>
-                      </div>
-                      <div class="card-description">
-                        <p>\${this.activeItem.description}</p>
-                      </div>
+                    \${download}
+
                 </div>
+
                 <div class="event-date">
-                    <h6 class="font-montserrat all-caps hint-text m-t-0">Apple Inc</h6>
                     <small class="fs-12 hint-text">
                         \${this.activeItem.date}
                     </small>
                 </div>
-            </div>
-        </div>`;
 
+            </div>
+
+        </div>`;
+   
         return response;
     }
 }

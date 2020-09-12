@@ -2,19 +2,35 @@
 
 namespace Saia\Pqr\controllers;
 
-use DateTime;
+use Saia\models\Funcionario;
+use Saia\Pqr\models\PqrForm;
+use Saia\models\Configuracion;
 use Saia\Pqr\models\PqrHistory;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\core\DatabaseConnection;
-use Saia\controllers\CryptController;
 use Saia\controllers\DateController;
+use Saia\models\documento\Documento;
+use Saia\controllers\anexos\FileJson;
+use Saia\controllers\CryptController;
 use Saia\controllers\documento\SaveFt;
 use Saia\controllers\SessionController;
-use Saia\models\Configuracion;
 use Saia\models\formatos\CamposFormato;
+use Saia\controllers\TemporalController;
 
 class FtPqrController extends Controller
 {
+    private PqrForm $PqrForm;
+    private Funcionario $Funcionario;
+
+    public function __construct(array $request = null)
+    {
+        $this->request = $request;
+
+        if (!$this->PqrForm = PqrForm::getPqrFormActive()) {
+            throw new \Exception("No se encuentra el formulario activo", 200);
+        }
+        $this->Funcionario = SessionController::getUser();
+    }
 
     /**
      * Obtiene los datos de la PQR
@@ -129,8 +145,10 @@ class FtPqrController extends Controller
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
                 'idft' => $FtPqr->getPK(),
-                'nombre_funcionario' => SessionController::getUser()->getName(),
-                'descripcion' => "Se actualiza el tipo de PQRSF de ({$oldStatus}) a ({$newStatus})"
+                'fk_funcionario' => $this->Funcionario->getPK(),
+                'tipo' => PqrHistory::TIPO_CAMBIO_ESTADO,
+                'idfk' => 0,
+                'descripcion' => "Se actualiza el tipo de {$this->PqrForm->label} de {$oldStatus} a {$newStatus}"
             ];
             if (!PqrHistory::newRecord($history)) {
                 throw new \Exception("No fue posible guardar el historial", 200);
@@ -153,6 +171,7 @@ class FtPqrController extends Controller
      * @return object
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
+     * 
      */
     public function getHistoryForTimeLine(): object
     {
@@ -169,65 +188,204 @@ class FtPqrController extends Controller
         }
 
         $rows = [];
-        $records = $FtPqr->getHistory();
-        $Configuracion = Configuracion::findByNames(['nombre'])[0];
-
-        $expiration = DateController::convertDate($FtPqr->sys_fecha_vencimiento, 'Y-m-d');
-        $expirationDate = new DateTime($expiration);
+        $records = $FtPqr->getHistory('fecha asc');
+        $expirationDate = $this->getExpirationDate($FtPqr);
         $addExpiration = false;
 
-        $rows[] = [
-            'iconPoint' => 'fa fa-comment',
-            'iconPointColor' => 'success',
-            'iconProfile' => 'fa-2x fa fa-user',
-            'business' => 'Solicitante',
-            'userName' => '',
-            'date' => DateController::convertDate($FtPqr->Documento->fecha),
-            'description' => 'Se registra la solicitud de '
-        ];
+        $rows[] = $this->getInitialRequestData($FtPqr->Documento);
 
         foreach ($records as $PqrHistory) {
             $action = DateController::convertDate($PqrHistory->fecha, 'Y-m-d');
-            $actionDate = new DateTime($action);
+            $actionDate = new \DateTime($action);
 
             if ($actionDate > $expirationDate && !$addExpiration) {
-                $rows[] = [
-                    'iconPoint' => 'fa fa-flag-checkered',
-                    'iconPointColor' => 'danger',
-                    'iconProfile' => 'fa-2x fa fa-users',
-                    'business' => $Configuracion ? $Configuracion->getValue() : '',
-                    'userName' => '',
-                    'date' => DateController::convertDate($expirationDate),
-                    'description' => ''
-                ];
+                $rows[] =  $this->getDataFinish($FtPqr);
                 $addExpiration = true;
             }
 
-            $rows[] = [
-                'iconPoint' => 'fa fa-users',
-                'iconPointColor' => 'warning',
-                'iconProfile' => 'fa-2x fa fa-users',
-                'business' => $Configuracion ? $Configuracion->getValue() : '',
-                'userName' => $PqrHistory->nombre_funcionario,
-                'date' => DateController::convertDate($PqrHistory->fecha),
-                'description' => $PqrHistory->descripcion
-            ];
+            if ($row = $this->getDataHistory($PqrHistory)) {
+                $rows[] = $row;
+            }
         }
+
         if (!$addExpiration) {
-            $rows[] = [
-                'iconPoint' => 'fa fa-flag-checkered',
-                'iconPointColor' => 'danger',
-                'iconProfile' => 'fa-2x fa fa-users',
-                'business' => $Configuracion ? $Configuracion->getValue() : '',
-                'userName' => '',
-                'date' => DateController::convertDate($PqrHistory->fecha),
-                'description' => ''
-            ];
+            $rows[] = $this->getDataFinish($FtPqr);
         }
+
 
         $Response->data = $rows;
         $Response->success = 1;
 
         return $Response;
+    }
+
+    /**
+     * Obtiene la fecha de expiracion
+     *
+     * @param Ftpqr $FtPqr
+     * @return \DateTime
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getExpirationDate(Ftpqr $FtPqr): \DateTime
+    {
+        $expiration = DateController::convertDate($FtPqr->sys_fecha_vencimiento, 'Y-m-d');
+
+        return new \DateTime($expiration);
+    }
+
+    /**
+     * Obtiene los datoss de finalizacion de timeline
+     *
+     * @param Ftpqr $FtPqr
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getDataFinish(Ftpqr $FtPqr): array
+    {
+        $type = $FtPqr->getFieldValue('sys_tipo');
+        return [
+            'iconPoint' => 'fa fa-flag-checkered',
+            'iconPointColor' => 'success',
+            'date' => DateController::convertDate(
+                $this->getExpirationDate($FtPqr),
+                DateController::PUBLIC_DATE_FORMAT
+            ),
+            'description' => "Fecha maxima para dar respuesta a la solicitud de tipo {$type}"
+        ];
+    }
+
+    /**
+     * Retonar la informacion inicial de la solicitud para el de timeline
+     *
+     * @param Documento $Documento
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getInitialRequestData(Documento $Documento): array
+    {
+        return [
+            'iconPoint' => 'fa fa-map-marker',
+            'iconPointColor' => 'success',
+            'date' => DateController::convertDate($Documento->fecha),
+            'description' => "Se registra la solicitud No # {$Documento->numero}",
+            'url' => $this->getRoutePdf($Documento)
+        ];
+    }
+
+    /**
+     * Obtiene el logo de la empresa
+     *
+     * @return string|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getLogo(): ?string
+    {
+        if (!$this->logo) {
+            $Configuracion = Configuracion::findByAttributes([
+                'nombre' => 'logo'
+            ]);
+
+            if (!$Configuracion->getValue()) {
+                return null;
+            }
+
+            $FileJson = new FileJson($Configuracion->getValue());
+            $FileTemporal = $FileJson->convertToFileTemporal();
+            $this->logo = ABSOLUTE_SAIA_ROUTE . $FileTemporal->getRouteFromRoot();
+        }
+
+        return $this->logo;
+    }
+
+    /**
+     * Obtiene la ruta del PDF
+     *
+     * @param Documento $Documento
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getRoutePdf(Documento $Documento): string
+    {
+        $Object = TemporalController::createTemporalFile($Documento->pdf, '', true);
+        if ($Object->success) {
+            return ABSOLUTE_SAIA_ROUTE . $Object->route;
+        }
+        return '#';
+    }
+
+    /**
+     * Obtiene el nombre del cliente
+     *
+     * @return string|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getCustomerName(): ?string
+    {
+        if (!$this->customerName) {
+            $Configuracion = Configuracion::findByNames(['nombre'])[0];
+            if ($Configuracion) {
+                $this->customerName = $Configuracion->getValue();
+            }
+        }
+
+        return $this->customerName;
+    }
+
+    /**
+     * Obtiene los datos de historial para pintar el timeline
+     *
+     * @param PqrHistory $PqrHistory
+     * @return arra|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getDataHistory(PqrHistory $PqrHistory): ?array
+    {
+        $data = [
+            'header' => true,
+            'imgRoute' => $this->getLogo(),
+            'userName' => $PqrHistory->Funcionario->getName(),
+            'business' => $this->getCustomerName(),
+            'date' => $PqrHistory->getFecha(),
+            'description' => $PqrHistory->descripcion
+        ];
+
+        switch ($PqrHistory->tipo) {
+            case PqrHistory::TIPO_RESPUESTA:
+                $FtPqrRespuesta = $PqrHistory->getRespuestaPqr();
+                $data = array_merge($data, [
+                    'iconPoint' => 'fa fa-envelope-o',
+                    'iconPointColor' => 'warning',
+                    'url' => $this->getRoutePdf($FtPqrRespuesta->Documento)
+                ]);
+                break;
+
+            case PqrHistory::TIPO_CALIFICACION:
+                $FtPqrRespuesta = $PqrHistory->getRespuestaPqr();
+                $data = array_merge($data, [
+                    'iconPoint' => 'fa fa-comment',
+                    'iconPointColor' => 'danger',
+                    'description' => "Se solicita la calificación del servicio prestado a la respuesta # {$FtPqrRespuesta->Documento->numero}"
+                ]);
+                break;
+
+            case PqrHistory::TIPO_CAMBIO_ESTADO:
+            case PqrHistory::TIPO_CAMBIO_VENCIMIENTO:
+                break;
+
+            case PqrHistory::TIPO_TAREA:
+            case PqrHistory::TIPO_NOTIFICACION:
+            default:
+                return null;
+                break;
+        }
+
+        return $data;
     }
 }

@@ -95,7 +95,6 @@ function addEdit(data) {
     }
   });
 
-  $("#group_sol_encuesta").hide();
   $("#tipo_distribucion").on('select2:select', function (e) {
     let key = e.params.data.element.dataset.key;
     if (+key == 4) {//Enviar por email

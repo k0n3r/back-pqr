@@ -2,10 +2,9 @@
 
 namespace Saia\Pqr\formatos\pqr;
 
-use DateTime;
-use Exception;
 use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
+use Saia\models\Funcionario;
 use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\models\PqrBackup;
 use Saia\Pqr\models\PqrHistory;
@@ -32,13 +31,15 @@ class FtPqr extends FtPqrProperties
     const VENCIMIENTO_AMARILLO = 5; //DIAS
 
     private PqrForm $PqrForm;
+    private Funcionario $Funcionario;
 
     public function __construct($id = null)
     {
         parent::__construct($id);
         if (!$this->PqrForm = PqrForm::getPqrFormActive()) {
-            throw new Exception("No se encuentra el formulario activo", 200);
+            throw new \Exception("No se encuentra el formulario activo", 200);
         }
+        $this->Funcionario = SessionController::getUser();
     }
 
     /**
@@ -216,8 +217,8 @@ class FtPqr extends FtPqrProperties
             return 'Fecha vencimiento no configurada';
         }
 
-        $now = $this->sys_fecha_terminado ? new DateTime($this->sys_fecha_terminado) : new DateTime();
-        $diff = $now->diff(new DateTime($this->sys_fecha_vencimiento));
+        $now = $this->sys_fecha_terminado ? new \DateTime($this->sys_fecha_terminado) : new \DateTime();
+        $diff = $now->diff(new \DateTime($this->sys_fecha_vencimiento));
 
         $color = "success";
         if ($diff->invert || $diff->days <= self::VENCIMIENTO_ROJO) {
@@ -263,8 +264,8 @@ class FtPqr extends FtPqrProperties
             return 'Fecha fin no configurada';
         }
 
-        $now = new DateTime($this->sys_fecha_terminado);
-        $diff = $now->diff(new DateTime($this->sys_fecha_vencimiento));
+        $now = new \DateTime($this->sys_fecha_terminado);
+        $diff = $now->diff(new \DateTime($this->sys_fecha_vencimiento));
 
         $dias = 0;
         if ($diff->invert) {
@@ -303,7 +304,7 @@ class FtPqr extends FtPqrProperties
             'fk_pqr' => $this->getPK(),
             'data_json' => json_encode($this->getDataRow())
         ])) {
-            throw new Exception("No fue posible registrar el backup", 1);
+            throw new \Exception("No fue posible registrar el backup", 1);
         }
         return true;
     }
@@ -384,7 +385,7 @@ class FtPqr extends FtPqrProperties
     {
         if ($this->sys_email) {
             if (!UtilitiesPqr::isEmailValid($this->sys_email)) {
-                throw new Exception("Esta dirección de correo ({$this->sys_email}) no es válida.", 200);
+                throw new \Exception("Esta dirección de correo ({$this->sys_email}) no es válida.", 200);
             }
         }
         return true;
@@ -410,14 +411,35 @@ class FtPqr extends FtPqrProperties
         }
 
         $fecha = (DateController::addBusinessDays(
-            new DateTime($this->Documento->fecha),
+            new \DateTime($this->Documento->fecha),
             $dias
         ))->format('Y-m-d H:i:s');
+
+        $oldDate = $this->sys_fecha_vencimiento;
         $this->sys_fecha_vencimiento = $fecha;
         $this->update();
 
         $this->Documento->fecha_limite = $fecha;
         $this->Documento->update();
+
+        if ($oldDate != $this->sys_fecha_vencimiento) {
+            $history = [
+                'fecha' => date('Y-m-d H:i:s'),
+                'idft' => $this->getPK(),
+                'fk_funcionario' => $this->Funcionario->getPK(),
+                'tipo' => PqrHistory::TIPO_CAMBIO_VENCIMIENTO,
+                'idfk' => 0,
+                'descripcion' => "Se actualiza la fecha de vencimiento a " .
+                    DateController::convertDate(
+                        $this->sys_fecha_vencimiento,
+                        DateController::PUBLIC_DATE_FORMAT
+                    )
+            ];
+
+            if (!PqrHistory::newRecord($history)) {
+                throw new \Exception("No fue posible actualizar el historial", 200);
+            }
+        }
 
         return true;
     }

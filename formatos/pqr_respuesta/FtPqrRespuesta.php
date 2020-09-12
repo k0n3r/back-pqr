@@ -117,8 +117,10 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
      */
     public function afterRad(): bool
     {
-        $description = "Se crea la respuesta # {$this->Documento->numero}";
-        return $this->saveHistory($description) &&
+        $description = "Se genera la respuesta con radicado # {$this->Documento->numero}";
+        $tipo = PqrHistory::TIPO_RESPUESTA;
+
+        return $this->saveHistory($description, $tipo) &&
             $this->transferCopiaInterna() &&
             $this->saveDistribution() &&
             $this->notifyEmail();
@@ -432,20 +434,22 @@ HTML;
     }
 
     /**
-     * Crea un registro de historial de Pqr
+     * Se crea un registro en el historial
      *
+     * @param string $description
+     * @param integer $type
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
-     * 
-     * @throws Exception
      */
-    private function saveHistory(string $description): bool
+    private function saveHistory(string $description, int $type): bool
     {
         $history = [
             'fecha' => date('Y-m-d H:i:s'),
             'idft' => $this->FtPqr->getPK(),
-            'nombre_funcionario' => $this->Funcionario->getName(),
+            'fk_funcionario' => $this->Funcionario->getPK(),
+            'tipo' => $type,
+            'idfk' => $this->getPK(),
             'descripcion' => $description
         ];
 
@@ -605,8 +609,9 @@ HTML;
             $texCopia = implode(", ", $copia);
             $description .= " con copia a: ({$texCopia})";
         }
+        $tipo = PqrHistory::TIPO_NOTIFICACION;
 
-        return $this->saveHistory($description);
+        return $this->saveHistory($description, $tipo);
     }
 
     /**
@@ -683,7 +688,7 @@ HTML;
             throw new \Exception("El email ({$email}) NO es valido");
         }
 
-        $nameFormat = $this->Formato->etiqueta;
+        $nameFormat = $this->getFormat()->etiqueta;
         $DocumentoPqr = $this->FtPqr->Documento;
 
         $url = $this->getUrlEncuesta();
@@ -716,6 +721,8 @@ HTML;
         }
 
         $description = "Se solicita la calificación de la ({$nameFormat}) # {$this->Documento->numero} al e-mail: ({$email})";
-        return $this->saveHistory($description);
+        $tipo = PqrHistory::TIPO_CALIFICACION;
+
+        return $this->saveHistory($description, $tipo);
     }
 }

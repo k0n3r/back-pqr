@@ -368,6 +368,7 @@ class PqrFormController extends Controller
             $this->PqrForm->Formato->nombre,
             false
         );
+
         $WsGenerator->loadAdditionalFiles([$defineFile]);
         $WsGenerator->addFiles([$infoQrFile, $infoQRJsFile, $timelineFile, $page404]);
 

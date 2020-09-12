@@ -3,7 +3,6 @@
 namespace Saia\Pqr\controllers;
 
 use Saia\Pqr\formatos\pqr\FtPqr;
-use Saia\Pqr\models\PqrHistory;
 
 class PqrHistoryController extends Controller
 {

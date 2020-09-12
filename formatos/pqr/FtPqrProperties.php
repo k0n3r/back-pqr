@@ -22,13 +22,16 @@ class FtPqrProperties extends ModelFormat
 				'encabezado',
 				'firma',
 				'idft_pqr',
+				'nombres_y_apellidos',
 				'sys_anonimo',
+				'sys_dependencia',
 				'sys_email',
 				'sys_estado',
 				'sys_fecha_terminado',
 				'sys_fecha_vencimiento',
 				'sys_tercero',
-				'sys_tipo' 
+				'sys_tipo',
+				'sys_tratamiento' 
             ],
             'date' => ['sys_fecha_vencimiento',
 				'sys_fecha_terminado'],

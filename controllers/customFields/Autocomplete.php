@@ -18,16 +18,16 @@ class Autocomplete extends Field implements IWsFields
   {
     return [
       [
-        'origin' => 'views/assets/node_modules/select2/dist/js/select2.min.js',
+        'origin' => 'views/node_modules/select2/dist/js/select2.min.js',
         'newName' => 'select2.min.js'
       ],
       [
-        'origin' => 'views/assets/node_modules/select2/dist/js/i18n/es.js',
+        'origin' => 'views/node_modules/select2/dist/js/i18n/es.js',
         'newName' => 'es.js',
         'subFolder' => 'i18n/'
       ],
       [
-        'origin' => 'views/assets/node_modules/select2/dist/css/select2.min.css',
+        'origin' => 'views/node_modules/select2/dist/css/select2.min.css',
         'newName' => 'select2.min.css'
       ]
     ];
