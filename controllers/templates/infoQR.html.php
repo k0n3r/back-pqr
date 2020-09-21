@@ -25,7 +25,7 @@
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/iziToast.min.js"></script>
     <script type="text/javascript" src="js/define.js"></script>
-    <script type="text/javascript" src="js/timeLine.js"></script>
+    <script type="text/javascript" src="js/TimeLine.js"></script>
     <script type="text/javascript" src="js/infoQR.js"></script>
 
 </body>

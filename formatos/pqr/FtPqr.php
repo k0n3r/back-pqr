@@ -654,7 +654,7 @@ HTML;
         $data = CryptController::encrypt(json_encode($params));
 
         return sprintf(
-            "%s/ws/%s/infoQr.html?data=%s",
+            "%s/ws/%s/infoQR.html?data=%s",
             PROTOCOLO_CONEXION . DOMINIO . "/" . CONTENEDOR_SAIA,
             $this->getFormat()->nombre,
             $data
