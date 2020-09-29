@@ -63,6 +63,13 @@ function getDaysLate(int $idft)
     return $FtPqr->getDaysLate();
 }
 
+function getDaysWait(int $idft)
+{
+    global $FtPqr;
+
+    return $FtPqr->getDaysWait();
+}
+
 function getValueSysTipo(int $iddocumento, $fkCampoOpciones)
 {
     if ($fkCampoOpciones == 'sys_tipo') {

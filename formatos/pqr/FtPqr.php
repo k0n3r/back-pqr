@@ -254,6 +254,13 @@ class FtPqr extends FtPqrProperties
         );
     }
 
+    /**
+     * Muestra los dias de retraso al solucionar la pqr
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
     public function getDaysLate(): string
     {
         if (!$this->sys_fecha_vencimiento) {
@@ -273,6 +280,23 @@ class FtPqr extends FtPqrProperties
         }
 
         return $dias;
+    }
+
+    /**
+     * Muestra los dias transcurridos desde la radicacion hasta la fecha actual
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getDaysWait(): string
+    {
+        $now = !$this->sys_fecha_terminado ? new \DateTime()
+            : new \DateTime($this->sys_fecha_terminado);
+
+        $diff = $now->diff(new \DateTime($this->Documento->fecha));
+
+        return $diff->days;
     }
 
     /**

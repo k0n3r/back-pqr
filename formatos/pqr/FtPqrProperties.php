@@ -22,6 +22,8 @@ class FtPqrProperties extends ModelFormat
 				'encabezado',
 				'firma',
 				'idft_pqr',
+				'ingrese_el_pais',
+				'ingrese_su_observaci',
 				'nombres_y_apellidos',
 				'sys_anonimo',
 				'sys_dependencia',
