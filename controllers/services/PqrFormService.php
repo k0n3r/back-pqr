@@ -3,6 +3,7 @@
 namespace Saia\Pqr\controllers\services;
 
 use Saia\Pqr\models\PqrForm;
+use Saia\Pqr\models\PqrNotyMessage;
 
 class PqrFormService
 {
@@ -83,6 +84,36 @@ class PqrFormService
                 $data[] = $PqrNotification->getDataAttributes();
             }
         }
+        return $data;
+    }
+
+    /**
+     * Obtiene los registros para actualizar el cuerpo de las notificaciones
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getDataPqrNotyMessages(): array
+    {
+        $data = [];
+        if ($records = PqrNotyMessage::findAllByAttributes([
+            'active' => 1
+        ])) {
+            foreach ($records as $PqrNotyMessage) {
+                $data[] = [
+                    'text' => $PqrNotyMessage->label,
+                    'value' => [
+                        'id' => $PqrNotyMessage->getPK(),
+                        'description' => $PqrNotyMessage->description,
+                        'subject' => $PqrNotyMessage->subject,
+                        'message_body' => $PqrNotyMessage->message_body,
+                        'type' => $PqrNotyMessage->type
+                    ]
+                ];
+            }
+        }
+
         return $data;
     }
 }

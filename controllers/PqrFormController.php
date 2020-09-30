@@ -52,7 +52,8 @@ class PqrFormController extends Controller
                 'pqrForm' => $PqrFormService->getDataPqrForm(),
                 'pqrTypes' => $PqrFormService->getTypes(),
                 'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
-                'pqrNotifications' => $PqrFormService->getDataPqrNotifications()
+                'pqrNotifications' => $PqrFormService->getDataPqrNotifications(),
+                'optionsNotyMessages' => $PqrFormService->getDataPqrNotyMessages()
             ]
         ];
 
