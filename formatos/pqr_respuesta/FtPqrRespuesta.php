@@ -11,6 +11,7 @@ use Saia\models\anexos\Anexos;
 use Saia\Pqr\models\PqrHistory;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\helpers\UtilitiesPqr;
+use Saia\Pqr\models\PqrNotyMessage;
 use Saia\controllers\DateController;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
@@ -19,6 +20,7 @@ use Saia\controllers\SessionController;
 use Saia\models\formatos\CamposFormato;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
+use Saia\Pqr\controllers\FtPqrController;
 use Saia\Pqr\controllers\PqrFormController;
 use Saia\controllers\DistribucionController;
 use Saia\controllers\functions\CoreFunctions;
@@ -556,6 +558,14 @@ HTML;
 
         $DocumentoPqr = $this->FtPqr->Documento;
         $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$this->PqrForm->label} con número de radicado {$DocumentoPqr->numero}.<br/><br/>";
+        $subject = "Respuesta solicitud de {$this->PqrForm->label} # {$DocumentoPqr->numero}";
+
+        if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
+            'name' => 'f2_email_respuesta'
+        ])) {
+            $message = FtPqrController::resolveVariables($PqrNotyMessage->message_body, $this->FtPqr);
+            $subject = FtPqrController::resolveVariables($PqrNotyMessage->subject, $this->FtPqr);
+        }
 
         if ($this->sol_encuesta) {
             $url = $this->getUrlEncuesta();
@@ -563,7 +573,7 @@ HTML;
         }
 
         $SendMailController = new SendMailController(
-            "Respuesta solicitud de {$this->PqrForm->label} # {$DocumentoPqr->numero}",
+            $subject,
             $message
         );
 

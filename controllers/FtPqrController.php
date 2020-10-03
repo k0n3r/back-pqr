@@ -13,6 +13,7 @@ use Saia\models\documento\Documento;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
 use Saia\controllers\documento\SaveFt;
+use Saia\controllers\functions\Header;
 use Saia\controllers\SessionController;
 use Saia\models\formatos\CamposFormato;
 use Saia\controllers\TemporalController;
@@ -387,5 +388,33 @@ class FtPqrController extends Controller
         }
 
         return $data;
+    }
+
+    public static function resolveVariables(
+        string $baseContent,
+        FtPqr $FtPqr
+    ): string {
+        $functions = Header::getFunctionsFromString($baseContent);
+        $functions = str_replace(['{*', '*}'], '', $functions);
+
+        foreach ($functions as $variable) {
+            $value = call_user_func([FtPqrController::class, $variable], $FtPqr);
+            $baseContent = str_replace(
+                "{*{$variable}*}",
+                $value,
+                $baseContent
+            );
+        }
+        return $baseContent;
+    }
+
+    public static function n_numeroPqr(FtPqr $FtPqr)
+    {
+        return $FtPqr->Documento->numero;
+    }
+
+    public static function n_nombreFormularioPqr(FtPqr $FtPqr)
+    {
+        return $FtPqr->PqrForm->label;
     }
 }

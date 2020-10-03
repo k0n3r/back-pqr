@@ -56,7 +56,7 @@ $(function () {
                         timeout: false,
                         icon: 'fa fa-check',
                         layout: 2,
-                        message: '<br/>Su solicitud ha sido generada con el número de radicado <strong>'+response.data.numero+'</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!',
+                        message: response.data.moreData.message,
                         onClosed: function (instance, toast, closedBy) {
                             window.location.reload()
                         }

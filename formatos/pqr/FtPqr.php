@@ -10,6 +10,7 @@ use Saia\Pqr\models\PqrBackup;
 use Saia\Pqr\models\PqrHistory;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\helpers\UtilitiesPqr;
+use Saia\Pqr\models\PqrNotyMessage;
 use Saia\controllers\DateController;
 use Saia\controllers\TerceroService;
 use Saia\controllers\anexos\FileJson;
@@ -18,6 +19,7 @@ use Saia\controllers\SessionController;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Saia\Pqr\controllers\FtPqrController;
 use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use Saia\Pqr\controllers\services\PqrFormFieldService;
 
@@ -30,7 +32,7 @@ class FtPqr extends FtPqrProperties
     const VENCIMIENTO_ROJO = 1; //DIAS
     const VENCIMIENTO_AMARILLO = 5; //DIAS
 
-    private PqrForm $PqrForm;
+    public PqrForm $PqrForm;
     private Funcionario $Funcionario;
 
     public function __construct($id = null)
@@ -106,6 +108,17 @@ class FtPqr extends FtPqrProperties
      */
     public function afterRad(): bool
     {
+        $message = "<br/>Su solicitud ha sido generada con el número de radicado <strong>{$this->Documento->numero}</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
+
+        if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
+            'name' => 'ws_noty_radicado'
+        ])) {
+            $message = FtPqrController::resolveVariables($PqrNotyMessage->message_body, $this);
+        }
+
+        $this->addTemporaryParameters([
+            'message' => $message
+        ]);
         return $this->sendNotifications() && $this->notifyEmail();
     }
 
@@ -483,9 +496,17 @@ class FtPqr extends FtPqrProperties
 
         $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {$this->Documento->numero}, adjunto encontrará una copia de la {$this->PqrForm->label} diligenciada el día de hoy.<br/><br/>
         El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado";
+        $subject = "Solicitud de {$this->PqrForm->label} # {$this->Documento->numero}";
+
+        if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
+            'name' => 'f1_email_solicitante'
+        ])) {
+            $message = FtPqrController::resolveVariables($PqrNotyMessage->message_body, $this);
+            $subject = FtPqrController::resolveVariables($PqrNotyMessage->subject, $this);
+        }
 
         $SendMailController = new SendMailController(
-            "Solicitud de {$this->PqrForm->label} # {$this->Documento->numero}",
+            $subject,
             $message
         );
 
