@@ -17,14 +17,15 @@ class FtPqrProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'dependencia',
+                'anexos',
+				'dependencia',
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
 				'idft_pqr',
-				'ingrese_el_pais',
-				'ingrese_su_observaci',
-				'nombres_y_apellidos',
+				'linea',
+				'linea_no',
+				'numerico',
 				'sys_anonimo',
 				'sys_dependencia',
 				'sys_email',

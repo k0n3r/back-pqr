@@ -75,7 +75,6 @@ final class Version20200310032827 extends AbstractMigration
             'publicar' => 1,
             'module' => 'pqr',
             'class_name' => NULL,
-            'rad_email' => 0,
             'generador_pdf' => 'Mpdf'
         ];
 

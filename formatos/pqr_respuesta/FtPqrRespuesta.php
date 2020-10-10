@@ -6,7 +6,6 @@ use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
 use Saia\models\Funcionario;
 use Saia\Pqr\models\PqrForm;
-use Saia\models\Distribucion;
 use Saia\models\anexos\Anexos;
 use Saia\Pqr\models\PqrHistory;
 use Saia\Pqr\formatos\pqr\FtPqr;
@@ -20,9 +19,9 @@ use Saia\controllers\SessionController;
 use Saia\models\formatos\CamposFormato;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
+use Saia\controllers\DistributionService;
 use Saia\Pqr\controllers\FtPqrController;
 use Saia\Pqr\controllers\PqrFormController;
-use Saia\controllers\DistribucionController;
 use Saia\controllers\functions\CoreFunctions;
 use Saia\Pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 
@@ -473,32 +472,31 @@ HTML;
     {
         switch ((int) $this->getKeyField('tipo_distribucion')) {
             case self::DISTRIBUCION_RECOGIDA_ENTREGA:
-                $recogida = Distribucion::REQUIRE_RECOGIDA;
-                $estado = Distribucion::ESTADO_POR_RECEPCIONAR;
+                $recogida = DistributionService::ESTADO_RECOGIDA;
+                $estado = DistributionService::DISTRIBUCION_POR_RECEPCIONAR;
                 break;
 
             case self::DISTRIBUCION_SOLO_ENTREGA:
-                $recogida = Distribucion::NO_REQUIRE_RECOGIDA;
-                $estado = Distribucion::ESTADO_POR_DISTRIBUIR;
+                $recogida = DistributionService::ESTADO_ENTREGA;
+                $estado = DistributionService::DISTRIBUCION_PENDIENTE;
                 break;
 
             case self::DISTRIBUCION_NO_REQUIERE_MENSAJERIA:
             case self::DISTRIBUCION_ENVIAR_EMAIL:
-                $recogida = Distribucion::NO_REQUIRE_RECOGIDA;
-                $estado = Distribucion::ESTADO_FINALIZADO;
+                $recogida = DistributionService::ESTADO_ENTREGA;
+                $estado = DistributionService::DISTRIBUCION_FINALIZADA;
                 break;
 
             default:
                 throw new \Exception("Tipo de distribucion no definida", 200);
                 break;
         }
-
-        DistribucionController::startDistribution(
-            $this,
-            'dependencia',
-            Distribucion::ORIGEN_INTERNO,
-            'destino',
-            Distribucion::DESTINO_EXTERNO,
+        $DistributionService = new DistributionService($this->Documento);
+        $DistributionService->start(
+            $this->dependencia,
+            DistributionService::TIPO_INTERNO,
+            $this->destino,
+            DistributionService::TIPO_EXTERNO,
             $estado,
             $recogida
         );

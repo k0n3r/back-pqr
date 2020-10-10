@@ -110,8 +110,7 @@ class AddEditFtPqr implements IAddEditFormat
             'version' => 1,
             'module' => 'pqr',
             'class_name' => 'Saia\Pqr\controllers\TaskEvents',
-            'publicar' => 1,
-            'rad_email' => $this->PqrForm->rad_email
+            'publicar' => 1
         ];
 
         if ($edit) {

@@ -29,7 +29,12 @@ class PqrHistoryController extends Controller
         $records = $FtPqr->getHistory();
 
         foreach ($records as $PqrHistory) {
-            $rows[] = $PqrHistory->getDataAttributes();
+            $rows[] = array_merge(
+                $PqrHistory->getDataAttributes(),
+                [
+                    'nombre_funcionario' => $PqrHistory->Funcionario->getName()
+                ]
+            );
         }
 
         return (object) [

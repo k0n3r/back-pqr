@@ -224,9 +224,10 @@ final class Version20200103155146 extends AbstractMigration
 
         $table->addColumn('idft', 'integer');
         $table->addColumn('fecha', 'datetime');
-        $table->addColumn('nombre_funcionario', 'string', [
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_general_ci'
+        $table->addColumn('fk_funcionario', 'integer');
+        $table->addColumn('tipo', 'integer');
+        $table->addColumn('idfk', 'integer', [
+            'default' => 0
         ]);
         $table->addColumn('descripcion', 'text', [
             'charset' => 'utf8mb4',

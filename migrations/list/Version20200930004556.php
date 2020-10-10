@@ -25,7 +25,7 @@ final class Version20200930004556 extends AbstractMigration
                 'label' => 'Radicar solicitud (Notificación)',
                 'description' => 'Mensaje informativo que se muestra al radicar la solicitud desde el webservice',
                 'subject' => NULL,
-                'message_body' => '<br/>Su solicitud ha sido generada con el número de radicado <strong>{*numero*}</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!',
+                'message_body' => '<br/>Su solicitud ha sido generada con el número de radicado <strong>{*n_numeroPqr*}</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!',
                 'type' => 1,
                 'active' => 1,
             ],
