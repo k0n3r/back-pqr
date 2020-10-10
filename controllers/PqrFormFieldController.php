@@ -42,7 +42,7 @@ class PqrFormFieldController extends Controller
             'show_anonymous' => 0,
             'fk_pqr_form' => $PqrForm->getPK(),
             'fk_campos_formato' => 0,
-            'system' => 0,
+            'is_system' => 0,
             'orden' => ($PqrForm->countFields()) + self::INITIAL_ORDER,
             'active' => 1
         ];

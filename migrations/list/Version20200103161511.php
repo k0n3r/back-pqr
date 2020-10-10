@@ -184,7 +184,7 @@ final class Version20200103161511 extends AbstractMigration
                 ]),
                 'fk_pqr_html_field' => $idsHtmlFields['select'],
                 'fk_pqr_form' => $idform,
-                'system' => 1,
+                'is_system' => 1,
                 'orden' => 2,
                 'required_anonymous' => 1
             ],
@@ -199,7 +199,7 @@ final class Version20200103161511 extends AbstractMigration
                 ]),
                 'fk_pqr_html_field' => $idsHtmlFields['email'],
                 'fk_pqr_form' => $idform,
-                'system' => 1,
+                'is_system' => 1,
                 'orden' => 3
             ]
         ];

@@ -98,7 +98,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addIndex(['fk_campos_formato'], 'i_fk_campos_formato');
 
 
-        $table->addColumn('system', 'boolean', [
+        $table->addColumn('is_system', 'boolean', [
             'default' => 0,
             'notnull' => false
         ]);
