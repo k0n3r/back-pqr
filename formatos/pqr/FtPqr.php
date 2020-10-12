@@ -720,4 +720,41 @@ HTML;
             'idft' => $this->getPK()
         ], [], $order);
     }
+
+    /**
+     * Cambia el estado de la PQR
+     *
+     * @param string $newStatus
+     * @param string $observations
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function changeStatus(string $newStatus, string $observations = ''): bool
+    {
+        $actualStatus = $this->sys_estado;
+
+        if ($actualStatus != $newStatus) {
+            $this->sys_estado = $newStatus;
+            if ($newStatus == FtPqr::ESTADO_TERMINADO) {
+                $this->sys_fecha_terminado = date('Y-m-d H:i:s');
+            } else {
+                $this->sys_fecha_terminado = NULL;
+            }
+            $this->update(true);
+
+            $history = [
+                'fecha' => date('Y-m-d H:i:s'),
+                'idft' => $this->getPK(),
+                'fk_funcionario' => $this->Funcionario->getPK(),
+                'tipo' => PqrHistory::TIPO_CAMBIO_ESTADO,
+                'idfk' => 0,
+                'descripcion' => "Se actualiza el estado de la solicitud de {$actualStatus} a {$newStatus}. {$observations}"
+            ];
+            if (!PqrHistory::newRecord($history)) {
+                throw new \Exception("No fue posible guardar el historial del cambio", 200);
+            }
+        }
+        return true;
+    }
 }

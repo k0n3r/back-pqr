@@ -145,6 +145,9 @@ HTML;
 
         default:
             $options = <<<HTML
+            <a href="#" class="dropdown-item finish" data-id="{$iddocumento}" data-idft="{$idft}">
+                <i class="fa fa-check"></i> Terminar
+            </a>
             <a href="#" class="dropdown-item cancel" data-id="{$iddocumento}" data-idft="{$idft}">
                 <i class="fa fa-exclamation-triangle"></i> Anular
             </a>

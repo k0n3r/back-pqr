@@ -162,29 +162,8 @@ class TaskEvents implements IExternalEventsTask
                 FtPqr::ESTADO_TERMINADO : FtPqr::ESTADO_PROCESO;
         }
         $Ft = $Documento->getFt();
-        $estadoActual = $Ft->sys_estado;
+        $Ft->changeStatus($estado);
 
-        if ($estadoActual != $estado) {
-            $Ft->sys_estado = $estado;
-            if ($estado == FtPqr::ESTADO_TERMINADO) {
-                $Ft->sys_fecha_terminado = date('Y-m-d H:i:s');
-            } else {
-                $Ft->sys_fecha_terminado = NULL;
-            }
-            $Ft->update(true);
-
-            $history = [
-                'fecha' => date('Y-m-d H:i:s'),
-                'idft' => $Ft->getPK(),
-                'fk_funcionario' => $this->Funcionario->getPK(),
-                'tipo' => PqrHistory::TIPO_CAMBIO_ESTADO,
-                'idfk' => 0,
-                'descripcion' => "Se actualiza el estado de la solicitud de {$estadoActual} a {$estado}"
-            ];
-            if (!PqrHistory::newRecord($history)) {
-                throw new \Exception("No fue posible guardar el historial del cambio", 200);
-            }
-        }
         return true;
     }
 }

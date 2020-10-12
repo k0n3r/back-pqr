@@ -122,8 +122,8 @@ class FtPqrController extends Controller
 
 
         try {
-            $conn = DatabaseConnection::getDefaultConnection();
-            $conn->beginTransaction();
+            $Connection = DatabaseConnection::getDefaultConnection();
+            $Connection->beginTransaction();
 
             if (!$this->request['idft'] || !$this->request['type']) {
                 throw new \Exception("Error faltan parametros", 200);
@@ -157,9 +157,9 @@ class FtPqrController extends Controller
             $FtPqr->updateFechaVencimiento();
 
             $Response->success = 1;
-            $conn->commit();
+            $Connection->commit();
         } catch (\Exception $th) {
-            $conn->rollBack();
+            $Connection->rollBack();
             $Response->message = $th->getMessage();
         }
 
@@ -219,6 +219,43 @@ class FtPqrController extends Controller
 
         return $Response;
     }
+
+    /**
+     * Termina una PQR
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function finish(): object
+    {
+        $Response = (object) [
+            'success' => 0
+        ];
+
+        try {
+            $Connection = DatabaseConnection::getDefaultConnection();
+            $Connection->beginTransaction();
+
+            if (!$this->request['idft'] || !$this->request['observaciones']) {
+                throw new \Exception("Error faltan parametros", 200);
+            }
+
+            $FtPqr = new FtPqr($this->request['idft']);
+            $Response->success = (int) $FtPqr->changeStatus(
+                FtPqr::ESTADO_TERMINADO,
+                $this->request['observaciones']
+            );
+
+            $Connection->commit();
+        } catch (\Exception $th) {
+            $Connection->rollBack();
+            $Response->message = $th->getMessage();
+        }
+
+        return $Response;
+    }
+
 
     /**
      * Obtiene la fecha de expiracion

@@ -126,7 +126,14 @@ final class Version20200103161511 extends AbstractMigration
                 'type_saia' => 'Attached',
                 'active' => 1,
                 'uniq' => 0
-            ]
+            ],
+            [
+                'label' => 'Categoria de tipos',
+                'type' => 'subTypesPqr',
+                'type_saia' => 'Select',
+                'active' => 1,
+                'uniq' => 1
+            ],
         ];
     }
 

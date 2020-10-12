@@ -142,6 +142,26 @@
             });
         });
 
+        $(document).on('click', '.finish', function() {
+
+            let idft = $(this).data('idft');
+
+            top.topModal({
+                url: `app/modules/back_pqr/views/finish.php`,
+                params: {
+                    idft: idft
+                },
+                size: 'modal-md',
+                title: 'Terminar',
+                backdrop: 'static',
+                onSuccess() {
+                    top.closeTopModal()
+                    $('#table').bootstrapTable('refresh');
+                }
+            });
+
+        });
+
         $(document).on('click', '.edit', function() {
 
             let idft = $(this).data('idft');

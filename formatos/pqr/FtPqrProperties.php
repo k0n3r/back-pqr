@@ -17,7 +17,9 @@ class FtPqrProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'anexos',
+                'adsfasd',
+				'anexos',
+				'area_de_texto',
 				'dependencia',
 				'documento_iddocumento',
 				'encabezado',
@@ -32,6 +34,7 @@ class FtPqrProperties extends ModelFormat
 				'sys_estado',
 				'sys_fecha_terminado',
 				'sys_fecha_vencimiento',
+				'sys_subtipo',
 				'sys_tercero',
 				'sys_tipo',
 				'sys_tratamiento' 
