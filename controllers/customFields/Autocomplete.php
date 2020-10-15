@@ -53,6 +53,7 @@ class Autocomplete extends Field implements IWsFields
     return <<<JAVASCRIPT
         let options_{$this->CamposFormato->nombre} = {
           language: "es",
+           minimumInputLength: 3,
           placeholder: "Ingrese el nombre",
           multiple: false,
           ajax: {
