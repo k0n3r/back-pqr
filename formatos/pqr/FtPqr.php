@@ -435,22 +435,9 @@ class FtPqr extends FtPqrProperties
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function updateFechaVencimiento(): bool
+    private function updateFechaVencimiento(): bool
     {
-        $options = json_decode($this->PqrForm->getRow('sys_tipo')->CamposFormato->opciones);
-
-        $dias = 1;
-        foreach ($options as $option) {
-            if ($option->idcampo_opciones == $this->sys_tipo) {
-                $dias = $option->dias ?? 0;
-                break;
-            }
-        }
-
-        $fecha = (DateController::addBusinessDays(
-            new \DateTime($this->Documento->fecha),
-            $dias
-        ))->format('Y-m-d H:i:s');
+        $fecha = $this->getDateForType();
 
         $oldDate = $this->sys_fecha_vencimiento;
         $this->sys_fecha_vencimiento = $fecha;
@@ -479,6 +466,32 @@ class FtPqr extends FtPqrProperties
         }
 
         return true;
+    }
+
+    /**
+     * Retonar la fecha de vencimiento basado en la fecha de aprobacion 
+     * y el tipo
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getDateForType(): string
+    {
+        $options = json_decode($this->PqrForm->getRow('sys_tipo')->CamposFormato->opciones);
+
+        $dias = 1;
+        foreach ($options as $option) {
+            if ($option->idcampo_opciones == $this->sys_tipo) {
+                $dias = $option->dias ?? 0;
+                break;
+            }
+        }
+
+        return (DateController::addBusinessDays(
+            new \DateTime($this->Documento->fecha),
+            $dias
+        ))->format('Y-m-d H:i:s');
     }
 
     /**

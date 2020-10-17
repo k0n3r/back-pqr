@@ -6,8 +6,10 @@ use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\models\PqrFormField;
 use Saia\Pqr\models\PqrHtmlField;
 use Saia\controllers\CryptController;
+use Saia\controllers\DateController;
 use Saia\Pqr\controllers\services\PqrFormService;
 use Saia\Pqr\controllers\services\PqrFormFieldService;
+use Saia\Pqr\formatos\pqr\FtPqr;
 
 class RequestProcessorController extends Controller
 {
@@ -100,6 +102,24 @@ class RequestProcessorController extends Controller
 
         return [
             'data' => $data
+        ];
+    }
+
+    /**
+     * retonar la fecha de vencimiento basado en la fecha de creacion y tipo
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getDateForType(): array
+    {
+        $FtPqr = new FtPqr($this->request['idft']);
+        $FtPqr->sys_tipo = $this->request['type'];
+        $onlyDate = DateController::convertDate($FtPqr->getDateForType(), 'Y-m-d', 'Y-m-d H:i:s');
+        return [
+            'success' => 1,
+            'date' => $onlyDate
         ];
     }
 }

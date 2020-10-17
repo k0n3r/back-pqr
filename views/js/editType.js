@@ -3,6 +3,13 @@ $(function () {
     $('#scriptEditType').removeAttr('data-params');
 
     var baseUrl = localStorage.getItem('baseUrl');
+    var subtypeExist = 0;
+
+    $('#sys_fecha_vencimiento').datetimepicker({
+        locale: 'es',
+        format: 'YYYY-MM-DD',
+        minDate: moment()
+    });
 
     $.ajax({
         type: 'POST',
@@ -15,12 +22,45 @@ $(function () {
         },
         dataType: 'json',
         success: function (response) {
-            if (+response.data.length) {
-                response.data.forEach(e => {
-                    $("#sys_tipo").append(
-                        new Option(e.text, e.id, false, false)
-                    )
+            if (+response.dataType.length) {
+                initSelect('sys_tipo', response.dataType);
+
+                $('#sys_tipo').on('change', function (e) {
+                    let sys_tipo = this.value;
+                    if (!sys_tipo) {
+                        $("#sys_fecha_vencimiento").val('');
+                        return false;
+                    }
+
+                    $.ajax({
+                        type: 'POST',
+                        dataType: 'json',
+                        url: `${baseUrl}app/modules/back_pqr/app/request.php`,
+                        data: {
+                            key: localStorage.getItem('key'),
+                            token: localStorage.getItem('token'),
+                            class: 'RequestProcessorController',
+                            method: 'getDateForType',
+                            data: {
+                                type: sys_tipo,
+                                idft: +params.idft,
+                            }
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                $("#sys_fecha_vencimiento").val(response.date);
+                            } else {
+                                $("#sys_fecha_vencimiento").val('');
+                            }
+                        },
+                        error: function (...arguments) {
+                            console.error(arguments);
+                            $("#sys_fecha_vencimiento").val('');
+                        }
+                    });
+
                 });
+
 
             } else {
                 top.notification({
@@ -28,58 +68,79 @@ $(function () {
                     type: 'error'
                 });
             }
+            if (+response.dataSubType.length) {
+                subtypeExist = 1;
+                initSelect('sys_subtipo', response.dataSubType);
+            } else {
+                $("#divSubType").remove();
+            }
         }
     });
 
-    $("#sys_tipo").select2({
-        language: "es",
-        placeholder: "Seleccione el nuevo tipo",
-        multiple: false,
-        dropdownParent: "#dinamic_modal"
-    });
+    function initSelect(id, data) {
+        data.forEach(e => {
+            $("#" + id).append(
+                new Option(e.text, e.id, false, false)
+            )
+        });
 
-    $(document).off('click', '#btn_success').on('click', '#btn_success', function () {
+        $("#" + id).select2({
+            language: "es",
+            placeholder: "Seleccione",
+            multiple: false,
+            dropdownParent: "#dinamic_modal"
+        });
+    }
 
-        let type = $("#sys_tipo").val();
-        if (!+type) {
-            top.notification({
-                message: "Por favor seleccione el nuevo tipo",
-                type: 'error'
+    $(document)
+        .off('click', '#btn_success')
+        .on('click', '#btn_success', function () {
+            $("#formChangeType").trigger('submit');
+        });
+
+    $("#formChangeType").validate({
+        submitHandler: function (form) {
+            let type = $("#sys_tipo").val();
+            let expiration = $("#sys_fecha_vencimiento").val();
+            let subtype = 0;
+            if (subtypeExist) {
+                subtype = $("#sys_subtipo").val();
+            }
+            $.ajax({
+                type: 'POST',
+                url: `${baseUrl}app/modules/back_pqr/app/request.php`,
+                data: {
+                    key: localStorage.getItem('key'),
+                    token: localStorage.getItem('token'),
+                    class: 'FtPqrController',
+                    method: 'updateType',
+                    data: {
+                        idft: +params.idft,
+                        expirationDate: expiration,
+                        type: type,
+                        subtype: subtype
+                    }
+                },
+                dataType: 'json',
+                success: function (response) {
+
+                    if (response.success) {
+                        top.notification({
+                            message: 'Se ha actualizado el tipo',
+                            type: 'success'
+                        });
+                        top.successModalEvent();
+
+                    } else {
+                        top.notification({
+                            message: response.message,
+                            type: 'error'
+                        });
+                    }
+                }
             });
             return false;
         }
-
-        $.ajax({
-            type: 'POST',
-            url: `${baseUrl}app/modules/back_pqr/app/request.php`,
-            data: {
-                key: localStorage.getItem('key'),
-                token: localStorage.getItem('token'),
-                class: 'FtPqrController',
-                method: 'updateType',
-                data: {
-                    idft: +params.idft,
-                    type: type
-                }
-            },
-            dataType: 'json',
-            success: function (response) {
-
-                if (response.success) {
-                    top.notification({
-                        message: 'Se ha actualizado el tipo',
-                        type: 'success'
-                    });
-                    top.successModalEvent();
-
-                } else {
-                    top.notification({
-                        message: response.message,
-                        type: 'error'
-                    });
-                }
-            }
-        });
     });
 
 });

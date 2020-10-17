@@ -20,6 +20,7 @@ use Saia\controllers\TemporalController;
 
 class FtPqrController extends Controller
 {
+    private $subTypeExist;
     private PqrForm $PqrForm;
     private Funcionario $Funcionario;
 
@@ -88,6 +89,9 @@ class FtPqrController extends Controller
      */
     public function getTypes(): array
     {
+
+        $subType = $this->getSubTypes();
+
         $records = (CamposFormato::findByAttributes([
             'nombre' => 'sys_tipo'
         ]))->CampoOpciones;
@@ -103,8 +107,61 @@ class FtPqrController extends Controller
         }
 
         return [
-            'data' => $data
+            'dataType' => $data,
+            'dataSubType' => $subType ?? []
         ];
+    }
+
+    /**
+     * Obtiene la informacion del subtype
+     *
+     * @return null|array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getSubTypes(): ?array
+    {
+        if (!$this->subTypeExist()) {
+            return null;
+        }
+
+        $PqrFormField = $this->PqrForm->getRow('sys_subtipo');
+        $records = $PqrFormField->CamposFormato->CampoOpciones;
+
+        $data = [];
+        foreach ($records as $CampoOpciones) {
+            if ($CampoOpciones->estado) {
+                $data[] = [
+                    'id' => $CampoOpciones->getPK(),
+                    'text' => $CampoOpciones->valor
+                ];
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Verifica si el campo subtipo fue creado y esta activo
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function subTypeExist(): bool
+    {
+        if ($this->subTypeExist !== null) {
+            return $this->subTypeExist;
+        }
+
+        $PqrFormField = $this->PqrForm->getRow('sys_subtipo');
+        if (!$PqrFormField || !$PqrFormField->active) {
+            $this->subTypeExist = false;
+        } else {
+            $this->subTypeExist = true;
+        }
+
+        return $this->subTypeExist;
     }
 
     /**
@@ -120,7 +177,6 @@ class FtPqrController extends Controller
             'success' => 0
         ];
 
-
         try {
             $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
@@ -129,19 +185,61 @@ class FtPqrController extends Controller
                 throw new \Exception("Error faltan parametros", 200);
             }
 
-            $FtPqr = new FtPqr($this->request['idft']);
-
-            if ($this->request['type'] == $FtPqr->sys_tipo) {
-                throw new \Exception("Seleccione otro estado diferente al actual", 200);
+            if ($this->subTypeExist() && !$this->request['subtype']) {
+                throw new \Exception("Error faltan parametros", 200);
             }
 
-            $oldStatus = $FtPqr->getFieldValue('sys_tipo');
+            $FtPqr = new FtPqr($this->request['idft']);
+            $newAttributes = [];
+            if ($this->request['type'] != $FtPqr->sys_tipo) {
+                $oldType = $FtPqr->getFieldValue('sys_tipo');
+                $newAttributes['sys_tipo'] = $this->request['type'];
+                $textField[] = "tipo de {$oldType} a {newType}";
+            }
+
+            if ($this->subTypeExist()) {
+                if ($this->request['subtype'] != $FtPqr->sys_subtipo) {
+                    $oldSubType = $FtPqr->getFieldValue('sys_subtipo');
+                    $newAttributes['sys_subtipo'] = $this->request['subtype'];
+                    $textField[] = "categoria/subtipo de {$oldSubType} a {newSubType}";
+                }
+            }
+            $expiration = DateController::convertDate($FtPqr->sys_fecha_vencimiento, 'Y-m-d');
+            if ($this->request['expirationDate'] != $expiration) {
+
+                $newAttributes['sys_fecha_vencimiento'] = $this->request['expirationDate'];
+                $FtPqr->Documento->fecha_limite = $this->request['expirationDate'];
+                $FtPqr->Documento->update();
+
+                $oldDate = DateController::convertDate(
+                    $expiration,
+                    DateController::PUBLIC_DATE_FORMAT,
+                    'Y-m-d'
+                );
+
+                $newDate = DateController::convertDate(
+                    $this->request['expirationDate'],
+                    DateController::PUBLIC_DATE_FORMAT,
+                    'Y-m-d'
+                );
+                $textField[] = "fecha de vencimiento de {$oldDate} a {$newDate}";
+            }
 
             $SaveFt = new SaveFt($FtPqr->Documento);
-            $SaveFt->edit(['sys_tipo' => $this->request['type']]);
+            $SaveFt->edit($newAttributes);
             $FtPqr = $FtPqr->Documento->getFt();
 
-            $newStatus = $FtPqr->getFieldValue('sys_tipo');
+            $text = "Se actualiza: " . implode(', ', $textField);
+            $newType = $FtPqr->getFieldValue('sys_tipo');
+            $newSubType = $this->subTypeExist() ? $FtPqr->getFieldValue('sys_subtipo') : '';
+
+            $text = str_replace([
+                '{newType}',
+                '{newSubType}'
+            ], [
+                $newType,
+                $newSubType
+            ], $text);
 
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
@@ -149,12 +247,11 @@ class FtPqrController extends Controller
                 'fk_funcionario' => $this->Funcionario->getPK(),
                 'tipo' => PqrHistory::TIPO_CAMBIO_ESTADO,
                 'idfk' => 0,
-                'descripcion' => "Se actualiza el tipo de {$this->PqrForm->label} de {$oldStatus} a {$newStatus}"
+                'descripcion' => $text
             ];
             if (!PqrHistory::newRecord($history)) {
                 throw new \Exception("No fue posible guardar el historial", 200);
             }
-            $FtPqr->updateFechaVencimiento();
 
             $Response->success = 1;
             $Connection->commit();

@@ -98,17 +98,18 @@ class PqrForm extends Model
      * Obtiene el campo de la pqr segun el nombre
      *
      * @param string $name
-     * @return PqrFormField
+     * @return null|PqrFormField
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function getRow(string $name): PqrFormField
+    public function getRow(string $name): ?PqrFormField
     {
         foreach ($this->PqrFormFields as $PqrFormField) {
             if ($PqrFormField->name == $name) {
                 return $PqrFormField;
             }
         }
+        return null;
     }
 
     /**

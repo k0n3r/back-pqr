@@ -172,7 +172,7 @@
                     idft: idft
                 },
                 size: 'modal-md',
-                title: 'Actualizar tipo de PQRSF',
+                title: 'Actualizar tipo',
                 backdrop: 'static',
                 onSuccess() {
                     top.closeTopModal()
