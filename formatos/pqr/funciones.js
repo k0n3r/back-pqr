@@ -17,6 +17,10 @@ function edit(data) {
 function addEdit(data) {
   var baseUrl = localStorage.getItem("baseUrl");
 
+  if (!data.sys_subtipo) {
+    $("#group_sys_subtipo").remove();
+  }
+
   $(".pqrAutocomplete").each(function (index, element) {
     $("#" + element.id).select2({
       language: "es",

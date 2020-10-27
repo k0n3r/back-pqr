@@ -292,10 +292,13 @@ class PqrFormFieldController extends Controller
             $PqrFormField = new PqrFormField($this->request['id']);
             $PqrFormField->setAttributes([
                 'active' => (int) $this->request['active'],
-                'show_report' => 0,
                 'required' => 0,
                 'required_anonymous' => 0
             ]);
+
+            if ($PqrFormField->name != 'sys_subtipo') {
+                $PqrFormField->show_report = 0;
+            }
 
             if (!$PqrFormField->update()) {
                 throw new Exception("No fue posible actualizar el campo", 200);

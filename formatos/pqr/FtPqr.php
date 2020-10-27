@@ -42,6 +42,12 @@ class FtPqr extends FtPqrProperties
             throw new \Exception("No se encuentra el formulario activo", 200);
         }
         $this->Funcionario = SessionController::getUser();
+
+        $PqrFormField = $this->PqrForm->getRow('sys_subtipo');
+
+        $this->addRouteParams([
+            'sys_subtipo' => (int) $PqrFormField->active
+        ]);
     }
 
     /**

@@ -155,7 +155,7 @@ class FtPqrController extends Controller
         }
 
         $PqrFormField = $this->PqrForm->getRow('sys_subtipo');
-        if (!$PqrFormField || !$PqrFormField->active) {
+        if (!$PqrFormField) {
             $this->subTypeExist = false;
         } else {
             $this->subTypeExist = true;
