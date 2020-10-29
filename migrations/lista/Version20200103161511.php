@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Saia\Pqr\migrations;
+namespace Saia\Pqr\migrations\lista;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;

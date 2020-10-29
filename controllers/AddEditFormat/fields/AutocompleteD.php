@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\controllers\addEditFormat\fields;
+namespace Saia\Pqr\controllers\AddEditFormat\fields;
 
 class AutocompleteD extends Field implements IField
 {

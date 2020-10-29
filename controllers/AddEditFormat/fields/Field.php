@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\controllers\addEditFormat\fields;
+namespace Saia\Pqr\controllers\AddEditFormat\fields;
 
 use Saia\Pqr\models\PqrFormField;
 use Saia\models\formatos\CamposFormato;

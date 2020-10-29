@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\migrations;
+namespace Saia\Pqr\migrations\lista;
 
 use Doctrine\DBAL\Schema\Schema;
 

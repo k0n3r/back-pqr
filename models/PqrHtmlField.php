@@ -6,7 +6,7 @@ use Saia\core\model\Model;
 
 class PqrHtmlField extends Model
 {
-    use TModel;
+    use TModels;
 
     const TYPE_DEPENDENCIA = 'dependencia';
     const TYPE_LOCALIDAD = 'localidad';

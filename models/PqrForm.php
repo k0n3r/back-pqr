@@ -10,7 +10,7 @@ use Saia\Pqr\models\PqrNotification;
 
 class PqrForm extends Model
 {
-    use TModel;
+    use TModels;
 
     /**
      * TODO: PASAR A .ENV 

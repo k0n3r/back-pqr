@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\controllers\addEditFormat\fields;
+namespace Saia\Pqr\controllers\AddEditFormat\fields;
 
 class Hidden extends Field implements IField
 {

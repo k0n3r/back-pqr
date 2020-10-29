@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\controllers\addEditFormat;
+namespace Saia\Pqr\controllers\AddEditFormat;
 
 use Saia\Pqr\models\PqrForm;
 use Saia\Pqr\formatos\pqr\FtPqr;

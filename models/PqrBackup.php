@@ -8,7 +8,7 @@ use Saia\Pqr\formatos\pqr\FtPqr;
 
 class PqrBackup extends Model
 {
-    use TModel;
+    use TModels;
 
     protected function defineAttributes(): void
     {

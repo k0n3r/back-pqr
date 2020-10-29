@@ -15,9 +15,9 @@ use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
 use Saia\controllers\generator\webservice\WsFt;
 use Saia\Pqr\controllers\services\PqrFormService;
-use Saia\Pqr\controllers\addEditFormat\AddEditFtPqr;
+use Saia\Pqr\controllers\AddEditFormat\AddEditFtPqr;
 use Saia\controllers\generator\webservice\WsGenerator;
-use Saia\Pqr\controllers\addEditFormat\IAddEditFormat;
+use Saia\Pqr\controllers\AddEditFormat\IAddEditFormat;
 
 
 class PqrFormController extends Controller

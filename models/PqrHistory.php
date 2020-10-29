@@ -9,7 +9,7 @@ use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 
 class PqrHistory extends Model
 {
-    use TModel;
+    use TModels;
 
     const TIPO_TAREA = 1;
     const TIPO_NOTIFICACION = 2;

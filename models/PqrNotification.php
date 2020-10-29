@@ -7,7 +7,7 @@ use Saia\models\Funcionario;
 
 class PqrNotification extends Model
 {
-    use TModel;
+    use TModels;
 
     protected function defineAttributes(): void
     {

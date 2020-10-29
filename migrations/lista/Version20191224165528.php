@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Saia\Pqr\migrations;
+namespace Saia\Pqr\migrations\lista;
 
 use Saia\models\Perfil;
 use Saia\Pqr\models\PqrForm;

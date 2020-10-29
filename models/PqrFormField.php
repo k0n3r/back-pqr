@@ -8,7 +8,7 @@ use Saia\Pqr\models\PqrHtmlField;
 
 class PqrFormField extends Model
 {
-    use TModel;
+    use TModels;
 
     protected function defineAttributes(): void
     {

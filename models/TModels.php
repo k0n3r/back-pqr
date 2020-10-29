@@ -2,7 +2,7 @@
 
 namespace Saia\Pqr\models;
 
-trait TModel
+trait TModels
 {
 
     /**
