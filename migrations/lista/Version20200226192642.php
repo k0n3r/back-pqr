@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Saia\Pqr\migrations\lista;
 
+use Saia\Pqr\models\PqrForm;
 use Doctrine\DBAL\Schema\Schema;
 use Saia\Pqr\formatos\pqr\FtPqr;
-use Saia\Pqr\migrations\TMigrations;
 use Doctrine\Migrations\AbstractMigration;
-use Saia\Pqr\models\PqrForm;
+use Saia\Pqr\migrations\lista\TMigrations;
 
 /**
  * Auto-generated Migration: Please modify to your needs!

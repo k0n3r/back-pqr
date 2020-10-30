@@ -7,9 +7,9 @@ namespace Saia\Pqr\migrations\lista;
 use Saia\models\Perfil;
 use Saia\Pqr\models\PqrForm;
 use Doctrine\DBAL\Schema\Schema;
-use Saia\Pqr\migrations\TMigrations;
 use Saia\controllers\CryptController;
 use Doctrine\Migrations\AbstractMigration;
+use Saia\Pqr\migrations\lista\TMigrations;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
