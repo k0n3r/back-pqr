@@ -135,8 +135,8 @@ class FtPqrController extends Controller
 
             $Response->success = 1;
             $Response->data = [
-                'sys_tipo' => $FtPqr->sys_tipo,
-                'sys_subtipo' => $this->subTypeExist() ? $FtPqr->sys_subtipo : 0,
+                'sys_tipo' => (int) $FtPqr->sys_tipo,
+                'sys_subtipo' => $this->subTypeExist() ? (int) $FtPqr->sys_subtipo : 0,
                 'sys_fecha_vencimiento' => $date
             ];
         }

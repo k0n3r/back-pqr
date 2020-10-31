@@ -111,7 +111,9 @@ $(function () {
             },
             success: function (response) {
                 if (response.success) {
-                    $('#sys_tipo').val(response.data.sys_tipo).trigger('change');
+                    if (+response.data.sys_tipo) {
+                        $('#sys_tipo').val(response.data.sys_tipo).trigger('change');
+                    }
                     if (+response.data.sys_subtipo) {
                         $('#sys_subtipo').val(response.data.sys_subtipo).trigger('change');
                     }
