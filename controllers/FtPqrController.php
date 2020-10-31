@@ -89,7 +89,6 @@ class FtPqrController extends Controller
      */
     public function getTypes(): array
     {
-
         $subType = $this->getSubTypes();
 
         $records = (CamposFormato::findByAttributes([
@@ -110,6 +109,39 @@ class FtPqrController extends Controller
             'dataType' => $data,
             'dataSubType' => $subType ?? []
         ];
+    }
+
+    /**
+     * Obtiene los valores que se cargan en el modal
+     * de los tipos/subtipos
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getValuesForType()
+    {
+        $Response = (object) [
+            'success' => 0,
+            'data' => []
+        ];
+
+        if ($id = $this->request['idft']) {
+            $FtPqr = new FtPqr($id);
+            $date = DateController::convertDate(
+                $FtPqr->sys_fecha_vencimiento,
+                'Y-m-d'
+            );
+
+            $Response->success = 1;
+            $Response->data = [
+                'sys_tipo' => $FtPqr->sys_tipo,
+                'sys_subtipo' => $this->subTypeExist() ? $FtPqr->sys_subtipo : 0,
+                'sys_fecha_vencimiento' => $date
+            ];
+        }
+
+        return $Response;
     }
 
     /**

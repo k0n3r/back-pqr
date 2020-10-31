@@ -1,5 +1,6 @@
 //evento ejecutado en el adicionar
 function add(data) {
+  console.log(data);
   $.post(
     `${data.baseUrl}app/modules/back_pqr/app/request.php`,
     {
@@ -8,7 +9,7 @@ function add(data) {
       key: localStorage.getItem('key'),
       token: localStorage.getItem('token'),
       data: {
-        idft: data.padre
+        iddocPadre: data.padre
       }
     },
     function (response) {

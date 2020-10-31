@@ -32,22 +32,6 @@ class TaskEvents implements IExternalEventsTask
 
     public function afterUpdateTarea(): bool
     {
-        if (!$this->Tarea->estado) {
-            if ($Documento = $this->Tarea->getService()->getDocument()) {
-                $history = [
-                    'fecha' => date('Y-m-d H:i:s'),
-                    'idft' => $Documento->getFt()->getPK(),
-                    'fk_funcionario' => $this->Funcionario->getPK(),
-                    'tipo' => PqrHistory::TIPO_TAREA,
-                    'idfk' => $this->Tarea->getPK(),
-                    'descripcion' => "Se elimina la tarea: {$this->Tarea->nombre}"
-                ];
-                if (!PqrHistory::newRecord($history)) {
-                    throw new \Exception("No fue posible guardar el historial de la eliminación de la tarea", 200);
-                }
-                $this->updateEstado($Documento);
-            }
-        }
         return true;
     }
 
@@ -90,7 +74,7 @@ class TaskEvents implements IExternalEventsTask
                 'fk_funcionario' => $this->Funcionario->getPK(),
                 'tipo' => PqrHistory::TIPO_TAREA,
                 'idfk' => $this->Tarea->getPK(),
-                'descripcion' => "Se actualiza el estado de la tarea de {$this->Tarea->nombre} a {$this->Instance->getValueLabel('valor')}"
+                'descripcion' => "Se actualiza el estado de la tarea ({$this->Tarea->nombre}) a : {$this->Instance->getValueLabel('valor')}"
             ];
             if (!PqrHistory::newRecord($history)) {
                 throw new \Exception("No fue posible guardar el historial del cambio", 200);
@@ -148,7 +132,7 @@ class TaskEvents implements IExternalEventsTask
      * Actualiza el estado de la PQR
      *
      * @param Documento $Documento
-     * @return void
+     * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
@@ -161,7 +145,19 @@ class TaskEvents implements IExternalEventsTask
             $estado = $data['total'] == $data['finish'] ?
                 FtPqr::ESTADO_TERMINADO : FtPqr::ESTADO_PROCESO;
         }
+
         $Ft = $Documento->getFt();
+        if ($estado == FtPqr::ESTADO_PENDIENTE) {
+            if ($records = $Ft->PqrRespuesta) {
+                foreach ($records as $PqrRespuesta) {
+                    if (!$PqrRespuesta->Documento->isDeleted()) {
+                        $estado = FtPqr::ESTADO_PROCESO;
+                        break;
+                    }
+                }
+            }
+        }
+
         $Ft->changeStatus($estado);
 
         return true;

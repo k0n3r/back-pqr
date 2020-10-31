@@ -68,12 +68,15 @@ $(function () {
                     type: 'error'
                 });
             }
+
             if (+response.dataSubType.length) {
                 subtypeExist = 1;
                 initSelect('sys_subtipo', response.dataSubType);
             } else {
                 $("#divSubType").remove();
             }
+
+            getValues()
         }
     });
 
@@ -89,6 +92,42 @@ $(function () {
             placeholder: "Seleccione",
             multiple: false,
             dropdownParent: "#dinamic_modal"
+        });
+    }
+
+    function getValues() {
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: `${baseUrl}app/modules/back_pqr/app/request.php`,
+            data: {
+                key: localStorage.getItem('key'),
+                token: localStorage.getItem('token'),
+                class: 'FtPqrController',
+                method: 'getValuesForType',
+                data: {
+                    idft: +params.idft
+                }
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#sys_tipo').val(response.data.sys_tipo).trigger('change');
+                    if (+response.data.sys_subtipo) {
+                        $('#sys_subtipo').val(response.data.sys_subtipo).trigger('change');
+                    }
+                    $("#sys_fecha_vencimiento").val(response.data.sys_fecha_vencimiento);
+
+                } else {
+                    console.error(response)
+                    top.notification({
+                        message: 'No fue posible cargar los valores seleccionados',
+                        type: 'error'
+                    });
+                }
+            },
+            error: function (...arguments) {
+                console.error(arguments);
+            }
         });
     }
 

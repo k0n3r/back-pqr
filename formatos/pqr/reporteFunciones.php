@@ -179,6 +179,9 @@ HTML;
             <a href="#" class="dropdown-item history" data-id="{$iddocumento}" data-idft="{$idft}">
                 <i class="fa fa-history"></i> Historial
             </a>
+            <a href="#" class="dropdown-item answer" data-id="{$iddocumento}" data-idft="{$idft}">
+               <i class="fa fa-mail-reply"></i> Responder
+           </a>
             <a href="#" class="dropdown-item finish" data-id="{$iddocumento}" data-idft="{$idft}">
                 <i class="fa fa-check"></i> Terminar
             </a>

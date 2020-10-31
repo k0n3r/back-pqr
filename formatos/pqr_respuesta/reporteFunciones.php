@@ -51,7 +51,8 @@ function getResponsable(int $iddocumento): string
     $GLOBALS['FtPqrRespuesta'] = $FtPqrRespuesta;
 
     $Funcionario = RutaService::getApprover($iddocumento);
-    return $Funcionario->getName();
+
+    return $Funcionario ? $Funcionario->getName() : '';
 }
 
 /**

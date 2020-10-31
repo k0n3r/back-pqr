@@ -114,6 +114,7 @@ class AddEditFtPqr implements IAddEditFormat
         ];
 
         if ($edit) {
+            unset($data['fk_categoria_formato']);
             unset($data['encabezado']);
             unset($data['pie_pagina']);
             unset($data['funcionario_idfuncionario']);

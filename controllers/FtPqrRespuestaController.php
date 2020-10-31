@@ -3,7 +3,6 @@
 namespace Saia\Pqr\controllers;
 
 use Saia\Pqr\formatos\pqr\FtPqr;
-use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
 use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 
@@ -45,12 +44,12 @@ class FtPqrRespuestaController extends Controller
      */
     public function loadField(): object
     {
-        $id = $this->request['idft'];
+        $id = $this->request['iddocPadre'];
         if (!$id) {
             throw new \Exception("Falta el identificador de la PQR", 200);
         }
 
-        $FtPqr = new FtPqr($id);
+        $FtPqr = FtPqr::findByDocumentId($id);
         if ($Tercero = $FtPqr->Tercero) {
             $destino = [
                 'id' => $Tercero->getPK(),

@@ -122,6 +122,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         $tipo = PqrHistory::TIPO_RESPUESTA;
 
         return $this->saveHistory($description, $tipo) &&
+            $this->FtPqr->changeStatus(FtPqr::ESTADO_PROCESO) &&
             $this->transferCopiaInterna() &&
             $this->saveDistribution() &&
             $this->notifyEmail();

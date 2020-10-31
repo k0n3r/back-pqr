@@ -185,19 +185,17 @@
 
         $(document).on('click', '.answer', function() {
             let documentId = $(this).data('id');
-            let idft = $(this).data('idft');
-            answerPqr(documentId, idft);
+            answerPqr(documentId);
         });
 
 
-        function answerPqr(documentId, idft) {
+        function answerPqr(documentId) {
             $.post(
                 `${params.baseUrl}app/formato/consulta_rutas.php`, {
                     key: localStorage.getItem('key'),
                     token: localStorage.getItem('token'),
                     formatName: "pqr_respuesta",
-                    anterior: documentId,
-                    padre: idft
+                    padre: documentId
                 },
                 function(response) {
                     if (response.success) {
