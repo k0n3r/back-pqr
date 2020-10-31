@@ -306,7 +306,6 @@ class PqrFormController extends Controller
             ];
             $conn->commit();
         } catch (\Throwable $th) {
-            var_dump($th);
             $conn->rollBack();
             $Response->success = 0;
             $Response->message = $th->getMessage();

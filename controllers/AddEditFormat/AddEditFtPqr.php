@@ -283,7 +283,7 @@ class AddEditFtPqr implements IAddEditFormat
      */
     private function resolveClass(String $fieldType): ?string
     {
-        $className = "Saia\\Pqr\\controllers\\addEditFormat\\fields\\$fieldType";
+        $className = "Saia\\Pqr\\controllers\\AddEditFormat\\fields\\$fieldType";
         if (class_exists($className)) {
             return $className;
         }
