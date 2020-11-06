@@ -219,7 +219,7 @@ HTML;
                     </tr>
 
                     <tr>
-                        <td colspan="2">{$this->asunto}</td>
+                        <td colspan="2">ASUNTO: {$this->asunto}</td>
                     </tr>
 
                     <tr>
