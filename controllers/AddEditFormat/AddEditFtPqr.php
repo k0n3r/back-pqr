@@ -114,10 +114,14 @@ class AddEditFtPqr implements IAddEditFormat
         ];
 
         if ($edit) {
-            unset($data['fk_categoria_formato']);
+            unset($data['contador_idcontador']);
             unset($data['encabezado']);
             unset($data['pie_pagina']);
+            unset($data['margenes']);
+            unset($data['orientacion']);
+            unset($data['papel']);
             unset($data['funcionario_idfuncionario']);
+            unset($data['fk_categoria_formato']);
         }
 
         return $data;
