@@ -154,6 +154,9 @@ HTML;
 
         case FtPqr::ESTADO_TERMINADO:
             $options = <<<HTML
+            <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}" data-idft="{$idft}">
+                <i class="fa fa-plus"></i> Asignar tarea
+            </a>
             <a href="#" class="dropdown-item viewTask" data-id="{$iddocumento}" data-idft="{$idft}">
                <i class="fa fa-eye"></i> Tareas
            </a>
