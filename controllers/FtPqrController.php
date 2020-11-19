@@ -2,6 +2,7 @@
 
 namespace Saia\Pqr\controllers;
 
+use Saia\models\Dependencia;
 use Saia\models\Funcionario;
 use Saia\Pqr\models\PqrForm;
 use Saia\models\Configuracion;
@@ -21,6 +22,8 @@ use Saia\controllers\TemporalController;
 class FtPqrController extends Controller
 {
     private $subTypeExist;
+    private $dependencyExist;
+
     private PqrForm $PqrForm;
     private Funcionario $Funcionario;
 
@@ -81,18 +84,20 @@ class FtPqrController extends Controller
     }
 
     /**
-     * Obtiene los tipos de PQR
+     * Obtiene los valores que se cargan en el modal
+     * de los tipos/subtipos/fecha vencimiento/dependencia
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function getTypes(): array
+    public function getDataForEditTypes(): array
     {
         $subType = $this->getSubTypes();
 
         $records = (CamposFormato::findByAttributes([
-            'nombre' => 'sys_tipo'
+            'nombre' => 'sys_tipo',
+            'formato_idformato' => $this->PqrForm->fk_formato
         ]))->CampoOpciones;
 
         $data = [];
@@ -107,13 +112,14 @@ class FtPqrController extends Controller
 
         return [
             'dataType' => $data,
-            'dataSubType' => $subType ?? []
+            'dataSubType' => $subType ?? [],
+            'activeDependency' => (int) $this->dependencyExist()
         ];
     }
 
     /**
      * Obtiene los valores que se cargan en el modal
-     * de los tipos/subtipos
+     * de los tipos/subtipos/fecha vencimiento/dependencia
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -133,11 +139,21 @@ class FtPqrController extends Controller
                 'Y-m-d'
             );
 
+            $idDependencia = (int) $FtPqr->sys_dependencia;
+            if ($idDependencia) {
+                $options = [
+                    'id' => $idDependencia,
+                    'text' => $FtPqr->getValueForReport('sys_dependencia')
+                ];
+            }
+
             $Response->success = 1;
             $Response->data = [
                 'sys_tipo' => (int) $FtPqr->sys_tipo,
                 'sys_subtipo' => $this->subTypeExist() ? (int) $FtPqr->sys_subtipo : 0,
-                'sys_fecha_vencimiento' => $date
+                'sys_fecha_vencimiento' => $date,
+                'sys_dependencia' => $idDependencia,
+                'optionsDependency' => $options
             ];
         }
 
@@ -174,7 +190,7 @@ class FtPqrController extends Controller
     }
 
     /**
-     * Verifica si el campo subtipo fue creado y esta activo
+     * Verifica si el campo subtipo fue creado
      *
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -186,14 +202,27 @@ class FtPqrController extends Controller
             return $this->subTypeExist;
         }
 
-        $PqrFormField = $this->PqrForm->getRow('sys_subtipo');
-        if (!$PqrFormField) {
-            $this->subTypeExist = false;
-        } else {
-            $this->subTypeExist = true;
-        }
+        $this->subTypeExist = (bool) $this->PqrForm->getRow('sys_subtipo');
 
         return $this->subTypeExist;
+    }
+
+    /**
+     * Verifica si el campo dependencia fue creado
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function dependencyExist(): bool
+    {
+        if ($this->dependencyExist !== null) {
+            return $this->dependencyExist;
+        }
+
+        $this->dependencyExist = (bool) $this->PqrForm->getRow('sys_dependencia');
+
+        return $this->dependencyExist;
     }
 
     /**
@@ -236,6 +265,15 @@ class FtPqrController extends Controller
                     $textField[] = "categoria/subtipo de {$oldSubType} a {newSubType}";
                 }
             }
+
+            if ($this->dependencyExist()) {
+                if ($this->request['dependency'] != $FtPqr->sys_dependencia) {
+                    $oldDependency = $FtPqr->getValueForReport('sys_dependencia');
+                    $newAttributes['sys_dependencia'] = $this->request['dependency'];
+                    $textField[] = "dependencia de {$oldDependency} a {newDependency}";
+                }
+            }
+
             $expiration = DateController::convertDate($FtPqr->sys_fecha_vencimiento, 'Y-m-d');
             if ($this->request['expirationDate'] != $expiration) {
 
@@ -264,13 +302,16 @@ class FtPqrController extends Controller
             $text = "Se actualiza: " . implode(', ', $textField);
             $newType = $FtPqr->getFieldValue('sys_tipo');
             $newSubType = $this->subTypeExist() ? $FtPqr->getFieldValue('sys_subtipo') : '';
+            $newDependency = $this->dependencyExist() ? $FtPqr->getValueForReport('sys_dependencia') : '';
 
             $text = str_replace([
                 '{newType}',
-                '{newSubType}'
+                '{newSubType}',
+                '{newDependency}'
             ], [
                 $newType,
-                $newSubType
+                $newSubType,
+                $newDependency
             ], $text);
 
             $history = [

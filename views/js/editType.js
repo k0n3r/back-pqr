@@ -4,6 +4,7 @@ $(function () {
 
     var baseUrl = localStorage.getItem('baseUrl');
     var subtypeExist = 0;
+    var dependencyExist = 0;
 
     $('#sys_fecha_vencimiento').datetimepicker({
         locale: 'es',
@@ -18,7 +19,7 @@ $(function () {
             key: localStorage.getItem('key'),
             token: localStorage.getItem('token'),
             class: 'FtPqrController',
-            method: 'getTypes'
+            method: 'getDataForEditTypes'
         },
         dataType: 'json',
         success: function (response) {
@@ -76,9 +77,44 @@ $(function () {
                 $("#divSubType").remove();
             }
 
+
+            if (+response.activeDependency) {
+                dependencyExist = 1;
+                initSelectDependency();
+            } else {
+                $("#divDependency").remove();
+            }
+
             getValues()
         }
     });
+
+    function initSelectDependency() {
+        let options = {
+            language: "es",
+            placeholder: "Ingrese el nombre",
+            multiple: false,
+            ajax: {
+                delay: 400,
+                url: `${baseUrl}app/modules/back_pqr/app/request.php`,
+                dataType: "json",
+                data: function (p) {
+                    var query = {
+                        key: localStorage.getItem("key"),
+                        token: localStorage.getItem("token"),
+                        class: "RequestProcessorController",
+                        method: "getListForField",
+                        data: {
+                            name: 'sys_dependencia',
+                            term: p.term
+                        }
+                    };
+                    return query;
+                }
+            }
+        };
+        $('#sys_dependencia').select2(options);
+    }
 
     function initSelect(id, data) {
         data.forEach(e => {
@@ -119,6 +155,14 @@ $(function () {
                     }
                     $("#sys_fecha_vencimiento").val(response.data.sys_fecha_vencimiento);
 
+                    if (response.data.sys_dependencia) {
+                        let u = response.data.optionsDependency;
+                        var option = new Option(u.text, u.id, true, true);
+                        $('#sys_dependencia')
+                            .append(option)
+                            .trigger('change');
+                    }
+
                 } else {
                     console.error(response)
                     top.notification({
@@ -144,9 +188,16 @@ $(function () {
             let type = $("#sys_tipo").val();
             let expiration = $("#sys_fecha_vencimiento").val();
             let subtype = 0;
+            let dependency = 0;
+
             if (subtypeExist) {
                 subtype = $("#sys_subtipo").val();
             }
+
+            if (dependencyExist) {
+                dependency = $("#sys_dependencia").val();
+            }
+
             $.ajax({
                 type: 'POST',
                 url: `${baseUrl}app/modules/back_pqr/app/request.php`,
@@ -159,7 +210,8 @@ $(function () {
                         idft: +params.idft,
                         expirationDate: expiration,
                         type: type,
-                        subtype: subtype
+                        subtype: subtype,
+                        dependency: dependency
                     }
                 },
                 dataType: 'json',

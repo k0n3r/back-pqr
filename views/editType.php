@@ -44,6 +44,12 @@ $params = json_encode($_REQUEST);
                     </span>
                 </div>
             </div>
+            <div id="divDependency" class="form-group form-group-default form-group-default-select2 required">
+                <label class="my-0">DEPENDENCIA:</label>
+                <select class="form-control full-width required" name="sys_dependencia" id="sys_dependencia">
+                    <option value="">Seleccione ...</option>
+                </select>
+            </div>
         </form>
     </div>
 </div>

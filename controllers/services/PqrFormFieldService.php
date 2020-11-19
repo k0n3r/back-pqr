@@ -69,27 +69,23 @@ class PqrFormFieldService
     private function getDependencys(object $ObjSettings, array $data = []): array
     {
         $Qb = DatabaseConnection::getDefaultConnection()
-            ->createQueryBuilder();
-
-        $Qb->select('iddependencia as id,nombre as text')
-            ->from('dependencia')
-            ->where('estado=1')
-            ->orderBy('nombre', 'ASC')
-            ->setFirstResult(0)
-            ->setMaxResults(40);
+            ->createQueryBuilder()
+            ->select('iddependencia as id,nombre as text')
+            ->from('dependencia');
 
         if ($data['id']) {
-            $Qb->andWhere('iddependencia=:iddependencia')
+            $Qb->where('iddependencia=:iddependencia')
                 ->setParameter(':iddependencia', $data['id'], Type::getType('integer'));
 
             return $Qb->execute()->fetchAll();
         }
 
+        $Qb->where('estado=1')
+            ->orderBy('nombre', 'ASC')
+            ->setFirstResult(0)
+            ->setMaxResults(40);
+
         if ($data['term']) {
-            $Qb->andWhere('nombre like :nombre')
-                ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
-        }
-        if ($data['id']) {
             $Qb->andWhere('nombre like :nombre')
                 ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
         }
@@ -119,9 +115,8 @@ class PqrFormFieldService
     private function getListLocalidad(object $ObjSettings, array $data = []): array
     {
         $Qb = DatabaseConnection::getDefaultConnection()
-            ->createQueryBuilder();
-
-        $Qb->select("CONCAT(a.nombre,
+            ->createQueryBuilder()
+            ->select("CONCAT(a.nombre,
             CONCAT(
                 ' - ',
                 CONCAT(
@@ -135,13 +130,7 @@ class PqrFormFieldService
         ) AS text", "a.idmunicipio as id")
             ->from('municipio', 'a')
             ->join('a', 'departamento', 'b', 'a.departamento_iddepartamento = b.iddepartamento')
-            ->join('b', 'pais', 'c', 'b.pais_idpais = c.idpais')
-            ->where("CONCAT(a.nombre,CONCAT(' ',b.nombre)) like :query")
-            ->andWhere('a.estado = 1 AND b.estado = 1 AND c.estado = 1')
-            ->setParameter('query', "%{$data['term']}%")
-            ->orderBy('a.nombre', 'ASC')
-            ->setFirstResult(0)
-            ->setMaxResults(40);
+            ->join('b', 'pais', 'c', 'b.pais_idpais = c.idpais');
 
         if ($data['id']) {
             $Qb->andWhere('idmunicipio=:idmunicipio')
@@ -149,6 +138,13 @@ class PqrFormFieldService
 
             return $Qb->execute()->fetchAll();
         }
+
+        $Qb->where("CONCAT(a.nombre,CONCAT(' ',b.nombre)) like :query")
+            ->andWhere('a.estado = 1 AND b.estado = 1 AND c.estado = 1')
+            ->setParameter('query', "%{$data['term']}%")
+            ->orderBy('a.nombre', 'ASC')
+            ->setFirstResult(0)
+            ->setMaxResults(40);
 
         if (!$ObjSettings->allCountry) {
             $Qb->andWhere('c.idpais=:idpais')

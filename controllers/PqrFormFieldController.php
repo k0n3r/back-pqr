@@ -175,7 +175,7 @@ class PqrFormFieldController extends Controller
             $name = $this->generateName($name, $pref);
         }
 
-        if ($this->existDB($name)) {
+        if ($this->columnExistsDB($name)) {
             $pref++;
             $name = $this->generateName($name, $pref);
         }
@@ -192,9 +192,10 @@ class PqrFormFieldController extends Controller
         return in_array($label, $reservedWords) ? $label . "_" : $label;
     }
 
-    private function existDB($name): bool
+    private function columnExistsDB($name): bool
     {
-        $Table = FormatGenerator::getSchema()->listTableDetails('ft_pqr');
+        $schema = DatabaseConnection::getInstance()->getSchemaManager();
+        $Table = $schema->listTableDetails('ft_pqr');
 
         return $Table->hasColumn($name);
     }
@@ -296,7 +297,7 @@ class PqrFormFieldController extends Controller
                 'required_anonymous' => 0
             ]);
 
-            if ($PqrFormField->name != 'sys_subtipo') {
+            if ($PqrFormField->name != 'sys_subtipo' && $PqrFormField->name != 'sys_dependencia') {
                 $PqrFormField->show_report = 0;
             }
 

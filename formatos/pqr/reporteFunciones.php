@@ -19,6 +19,7 @@ if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
 }
 
+use Saia\controllers\DateController;
 use Saia\Pqr\formatos\pqr\FtPqr;
 use Saia\Pqr\helpers\UtilitiesPqr;
 use Saia\models\documento\Documento;
@@ -104,7 +105,8 @@ function totalAnswers(int $idft): string
         ])[0];
     }
 
-    $cant = count($FtPqr->getPqrAnswers());
+    $records = $FtPqr->getPqrAnswers();
+    $cant = count($records);
     if (!$cant) {
         return 0;
     }
@@ -116,16 +118,31 @@ function totalAnswers(int $idft): string
     ]);
 
     $numero = $FtPqr->Documento->numero;
+    $answers = [];
+    foreach ($records as $FtPqrRespuesta) {
+        $fecha = DateController::convertDate($FtPqrRespuesta->Documento->fecha, DateController::PUBLIC_DATE_FORMAT);
+        $answers[] = "<a class='kenlace_saia' enlace='{$url}' title='Ver las respuestas' conector='iframe' titulo='Respuestas a PQR No {$numero}' href='#'>{$FtPqrRespuesta->Documento->numero} - {$fecha}</a>";
+    }
 
-    $enlace = <<<HTML
-    <div class='kenlace_saia'
-    enlace='{$url}' 
-    conector='iframe'
-    titulo='Respuestas a PQR No {$numero}'>
-        <button class='btn btn-complete' style='margin:auto'>{$cant}</button>
-    </div>
-HTML;
-    return $enlace;
+    return implode('<br/>', $answers);
+}
+
+function getResponsible(int $iddocumento)
+{
+    $tareas = (new Documento($iddocumento))->getService()->getTasks();
+    if (!$tareas) {
+        return '';
+    }
+
+    $responsible = [];
+    foreach ($tareas as $Tarea) {
+        $funcionarios = $Tarea->getService()->getManagers();
+        foreach ($funcionarios as $Funcionario) {
+            $responsible[$Funcionario->getPK()] = $Funcionario->getName();
+        }
+    }
+
+    return implode('<br/>', $responsible);
 }
 
 function options(int $iddocumento, string $estado, int $idft): string
