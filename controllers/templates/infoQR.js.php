@@ -13,6 +13,10 @@ $(function () {
         setTimeout(function () { window.location.href = "404.html" }, 5000);
         return;
     }
+    
+    if (!localStorage.getItem('WsKey')) {
+        window.getCredentials();
+    }
 
     let options = {
             selector: '#timeline-container',

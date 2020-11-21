@@ -62,7 +62,7 @@ final class Version20200226192642 extends AbstractMigration
         }
 
         return [
-            'url' => NULL,
+            'url' => 'views/buzones/grilla.php',
             'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},{"title":"E-MAIL","field":"{*sys_email*}","align":"center"},{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
             'encabezado_componente' => NULL,
             'campos_adicionales' => 'v.numero,v.fecha,v.sys_email,v.sys_tipo,v.sys_estado,v.idft',

@@ -18,6 +18,7 @@ use Saia\controllers\functions\Header;
 use Saia\controllers\SessionController;
 use Saia\models\formatos\CamposFormato;
 use Saia\controllers\TemporalController;
+use Saia\Pqr\helpers\UtilitiesPqr;
 
 class FtPqrController extends Controller
 {
@@ -516,13 +517,29 @@ class FtPqrController extends Controller
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
+     * 
+     * @throws Exception
      */
     private function getRoutePdf(Documento $Documento): string
     {
-        $Object = TemporalController::createTemporalFile($Documento->pdf, '', true);
-        if ($Object->success) {
-            return ABSOLUTE_SAIA_ROUTE . $Object->route;
+        try {
+            if (!$Documento->pdf) {
+                $Documento->getPdfJson(true);
+            }
+
+            $Object = TemporalController::createTemporalFile($Documento->pdf, '', true);
+            if ($Object->success) {
+                return ABSOLUTE_SAIA_ROUTE . $Object->route;
+            }
+        } catch (\Throwable $th) {
+            $log = [
+                'errorMessage' => $th->getMessage(),
+                'iddocumento' => $Documento->getPK()
+            ];
+            $message = "No se ha podido generar el pdf del documento con radicado: {$Documento->numero} (ID:{$Documento->getPK()})";
+            UtilitiesPqr::notifyAdministrator($message, $log);
         }
+
         return '#';
     }
 
