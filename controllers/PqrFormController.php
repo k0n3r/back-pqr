@@ -607,6 +607,7 @@ class PqrFormController extends Controller
             $type = $PqrFormField->PqrHtmlField->type_saia;
             switch ($type) {
                 case 'Text':
+                case 'Textarea':
                     $code[] = '{"title":"' . strtoupper($PqrFormField->label) . '","field":"{*' . $PqrFormField->name . '*}","align":"center"}';
                     break;
                 default:
@@ -736,11 +737,11 @@ class PqrFormController extends Controller
         foreach ($fields as $PqrFormField) {
             $code = '';
             switch ($PqrFormField->PqrHtmlField->type_saia) {
-                case 'Textarea':
-                    $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
-                        return substr(\$value, 0, 30).' ...';
-                    }";
-                    break;
+                    // case 'Textarea':
+                    //     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                    //         return substr(\$value, 0, 30).' ...';
+                    //     }";
+                    //     break;
                 case 'Select':
                 case 'Radio':
                     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
