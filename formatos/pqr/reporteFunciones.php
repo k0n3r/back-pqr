@@ -19,9 +19,10 @@ if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
 }
 
-use Saia\controllers\DateController;
 use Saia\Pqr\formatos\pqr\FtPqr;
+use Saia\models\tarea\TareaEstado;
 use Saia\Pqr\helpers\UtilitiesPqr;
+use Saia\controllers\DateController;
 use Saia\models\documento\Documento;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CampoSeleccionados;
@@ -136,6 +137,10 @@ function getResponsible(int $iddocumento)
 
     $responsible = [];
     foreach ($tareas as $Tarea) {
+        if ($Tarea->getService()->getState()->valor == TareaEstado::CANCELADA) {
+            continue;
+        }
+
         $funcionarios = $Tarea->getService()->getManagers();
         foreach ($funcionarios as $Funcionario) {
             $responsible[$Funcionario->getPK()] = $Funcionario->getName();
