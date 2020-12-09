@@ -1,6 +1,4 @@
 $(function () {
-    let params = $('#script_grid').data('params');
-    $('#script_grid').removeAttr('data-params');
     let baseUrl = localStorage.getItem('baseUrl');
 
     $(document).on('click', '.addTask', function () {
@@ -84,7 +82,7 @@ $(function () {
 
                         $.ajax({
                             type: 'POST',
-                            url: `${params.baseUrl}app/documento/anular.php`,
+                            url: `${baseUrl}app/documento/anular.php`,
                             data: {
                                 key: localStorage.getItem('key'),
                                 token: localStorage.getItem('token'),
@@ -190,7 +188,7 @@ $(function () {
 
     function answerPqr(documentId) {
         $.post(
-            `${params.baseUrl}app/formato/consulta_rutas.php`, {
+            `${baseUrl}app/formato/consulta_rutas.php`, {
             key: localStorage.getItem('key'),
             token: localStorage.getItem('token'),
             formatName: "pqr_respuesta",
@@ -198,7 +196,7 @@ $(function () {
         },
             function (response) {
                 if (response.success) {
-                    let route = params.baseUrl + response.data.ruta_adicionar;
+                    let route = baseUrl + response.data.ruta_adicionar;
                     let iframe = $('<iframe>', {
                         src: route
                     }).css({

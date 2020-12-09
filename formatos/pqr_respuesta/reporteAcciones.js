@@ -1,8 +1,6 @@
 
 $(function () {
-    let params = $('#script_grid').data('params');
-    $('#script_grid').removeAttr('data-params');
-
+    let baseUrl = localStorage.getItem('baseUrl');
 
     $(document).on('click', '.requestSurvey', function () {
 
@@ -41,7 +39,7 @@ $(function () {
 
                         $.ajax({
                             type: 'POST',
-                            url: `${params.baseUrl}app/modules/back_pqr/app/request.php`,
+                            url: `${baseUrl}app/modules/back_pqr/app/request.php`,
                             data: {
                                 key: localStorage.getItem('key'),
                                 token: localStorage.getItem('token'),
