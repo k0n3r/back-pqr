@@ -1,12 +1,12 @@
 <?php
 
-namespace Saia\Pqr\formatos\pqr_calificacion;
+namespace App\Bundles\pqr\formatos\pqr_calificacion;
 
 use Saia\core\model\ModelFormat;
 
 class FtPqrCalificacionProperties extends ModelFormat
 {
-    public $isPDF=false;
+    public $isPDF = false;
 
     public function __construct($id = null)
     {
@@ -18,13 +18,13 @@ class FtPqrCalificacionProperties extends ModelFormat
         return [
             'safe' => [
                 'dependencia',
-				'documento_iddocumento',
-				'encabezado',
-				'experiencia_gestion',
-				'experiencia_servicio',
-				'firma',
-				'ft_pqr_respuesta',
-				'idft_pqr_calificacion' 
+                'documento_iddocumento',
+                'encabezado',
+                'experiencia_gestion',
+                'experiencia_servicio',
+                'firma',
+                'ft_pqr_respuesta',
+                'idft_pqr_calificacion'
             ],
             'date' => [],
             'table' => 'ft_pqr_calificacion',

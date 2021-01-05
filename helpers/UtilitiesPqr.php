@@ -1,14 +1,14 @@
 <?php
 
-namespace Saia\Pqr\helpers;
+namespace App\Bundles\pqr\helpers;
 
 use Saia\models\Configuracion;
-use Saia\Pqr\formatos\pqr\FtPqr;
+use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\documento\Documento;
 use Saia\controllers\SendMailController;
 use Saia\controllers\TemporalController;
-use Saia\Pqr\controllers\QRDocumentoPqrController;
+use App\Bundles\pqr\Services\controllers\QRDocumentoPqrController;
 
 class UtilitiesPqr
 {

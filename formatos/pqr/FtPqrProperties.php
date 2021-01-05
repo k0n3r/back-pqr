@@ -1,23 +1,23 @@
 <?php
 
-namespace Saia\Pqr\formatos\pqr;
+namespace App\Bundles\pqr\formatos\pqr;
 
 use Saia\core\model\ModelFormat;
 
 class FtPqrProperties extends ModelFormat
 {
-    public $isPDF=false;
+	public $isPDF = false;
 
-    public function __construct($id = null)
-    {
-        parent::__construct($id);
-    }
+	public function __construct($id = null)
+	{
+		parent::__construct($id);
+	}
 
-    protected function defaultDbAttributes()
-    {
-        return [
-            'safe' => [
-                'adsfasd',
+	protected function defaultDbAttributes()
+	{
+		return [
+			'safe' => [
+				'adsfasd',
 				'anexos',
 				'area_de_texto',
 				'dependencia',
@@ -37,17 +37,19 @@ class FtPqrProperties extends ModelFormat
 				'sys_subtipo',
 				'sys_tercero',
 				'sys_tipo',
-				'sys_tratamiento' 
-            ],
-            'date' => ['sys_fecha_vencimiento',
-				'sys_fecha_terminado'],
-            'table' => 'ft_pqr',
-            'primary' => 'idft_pqr'
-        ];
-    }
+				'sys_tratamiento'
+			],
+			'date' => [
+				'sys_fecha_vencimiento',
+				'sys_fecha_terminado'
+			],
+			'table' => 'ft_pqr',
+			'primary' => 'idft_pqr'
+		];
+	}
 
-    protected function defineMoreAttributes()
-    {
-        return [];
-    }
+	protected function defineMoreAttributes()
+	{
+		return [];
+	}
 }

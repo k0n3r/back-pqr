@@ -1,16 +1,18 @@
 <?php
 
-namespace Saia\Pqr\formatos\pqr;
+namespace App\Bundles\pqr\formatos\pqr;
 
 use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
 use Saia\models\Funcionario;
-use Saia\Pqr\models\PqrForm;
-use Saia\Pqr\models\PqrBackup;
-use Saia\Pqr\models\PqrHistory;
-use Saia\Pqr\models\PqrFormField;
-use Saia\Pqr\helpers\UtilitiesPqr;
-use Saia\Pqr\models\PqrNotyMessage;
+
+use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\models\PqrBackup;
+use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\Services\models\PqrNotyMessage;
+
 use Saia\controllers\DateController;
 use Saia\controllers\TerceroService;
 use Saia\controllers\anexos\FileJson;
@@ -19,9 +21,10 @@ use Saia\controllers\SessionController;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
-use Saia\Pqr\controllers\FtPqrController;
-use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
-use Saia\Pqr\controllers\services\PqrFormFieldService;
+
+use App\Bundles\pqr\Services\controllers\FtPqrController;
+use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+use App\Bundles\pqr\Services\PqrFormFieldService;
 
 class FtPqr extends FtPqrProperties
 {
@@ -723,7 +726,7 @@ HTML;
 
         return sprintf(
             "%s/ws/%s/infoQR.html?data=%s",
-            PROTOCOLO_CONEXION . DOMINIO . "/" . CONTENEDOR_SAIA,
+            PROTOCOLO_CONEXION . DOMINIO,
             $this->getFormat()->nombre,
             $data
         );

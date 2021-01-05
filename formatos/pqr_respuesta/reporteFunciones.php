@@ -18,7 +18,8 @@ include_once $rootPath . 'app/vendor/autoload.php';
 use Saia\controllers\documento\RutaService;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CampoSeleccionados;
-use Saia\Pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+
+use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 
 /**
  * Obtiene el filtro por PQR

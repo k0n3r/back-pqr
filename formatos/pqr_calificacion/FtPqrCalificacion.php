@@ -1,6 +1,6 @@
 <?php
 
-namespace Saia\Pqr\formatos\pqr_calificacion;
+namespace App\Bundles\pqr\formatos\pqr_calificacion;
 
 class FtPqrCalificacion extends FtPqrCalificacionProperties
 {

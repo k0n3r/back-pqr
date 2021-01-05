@@ -19,18 +19,19 @@ El modulo esta compuesto por dos repositorios, uno con todo el codigo del frontE
 Para empezar se debe ingresar a la raiz del sistema SAIA y correr los siguientes comandos.
 
 _Instalación frontEnd:_
+
 ```
 #Se clona el repositorio
-git submodule add --force https://github.com/k0n3r/front-pqr.git views/modules/pqr --name "front-pqr"
+git submodule add --force https://github.com/k0n3r/front-pqr.git public/views/modules/pqr --name "front-pqr"
 
 #Ingresamos al directorio del submodulo
-cd views/modules/pqr/ 
+cd views/modules/pqr/
 
 #Instalamos las librerias
 npm install
 
 #Compilamos el codigo y generamos el front
-npm run build 
+npm run build
 
 ```
 
@@ -38,16 +39,16 @@ _Instalación backEnd:_
 
 ```
 #Se clona el repositorio
-git submodule add --force https://github.com/k0n3r/back-pqr.git app/modules/back_pqr --name "back-pqr"
+git submodule add --force https://github.com/k0n3r/back-pqr.git src/Bundles/pqr --name "back-pqr"
 
 #Se ingresa al directorio
-cd app/ 
+cd app/
 
 #Se actualizan las clases y el autoload
-composer dump-autoload -o 
+composer dump-autoload -o
 
 #Ingresamos al directorio de las migraciones del submodulo
-cd modules/back_pqr/migrations/ 
+cd modules/back_pqr/migrations/
 
 #Ejecutamos las migraciones (Linux)
 ../../../vendor/bin/doctrine-migrations migrate
@@ -72,17 +73,17 @@ _Cambiar **DOMINIO** por el dominio del cliente_
 
 ## Construido con 🛠️
 
-* [PHP](https://www.php.net/) - Para el BackEnd
-* [Vue](https://vuejs.org/) - Para el FrontEnd
+- [PHP](https://www.php.net/) - Para el BackEnd
+- [Vue](https://vuejs.org/) - Para el FrontEnd
 
 ## Autores ✒️
 
-* **Andrés Agudelo** - *andres.agudelo@cerok.com* - [Github](https://github.com/k0n3r)
-
+- **Andrés Agudelo** - *andres.agudelo@cerok.com* - [Github](https://github.com/k0n3r)
 
 ## Licencia 📄
 
-Este proyecto está bajo la Licencia (copyright) -  [CEROK SAS](https://www.cerok.co/)
+Este proyecto está bajo la Licencia (copyright) - [CEROK SAS](https://www.cerok.co/)
 
 ---
+
 Ultima actualización: 2020-11-25

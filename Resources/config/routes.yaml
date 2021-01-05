@@ -1,0 +1,4 @@
+app_annotations:
+  resource: "../../Controller/"
+  prefix: /api/pqr
+  type: annotation

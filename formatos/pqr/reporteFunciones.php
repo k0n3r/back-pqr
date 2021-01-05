@@ -19,9 +19,12 @@ if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
 }
 
-use Saia\Pqr\formatos\pqr\FtPqr;
+use App\Bundles\pqr\formatos\pqr\FtPqr;
+
 use Saia\models\tarea\TareaEstado;
-use Saia\Pqr\helpers\UtilitiesPqr;
+
+use App\Bundles\pqr\helpers\UtilitiesPqr;
+
 use Saia\controllers\DateController;
 use Saia\models\documento\Documento;
 use Saia\models\busqueda\BusquedaComponente;

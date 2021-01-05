@@ -1,16 +1,20 @@
 <?php
 
-namespace Saia\Pqr\formatos\pqr_respuesta;
+namespace App\Bundles\pqr\formatos\pqr_respuesta;
 
 use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
 use Saia\models\Funcionario;
-use Saia\Pqr\models\PqrForm;
+
+use App\Bundles\pqr\Services\models\PqrForm;
+
 use Saia\models\anexos\Anexos;
-use Saia\Pqr\models\PqrHistory;
-use Saia\Pqr\formatos\pqr\FtPqr;
-use Saia\Pqr\helpers\UtilitiesPqr;
-use Saia\Pqr\models\PqrNotyMessage;
+
+use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Bundles\pqr\formatos\pqr\FtPqr;
+use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\Services\models\PqrNotyMessage;
+
 use Saia\controllers\DateController;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
@@ -20,10 +24,13 @@ use Saia\models\formatos\CamposFormato;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
 use Saia\controllers\DistributionService;
-use Saia\Pqr\controllers\FtPqrController;
-use Saia\Pqr\controllers\PqrFormController;
+
+use App\Bundles\pqr\Services\controllers\FtPqrController;
+use App\Bundles\pqr\Services\controllers\PqrFormController;
+
 use Saia\controllers\functions\CoreFunctions;
-use Saia\Pqr\formatos\pqr_calificacion\FtPqrCalificacion;
+
+use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 
 class FtPqrRespuesta extends FtPqrRespuestaProperties
 {
