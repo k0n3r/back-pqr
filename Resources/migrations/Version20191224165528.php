@@ -141,8 +141,10 @@ final class Version20191224165528 extends AbstractMigration
     {
         if ($data) {
             foreach ($data as $name => $dataModule) {
-                $child = $dataModule['children'];
-                unset($dataModule['children']);
+                if (isset($dataModule['children'])) {
+                    $child = $dataModule['children'];
+                    unset($dataModule['children']);
+                }
 
                 $idmodulo = $this->createModulo(
                     array_merge($dataModule, ['cod_padre' => $id]),
@@ -311,7 +313,7 @@ final class Version20191224165528 extends AbstractMigration
         WHERE funcionario_idfuncionario={$idfuncionario} AND cargo_idcargo={$idcargo}";
         $dependenciaCargo = $this->connection->fetchAll($sqlDependenciaCargo);
 
-        if ($dependenciaCargo[0]['iddependencia_cargo']) {
+        if ($dependenciaCargo) {
             $this->connection->update('dependencia_cargo', [
                 'fecha_final' => date('Y-12-31 23:59:59'),
                 'estado' => 1

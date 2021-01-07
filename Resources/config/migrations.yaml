@@ -2,7 +2,7 @@ doctrine_migrations:
   migrations_paths:
     # namespace is arbitrary but should be different from App\Migrations
     # as migrations classes should NOT be autoloaded
-    'use App\Bundles\pqr\Resources\migrations': "%kernel.project_dir%/src/Bundles/pqr/Resources/migrations"
+    'App\Bundles\pqr\Resources\migrations': "%kernel.project_dir%/src/Bundles/pqr/Resources/migrations"
   storage:
     table_storage:
       table_name: "migrations"

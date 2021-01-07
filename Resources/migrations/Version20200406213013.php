@@ -29,8 +29,6 @@ final class Version20200406213013 extends AbstractMigration
             'estado' => 1,
             'campos' => NULL,
             'tablas' => NULL,
-            'ruta_libreria' => 'app/modules/back_pqr/formatos/pqr_respuesta/reporteFunciones.php,app/modules/back_pqr/formatos/reporteFuncionesGenerales.php',
-            'ruta_libreria_pantalla' => 'app/modules/back_pqr/formatos/pqr_respuesta/reporteAcciones.php',
             'cantidad_registros' => 20,
             'tipo_busqueda' => 2
         ];
@@ -59,7 +57,9 @@ final class Version20200406213013 extends AbstractMigration
             'agrupado_por' => NULL,
             'busqueda_avanzada' => NULL,
             'enlace_adicionar' => NULL,
-            'llave' => 'v.iddocumento'
+            'llave' => 'v.iddocumento',
+            'ruta_libreria' => 'src/Bundles/pqr/formatos/pqr_respuesta/reporteFunciones.php,src/Bundles/pqr/formatos/reporteFuncionesGenerales.php',
+            'ruta_libreria_pantalla' => 'src/Bundles/pqr/formatos/pqr_respuesta/reporteAcciones.js',
         ];
         $idbusquedaComponente = $this->createBusquedaComponente($idbusqueda, $busquedaComponente, $nombreComponente);
 
@@ -90,7 +90,9 @@ final class Version20200406213013 extends AbstractMigration
             'agrupado_por' => NULL,
             'busqueda_avanzada' => NULL,
             'enlace_adicionar' => NULL,
-            'llave' => 'v.iddocumento'
+            'llave' => 'v.iddocumento',
+            'ruta_libreria' => NULL,
+            'ruta_libreria_pantalla' => NULL,
         ];
         $idbusquedaComponente = $this->createBusquedaComponente($idbusqueda, $busquedaComponente, $nombreComponente);
 

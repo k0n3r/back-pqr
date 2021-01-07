@@ -32,8 +32,6 @@ final class Version20200226192642 extends AbstractMigration
             'estado' => 1,
             'campos' => NULL,
             'tablas' => 'vpqr v',
-            'ruta_libreria' => 'app/modules/back_pqr/formatos/pqr/reporteFunciones.php,app/modules/back_pqr/formatos/reporteFuncionesGenerales.php',
-            'ruta_libreria_pantalla' => 'app/modules/back_pqr/formatos/pqr/reporteAcciones.php',
             'cantidad_registros' => 20,
             'tipo_busqueda' => 2
         ];
@@ -68,11 +66,13 @@ final class Version20200226192642 extends AbstractMigration
             'campos_adicionales' => 'v.numero,v.fecha,v.sys_email,v.sys_tipo,v.sys_estado,v.idft',
             'tablas_adicionales' => NULL,
             'ordenado_por' => 'v.fecha',
-            'direccion' => 'DESC',
+            'direccion' => 'ASC',
             'agrupado_por' => NULL,
-            'busqueda_avanzada' => 'app/modules/back_pqr/formatos/pqr/busqueda.php',
+            'busqueda_avanzada' => 'src/Bundles/pqr/formatos/pqr/busqueda.php',
             'enlace_adicionar' => NULL,
-            'llave' => 'v.iddocumento'
+            'llave' => 'v.iddocumento',
+            'ruta_libreria' => 'src/Bundles/pqr/formatos/pqr/reporteFunciones.php,src/Bundles/pqr/formatos/reporteFuncionesGenerales.php',
+            'ruta_libreria_pantalla' => 'src/Bundles/pqr/formatos/pqr/reporteAcciones.js',
         ];
     }
 

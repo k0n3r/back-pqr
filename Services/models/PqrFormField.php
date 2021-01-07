@@ -4,12 +4,15 @@ namespace App\Bundles\pqr\Services\models;
 
 use Saia\core\model\Model;
 use Saia\models\formatos\CamposFormato;
-
 use App\Bundles\pqr\Services\models\PqrHtmlField;
+use App\Bundles\pqr\Services\PqrFormFieldService;
 
 class PqrFormField extends Model
 {
     use TModels;
+
+    const ACTIVE = 1;
+    const INACTIVE = 0;
 
     protected function defineAttributes(): void
     {
@@ -52,6 +55,11 @@ class PqrFormField extends Model
                 ]
             ]
         ];
+    }
+
+    public function getService()
+    {
+        return new PqrFormFieldService($this);
     }
 
     /**

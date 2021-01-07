@@ -4,11 +4,8 @@ namespace App\Bundles\pqr\Services\controllers\AddEditFormat;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
-
 use Saia\models\formatos\Formato;
-
 use App\Bundles\pqr\Services\models\PqrFormField;
-
 use Saia\controllers\SessionController;
 use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
@@ -40,6 +37,14 @@ class AddEditFtPqr implements IAddEditFormat
             $this->updateForm() : $this->createForm();
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getFormat(): Formato
+    {
+        return $this->PqrForm->Formato;
     }
 
     /**

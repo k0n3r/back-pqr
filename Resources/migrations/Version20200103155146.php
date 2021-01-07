@@ -15,7 +15,7 @@ final class Version20200103155146 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Creacion de tablas de pqr form field y pqr html field';
+        return 'Creacion de tablas';
     }
 
     public function up(Schema $schema): void
@@ -38,6 +38,9 @@ final class Version20200103155146 extends AbstractMigration
 
         $table7 = $schema->createTable('pqr_history');
         $this->tablePqrHistory($table7);
+
+        $table8 = $schema->createTable('pqr_noty_messages');
+        $this->tablePqrNotyMessages($table8);
     }
 
     public function tablePqrFormFields(Table $table)
@@ -235,6 +238,47 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
+    public function tablePqrNotyMessages(Table $table)
+    {
+        $table->addColumn('id', 'integer', [
+            'autoincrement' => true
+        ]);
+        $table->setPrimaryKey(['id']);
+
+        $table->addColumn('name', 'string', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci',
+            'length' => 50
+        ]);
+
+        $table->addColumn('label', 'string', [
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci',
+            'length' => 50
+        ]);
+
+        $table->addColumn('description', 'text', [
+            'notnull' => false
+        ]);
+
+        $table->addColumn('subject', 'text', [
+            'notnull' => false
+        ]);
+
+        $table->addColumn('message_body', 'text', [
+            'notnull' => false
+        ]);
+
+        $table->addColumn('type', 'integer', [
+            'comment' => '1:Noty,2:Email',
+            'default' => 1
+        ]);
+
+        $table->addColumn('active', 'boolean', [
+            'default' => 1
+        ]);
+    }
+
     public function down(Schema $schema): void
     {
         $data = [
@@ -243,7 +287,8 @@ final class Version20200103155146 extends AbstractMigration
             'pqr_forms',
             'pqr_backups',
             'pqr_notifications',
-            'pqr_history'
+            'pqr_history',
+            'pqr_noty_messages'
         ];
 
         foreach ($data as $table) {

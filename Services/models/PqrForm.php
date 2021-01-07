@@ -8,6 +8,7 @@ use Saia\models\formatos\Formato;
 
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrNotification;
+use App\Bundles\pqr\Services\PqrFormService;
 
 class PqrForm extends Model
 {
@@ -66,6 +67,18 @@ class PqrForm extends Model
                 ]
             ]
         ];
+    }
+
+    /**
+     * Retorna el servicio
+     *
+     * @return PqrFormService
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2021
+     */
+    public function getService(): PqrFormService
+    {
+        return new PqrFormService($this);
     }
 
     /**

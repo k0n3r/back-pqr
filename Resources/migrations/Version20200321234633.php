@@ -182,8 +182,11 @@ final class Version20200321234633 extends AbstractMigration
         ];
 
         foreach ($data as $field) {
-            $campoOpciones = $field['campoOpciones'];
-            unset($field['campoOpciones']);
+            $campoOpciones = [];
+            if (isset($field['campoOpciones'])) {
+                $campoOpciones = $field['campoOpciones'];
+                unset($field['campoOpciones']);
+            }
 
             $this->connection->insert('campos_formato', $field);
             $id = $this->connection->lastInsertId();

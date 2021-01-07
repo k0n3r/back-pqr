@@ -47,7 +47,7 @@ trait TMigrations
         $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '{$search}'";
         $modulo = $this->connection->fetchAll($sql);
 
-        if ($modulo[0]['idmodulo']) {
+        if ($modulo) {
             $id = $modulo[0]['idmodulo'];
             $this->connection->update('modulo', $data, [
                 'idmodulo' => $id
@@ -68,7 +68,7 @@ trait TMigrations
         $sql = "SELECT idpermiso_perfil FROM permiso_perfil WHERE modulo_idmodulo={$idmodulo} AND perfil_idperfil={$idperfil}";
         $permiso = $this->connection->fetchAll($sql);
 
-        if (!$permiso[0]['idpermiso_perfil']) {
+        if (!$permiso) {
             $this->connection->insert('permiso_perfil', [
                 'modulo_idmodulo' => $idmodulo,
                 'perfil_idperfil' => $idperfil
@@ -98,7 +98,7 @@ trait TMigrations
         $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '{$search}'";
         $record = $this->connection->fetchAll($sql);
 
-        if ($record[0]['idbusqueda']) {
+        if ($record) {
             $id = $record[0]['idbusqueda'];
             $this->connection->update('busqueda', $data, [
                 'idbusqueda' => $id
@@ -117,7 +117,7 @@ trait TMigrations
         WHERE busqueda_idbusqueda={$idbusqueda} AND lower(nombre) like '{$search}'";
         $record = $this->connection->fetchAll($sql);
 
-        if ($record[0]['idbusqueda_componente']) {
+        if ($record) {
             $id = $record[0]['idbusqueda_componente'];
 
             $this->connection->update('busqueda_componente', $data, [
@@ -137,7 +137,7 @@ trait TMigrations
         WHERE fk_busqueda_componente={$idbusquedaComponente} AND lower(etiqueta_condicion) like '{$search}'";
         $record = $this->connection->fetchAll($sql);
 
-        if ($record[0]['idbusqueda_condicion']) {
+        if ($record) {
             $id = $record[0]['idbusqueda_condicion'];
             $this->connection->update('busqueda_condicion', $data, [
                 'idbusqueda_condicion' => $id
@@ -155,7 +155,7 @@ trait TMigrations
         $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '{$search}'";
         $busqueda = $this->connection->fetchAll($sql);
 
-        if ($busqueda[0]['idbusqueda']) {
+        if ($busqueda) {
             $idbusqueda = $busqueda[0]['idbusqueda'];
             $this->connection->delete('busqueda', [
                 'idbusqueda' => $idbusqueda
