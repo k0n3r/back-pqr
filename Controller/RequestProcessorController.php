@@ -2,26 +2,21 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use Saia\controllers\DateController;
 use Saia\controllers\CryptController;
-use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\PqrFormFieldService;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-/**
- * @Route("/components", name="components")
- */
 class RequestProcessorController extends AbstractController
 {
 
     /**
-     * @Route("/allData", name="getAllData")
+     * @Route("/components/allData", name="getAllData", methods={"GET"})
      */
     public function getAllData(
         ISaiaResponse $saiaResponse
@@ -46,37 +41,34 @@ class RequestProcessorController extends AbstractController
     }
 
     /**
-     * Lista la informacion de los campos Dependencia y Municipio
-     *
-     * @Route("/listForField", name="getListForField")
+     * @Route("/components/dataForEditTypes", name="getDataForEditTypes", methods={"GET"})
      */
+    public function getDataForEditTypes(
+        ISaiaResponse $saiaResponse
+    ): Response {
+
+        try {
+            $data = (new PqrService())->getDataForEditTypes();
+
+            $saiaResponse->replaceData($data);
+            $saiaResponse->setSuccess(1);
+        } catch (\Throwable $th) {
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
 
     /**
-     * Lista la informacion de los campos Dependencia y Municipio
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @Route("components/listForField", name="getListForField", methods={"GET"})
      */
-    public function getListForField(): array
-    {
-        $response = [
-            'results' => []
-        ];
+    public function getListForField(
+        Request $request
+    ): JsonResponse {
 
-        if (!$this->request['name']) {
-            return $response;
-        }
+        $data = (new PqrService())->getListForField($request->get('data'));
 
-        if (!$PqrFormField = PqrFormField::findByAttributes([
-            'name' => $this->request['name'],
-        ])) {
-            return $response;
-        }
-
-        return [
-            'results' => (new PqrFormFieldService($PqrFormField))
-                ->getListField($this->request)
-        ];
+        return new JsonResponse($data);
     }
 
     /**
@@ -91,23 +83,6 @@ class RequestProcessorController extends AbstractController
 
         return [
             'data' => $data
-        ];
-    }
-
-    /**
-     * retonar la fecha de vencimiento basado en la fecha de creacion y tipo
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     */
-    public function getDateForType(): array
-    {
-        $FtPqr = new FtPqr($this->request['idft']);
-        $FtPqr->sys_tipo = $this->request['type'];
-        $onlyDate = DateController::convertDate($FtPqr->getDateForType(), 'Y-m-d', 'Y-m-d H:i:s');
-        return [
-            'success' => 1,
-            'date' => $onlyDate
         ];
     }
 }

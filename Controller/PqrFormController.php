@@ -3,7 +3,6 @@
 namespace App\Bundles\pqr\Controller;
 
 use Saia\core\DatabaseConnection;
-use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
 use Symfony\Component\HttpFoundation\Request;

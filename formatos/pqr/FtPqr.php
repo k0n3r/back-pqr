@@ -24,6 +24,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 use App\Bundles\pqr\Services\controllers\FtPqrController;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+use App\Bundles\pqr\Services\FtPqrService;
 use App\Bundles\pqr\Services\PqrFormFieldService;
 
 class FtPqr extends FtPqrProperties
@@ -84,6 +85,18 @@ class FtPqr extends FtPqrProperties
                 ]
             ]
         ];
+    }
+
+    /**
+     * Retorna el Servicio
+     *
+     * @return FtPqrService
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2021
+     */
+    public function getService(): FtPqrService
+    {
+        return new FtPqrService($this);
     }
 
     /**

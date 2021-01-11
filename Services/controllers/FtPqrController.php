@@ -2,40 +2,21 @@
 
 namespace App\Bundles\pqr\Services\controllers;
 
-use Saia\models\Funcionario;
-use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\models\Configuracion;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
-use Saia\core\DatabaseConnection;
 use Saia\controllers\DateController;
 use Saia\models\documento\Documento;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
-use Saia\controllers\documento\SaveFt;
 use Saia\controllers\functions\Header;
-use Saia\controllers\SessionController;
-use Saia\models\formatos\CamposFormato;
+
 use Saia\controllers\TemporalController;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 
 class FtPqrController extends Controller
 {
-    private $subTypeExist;
-    private $dependencyExist;
 
-    private PqrForm $PqrForm;
-    private Funcionario $Funcionario;
-
-    public function __construct(array $request = null)
-    {
-        $this->request = $request;
-
-        if (!$this->PqrForm = PqrForm::getPqrFormActive()) {
-            throw new \Exception("No se encuentra el formulario activo", 200);
-        }
-        $this->Funcionario = SessionController::getUser();
-    }
 
     /**
      * Obtiene los datos de la PQR
@@ -78,259 +59,6 @@ class FtPqrController extends Controller
                 $Response->success = 1;
                 $Response->data = $FtPqr->sys_email;
             }
-        }
-
-        return $Response;
-    }
-
-    /**
-     * Obtiene los valores que se cargan en el modal
-     * de los tipos/subtipos/fecha vencimiento/dependencia
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function getDataForEditTypes(): array
-    {
-        $subType = $this->getSubTypes();
-
-        $records = (CamposFormato::findByAttributes([
-            'nombre' => 'sys_tipo',
-            'formato_idformato' => $this->PqrForm->fk_formato
-        ]))->CampoOpciones;
-
-        $data = [];
-        foreach ($records as $CampoOpciones) {
-            if ($CampoOpciones->estado) {
-                $data[] = [
-                    'id' => $CampoOpciones->getPK(),
-                    'text' => $CampoOpciones->valor
-                ];
-            }
-        }
-
-        return [
-            'dataType' => $data,
-            'dataSubType' => $subType ?? [],
-            'activeDependency' => (int) $this->dependencyExist()
-        ];
-    }
-
-    /**
-     * Obtiene los valores que se cargan en el modal
-     * de los tipos/subtipos/fecha vencimiento/dependencia
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function getValuesForType()
-    {
-        $Response = (object) [
-            'success' => 0,
-            'data' => []
-        ];
-
-        if ($id = $this->request['idft']) {
-            $FtPqr = new FtPqr($id);
-            $date = DateController::convertDate(
-                $FtPqr->sys_fecha_vencimiento,
-                'Y-m-d'
-            );
-
-            $idDependencia = (int) $FtPqr->sys_dependencia;
-            if ($idDependencia) {
-                $options = [
-                    'id' => $idDependencia,
-                    'text' => $FtPqr->getValueForReport('sys_dependencia')
-                ];
-            }
-
-            $Response->success = 1;
-            $Response->data = [
-                'sys_tipo' => (int) $FtPqr->sys_tipo,
-                'sys_subtipo' => $this->subTypeExist() ? (int) $FtPqr->sys_subtipo : 0,
-                'sys_fecha_vencimiento' => $date,
-                'sys_dependencia' => $idDependencia,
-                'optionsDependency' => $options
-            ];
-        }
-
-        return $Response;
-    }
-
-    /**
-     * Obtiene la informacion del subtype
-     *
-     * @return null|array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    private function getSubTypes(): ?array
-    {
-        if (!$this->subTypeExist()) {
-            return null;
-        }
-
-        $PqrFormField = $this->PqrForm->getRow('sys_subtipo');
-        $records = $PqrFormField->CamposFormato->CampoOpciones;
-
-        $data = [];
-        foreach ($records as $CampoOpciones) {
-            if ($CampoOpciones->estado) {
-                $data[] = [
-                    'id' => $CampoOpciones->getPK(),
-                    'text' => $CampoOpciones->valor
-                ];
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * Verifica si el campo subtipo fue creado
-     *
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    private function subTypeExist(): bool
-    {
-        if ($this->subTypeExist !== null) {
-            return $this->subTypeExist;
-        }
-
-        $this->subTypeExist = (bool) $this->PqrForm->getRow('sys_subtipo');
-
-        return $this->subTypeExist;
-    }
-
-    /**
-     * Verifica si el campo dependencia fue creado
-     *
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    private function dependencyExist(): bool
-    {
-        if ($this->dependencyExist !== null) {
-            return $this->dependencyExist;
-        }
-
-        $this->dependencyExist = (bool) $this->PqrForm->getRow('sys_dependencia');
-
-        return $this->dependencyExist;
-    }
-
-    /**
-     * Actualiza el tipo de PQR y guarda en el historial
-     *
-     * @return object
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function updateType(): object
-    {
-        $Response = (object) [
-            'success' => 0
-        ];
-
-        try {
-            $Connection = DatabaseConnection::getDefaultConnection();
-            $Connection->beginTransaction();
-
-            if (!$this->request['idft'] || !$this->request['type']) {
-                throw new \Exception("Error faltan parametros", 200);
-            }
-
-            if ($this->subTypeExist() && !$this->request['subtype']) {
-                throw new \Exception("Error faltan parametros", 200);
-            }
-
-            $FtPqr = new FtPqr($this->request['idft']);
-            $newAttributes = [];
-            if ($this->request['type'] != $FtPqr->sys_tipo) {
-                $oldType = $FtPqr->getFieldValue('sys_tipo');
-                $newAttributes['sys_tipo'] = $this->request['type'];
-                $textField[] = "tipo de {$oldType} a {newType}";
-            }
-
-            if ($this->subTypeExist()) {
-                if ($this->request['subtype'] != $FtPqr->sys_subtipo) {
-                    $oldSubType = $FtPqr->getFieldValue('sys_subtipo');
-                    $newAttributes['sys_subtipo'] = $this->request['subtype'];
-                    $textField[] = "categoria/subtipo de {$oldSubType} a {newSubType}";
-                }
-            }
-
-            if ($this->dependencyExist()) {
-                if ($this->request['dependency'] != $FtPqr->sys_dependencia) {
-                    $oldDependency = $FtPqr->getValueForReport('sys_dependencia');
-                    $newAttributes['sys_dependencia'] = $this->request['dependency'];
-                    $textField[] = "dependencia de {$oldDependency} a {newDependency}";
-                }
-            }
-
-            $expiration = DateController::convertDate($FtPqr->sys_fecha_vencimiento, 'Y-m-d');
-            if ($this->request['expirationDate'] != $expiration) {
-
-                $newAttributes['sys_fecha_vencimiento'] = $this->request['expirationDate'];
-                $FtPqr->Documento->fecha_limite = $this->request['expirationDate'];
-                $FtPqr->Documento->update();
-
-                $oldDate = DateController::convertDate(
-                    $expiration,
-                    DateController::PUBLIC_DATE_FORMAT,
-                    'Y-m-d'
-                );
-
-                $newDate = DateController::convertDate(
-                    $this->request['expirationDate'],
-                    DateController::PUBLIC_DATE_FORMAT,
-                    'Y-m-d'
-                );
-                $textField[] = "fecha de vencimiento de {$oldDate} a {$newDate}";
-            }
-
-            $SaveFt = new SaveFt($FtPqr->Documento);
-            $SaveFt->edit($newAttributes);
-            $FtPqr = $FtPqr->Documento->getFt();
-
-            $text = "Se actualiza: " . implode(', ', $textField);
-            $newType = $FtPqr->getFieldValue('sys_tipo');
-            $newSubType = $this->subTypeExist() ? $FtPqr->getFieldValue('sys_subtipo') : '';
-            $newDependency = $this->dependencyExist() ? $FtPqr->getValueForReport('sys_dependencia') : '';
-
-            $text = str_replace([
-                '{newType}',
-                '{newSubType}',
-                '{newDependency}'
-            ], [
-                $newType,
-                $newSubType,
-                $newDependency
-            ], $text);
-
-            $history = [
-                'fecha' => date('Y-m-d H:i:s'),
-                'idft' => $FtPqr->getPK(),
-                'fk_funcionario' => $this->Funcionario->getPK(),
-                'tipo' => PqrHistory::TIPO_CAMBIO_ESTADO,
-                'idfk' => 0,
-                'descripcion' => $text
-            ];
-            if (!PqrHistory::newRecord($history)) {
-                throw new \Exception("No fue posible guardar el historial", 200);
-            }
-
-            $Response->success = 1;
-            $Connection->commit();
-        } catch (\Exception $th) {
-            $Connection->rollBack();
-            $Response->message = $th->getMessage();
         }
 
         return $Response;
@@ -386,42 +114,6 @@ class FtPqrController extends Controller
 
         $Response->data = $rows;
         $Response->success = 1;
-
-        return $Response;
-    }
-
-    /**
-     * Termina una PQR
-     *
-     * @return object
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function finish(): object
-    {
-        $Response = (object) [
-            'success' => 0
-        ];
-
-        try {
-            $Connection = DatabaseConnection::getDefaultConnection();
-            $Connection->beginTransaction();
-
-            if (!$this->request['idft'] || !$this->request['observaciones']) {
-                throw new \Exception("Error faltan parametros", 200);
-            }
-
-            $FtPqr = new FtPqr($this->request['idft']);
-            $Response->success = (int) $FtPqr->changeStatus(
-                FtPqr::ESTADO_TERMINADO,
-                $this->request['observaciones']
-            );
-
-            $Connection->commit();
-        } catch (\Exception $th) {
-            $Connection->rollBack();
-            $Response->message = $th->getMessage();
-        }
 
         return $Response;
     }

@@ -68,11 +68,11 @@ final class Version20200226192642 extends AbstractMigration
             'ordenado_por' => 'v.fecha',
             'direccion' => 'ASC',
             'agrupado_por' => NULL,
-            'busqueda_avanzada' => 'src/Bundles/pqr/formatos/pqr/busqueda.php',
+            'busqueda_avanzada' => 'views/modules/pqr/formatos/pqr/busqueda.php',
             'enlace_adicionar' => NULL,
             'llave' => 'v.iddocumento',
             'ruta_libreria' => 'src/Bundles/pqr/formatos/pqr/reporteFunciones.php,src/Bundles/pqr/formatos/reporteFuncionesGenerales.php',
-            'ruta_libreria_pantalla' => 'src/Bundles/pqr/formatos/pqr/reporteAcciones.js',
+            'ruta_libreria_pantalla' => 'views/modules/pqr/formatos/pqr/reporteAcciones.js',
         ];
     }
 
