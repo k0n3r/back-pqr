@@ -3,7 +3,9 @@
 namespace App\Bundles\pqr\Controller;
 
 use Saia\core\DatabaseConnection;
+use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
+use App\Bundles\pqr\Services\models\PqrForm;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,7 +17,7 @@ class PqrFormFieldController extends AbstractController
 {
 
     /**
-     * @Route("/formField/order", name="updateOrder", methods={"PUT"})
+     * @Route("/formField/updateOrder", name="updateOrder", methods={"PUT"})
      */
     public function updateOrder(
         Request $request,
@@ -37,6 +39,48 @@ class PqrFormFieldController extends AbstractController
                 }
             }
 
+            $saiaResponse->setSuccess(1);
+            $Connection->commit();
+        } catch (\Throwable $th) {
+            $Connection->rollBack();
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * @Route("/formField/updateShowReport", name="updateShowReport", methods={"PUT"})
+     */
+    public function updateShowReport(
+        Request $request,
+        ISaiaResponse $saiaResponse
+    ): Response {
+
+        try {
+            $Connection = DatabaseConnection::getDefaultConnection();
+            $Connection->beginTransaction();
+
+            $Connection->createQueryBuilder()
+                ->update('pqr_form_fields')
+                ->set('show_report', 0)->execute();
+
+            if ($request->get('ids')) {
+                foreach ($request->get('ids') as $id) {
+                    $PqrFormFieldService = (new PqrFormField($id))->getService();
+                    if (!$PqrFormFieldService->update([
+                        'show_report' => 1
+                    ])) {
+                        throw new \Exception("No fue posible actualizar", 200);
+                    }
+                }
+            }
+
+            $PqrFormService = (PqrForm::getPqrFormActive())->getService();
+            $PqrFormService->generaReport();
+            $data = $PqrFormService->getDataPqrFormFields();
+
+            $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (\Throwable $th) {
@@ -96,6 +140,24 @@ class PqrFormFieldController extends AbstractController
 
         return $saiaResponse->getResponse();
     }
+
+    /**
+     * @Route("/formField/textFields", name="getTextFields", methods={"GET"}) 
+     */
+    public function getTextFields(
+        ISaiaResponse $saiaResponse
+    ): Response {
+
+        try {
+            $saiaResponse->replaceData(PqrService::getTextFields());
+            $saiaResponse->setSuccess(1);
+        } catch (\Throwable $th) {
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
 
     /**
      * @Route("/formField", name="store", methods={"POST"}) 

@@ -59,7 +59,7 @@ class WebservicePqr extends WsFt implements IWsHtml
         ];
 
         return $this->getContent(
-            'app/modules/back_pqr/controllers/templates/formPqr.html.php',
+            'src/Bundles/pqr/Services/controllers/templates/formPqr.html.php',
             $values
         );
     }
@@ -78,7 +78,7 @@ class WebservicePqr extends WsFt implements IWsHtml
         ];
 
         return $this->getContent(
-            'app/modules/back_pqr/controllers/templates/formPqr.js.php',
+            'src/Bundles/pqr/Services/controllers/templates/formPqr.js.php',
             $values
         );
     }

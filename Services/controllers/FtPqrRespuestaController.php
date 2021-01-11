@@ -3,9 +3,7 @@
 namespace App\Bundles\pqr\Services\controllers;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
-
 use Saia\models\formatos\Formato;
-
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 
 class FtPqrRespuestaController extends Controller

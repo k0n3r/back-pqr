@@ -2,11 +2,16 @@
 
 namespace App\Bundles\pqr\formatos\pqr_respuesta;
 
+
 use Saia\core\model\ModelFormat;
+
+
+
 
 class FtPqrRespuestaProperties extends ModelFormat
 {
-    public $isPDF = false;
+    
+    public $isPDF=false;
 
     public function __construct($id = null)
     {
@@ -18,23 +23,23 @@ class FtPqrRespuestaProperties extends ModelFormat
         return [
             'safe' => [
                 'anexos_digitales',
-                'anexos_fisicos',
-                'asunto',
-                'ciudad_origen',
-                'contenido',
-                'copia',
-                'copia_interna',
-                'dependencia',
-                'despedida',
-                'destino',
-                'documento_iddocumento',
-                'encabezado',
-                'firma',
-                'ft_pqr',
-                'idft_pqr_respuesta',
-                'otra_despedida',
-                'sol_encuesta',
-                'tipo_distribucion'
+				'anexos_fisicos',
+				'asunto',
+				'ciudad_origen',
+				'contenido',
+				'copia',
+				'copia_interna',
+				'dependencia',
+				'despedida',
+				'destino',
+				'documento_iddocumento',
+				'encabezado',
+				'firma',
+				'ft_pqr',
+				'idft_pqr_respuesta',
+				'otra_despedida',
+				'sol_encuesta',
+				'tipo_distribucion' 
             ],
             'date' => [],
             'table' => 'ft_pqr_respuesta',
@@ -46,4 +51,6 @@ class FtPqrRespuestaProperties extends ModelFormat
     {
         return [];
     }
+    
+    
 }

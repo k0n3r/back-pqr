@@ -93,10 +93,10 @@ class AddEditFtPqr implements IAddEditFormat
             'cod_padre' => 0,
             'contador_idcontador' => $this->PqrForm->fk_contador,
             'nombre_tabla' => "ft_{$name}",
-            'ruta_mostrar' => "app/modules/back_pqr/formatos/{$name}/mostrar.php",
-            'ruta_editar' => "app/modules/back_pqr/formatos/{$name}/editar.php",
-            'ruta_adicionar' => "app/modules/back_pqr/formatos/{$name}/adicionar.php",
-            'ruta_buscar' => "app/modules/back_pqr/formatos/{$name}/buscar.php",
+            'ruta_mostrar' => "views/modules/pqr/formatos/{$name}/mostrar.php",
+            'ruta_editar' => "views/modules/pqr/formatos/{$name}/editar.php",
+            'ruta_adicionar' => "views/modules/pqr/formatos/{$name}/adicionar.php",
+            'ruta_buscar' => "views/modules/pqr/formatos/{$name}/buscar.php",
             'encabezado' => 1,
             'cuerpo' => '<p>{*showContent*}</p><p>{*mostrar_estado_proceso*}</p>',
             'pie_pagina' => 0,
@@ -295,7 +295,7 @@ class AddEditFtPqr implements IAddEditFormat
      */
     private function resolveClass(String $fieldType): ?string
     {
-        $className = "Saia\\Pqr\\controllers\\AddEditFormat\\fields\\$fieldType";
+        $className = "App\\Bundles\\pqr\\Services\\controllers\\AddEditFormat\\fields\\$fieldType";
         if (class_exists($className)) {
             return $className;
         }

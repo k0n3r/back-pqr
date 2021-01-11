@@ -11,7 +11,8 @@ use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
 use Saia\controllers\generator\webservice\WsFt;
-use App\Bundles\pqr\Services\models\PqrNotyMessage;
+use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Services\PqrNotyMessageService;
 use Saia\controllers\generator\webservice\WsGenerator;
 use App\Bundles\pqr\Services\controllers\WebservicePqr;
 use App\Bundles\pqr\Services\controllers\WebserviceCalificacion;
@@ -20,6 +21,8 @@ use App\Bundles\pqr\Services\controllers\AddEditFormat\IAddEditFormat;
 
 class PqrFormService
 {
+    const URLWSPQR = PROTOCOLO_CONEXION . DOMINIO . '/ws/pqr/';
+    const URLWSCALIFICACION = PROTOCOLO_CONEXION . DOMINIO . '/ws/pqr_calificacion/';
 
     private PqrForm $PqrForm;
     private string $errorMessage;
@@ -53,6 +56,137 @@ class PqrFormService
         return $this->PqrForm;
     }
 
+    /**
+     * Actualiza un registro
+     * 
+     * @param array $data
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2021
+     */
+    public function update(array $data): bool
+    {
+        $this->PqrForm->setAttributes($data);
+
+        return $this->PqrForm->save();
+    }
+
+    /**
+     * Actualiza los datos de configuracion del formulario
+     *
+     * @param array $data
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function updateSetting(array $data): bool
+    {
+        if (!$this->update($data['pqrForm'])) {
+            $this->errorMessage = "No fue posible actualizar";
+            return false;
+        }
+
+        DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder()
+            ->update('pqr_form_fields')
+            ->set('anonymous', 0)
+            ->set('required_anonymous', 0)
+            ->where("name<>'sys_tipo'")->execute();
+
+        if ($this->PqrForm->show_anonymous) {
+            if ($formFields = $data['formFields']) {
+                foreach ($formFields['dataShowAnonymous'] as $id) {
+
+                    $attributes = [
+                        'anonymous' => 1
+                    ];
+                    if ($dataRequired = $formFields['dataRequiredAnonymous']) {
+                        if (in_array($id, $dataRequired)) {
+                            $attributes['required_anonymous'] = 1;
+                        }
+                    }
+
+                    $PqrFormFieldService = (new PqrFormField($id))->getService();
+                    if (!$PqrFormFieldService->update($attributes)) {
+                        $this->errorMessage = "No fue posible actualizar";
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Actualiza la configuracion para la respuesta
+     * 
+     * @param array $data
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function updateResponseSetting(array $data): bool
+    {
+
+        $info = [];
+        foreach ($data['tercero'] as $name => $value) {
+            $info[] = [
+                'name' => $name,
+                'value' => $value
+            ];
+        }
+
+        return $this->update([
+            'response_configuration' => json_encode(['tercero' => $info])
+        ]);
+    }
+
+    /**
+     * Obtiene todos los datos del modulo de configuracion
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getSetting(): array
+    {
+        return [
+            'urlWs' => self::URLWSPQR,
+            'publish' => $this->PqrForm->fk_formato ? 1 : 0,
+            'pqrForm' => $this->getDataPqrForm(),
+            'pqrTypes' => $this->getTypes(),
+            'pqrFormFields' => $this->getDataPqrFormFields(),
+            'pqrNotifications' => $this->getDataPqrNotifications(),
+            'optionsNotyMessages' => PqrNotyMessageService::getDataPqrNotyMessages()
+        ];
+    }
+
+    /**
+     * Actualiza los dias de vencimientos de los tipo de PQR
+     * 
+     * @param array $data
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function updatePqrTypes(array $data): bool
+    {
+
+        $PqrFormFieldService = ($this->PqrForm->getRow('sys_tipo'))->getService();
+        if (!$PqrFormFieldService->update([
+            'setting' => $data
+        ])) {
+            $this->errorMessage = "No fue posible actualizar los tipos";
+            return false;
+        }
+
+        if ($PqrFormFieldService->getModel()->fk_campos_formato) {
+            AddEditFtPqr::addEditformatOptions($PqrFormFieldService->getModel());
+        }
+
+        return true;
+    }
 
     /**
      * publica o crea el formulario en el webservice
@@ -183,36 +317,6 @@ class PqrFormService
     }
 
     /**
-     * Obtiene los registros para actualizar el cuerpo de las notificaciones
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function getDataPqrNotyMessages(): array
-    {
-        $data = [];
-        if ($records = PqrNotyMessage::findAllByAttributes([
-            'active' => 1
-        ])) {
-            foreach ($records as $PqrNotyMessage) {
-                $data[] = [
-                    'text' => $PqrNotyMessage->label,
-                    'value' => [
-                        'id' => $PqrNotyMessage->getPK(),
-                        'description' => $PqrNotyMessage->description,
-                        'subject' => $PqrNotyMessage->subject,
-                        'message_body' => $PqrNotyMessage->message_body,
-                        'type' => $PqrNotyMessage->type
-                    ]
-                ];
-            }
-        }
-
-        return $data;
-    }
-
-    /**
      * Genera el formulario recibido
      *
      * @param IAddEditFormat $Instance
@@ -250,7 +354,7 @@ class PqrFormService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function generaReport(): void
+    public function generaReport(): void
     {
         $fields = $this->getFieldsReport(true);
         $this->viewPqr();
@@ -291,7 +395,7 @@ class PqrFormService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function viewPqr()
+    private function viewPqr(): void
     {
         $fields = implode(',', array_merge(
             $this->defaultFieldsReport(),
@@ -330,6 +434,7 @@ class PqrFormService
     /**
      * Crea la vista en la DB
      *
+     * @param string $name
      * @param string $select
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -608,9 +713,9 @@ class PqrFormService
     private function generatePqrWs(): bool
     {
 
-        $urlFolderTemplate = "app/modules/back_pqr/controllers/templates/";
+        $urlFolderTemplate = "src/Bundles/pqr/Services/controllers/templates/";
 
-        $defineFile = $this->generateFile('define.js', 'app/controllers/generator/webservice/templates/');
+        $defineFile = $this->generateFile('define.js', 'src/legacy/controllers/generator/webservice/templates/');
         $page404 = $this->generateFile('404.html', $urlFolderTemplate);
         $infoQrFile = $this->generateFile('infoQR.html', $urlFolderTemplate);
         $infoQRJsFile = $this->generateFile('infoQR.js', $urlFolderTemplate);
@@ -632,14 +737,15 @@ class PqrFormService
     /**
      * Genera el WS de Calificacion PQR
      *
+     * @param Formato $FormatoC
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
     private function generateCalificacionWs(Formato $FormatoC): bool
     {
-        $errorPage = $this->generateFile('404.html', 'app/modules/back_pqr/controllers/templates/');
-        $fileName = $this->generateFile('define.js', 'app/controllers/generator/webservice/templates/');
+        $errorPage = $this->generateFile('404.html', 'src/Bundles/pqr/Services/controllers/templates/');
+        $fileName = $this->generateFile('define.js', 'src/legacy/controllers/generator/webservice/templates/');
 
         $IWsHtml = new WebserviceCalificacion($FormatoC);
         $WsGenerator = new WsGenerator(
@@ -662,8 +768,10 @@ class PqrFormService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function generateFile(string $templateName, string $urlFolderTemplate): string
-    {
+    private function generateFile(
+        string $templateName,
+        string $urlFolderTemplate
+    ): string {
         $values = [
             'baseUrl' => ABSOLUTE_SAIA_ROUTE
         ];
@@ -674,7 +782,7 @@ class PqrFormService
         );
         $fileName = SessionController::getTemporalDir() . "/{$templateName}";
 
-        if (!file_put_contents(ROOT_PATH . $fileName, $content)) {
+        if (!file_put_contents(PUBLIC_PATH . $fileName, $content)) {
             throw new \Exception("Imposible crear el archivo {$templateName} para el ws", 1);
         }
 

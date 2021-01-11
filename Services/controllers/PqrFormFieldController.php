@@ -10,48 +10,6 @@ use App\Bundles\pqr\Services\PqrFormService;
 
 class PqrFormFieldController extends Controller
 {
-
-    public function updateShowReport()
-    {
-        $Response = (object) [
-            'success' => 0
-        ];
-
-        try {
-            $conn = DatabaseConnection::getDefaultConnection();
-            $conn->beginTransaction();
-
-            DatabaseConnection::getDefaultConnection()
-                ->createQueryBuilder()
-                ->update('pqr_form_fields')
-                ->set('show_report', 0)->execute();
-
-            if ($this->request['ids']) {
-                foreach ($this->request['ids'] as $id) {
-                    $PqrFormField = new PqrFormField($id);
-                    $PqrFormField->show_report = 1;
-                    if (!$PqrFormField->update()) {
-                        throw new \Exception("No fue posible actualizar", 200);
-                    };
-                }
-            }
-
-            (new PqrFormController())->generaReport();
-
-            $PqrFormService = new PqrFormService(PqrForm::getPqrFormActive());
-            $Response->pqrFormFields = $PqrFormService->getDataPqrFormFields();
-
-            $Response->success = 1;
-            $conn->commit();
-        } catch (\Exception $th) {
-            $conn->rollBack();
-            $Response->message = $th->getMessage();
-        }
-
-        return $Response;
-    }
-
-
     /**
      * Obtiene una lista de datos
      *
@@ -163,39 +121,5 @@ class PqrFormFieldController extends Controller
         }
 
         return $Qb->execute()->fetchAll();
-    }
-
-    /**
-     * Obtiene los campos que se podran utilizar para la
-     * carga automatica del destino de la respuesta
-     *
-     * @return object
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function getTextFields(): object
-    {
-        $Qb = DatabaseConnection::getDefaultConnection()
-            ->createQueryBuilder()
-            ->select('ff.*')
-            ->from('pqr_form_fields', 'ff')
-            ->join('ff', 'pqr_html_fields', 'hf', 'ff.fk_pqr_html_field=hf.id')
-            ->where("hf.type_saia='Text' and ff.active=1")
-            ->orderBy('ff.orden');
-
-        $data = [];
-        if ($records = PqrFormField::findByQueryBuilder($Qb)) {
-            foreach ($records as $PqrFormField) {
-                $data[] = [
-                    'id' => $PqrFormField->getPK(),
-                    'text' => $PqrFormField->label
-                ];
-            }
-        }
-
-        return (object) [
-            'success' => 1,
-            'data' => $data
-        ];
     }
 }

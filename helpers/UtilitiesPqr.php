@@ -82,9 +82,8 @@ class UtilitiesPqr
 
     public static function saveLog(array $log): void
     {
-        global $rootPath;
 
-        $path = $rootPath . 'app/modules/back_pqr/logs/';
+        $path = ROOT_PATH . 'src/Bundles/pqr/logs/';
         TemporalController::createFolder($path);
 
         $data = [

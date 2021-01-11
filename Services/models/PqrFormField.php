@@ -57,7 +57,14 @@ class PqrFormField extends Model
         ];
     }
 
-    public function getService()
+    /**
+     * Retorna el servicio
+     *
+     * @return PqrFormFieldService
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2021
+     */
+    public function getService(): PqrFormFieldService
     {
         return new PqrFormFieldService($this);
     }

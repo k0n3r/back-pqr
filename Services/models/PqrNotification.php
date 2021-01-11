@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Services\models;
 
+use App\Bundles\pqr\Services\PqrNotificationService;
 use Saia\core\model\Model;
 use Saia\models\Funcionario;
 
@@ -29,6 +30,18 @@ class PqrNotification extends Model
                 ]
             ]
         ];
+    }
+
+    /**
+     * Retorna el servicio
+     *
+     * @return PqrNotificationService
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2021
+     */
+    public function getService(): PqrNotificationService
+    {
+        return new PqrNotificationService($this);
     }
 
     /**

@@ -50,6 +50,13 @@ class RequestProcessorController extends AbstractController
      *
      * @Route("/listForField", name="getListForField")
      */
+
+    /**
+     * Lista la informacion de los campos Dependencia y Municipio
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     */
     public function getListForField(): array
     {
         $response = [
@@ -92,8 +99,6 @@ class RequestProcessorController extends AbstractController
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-
-     * @Route("/request/processor", name="request_processor")
      */
     public function getDateForType(): array
     {

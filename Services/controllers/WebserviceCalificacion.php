@@ -18,7 +18,7 @@ class WebserviceCalificacion extends WsFormulario
         ];
 
         return $this->getContent(
-            'app/modules/back_pqr/controllers/templates/formCalificacion.js.php',
+            'src/Bundles/pqr/Services/controllers/templates/formCalificacion.js.php',
             $values
         );
     }
