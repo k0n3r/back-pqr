@@ -3,11 +3,8 @@
 namespace App\Bundles\pqr\Services\controllers;
 
 use App\Bundles\pqr\Services\models\PqrForm;
-
 use Saia\models\formatos\Formato;
-
 use App\Bundles\pqr\Services\models\PqrFormField;
-
 use Saia\controllers\generator\webservice\WsFt;
 use Saia\controllers\generator\webservice\IWsHtml;
 use Saia\controllers\generator\webservice\WsGenerator;
@@ -198,7 +195,7 @@ class WebservicePqr extends WsFt implements IWsHtml
      */
     protected function resolveCustomClass(String $typeField): ?string
     {
-        $className = "Saia\\Pqr\\controllers\\customFields\\$typeField";
+        $className = "App\\Bundles\\pqr\\Services\\controllers\\customFields\\$typeField";
         if (class_exists($className)) {
             return $className;
         }

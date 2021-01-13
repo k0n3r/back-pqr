@@ -11,11 +11,14 @@ use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\Bundles\pqr\Services\PqrNotyMessageService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+/**
+ * @Route("/notyMessage", name="notyMessage_")
+ */
 class PqrNotyMessageController extends AbstractController
 {
 
     /**
-     * @Route("/notyMessage/{id}", name="update", methods={"PUT"})
+     * @Route("/{id}", name="update", methods={"PUT"})
      */
     public function update(
         int $id,

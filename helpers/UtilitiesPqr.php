@@ -155,4 +155,38 @@ class UtilitiesPqr
         $QRDocumentoPqrController = new QRDocumentoPqrController($FtPqr);
         return $QRDocumentoPqrController->getImageQR();
     }
+
+    /**
+     * Obtiene la ruta del PDF
+     *
+     * @param Documento $Documento
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     * 
+     * @throws Exception
+     */
+    public static function getRoutePdf(Documento $Documento): string
+    {
+        try {
+
+            if (!$Documento->pdf) {
+                $Documento->getPdfJson(true);
+            }
+
+            $Object = TemporalController::createTemporalFile($Documento->pdf, '', true);
+            if ($Object->success) {
+                return ABSOLUTE_SAIA_ROUTE . $Object->route;
+            }
+        } catch (\Throwable $th) {
+            $log = [
+                'errorMessage' => $th->getMessage(),
+                'iddocumento' => $Documento->getPK()
+            ];
+            $message = "No se ha podido generar el pdf del documento con radicado: {$Documento->numero} (ID:{$Documento->getPK()})";
+            self::notifyAdministrator($message, $log);
+        }
+
+        return '#';
+    }
 }

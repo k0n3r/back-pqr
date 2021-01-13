@@ -61,7 +61,7 @@
         </div>
 
         <div class="card">
-            <!-- <img src="../../saia/app/modules/back_pqr/controllers/templates/encabezadoWs.jpeg"> -->
+            <!-- <img src="img/encabezadoWs.jpeg"> -->
             <?php if ($showLabel) : ?>
                 <div class="card-header text-center">
                     <div class="card-title">

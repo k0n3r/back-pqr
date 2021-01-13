@@ -3,11 +3,14 @@
 namespace App\Bundles\pqr\Services;
 
 use Saia\models\Funcionario;
+use Saia\models\formatos\Formato;
 use Saia\controllers\DateController;
 use Saia\controllers\documento\SaveFt;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Saia\controllers\SessionController;
+use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 
 class FtPqrService
 {
@@ -48,6 +51,54 @@ class FtPqrService
         return $this->FtPqr;
     }
 
+    /**
+     * Obtiene los campos a cargar en el adicionar
+     * de la respuesta
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    public function getDataToLoadResponse(): array
+    {
+
+        if ($Tercero = $this->FtPqr->Tercero) {
+            $destino = [
+                'id' => $Tercero->getPK(),
+                'text' => "{$Tercero->identificacion} - {$Tercero->nombre}"
+            ];
+        };
+
+        $Formato = Formato::findByAttributes([
+            'nombre' => 'pqr_respuesta'
+        ]);
+
+        if ($records = $Formato->getField('tipo_distribucion')->CampoOpciones) {
+            foreach ($records as $CampoOpciones) {
+                if ($CampoOpciones->llave == FtPqrRespuesta::DISTRIBUCION_ENVIAR_EMAIL) {
+                    $tipoDistribucion = $CampoOpciones->getPK();
+                    break;
+                }
+            }
+        }
+
+        if ($records = $Formato->getField('despedida')->CampoOpciones) {
+            foreach ($records as $CampoOpciones) {
+                if ($CampoOpciones->llave == FtPqrRespuesta::ATENTAMENTE_DESPEDIDA) {
+                    $despedida = $CampoOpciones->getPK();
+                    break;
+                }
+            }
+        }
+
+        return [
+            'iddocPqr' => $this->FtPqr->Documento->getPK(),
+            'destino' => $destino ?? 0,
+            'tipo_distribucion' => $tipoDistribucion ?? 0,
+            'despedida' => $despedida ?? 0,
+            'asunto' => "Respondiendo a la {$this->FtPqr->getFormat()->etiqueta} No {$this->FtPqr->Documento->numero}"
+        ];
+    }
 
     /**
      * Termina una PQR
@@ -85,6 +136,99 @@ class FtPqrService
         }
 
         return $rows;
+    }
+
+    /**
+     * Obtiene el email
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     * 
+     */
+    public function getHistoryForTimeline(): array
+    {
+
+        $rows = [];
+
+        $records = $this->FtPqr->getHistory('fecha asc');
+        $expirationDate = $this->getExpirationDate();
+        $addExpiration = false;
+
+        $rows[] = $this->getInitialRequestData();
+
+        foreach ($records as $PqrHistory) {
+            $action = DateController::convertDate($PqrHistory->fecha, 'Y-m-d');
+            $actionDate = new \DateTime($action);
+
+            if ($actionDate > $expirationDate && !$addExpiration) {
+                $rows[] =  $this->getDataFinish();
+                $addExpiration = true;
+            }
+
+            if ($row = $PqrHistory->getService()->getHistoryForTimeline()) {
+                $rows[] = $row;
+            }
+        }
+
+        if (!$addExpiration) {
+            $rows[] = $this->getDataFinish();
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Obtiene la fecha de expiracion
+     *
+     * @return DateTime
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getExpirationDate(): \DateTime
+    {
+        $expiration = DateController::convertDate($this->FtPqr->sys_fecha_vencimiento, 'Y-m-d');
+
+        return new \DateTime($expiration);
+    }
+
+    /**
+     * Retonar la informacion inicial de la solicitud para el de timeline
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getInitialRequestData(): array
+    {
+        return [
+            'iconPoint' => 'fa fa-map-marker',
+            'iconPointColor' => 'success',
+            'date' => DateController::convertDate($this->FtPqr->Documento->fecha),
+            'description' => "Se registra la solicitud No # {$this->FtPqr->Documento->numero}",
+            'url' => UtilitiesPqr::getRoutePdf($this->FtPqr->Documento)
+        ];
+    }
+
+    /**
+     * Obtiene los datoss de finalizacion de timeline
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getDataFinish(): array
+    {
+        $type = $this->FtPqr->getFieldValue('sys_tipo');
+        return [
+            'iconPoint' => 'fa fa-flag-checkered',
+            'iconPointColor' => 'success',
+            'date' => DateController::convertDate(
+                $this->getExpirationDate(),
+                DateController::PUBLIC_DATE_FORMAT
+            ),
+            'description' => "Fecha maxima para dar respuesta a la solicitud de tipo {$type}"
+        ];
     }
 
     /**

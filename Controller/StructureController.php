@@ -2,23 +2,23 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use Saia\controllers\CryptController;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class RequestProcessorController extends AbstractController
+/**
+ * @Route("/structure", name="structure_")
+ */
+class StructureController extends AbstractController
 {
 
     /**
-     * @Route("/components/allData", name="getAllData", methods={"GET"})
+     * @Route("/dataViewIndex", name="dataViewIndex", methods={"GET"})
      */
-    public function getAllData(
+    public function getDataViewIndex(
         ISaiaResponse $saiaResponse
     ): Response {
 
@@ -41,9 +41,9 @@ class RequestProcessorController extends AbstractController
     }
 
     /**
-     * @Route("/components/dataForEditTypes", name="getDataForEditTypes", methods={"GET"})
+     * @Route("/dataModalViewEditType", name="getDataModalViewEditType", methods={"GET"})
      */
-    public function getDataForEditTypes(
+    public function getDataModalViewEditType(
         ISaiaResponse $saiaResponse
     ): Response {
 
@@ -57,32 +57,5 @@ class RequestProcessorController extends AbstractController
         }
 
         return $saiaResponse->getResponse();
-    }
-
-    /**
-     * @Route("components/listForField", name="getListForField", methods={"GET"})
-     */
-    public function getListForField(
-        Request $request
-    ): JsonResponse {
-
-        $data = (new PqrService())->getListForField($request->get('data'));
-
-        return new JsonResponse($data);
-    }
-
-    /**
-     * Desencripta la informacion
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     */
-    public function decrypt(): array
-    {
-        $data = json_decode(CryptController::decrypt($this->request['dataCrypt']), true);
-
-        return [
-            'data' => $data
-        ];
     }
 }

@@ -14,7 +14,7 @@ $(function () {
         return;
     }
     
-    if (!localStorage.getItem('WsKey')) {
+    if (!localStorage.getItem('key')) {
         window.getCredentials();
     }
 
@@ -23,14 +23,13 @@ $(function () {
             source: function () {
                 let data = new Array();
                 $.ajax({
-                    url: window.baseUrl + `app/modules/back_pqr/app/request.php`,
+                    method:'get',
+                    url: window.baseUrl + `api/pqr/historyForTimeline`,
                     async: false,
                     data: {
-                        key: localStorage.getItem('WsKey'),
-                        token: localStorage.getItem('WsToken'),
-                        class: 'FtPqrController',
-                        method: 'getHistoryForTimeLine',
-                        data: {infoCryp: d}
+                        key: localStorage.getItem('key'),
+                        token: localStorage.getItem('token'),
+                        infoCryp: d
                     },
                 }).done((response) => {
                     if (!response.success) {

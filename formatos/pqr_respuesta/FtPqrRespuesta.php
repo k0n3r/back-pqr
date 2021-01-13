@@ -5,31 +5,24 @@ namespace App\Bundles\pqr\formatos\pqr_respuesta;
 use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
 use Saia\models\Funcionario;
-
-use App\Bundles\pqr\Services\models\PqrForm;
-
 use Saia\models\anexos\Anexos;
-
-use App\Bundles\pqr\Services\models\PqrHistory;
-use App\Bundles\pqr\formatos\pqr\FtPqr;
-use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Bundles\pqr\Services\models\PqrNotyMessage;
-
 use Saia\controllers\DateController;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
 use Saia\models\localidades\Municipio;
+use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Saia\controllers\SessionController;
 use Saia\models\formatos\CamposFormato;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
+use App\Bundles\pqr\helpers\UtilitiesPqr;
 use Saia\controllers\DistributionService;
-
-use App\Bundles\pqr\Services\controllers\FtPqrController;
-use App\Bundles\pqr\Services\controllers\PqrFormController;
-
+use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\PqrFormService;
 use Saia\controllers\functions\CoreFunctions;
-
+use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Bundles\pqr\Services\models\PqrNotyMessage;
+use App\Bundles\pqr\Services\PqrNotyMessageService;
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 
 class FtPqrRespuesta extends FtPqrRespuestaProperties
@@ -568,8 +561,8 @@ HTML;
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
             'name' => 'f2_email_respuesta'
         ])) {
-            $message = FtPqrController::resolveVariables($PqrNotyMessage->message_body, $this->FtPqr);
-            $subject = FtPqrController::resolveVariables($PqrNotyMessage->subject, $this->FtPqr);
+            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $this->FtPqr);
+            $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $this->FtPqr);
         }
 
         if ($this->sol_encuesta) {
@@ -663,7 +656,7 @@ HTML;
             'anterior' => $this->Documento->getPK()
         ]));
 
-        return PqrFormController::URLWSCALIFICACION . "index.html?d={$params}";
+        return PqrFormService::URLWSCALIFICACION . "index.html?d={$params}";
     }
 
     /**

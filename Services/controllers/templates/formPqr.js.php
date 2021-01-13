@@ -42,7 +42,8 @@ $(function () {
             });
 
             $.ajax({
-                url: baseUrl + `app/ws/save.php`,
+                method:'post',
+                url: baseUrl + `api/document`,
                 data,
             }).done((response) => {
                 if (response.success) {
@@ -94,7 +95,8 @@ $(function () {
             let data = window.getFormObject($('#formSearch').serializeArray());
 
             $.ajax({
-                url: baseUrl + `app/modules/back_pqr/app/search.php`,
+                method: "get",
+                url: baseUrl + `api/pqr/searchByNumber`,
                 data
             }).done((response) => {
                 $("#result").removeClass('d-none');

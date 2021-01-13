@@ -13,11 +13,35 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
+
+/**
+ * @Route("/{idft}", name="FtPqr_")
+ */
 class FtPqrController extends AbstractController
 {
 
     /**
-     * @Route("{idft}/dateForType", name="getDateForType", methods={"GET"})
+     * @Route("/dataToLoadResponse", name="getDataToLoadResponse", methods={"GET"})
+     */
+    public function getDataToLoadResponse(
+        int $idft,
+        ISaiaResponse $saiaResponse
+    ): Response {
+
+        try {
+            $data = (new FtPqr($idft))->getService()->getDataToLoadResponse();
+            $saiaResponse->replaceData($data);
+
+            $saiaResponse->setSuccess(1);
+        } catch (\Throwable $th) {
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * @Route("/dateForType", name="getDateForType", methods={"GET"})
      */
     public function getDateForType(
         int $idft,
@@ -46,7 +70,7 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @Route("{idft}/valuesForType", name="getValuesForType", methods={"GET"})
+     * @Route("/valuesForType", name="getValuesForType", methods={"GET"})
      */
     public function getValuesForType(
         int $idft,
@@ -87,7 +111,7 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @Route("{idft}/history", name="getHistory", methods={"GET"})
+     * @Route("/history", name="getHistory", methods={"GET"})
      */
     public function getHistory(
         int $idft
@@ -112,7 +136,7 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @Route("{idft}/updateType", name="updateType", methods={"PUT"})
+     * @Route("/updateType", name="updateType", methods={"PUT"})
      */
     public function updateType(
         int $idft,
@@ -140,7 +164,7 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @Route("{idft}/finish", name="finish", methods={"PUT"})
+     * @Route("/finish", name="finish", methods={"PUT"})
      */
     public function finish(
         int $idft,

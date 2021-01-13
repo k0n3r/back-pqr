@@ -8,7 +8,6 @@ if (file_exists($fileAdditionalFunctions)) {
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Saia\models\tarea\TareaEstado;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-
 use Saia\controllers\DateController;
 use Saia\models\documento\Documento;
 use Saia\models\busqueda\BusquedaComponente;

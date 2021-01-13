@@ -2,6 +2,8 @@
 
 namespace App\Bundles\pqr\Services;
 
+use Saia\controllers\functions\Header;
+use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
 
 class PqrNotyMessageService
@@ -84,5 +86,61 @@ class PqrNotyMessageService
         }
 
         return $data;
+    }
+
+    /**
+     * Resuelve y reemplaza las variables por los valores
+     *
+     * @param string $baseContent
+     * @param FtPqr $FtPqr
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2021
+     */
+    public static function resolveVariables(
+        string $baseContent,
+        FtPqr $FtPqr
+    ): string {
+        $functions = Header::getFunctionsFromString($baseContent);
+        $functions = str_replace(['{*', '*}'], '', $functions);
+
+        foreach ($functions as $variable) {
+            $value = call_user_func([FtPqrService::class, $variable], $FtPqr);
+            $baseContent = str_replace(
+                "{*{$variable}*}",
+                $value,
+                $baseContent
+            );
+        }
+
+        return $baseContent;
+    }
+
+    /**
+     * Obtiene el numero de la PQR
+     *
+     * @see resolveVariables
+     * @param FtPqr $FtPqr
+     * @return integer
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2021
+     */
+    public static function n_numeroPqr(FtPqr $FtPqr): int
+    {
+        return (int) $FtPqr->Documento->numero;
+    }
+
+    /**
+     * Obtiene la etiqueta el formulario PQR
+     *
+     * @see resolveVariables
+     * @param FtPqr $FtPqr
+     * @return integer
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2021
+     */
+    public static function n_nombreFormularioPqr(FtPqr $FtPqr): string
+    {
+        return $FtPqr->PqrForm->label;
     }
 }

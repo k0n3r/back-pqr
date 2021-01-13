@@ -216,14 +216,14 @@ class PqrFormFieldService
     }
 
     /**
-     * Retorna listado de valores
+     * Retorna listado de valores para los campos autocompletar
      *
      * @param array $data
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function getListField(array $data = []): array
+    public function getListDataForAutocomplete(array $data = []): array
     {
         $list = [];
 

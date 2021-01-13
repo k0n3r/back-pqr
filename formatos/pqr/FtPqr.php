@@ -5,14 +5,6 @@ namespace App\Bundles\pqr\formatos\pqr;
 use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
 use Saia\models\Funcionario;
-
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrBackup;
-use App\Bundles\pqr\Services\models\PqrHistory;
-use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Bundles\pqr\Services\models\PqrNotyMessage;
-
 use Saia\controllers\DateController;
 use Saia\controllers\TerceroService;
 use Saia\controllers\anexos\FileJson;
@@ -20,12 +12,16 @@ use Saia\controllers\CryptController;
 use Saia\controllers\SessionController;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
+use App\Bundles\pqr\helpers\UtilitiesPqr;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
-
-use App\Bundles\pqr\Services\controllers\FtPqrController;
-use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\Services\FtPqrService;
-use App\Bundles\pqr\Services\PqrFormFieldService;
+use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\models\PqrBackup;
+use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Services\models\PqrNotyMessage;
+use App\Bundles\pqr\Services\PqrNotyMessageService;
+use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 
 class FtPqr extends FtPqrProperties
 {
@@ -135,7 +131,7 @@ class FtPqr extends FtPqrProperties
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
             'name' => 'ws_noty_radicado'
         ])) {
-            $message = FtPqrController::resolveVariables($PqrNotyMessage->message_body, $this);
+            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $this);
         }
 
         $this->addTemporaryParameters([
@@ -424,8 +420,7 @@ class FtPqr extends FtPqrProperties
             case 'AutocompleteD';
             case 'AutocompleteM';
                 if ($this->$fieldName) {
-                    $value = (new PqrFormFieldService($PqrFormField))
-                        ->getListField(['id' => $this->$fieldName]);
+                    $value = $PqrFormField->getService()->getListDataForAutocomplete(['id' => $this->$fieldName]);
                 }
                 $data[$label] = $value ? $value[0]['text'] : '';
                 break;
@@ -540,8 +535,8 @@ class FtPqr extends FtPqrProperties
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
             'name' => 'f1_email_solicitante'
         ])) {
-            $message = FtPqrController::resolveVariables($PqrNotyMessage->message_body, $this);
-            $subject = FtPqrController::resolveVariables($PqrNotyMessage->subject, $this);
+            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $this);
+            $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $this);
         }
 
         $SendMailController = new SendMailController(
@@ -588,7 +583,7 @@ class FtPqr extends FtPqrProperties
 
         $options = '';
         if ($this->$name) {
-            $list = (new PqrFormFieldService($PqrFormField))->getListField(['id' => $this->$name]);
+            $list = $PqrFormField->getService()->getListDataForAutocomplete(['id' => $this->$name]);
             if ($list) {
                 $options .= "<option value='{$list[0]['id']}' selected='selected'>{$list[0]['text']}</option>";
             }

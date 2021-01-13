@@ -7,6 +7,7 @@ use Saia\models\Funcionario;
 use Saia\controllers\DateController;
 
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+use App\Bundles\pqr\Services\PqrHistoryService;
 
 class PqrHistory extends Model
 {
@@ -44,6 +45,18 @@ class PqrHistory extends Model
                 ],
             ],
         ];
+    }
+
+    /**
+     * Retorna el servicio
+     *
+     * @return PqrHistoryService
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2021
+     */
+    public function getService(): PqrHistoryService
+    {
+        return new PqrHistoryService($this);
     }
 
     /**

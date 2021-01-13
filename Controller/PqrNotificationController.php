@@ -10,10 +10,13 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Bundles\pqr\Services\models\PqrNotification;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+/**
+ * @Route("/notification", name="notification_") 
+ */
 class PqrNotificationController extends AbstractController
 {
     /**
-     * @Route("/notification", name="store", methods={"POST"}) 
+     * @Route("", name="store", methods={"POST"}) 
      */
     public function store(
         Request $request,
@@ -46,7 +49,7 @@ class PqrNotificationController extends AbstractController
     }
 
     /**
-     * @Route("/notification/{id}", name="update", methods={"PUT"})
+     * @Route("/{id}", name="update", methods={"PUT"})
      */
     public function update(
         int $id,
@@ -78,7 +81,7 @@ class PqrNotificationController extends AbstractController
     }
 
     /**
-     * @Route("/notification/{id}", name="destroy", methods={"DELETE"})
+     * @Route("/{id}", name="destroy", methods={"DELETE"})
      */
     public function destroy(
         int $id,

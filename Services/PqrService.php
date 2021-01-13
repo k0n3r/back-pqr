@@ -24,34 +24,123 @@ class PqrService
     }
 
     /**
-     * Obtiene el Listado de Opciones del campo
+     * Obtiene los datos 
      *
-     * @param array $request
+     * @param string $type
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2021
      */
-    public function getListForField(array $request): array
+    public function findDataForAutocomplete(string $type, array $data): array
     {
-        $data = [
-            'results' => []
-        ];
+        $list = [];
 
-        if (!$request['name']) {
-            return $data;
+        switch ($type) {
+            case 'dependencia':
+                $records = $this->getListDependency($data);
+                break;
+            case 'pais':
+                $records = $this->getListPais($data);
+                break;
+            case 'departamento':
+                $records = $this->getListDepartamento($data);
+                break;
         }
 
-        if (!$PqrFormField = PqrFormField::findByAttributes([
-            'name' => $request['name'],
-        ])) {
-            return $data;
+        foreach ($records as $row) {
+            $list[] = [
+                'id' => $row['id'],
+                'text' => $row['nombre']
+            ];
         }
 
-        return [
-            'results' => (new PqrFormFieldService($PqrFormField))
-                ->getListField($request)
-        ];
+        return $list;
     }
+
+    /**
+     * Obtiene una lista de dependencias
+     *
+     * @param array $data
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getListDependency(array $data): array
+    {
+        $Qb = DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder()
+            ->select('iddependencia as id,nombre')
+            ->from('dependencia')
+            ->where('estado=1')
+            ->orderBy('nombre', 'ASC')
+            ->setFirstResult(0)
+            ->setMaxResults(40);
+
+        if ($data['term']) {
+            $Qb->andWhere('nombre like :nombre')
+                ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
+        }
+        return $Qb->execute()->fetchAll();
+    }
+
+    /**
+     * Obtiene una lista de paises
+     *
+     * @param array $data
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getListPais(array $data): array
+    {
+        $Qb = DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder()
+            ->select('idpais as id,nombre')
+            ->from('pais')
+            ->where('estado=1')
+            ->orderBy('nombre', 'ASC')
+            ->setFirstResult(0)
+            ->setMaxResults(40);
+
+        if ($data['term']) {
+            $Qb->andWhere('nombre like :nombre')
+                ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
+        }
+        return $Qb->execute()->fetchAll();
+    }
+
+    /**
+     * Obtiene una lista de departamentos
+     *
+     * @param array $data
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date 2020
+     */
+    private function getListDepartamento(array $data): array
+    {
+        $Qb = DatabaseConnection::getDefaultConnection()
+            ->createQueryBuilder()
+            ->select('iddepartamento as id,nombre')
+            ->from('departamento')
+            ->where('estado=1')
+            ->orderBy('nombre', 'ASC')
+            ->setFirstResult(0)
+            ->setMaxResults(40);
+
+        if ($data['idpais']) {
+            $Qb->andWhere('pais_idpais=:pais')
+                ->setParameter(':pais', $data['idpais'], Type::getType('integer'));
+        }
+
+        if ($data['term']) {
+            $Qb->andWhere('nombre like :nombre')
+                ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
+        }
+
+        return $Qb->execute()->fetchAll();
+    }
+
 
     /**
      * Obtiene los valores que se cargan en el modal

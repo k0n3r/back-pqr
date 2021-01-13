@@ -21,8 +21,8 @@ use App\Bundles\pqr\Services\controllers\AddEditFormat\IAddEditFormat;
 
 class PqrFormService
 {
-    const URLWSPQR = PROTOCOLO_CONEXION . DOMINIO . '/ws/pqr/';
-    const URLWSCALIFICACION = PROTOCOLO_CONEXION . DOMINIO . '/ws/pqr_calificacion/';
+    const URLWSPQR = PROTOCOLO_CONEXION . DOMINIO . '/ws/pqr/index.html';
+    const URLWSCALIFICACION = PROTOCOLO_CONEXION . DOMINIO . '/ws/pqr_calificacion/index.html';
 
     private PqrForm $PqrForm;
     private string $errorMessage;

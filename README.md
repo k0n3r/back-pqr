@@ -25,7 +25,7 @@ _Instalación frontEnd:_
 git submodule add --force https://github.com/k0n3r/front-pqr.git public/views/modules/pqr --name "front-pqr"
 
 #Ingresamos al directorio del submodulo
-cd views/modules/pqr/
+cd public/views/modules/pqr/
 
 #Instalamos las librerias
 npm install
@@ -37,28 +37,20 @@ npm run build
 
 _Instalación backEnd:_
 
+Desde la raiz del proyecto se corre nuevamente los siguientes comandos.
+
 ```
 #Se clona el repositorio
 git submodule add --force https://github.com/k0n3r/back-pqr.git src/Bundles/pqr --name "back-pqr"
 
-#Se ingresa al directorio
-cd app/
-
 #Se actualizan las clases y el autoload
 composer dump-autoload -o
 
-#Ingresamos al directorio de las migraciones del submodulo
-cd modules/back_pqr/migrations/
+#Ejecutamos las migraciones
+php bin/console doctrine:migrations:migrate
 
-#Ejecutamos las migraciones (Linux)
-../../../vendor/bin/doctrine-migrations migrate
-
-#Ejecutamos las migraciones (Windows)
-php ../../../vendor/doctrine/migrations/bin/doctrine-migrations.php migrations:migrate
-
-#Volvemos a la raiz y damos permisos
-cd ../../../../
-chmod -R 775 *
+#Actualizamos permisos
+chmod -R 770 *
 
 ```
 

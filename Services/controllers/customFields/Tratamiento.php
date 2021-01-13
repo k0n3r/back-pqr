@@ -3,7 +3,6 @@
 namespace App\Bundles\pqr\Services\controllers\customFields;
 
 use App\Bundles\pqr\Services\models\PqrFormField;
-
 use Saia\controllers\generator\webservice\IWsFields;
 
 class Tratamiento implements IWsFields
@@ -17,7 +16,6 @@ class Tratamiento implements IWsFields
      * @date 2020
      */
     protected PqrFormField $PqrFormField;
-
 
     public function __construct(PqrFormField $PqrFormField)
     {

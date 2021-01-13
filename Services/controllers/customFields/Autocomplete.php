@@ -59,14 +59,14 @@ class Autocomplete extends Field implements IWsFields
           multiple: false,
           ajax: {
             delay: 400,
-            url: baseUrl+`api/pqr/components/listForField`,
+            url: baseUrl+`api/pqr/components/autocomplete/list`,
             dataType: "json",
             data: function(p) {
               var query = {
                 key: localStorage.getItem("key"),
                 token: localStorage.getItem("token"),
+                name: '{$this->CamposFormato->nombre}',
                 data: {
-                  name: '{$this->CamposFormato->nombre}',
                   term: p.term
                 }
               };

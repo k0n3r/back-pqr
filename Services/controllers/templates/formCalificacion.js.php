@@ -51,7 +51,8 @@ $(function () {
             });
 
             $.ajax({
-                url: baseUrl + `app/ws/save.php`,
+                method:'post',
+                url: baseUrl + `api/document`,
                 data,
             }).done((response) => {
                 if (response.success) {
@@ -106,12 +107,11 @@ $(function () {
 
     function decrypt(d){
         $.ajax({
-            url: baseUrl + `app/modules/back_pqr/app/request.php`,
+            method:'get',
+            url: baseUrl + `api/pqr/decrypt`,
             async: false,
             data:{
-                class: 'RequestProcessorController',
-                method: 'decrypt',
-                data:{dataCrypt: d}
+                dataCrypt: d
             }
         }).done((response) => {
             localStorage.setItem('WsFtPqr', response.data.ft_pqr_respuesta);

@@ -5,11 +5,9 @@ namespace App\Bundles\pqr\Services\controllers;
 use Saia\core\model\Model;
 use Saia\models\Funcionario;
 use Saia\models\tarea\Tarea;
-
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-
 use Saia\models\documento\Documento;
 use Saia\controllers\SessionController;
 use Saia\models\tarea\IExternalEventsTask;
