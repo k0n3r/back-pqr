@@ -2,8 +2,6 @@
 
 use Saia\controllers\documento\RutaService;
 use Saia\models\busqueda\BusquedaComponente;
-use Saia\models\formatos\CampoSeleccionados;
-
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 
 /**
@@ -87,66 +85,4 @@ function viewCalificacion(int $idft): string
     </div>
 HTML;
     return $enlace;
-}
-
-//REPORTE CALIFICACION
-
-/**
- * Obtiene el filtro por las calificaciones
- *
- * @return string
- * @author Andres Agudelo <andres.agudelo@cerok.com>
- * @date 2020
- */
-function filter_calificacion(): string
-{
-    $idft = $_REQUEST['idft_pqr_respuesta'];
-    if ($idft) {
-        return "ft_pqr_respuesta={$idft}";
-    }
-    return '1=1';
-}
-
-/**
- * Obtiene la calificacion sobre la gestion
- *
- * @param integer $iddocumento
- * @param integer $fkCampoOpciones
- * @return string
- * @author Andres Agudelo <andres.agudelo@cerok.com>
- * @date 2020
- */
-function getGestion(int $iddocumento, int $fkCampoOpciones): string
-{
-    $calGestion = '';
-    if ($valor = CampoSeleccionados::findColumn('valor', [
-        'fk_campo_opciones' => $fkCampoOpciones,
-        'fk_documento' => $iddocumento
-    ])) {
-        $calGestion = $valor[0];
-    }
-
-    return $calGestion;
-}
-
-/**
- * Obtiene la calificacion sobre el servicio
- *
- * @param integer $iddocumento
- * @param integer $fkCampoOpciones
- * @return string
- * @author Andres Agudelo <andres.agudelo@cerok.com>
- * @date 2020
- */
-function getServicio(int $iddocumento, int $fkCampoOpciones): string
-{
-    $calExperiencia = '';
-    if ($valor = CampoSeleccionados::findColumn('valor', [
-        'fk_campo_opciones' => $fkCampoOpciones,
-        'fk_documento' => $iddocumento
-    ])) {
-        $calExperiencia = $valor[0];
-    }
-
-    return $calExperiencia;
 }

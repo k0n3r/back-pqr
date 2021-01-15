@@ -126,6 +126,7 @@ class FtPqr extends FtPqrProperties
      */
     public function afterRad(): bool
     {
+
         $message = "<br/>Su solicitud ha sido generada con el número de radicado <strong>{$this->Documento->numero}</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
 
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([

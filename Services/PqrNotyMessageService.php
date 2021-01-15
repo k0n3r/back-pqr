@@ -105,7 +105,7 @@ class PqrNotyMessageService
         $functions = str_replace(['{*', '*}'], '', $functions);
 
         foreach ($functions as $variable) {
-            $value = call_user_func([FtPqrService::class, $variable], $FtPqr);
+            $value = call_user_func([self::class, $variable], $FtPqr);
             $baseContent = str_replace(
                 "{*{$variable}*}",
                 $value,

@@ -656,7 +656,7 @@ HTML;
             'anterior' => $this->Documento->getPK()
         ]));
 
-        return PqrFormService::URLWSCALIFICACION . "index.html?d={$params}";
+        return PqrFormService::URLWSCALIFICACION . "?d={$params}";
     }
 
     /**
