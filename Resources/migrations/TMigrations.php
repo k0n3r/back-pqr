@@ -17,7 +17,7 @@ trait TMigrations
     protected function init()
     {
         $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like 'ADMINISTRADOR'";
-        $perfil = $this->connection->fetchAll($sql);
+        $perfil = $this->connection->fetchAllAssociative($sql);
         if ($perfil) {
             $this->idperfil = (int) $perfil[0]['idperfil'];
         } else {
@@ -25,7 +25,7 @@ trait TMigrations
         }
 
         $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like 'ADMINISTRADOR INTERNO'";
-        $perfil2 = $this->connection->fetchAll($sql);
+        $perfil2 = $this->connection->fetchAllAssociative($sql);
         if ($perfil2) {
             $this->idperfilInterno = (int) $perfil2[0]['idperfil'];
         } else {
@@ -45,7 +45,7 @@ trait TMigrations
     protected function createModulo(array $data, string $search): int
     {
         $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '{$search}'";
-        $modulo = $this->connection->fetchAll($sql);
+        $modulo = $this->connection->fetchAllAssociative($sql);
 
         if ($modulo) {
             $id = $modulo[0]['idmodulo'];
@@ -66,7 +66,7 @@ trait TMigrations
     protected function createPermiso(int $idmodulo, int $idperfil): void
     {
         $sql = "SELECT idpermiso_perfil FROM permiso_perfil WHERE modulo_idmodulo={$idmodulo} AND perfil_idperfil={$idperfil}";
-        $permiso = $this->connection->fetchAll($sql);
+        $permiso = $this->connection->fetchAllAssociative($sql);
 
         if (!$permiso) {
             $this->connection->insert('permiso_perfil', [
@@ -79,7 +79,7 @@ trait TMigrations
     protected function deleteModulo(string $search): void
     {
         $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '{$search}'";
-        $modulo = $this->connection->fetchAll($sql);
+        $modulo = $this->connection->fetchAllAssociative($sql);
 
         if ($modulo[0]['idmodulo']) {
             $id = $modulo[0]['idmodulo'];
@@ -96,7 +96,7 @@ trait TMigrations
     protected function createBusqueda(array $data, string $search): int
     {
         $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '{$search}'";
-        $record = $this->connection->fetchAll($sql);
+        $record = $this->connection->fetchAllAssociative($sql);
 
         if ($record) {
             $id = $record[0]['idbusqueda'];
@@ -115,7 +115,7 @@ trait TMigrations
     {
         $sql = "SELECT idbusqueda_componente FROM busqueda_componente
         WHERE busqueda_idbusqueda={$idbusqueda} AND lower(nombre) like '{$search}'";
-        $record = $this->connection->fetchAll($sql);
+        $record = $this->connection->fetchAllAssociative($sql);
 
         if ($record) {
             $id = $record[0]['idbusqueda_componente'];
@@ -135,7 +135,7 @@ trait TMigrations
     {
         $sql = "SELECT idbusqueda_condicion FROM busqueda_condicion
         WHERE fk_busqueda_componente={$idbusquedaComponente} AND lower(etiqueta_condicion) like '{$search}'";
-        $record = $this->connection->fetchAll($sql);
+        $record = $this->connection->fetchAllAssociative($sql);
 
         if ($record) {
             $id = $record[0]['idbusqueda_condicion'];
@@ -153,7 +153,7 @@ trait TMigrations
     protected function deleteBusqueda(string $search): void
     {
         $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '{$search}'";
-        $busqueda = $this->connection->fetchAll($sql);
+        $busqueda = $this->connection->fetchAllAssociative($sql);
 
         if ($busqueda) {
             $idbusqueda = $busqueda[0]['idbusqueda'];
@@ -162,7 +162,7 @@ trait TMigrations
             ]);
 
             $sql = "SELECT idbusqueda_componente FROM busqueda_componente WHERE busqueda_idbusqueda={$idbusqueda}";
-            $records = $this->connection->fetchAll($sql);
+            $records = $this->connection->fetchAllAssociative($sql);
 
             foreach ($records as $busquedaComponente) {
                 $idbusquedaComponente = $busquedaComponente['idbusqueda_componente'];
@@ -181,7 +181,7 @@ trait TMigrations
     {
 
         $sql = "SELECT idformato FROM formato WHERE nombre like '{$formatName}'";
-        $data = $this->connection->executeQuery($sql)->fetchAll();
+        $data = $this->connection->executeQuery($sql)->fetchAllAssociative();
         if (!$data[0]['idformato']) {
             $this->abortIf(true, "No se encontro el formato {$formatName}");
         }

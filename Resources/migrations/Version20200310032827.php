@@ -30,14 +30,14 @@ final class Version20200310032827 extends AbstractMigration
     protected function createFormat()
     {
         $sql = "SELECT idcontador FROM contador WHERE nombre like 'radicacion_salida'";
-        $contador = $this->connection->executeQuery($sql)->fetchAll();
+        $contador = $this->connection->fetchAllAssociative($sql);
 
         if (!$contador[0]['idcontador']) {
             $this->abortIf(true, "El contador radicacion_salida NO existe");
         }
 
         $sql = "SELECT idfuncionario FROM funcionario WHERE login='cerok'";
-        $funcionario = $this->connection->executeQuery($sql)->fetchAll();
+        $funcionario = $this->connection->fetchAllAssociative($sql);
 
         if (!$funcionario[0]['idfuncionario']) {
             $this->abortIf(true, "El funcionario cerok NO existe");

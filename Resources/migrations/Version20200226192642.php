@@ -197,7 +197,7 @@ final class Version20200226192642 extends AbstractMigration
 
         $nombre = PqrForm::NOMBRE_PANTALLA_GRAFICO;
         $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE lower(nombre) like '{$nombre}'";
-        $pantallaGrafico = $this->connection->fetchAll($sql);
+        $pantallaGrafico = $this->connection->fetchAllAssociative($sql);
 
         $idPantallaGrafico = $pantallaGrafico[0]['idpantalla_grafico'];
 
@@ -207,12 +207,6 @@ final class Version20200226192642 extends AbstractMigration
             'enlace' => 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector": "iframe","url": "views/buzones/listado_componentes.php?searchId=' . $idbusqueda . '"},{"kConnector": "iframe","url": "views/graficos/dashboard.php?screen=' . $idPantallaGrafico . '","kTitle": "Indicadores"}]',
         ];
         $this->createModulo($data, 'indicadores_pqr');
-
-        // $this->connection->update('grafico', [
-        //     'fk_busqueda_componente' => $idbusquedaComponente
-        // ], [
-        //     'fk_pantalla_grafico' => $idPantallaGrafico
-        // ]);
     }
 
 

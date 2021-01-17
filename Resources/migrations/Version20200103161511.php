@@ -145,7 +145,7 @@ final class Version20200103161511 extends AbstractMigration
     protected function getDataPqrForms(): array
     {
         $sql = "SELECT idcontador FROM contador WHERE nombre='radicacion_entrada'";
-        $contador = $this->connection->fetchAll($sql);
+        $contador = $this->connection->fetchAllAssociative($sql);
 
         if (!$contador[0]['idcontador']) {
             $this->abortIf(true, 'El contador Externo-Interno NO existe');

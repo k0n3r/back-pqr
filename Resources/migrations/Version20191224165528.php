@@ -255,13 +255,13 @@ final class Version20191224165528 extends AbstractMigration
     protected function validateCreation(): void
     {
         $sql = "SELECT idformato FROM formato WHERE nombre='pqr' OR nombre_tabla='ft_pqr'";
-        $exist = $this->connection->fetchAll($sql);
+        $exist = $this->connection->fetchAllAssociative($sql);
         if ($exist) {
             $this->abortIf(true, "Ya existe el formato PQR");
         }
 
         $sql = "SELECT idbusqueda FROM busqueda WHERE nombre='reporte_pqr'";
-        $exist = $this->connection->fetchAll($sql);
+        $exist = $this->connection->fetchAllAssociative($sql);
         if ($exist) {
             $this->abortIf(true, "Ya existe un reporte de PQR");
         }
@@ -270,7 +270,7 @@ final class Version20191224165528 extends AbstractMigration
     protected function createRadicadorWeb(): void
     {
         $sqlCargo = "SELECT idcargo FROM cargo WHERE lower(nombre) like 'radicador web'";
-        $cargo = $this->connection->fetchAll($sqlCargo);
+        $cargo = $this->connection->fetchAllAssociative($sqlCargo);
         if (!$cargo) {
             $this->connection->insert('cargo', [
                 'nombre' => 'Radicador Web',
@@ -287,7 +287,7 @@ final class Version20191224165528 extends AbstractMigration
         }
 
         $sqlFuncionario = "SELECT idfuncionario FROM funcionario WHERE login='radicador_web'";
-        $funcionario = $this->connection->fetchAll($sqlFuncionario);
+        $funcionario = $this->connection->fetchAllAssociative($sqlFuncionario);
         if (!$funcionario) {
             $this->connection->insert('funcionario', [
                 'login' => 'radicador_web',
@@ -311,7 +311,7 @@ final class Version20191224165528 extends AbstractMigration
 
         $sqlDependenciaCargo = "SELECT iddependencia_cargo FROM dependencia_cargo 
         WHERE funcionario_idfuncionario={$idfuncionario} AND cargo_idcargo={$idcargo}";
-        $dependenciaCargo = $this->connection->fetchAll($sqlDependenciaCargo);
+        $dependenciaCargo = $this->connection->fetchAllAssociative($sqlDependenciaCargo);
 
         if ($dependenciaCargo) {
             $this->connection->update('dependencia_cargo', [
@@ -322,7 +322,7 @@ final class Version20191224165528 extends AbstractMigration
             ]);
         } else {
             $sqlDependencia = "SELECT iddependencia FROM dependencia WHERE cod_padre=0 OR cod_padre IS NULL";
-            $dependencia = $this->connection->fetchAll($sqlDependencia);
+            $dependencia = $this->connection->fetchAllAssociative($sqlDependencia);
             if (!$dependencia) {
                 $this->abortIf(true, "No se encuentra la dependencia principal");
             }
@@ -383,7 +383,7 @@ final class Version20191224165528 extends AbstractMigration
 
         foreach ($screen as $name) {
             $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE nombre='{$name}'";
-            $data = $this->connection->fetchColumn($sql);
+            $data = $this->connection->fetchOne($sql);
 
             if ($data['idpantalla_grafico']) {
                 $this->connection->delete('pantalla_grafico', [
@@ -391,7 +391,7 @@ final class Version20191224165528 extends AbstractMigration
                 ]);
 
                 $sql = "SELECT idgrafico FROM grafico WHERE fk_pantalla_grafico='{$data['idpantalla_grafico']}'";
-                $records = $this->connection->fetchAll($sql);
+                $records = $this->connection->fetchAllAssociative($sql);
 
                 foreach ($records as $graphic) {
                     $this->connection->delete('grafico_serie', [
