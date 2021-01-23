@@ -67,7 +67,7 @@ class PqrFormFieldService
         $PqrForm = new PqrForm($data['fk_pqr_form']);
 
         $defaultFields = [
-            'name' => $this->generateName($data['label']),
+            'name' => $this->generateName(trim(strtolower($data['label']))),
             'required' => 0,
             'show_anonymous' => 0,
             'fk_pqr_form' => $PqrForm->getPK(),
@@ -160,12 +160,15 @@ class PqrFormFieldService
      */
     private function generateName(string $label, int $pref = 0): string
     {
-        $label = $this->excludeReservedWords($label);
-        $cadena = trim(preg_replace('/[^a-z]/', '_', strtolower($label)));
+        $cadena = trim(preg_replace('/[^a-z]/', '_', $label), '_');
         $cadena = implode('_', array_filter(explode('_', $cadena)));
-        $cadena = trim(substr($cadena, 0, 20), '_');
+        $cadena = trim(substr($cadena, 0, 15), '_');
 
         $name = $pref ? "{$cadena}_{$pref}" : $cadena;
+
+        if ($this->isReservedWords($name)) {
+            $name = $pref ? "{$cadena}_{$pref}" : "{$cadena}_1";
+        }
 
         if (PqrFormField::findAllByAttributes([
             'name' => $name
@@ -186,17 +189,18 @@ class PqrFormFieldService
      * Palabras reservadas que no se deben usar
      *
      * @param string $label
-     * @return string
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2021
      */
-    private function excludeReservedWords(string $label): string
+    private function isReservedWords(string $label): bool
     {
         $reservedWords = [
-            'select', 'from', 'where', 'uniq', 'numero', 'fecha'
+            'select', 'from', 'where', 'and', 'in', 'or', 'like', 'is',
+            'system', 'uniq', 'numero', 'fecha', 'idft'
         ];
 
-        return in_array($label, $reservedWords) ? $label . "_" : $label;
+        return in_array($label, $reservedWords);
     }
 
     /**

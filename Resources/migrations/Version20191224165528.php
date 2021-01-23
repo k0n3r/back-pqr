@@ -150,7 +150,7 @@ final class Version20191224165528 extends AbstractMigration
                     array_merge($dataModule, ['cod_padre' => $id]),
                     $name
                 );
-                if ($child) {
+                if (isset($child)) {
                     $this->generateModules($child, $idmodulo);
                 }
             }

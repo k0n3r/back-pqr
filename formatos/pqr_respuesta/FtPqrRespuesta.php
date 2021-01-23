@@ -53,7 +53,11 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         if (!$this->PqrForm = PqrForm::getPqrFormActive()) {
             throw new \Exception("No se encuentra el formulario activo", 200);
         }
-        $this->Funcionario = SessionController::getUser();
+
+        //TODO: Al Leer el QR se invoca el contructor
+        if (SessionController::hasActiveSession()) {
+            $this->Funcionario = SessionController::getUser();
+        }
     }
 
     /**
@@ -230,6 +234,10 @@ HTML;
 
                     <tr>
                         <td colspan="2">Cordial saludo:</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="2">&nbsp;</td>
                     </tr>
                 </tbody>
             </table>
