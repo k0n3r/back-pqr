@@ -12,7 +12,6 @@ use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
 use Saia\controllers\generator\webservice\WsFt;
 use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\PqrNotyMessageService;
 use Saia\controllers\generator\webservice\WsGenerator;
 use App\Bundles\pqr\Services\controllers\WebservicePqr;
 use App\Bundles\pqr\Services\controllers\WebserviceCalificacion;
@@ -342,7 +341,7 @@ class PqrFormService
     {
         $FormatGenerator = new FormatGenerator($Formato);
         $FormatGenerator->generate();
-        $FormatGenerator->createModule();
+        $Formato->getService()->createUpdateModule();
 
         return true;
     }
