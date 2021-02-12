@@ -685,7 +685,7 @@ HTML;
                 'nombre' => '-',
                 'identificacion' => -1,
                 'tipo' => Tercero::TIPO_NATURAL,
-                'tipo_identificacion' => 'CC',
+                'tipo_identificacion' => Tercero::TIPO_IDENTIFICACION_CC,
                 'correo' => $this->sys_email
             ];
             foreach ($config['tercero'] as $row) {
@@ -709,8 +709,9 @@ HTML;
 
             $Tercero ??= new Tercero();
             $TerceroService = new TerceroService($Tercero);
-            $TerceroService->update($data);
-
+            if(!$TerceroService->save($data)){
+                return false;
+            }
             $this->sys_tercero = $TerceroService->getModel()->getPK();
             $this->update();
         }
