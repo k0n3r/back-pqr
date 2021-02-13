@@ -232,6 +232,12 @@ class PqrFormService
             return false;
         }
 
+        $formatNameC = "CALIFICACIÓN ({$this->PqrForm->label})";
+        if ($FormatoC->etiqueta != $formatNameC) {
+            $FormatoC->etiqueta = $formatNameC;
+            $FormatoC->save();
+        }
+
         if (!$this->generateForm($FormatoC)) {
             $this->errorMessage = "No fue posible generar el formulario: {$FormatoC->etiqueta} ";
             return false;
@@ -341,7 +347,6 @@ class PqrFormService
     {
         $FormatGenerator = new FormatGenerator($Formato);
         $FormatGenerator->generate();
-        $Formato->getService()->createUpdateModule();
 
         return true;
     }

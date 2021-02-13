@@ -2,6 +2,8 @@
 
 namespace App\Bundles\pqr\formatos\pqr;
 
+use DateTime;
+use Exception;
 use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
 use Saia\models\Funcionario;
@@ -13,7 +15,6 @@ use Saia\controllers\SessionController;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Bundles\pqr\Services\FtPqrService;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrBackup;
@@ -35,19 +36,24 @@ class FtPqr extends FtPqrProperties
     public PqrForm $PqrForm;
     private Funcionario $Funcionario;
 
+
     public function __construct($id = null)
     {
+        $this->PqrForm = PqrForm::getInstance();
+        $this->setFuncionario(SessionController::getUser());
+
         parent::__construct($id);
-        if (!$this->PqrForm = PqrForm::getPqrFormActive()) {
-            throw new \Exception("No se encuentra el formulario activo", 200);
-        }
-        $this->Funcionario = SessionController::getUser();
 
-        $PqrFormField = $this->PqrForm->getRow('sys_subtipo');
+    }
 
-        $this->addRouteParams([
-            'sys_subtipo' => (int) $PqrFormField->active
-        ]);
+    public function getFuncionario(): Funcionario
+    {
+        return $this->Funcionario;
+    }
+
+    public function setFuncionario(Funcionario $Funcionario): void
+    {
+        $this->Funcionario = $Funcionario;
     }
 
     /**
@@ -55,7 +61,7 @@ class FtPqr extends FtPqrProperties
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     protected function defineMoreAttributes(): array
     {
@@ -88,7 +94,7 @@ class FtPqr extends FtPqrProperties
      *
      * @return FtPqrService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     public function getService(): FtPqrService
     {
@@ -96,7 +102,7 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
-     *@inheritDoc
+     * @inheritDoc
      */
     public function afterAdd(): bool
     {
@@ -104,7 +110,7 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
-     *@inheritDoc
+     * @inheritDoc
      */
     public function afterEdit(): bool
     {
@@ -112,7 +118,7 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
-     *@inheritDoc
+     * @inheritDoc
      */
     public function beforeRad(): bool
     {
@@ -122,22 +128,10 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
-     *@inheritDoc
+     * @inheritDoc
      */
     public function afterRad(): bool
     {
-
-        $message = "<br/>Su solicitud ha sido generada con el número de radicado <strong>{$this->Documento->numero}</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
-
-        if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
-            'name' => 'ws_noty_radicado'
-        ])) {
-            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $this);
-        }
-
-        $this->addTemporaryParameters([
-            'message' => $message
-        ]);
         return $this->sendNotifications() && $this->notifyEmail();
     }
 
@@ -145,8 +139,9 @@ class FtPqr extends FtPqrProperties
      * Carga todo el mostrar del formulario
      *
      * @return string
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function showContent(): string
     {
@@ -168,7 +163,7 @@ class FtPqr extends FtPqrProperties
                     Puede hacer seguimiento en la opción CONSULTAR MI ' . $labelPQR . ' de nuestro sitio Web.
                 </p>
             </td>
-            <td style="width:50%;text-align:center">' . $Qr  . '<br/>' . $text . ' </td>
+            <td style="width:50%;text-align:center">' . $Qr . '<br/>' . $text . ' </td>
         </tr>
         <tr><td colspan="2">&nbsp;</td></tr>';
         foreach ($data as $key => $value) {
@@ -187,7 +182,7 @@ class FtPqr extends FtPqrProperties
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getPqrAnswers(): array
     {
@@ -206,8 +201,9 @@ class FtPqr extends FtPqrProperties
      *
      * @param integer $idCamposFormato
      * @return string
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function autocompleteD(int $idCamposFormato): string
     {
@@ -223,8 +219,9 @@ class FtPqr extends FtPqrProperties
      *
      * @param integer $idCamposFormato
      * @return string
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function autocompleteM(int $idCamposFormato): string
     {
@@ -240,8 +237,9 @@ class FtPqr extends FtPqrProperties
      * el tiempo pendiente por responder la PQR
      *
      * @return string
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getColorExpiration(): string
     {
@@ -249,8 +247,8 @@ class FtPqr extends FtPqrProperties
             return 'Fecha vencimiento no configurada';
         }
 
-        $now = $this->sys_fecha_terminado ? new \DateTime($this->sys_fecha_terminado) : new \DateTime();
-        $diff = $now->diff(new \DateTime($this->sys_fecha_vencimiento));
+        $now = $this->sys_fecha_terminado ? new DateTime($this->sys_fecha_terminado) : new DateTime();
+        $diff = $now->diff(new DateTime($this->sys_fecha_vencimiento));
 
         $color = "success";
         if ($diff->invert || $diff->days <= self::VENCIMIENTO_ROJO) {
@@ -271,8 +269,9 @@ class FtPqr extends FtPqrProperties
      * Muestra la fecha finalizacion
      *
      * @return string
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getEndDate(): string
     {
@@ -290,8 +289,9 @@ class FtPqr extends FtPqrProperties
      * Muestra los dias de retraso al solucionar la pqr
      *
      * @return string
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getDaysLate(): string
     {
@@ -303,8 +303,8 @@ class FtPqr extends FtPqrProperties
             return 'Fecha fin no configurada';
         }
 
-        $now = new \DateTime($this->sys_fecha_terminado);
-        $diff = $now->diff(new \DateTime($this->sys_fecha_vencimiento));
+        $now = new DateTime($this->sys_fecha_terminado);
+        $diff = $now->diff(new DateTime($this->sys_fecha_vencimiento));
 
         $dias = 0;
         if ($diff->invert) {
@@ -318,15 +318,16 @@ class FtPqr extends FtPqrProperties
      * Muestra los dias transcurridos desde la radicacion hasta la fecha actual
      *
      * @return string
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getDaysWait(): string
     {
-        $now = !$this->sys_fecha_terminado ? new \DateTime()
-            : new \DateTime($this->sys_fecha_terminado);
+        $now = !$this->sys_fecha_terminado ? new DateTime()
+            : new DateTime($this->sys_fecha_terminado);
 
-        $diff = $now->diff(new \DateTime($this->Documento->fecha));
+        $diff = $now->diff(new DateTime($this->Documento->fecha));
 
         return $diff->days;
     }
@@ -336,8 +337,9 @@ class FtPqr extends FtPqrProperties
      *
      * @param string $name
      * @return string|null
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getValueForReport(string $name): ?string
     {
@@ -350,8 +352,9 @@ class FtPqr extends FtPqrProperties
      * Genera el backup del formulario
      *
      * @return boolean
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function createBackup(): bool
     {
@@ -360,7 +363,7 @@ class FtPqr extends FtPqrProperties
             'fk_pqr' => $this->getPK(),
             'data_json' => json_encode($this->getDataRow())
         ])) {
-            throw new \Exception("No fue posible registrar el backup", 1);
+            throw new Exception("No fue posible registrar el backup", 1);
         }
         return true;
     }
@@ -369,8 +372,9 @@ class FtPqr extends FtPqrProperties
      * Obtiene las valores del modelo para guardarlos en el backup
      *
      * @return array
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getDataRow(): array
     {
@@ -382,7 +386,7 @@ class FtPqr extends FtPqrProperties
         }
 
         $Fields = $this->PqrForm->PqrFormFields;
-        foreach ($Fields as  $PqrFormField) {
+        foreach ($Fields as $PqrFormField) {
             if ($PqrFormField->active) {
                 if ($value = $this->getValue($PqrFormField)) {
                     $data = array_merge($data, $value);
@@ -398,8 +402,9 @@ class FtPqr extends FtPqrProperties
      *
      * @param PqrFormField $PqrFormField
      * @return array|null
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getValue(PqrFormField $PqrFormField): ?array
     {
@@ -411,7 +416,6 @@ class FtPqr extends FtPqrProperties
             case 'Hidden':
             case 'Attached':
                 continue;
-                break;
 
             case 'Radio':
             case 'Checkbox':
@@ -437,14 +441,15 @@ class FtPqr extends FtPqrProperties
      * Valida si el campo sys_email es valido
      *
      * @return boolean
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function validSysEmail(): bool
     {
         if ($this->sys_email) {
             if (!UtilitiesPqr::isEmailValid($this->sys_email)) {
-                throw new \Exception("Esta dirección de correo ({$this->sys_email}) no es válida.", 200);
+                throw new Exception("Esta dirección de correo ({$this->sys_email}) no es válida.", 200);
             }
         }
         return true;
@@ -454,8 +459,9 @@ class FtPqr extends FtPqrProperties
      * Actualiza la fecha de vencimiento
      *
      * @return boolean
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function updateFechaVencimiento(): bool
     {
@@ -472,7 +478,7 @@ class FtPqr extends FtPqrProperties
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
                 'idft' => $this->getPK(),
-                'fk_funcionario' => $this->Funcionario->getPK(),
+                'fk_funcionario' => $this->getFuncionario()->getPK(),
                 'tipo' => PqrHistory::TIPO_CAMBIO_VENCIMIENTO,
                 'idfk' => 0,
                 'descripcion' => "Se actualiza la fecha de vencimiento a " .
@@ -483,7 +489,7 @@ class FtPqr extends FtPqrProperties
             ];
 
             if (!PqrHistory::newRecord($history)) {
-                throw new \Exception("No fue posible actualizar el historial", 200);
+                throw new Exception("No fue posible actualizar el historial", 200);
             }
         }
 
@@ -491,12 +497,13 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
-     * Retonar la fecha de vencimiento basado en la fecha de aprobacion 
+     * Retonar la fecha de vencimiento basado en la fecha de aprobacion
      * y el tipo
      *
      * @return string
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getDateForType(): string
     {
@@ -511,7 +518,7 @@ class FtPqr extends FtPqrProperties
         }
 
         return (DateController::addBusinessDays(
-            new \DateTime($this->Documento->fecha),
+            new DateTime($this->Documento->fecha),
             $dias
         ))->format('Y-m-d H:i:s');
     }
@@ -520,8 +527,9 @@ class FtPqr extends FtPqrProperties
      * Notifica al email registrado
      *
      * @return boolean
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function notifyEmail(): bool
     {
@@ -570,12 +578,11 @@ class FtPqr extends FtPqrProperties
 
     /**
      * Html de los campos Automplete
-     * 
      *
      * @param PqrFormField $PqrFormField
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function generateField(PqrFormField $PqrFormField): string
     {
@@ -607,8 +614,9 @@ HTML;
      * Notifica a los funcionarios configurados
      *
      * @return boolean
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function sendNotifications(): bool
     {
@@ -673,8 +681,9 @@ HTML;
      * Crea el tercero segun la configuracion del funcionario
      *
      * @return boolean
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function createTercero(): bool
     {
@@ -709,7 +718,7 @@ HTML;
 
             $Tercero ??= new Tercero();
             $TerceroService = new TerceroService($Tercero);
-            if(!$TerceroService->save($data)){
+            if (!$TerceroService->save($data)) {
                 return false;
             }
             $this->sys_tercero = $TerceroService->getModel()->getPK();
@@ -723,8 +732,9 @@ HTML;
      * Retorna la URL de QR
      *
      * @return string
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getUrlQR(): string
     {
@@ -747,8 +757,9 @@ HTML;
      *
      * @param string $order
      * @return PqrHistory[]
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getHistory(string $order = 'id desc'): array
     {
@@ -763,8 +774,9 @@ HTML;
      * @param string $newStatus
      * @param string $observations
      * @return boolean
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function changeStatus(string $newStatus, string $observations = ''): bool
     {
@@ -775,20 +787,20 @@ HTML;
             if ($newStatus == FtPqr::ESTADO_TERMINADO) {
                 $this->sys_fecha_terminado = date('Y-m-d H:i:s');
             } else {
-                $this->sys_fecha_terminado = NULL;
+                $this->sys_fecha_terminado = null;
             }
             $this->update(true);
 
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
                 'idft' => $this->getPK(),
-                'fk_funcionario' => $this->Funcionario->getPK(),
+                'fk_funcionario' => $this->getFuncionario()->getPK(),
                 'tipo' => PqrHistory::TIPO_CAMBIO_ESTADO,
                 'idfk' => 0,
                 'descripcion' => "Se actualiza el estado de la solicitud de {$actualStatus} a {$newStatus}. {$observations}"
             ];
             if (!PqrHistory::newRecord($history)) {
-                throw new \Exception("No fue posible guardar el historial del cambio", 200);
+                throw new Exception("No fue posible guardar el historial del cambio", 200);
             }
         }
         return true;

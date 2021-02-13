@@ -2,30 +2,27 @@
 
 namespace App\Bundles\pqr\Services\models;
 
+use Masterminds\HTML5\Exception;
 use Saia\models\Contador;
 use Saia\core\model\Model;
 use Saia\models\formatos\Formato;
-
-use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\models\PqrNotification;
 use App\Bundles\pqr\Services\PqrFormService;
 
 class PqrForm extends Model
 {
     use TModels;
 
-    /**
-     * TODO: PASAR A .ENV 
-     */
     const NOMBRE_REPORTE_PENDIENTE = 'rep_pendientes_pqr';
     const NOMBRE_REPORTE_PROCESO = 'rep_proceso_pqr';
     const NOMBRE_REPORTE_TERMINADO = 'rep_terminados_pqr';
     const NOMBRE_REPORTE_TODOS = 'rep_todos_pqr';
     const NOMBRE_PANTALLA_GRAFICO = 'PQRSF';
 
+    private static ?PqrForm $PqrForm = null;
+
     protected function defineAttributes(): void
     {
-        $this->dbAttributes = (object) [
+        $this->dbAttributes = (object)[
             'safe' => [
                 'fk_formato',
                 'fk_contador',
@@ -74,7 +71,7 @@ class PqrForm extends Model
      *
      * @return PqrFormService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     public function getService(): PqrFormService
     {
@@ -86,7 +83,7 @@ class PqrForm extends Model
      *
      * @return integer
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function countFields(): int
     {
@@ -97,15 +94,23 @@ class PqrForm extends Model
 
 
     /**
-     * obtiene la instancia del modelo PqrForm activa
+     * Obtiene la instancia del formulario activo
      *
-     * @return PqrForm|null
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @return PqrForm
+     * @throws Exception
+     * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-13
      */
-    public static function getPqrFormActive(): ?PqrForm
+    public static function getInstance(): PqrForm
     {
-        return PqrForm::findByAttributes(['active' => 1]);
+        if (!self::$PqrForm) {
+            $rows = PqrForm::findAllByAttributes(['active' => 1]);
+            if (count($rows) != 1) {
+                throw new Exception("No se encontro un formulario activo");
+            }
+            self::$PqrForm = $rows[0];
+        }
+
+        return self::$PqrForm;
     }
 
     /**
@@ -114,7 +119,7 @@ class PqrForm extends Model
      * @param string $name
      * @return null|PqrFormField
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getRow(string $name): ?PqrFormField
     {
@@ -127,13 +132,13 @@ class PqrForm extends Model
     }
 
     /**
-     * Obtiene decodificada la configuracion 
+     * Obtiene decodificada la configuracion
      * de la respuesta
      *
-     * @param boolean $inArray: Retorna como array
+     * @param boolean $inArray : Retorna como array
      * @return null|object|array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getResponseConfiguration(bool $inArray = false)
     {

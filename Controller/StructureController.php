@@ -23,7 +23,7 @@ class StructureController extends AbstractController
     ): Response {
 
         try {
-            $PqrFormService = PqrForm::getPqrFormActive()->getService();
+            $PqrFormService = PqrForm::getInstance()->getService();
 
             $data = [
                 'pqrForm' => $PqrFormService->getDataPqrForm(),

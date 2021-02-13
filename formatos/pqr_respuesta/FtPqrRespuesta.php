@@ -50,7 +50,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     {
         parent::__construct($id);
 
-        if (!$this->PqrForm = PqrForm::getPqrFormActive()) {
+        if (!$this->PqrForm = PqrForm::getInstance()) {
             throw new \Exception("No se encuentra el formulario activo", 200);
         }
 

@@ -70,7 +70,7 @@ class PqrNotificationService
     public function update(array $data): bool
     {
         if (!isset($data['fk_pqr_form'])) {
-            $data['fk_pqr_form'] = PqrForm::getPqrFormActive()->getPK();
+            $data['fk_pqr_form'] = PqrForm::getInstance()->getPK();
         }
         $this->PqrNotification->setAttributes($data);
 

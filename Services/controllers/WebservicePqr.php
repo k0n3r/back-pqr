@@ -22,7 +22,7 @@ class WebservicePqr extends WsFt implements IWsHtml
     public function __construct(Formato $Formato)
     {
         parent::__construct($Formato);
-        $this->PqrForm = PqrForm::getPqrFormActive();
+        $this->PqrForm = PqrForm::getInstance();
     }
 
     /**

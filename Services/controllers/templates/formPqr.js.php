@@ -1,4 +1,3 @@
-
 <?php
 $code = <<<JAVASCRIPT
 $(function () {
@@ -7,10 +6,10 @@ $(function () {
     window.getCredentials();
     loadjsComponent();
 
-    $("#sys_anonimo").change(function (){
-        if($(this).is(':checked')){
+    $("#sys_anonimo").change(function () {
+        if ($(this).is(':checked')) {
             showAnonymousFields();
-        }else{
+        } else {
             hideAnonymousFields();
         }
     });
@@ -23,7 +22,6 @@ $(function () {
     $("#formulario").validate({
         errorPlacement: function (error, element) {
             let node = element[0];
-
             if (
                 node.tagName == "SELECT" &&
                 node.className.indexOf("select2") !== false
@@ -36,36 +34,45 @@ $(function () {
         },
         submitHandler: function (form) {
             let dataForm = window.getFormObject($('#formulario').serializeArray());
-            let data=Object.assign(dataForm, {
+            let data = Object.assign(dataForm, {
                 formatId: {$formatId},
-                dependencia: localStorage.getItem('WsRol') 
+                dependencia: localStorage.getItem('WsRol')
             });
 
             $.ajax({
-                method:'post',
+                method: 'post',
                 url: baseUrl + `api/document`,
                 data,
             }).done((response) => {
+                console.log(response);
                 if (response.success) {
                     clearForm(form);
-
-                    window.notification({
-                        title: "Radicado No "+response.data.numero,
-                        color: 'green',
-                        position: "center",
-                        overlay: true,
-                        timeout: false,
-                        icon: 'fa fa-check',
-                        layout: 2,
-                        message: response.data.moreData.message,
-                        onClosed: function (instance, toast, closedBy) {
-                            window.location.reload()
-                        }
+                    let id = response.data.id;
+                    $.ajax({
+                        method: 'get',
+                        url: baseUrl + `api/pqr/\${id}/getMessage`,
+                        data,
+                    }).done((response) => {
+                        console.log(response);
+                        window.notification({
+                            title: "Radicado No " + response.number,
+                            color: 'green',
+                            position: "center",
+                            overlay: true,
+                            timeout: false,
+                            icon: 'fa fa-check',
+                            layout: 2,
+                            message: response.message,
+                            onClosed: function (instance, toast, closedBy) {
+                                window.location.reload()
+                            }
+                        });
                     });
+
                 } else {
                     console.error(response.message);
                     window.notification({
-                        title:'Error!',
+                        title: 'Error!',
                         icon: 'fa fa-exclamation-circle',
                         color: 'red',
                         message: +response.code == 200 ? response.message : 'No fue posible radicar su solicitud'
@@ -104,46 +111,46 @@ $(function () {
                 if (response.success) {
                     $("#tbody").empty();
 
-                    if(+response.data.length){
+                    if (+response.data.length) {
                         $.each(response.data, function (key, value) {
-                            let ul=$("<ul>");
+                            let ul = $("<ul>");
                             $.each(value.descripcion, function (k, v) {
                                 ul.append(
-                                   $("<li>",{
-                                       text:v
-                                   })
+                                    $("<li>", {
+                                        text: v
+                                    })
                                 )
                             });
                             $("#tbody").append(
                                 $('<tr>').append(
-                                    $('<td>',{
+                                    $('<td>', {
                                         class: 'text-center',
                                         text: value.fecha
                                     }),
                                     $('<td>').append(ul),
-                                    $('<td>',{
+                                    $('<td>', {
                                         class: 'text-center'
                                     }).append(
-                                        $("<a>",{
-                                            href:value.url,
+                                        $("<a>", {
+                                            href: value.url,
                                             target: '_blank'
                                         }).text('Ver')
                                     )
                                 )
                             );
                         });
-                    }else{
+                    } else {
                         $("#tbody").append(
                             $('<tr>').append(
-                                $('<td>',{
-                                    class:'text-center',
+                                $('<td>', {
+                                    class: 'text-center',
                                     colspan: 3,
                                     text: 'NO SE ENCONTRARON RESULTADOS'
                                 })
                             )
                         );
                     }
-                
+
                 }
 
             }).fail(function () {
@@ -161,8 +168,8 @@ $(function () {
 
     //TERMINA Search
 
-    function toggleButton(div='form_buttons') {
-        $("#"+div).find('button,#spiner').toggleClass('d-none');
+    function toggleButton(div = 'form_buttons') {
+        $("#" + div).find('button,#spiner').toggleClass('d-none');
     }
 
     function clearForm(form) {
@@ -175,35 +182,35 @@ $(function () {
         {$content}
     }
 
-    function showAnonymousFields(){
-        let fields={$fieldsWithAnonymous};
-        $.each(fields, function( i, field ) {
-            if(field.required){
-                $( "#"+field.name ).rules( "add", { required: true } );
-                $( "#group_"+field.name ).addClass("required");
-            }else{
-                $("#"+field.name).rules( "add", { required: false } );
-                $( "#group_"+field.name ).removeClass("required");
+    function showAnonymousFields() {
+        let fields = {$fieldsWithAnonymous};
+        $.each(fields, function (i, field) {
+            if (field.required) {
+                $("#" + field.name).rules("add", { required: true });
+                $("#group_" + field.name).addClass("required");
+            } else {
+                $("#" + field.name).rules("add", { required: false });
+                $("#group_" + field.name).removeClass("required");
             }
-            if(field.show){
-                $( "#group_"+field.name ).show();
-            }else{
-                $( "#group_"+field.name ).hide();
+            if (field.show) {
+                $("#group_" + field.name).show();
+            } else {
+                $("#group_" + field.name).hide();
             }
         });
     }
 
-    function hideAnonymousFields(){
-        let fields={$fieldsWithoutAnonymous};
-        $.each(fields, function( i, field ) {
-            $( "#group_"+field.name ).show();
+    function hideAnonymousFields() {
+        let fields = {$fieldsWithoutAnonymous};
+        $.each(fields, function (i, field) {
+            $("#group_" + field.name).show();
 
-            if(field.required){
-                $( "#group_"+field.name ).addClass("required");
-                $("#"+field.name).rules( "add", { required: true } );
-            }else{
-                $( "#group_"+field.name ).removeClass("required");
-                $("#"+field.name).rules( "add", { required: false } );
+            if (field.required) {
+                $("#group_" + field.name).addClass("required");
+                $("#" + field.name).rules("add", { required: true });
+            } else {
+                $("#group_" + field.name).removeClass("required");
+                $("#" + field.name).rules("add", { required: false });
             }
         });
     }

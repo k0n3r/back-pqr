@@ -20,7 +20,7 @@ class PqrService
 
     public function __construct()
     {
-        $this->PqrForm = PqrForm::getPqrFormActive();
+        $this->PqrForm = PqrForm::getInstance();
     }
 
     /**
