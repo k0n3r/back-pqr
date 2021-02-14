@@ -79,6 +79,36 @@ final class Version20210117184445 extends AbstractMigration
             'modelo' => 'Saia\Pqr\formatos\pqr\FtPqr'
         ]);
 
+        $name = 'pqr_respuesta';
+        $this->connection->update('formato', [
+            'ruta_mostrar' => "views/modules/pqr/formatos/{$name}/mostrar.php",
+            'ruta_editar' => "views/modules/pqr/formatos/{$name}/editar.html",
+            'ruta_adicionar' => "views/modules/pqr/formatos/{$name}/adicionar.html",
+            'ruta_buscar' => "views/modules/pqr/formatos/{$name}/buscar.html",
+        ], [
+            'nombre' => $name
+        ]);
+
+        $name = 'pqr_respuesta';
+        $this->connection->update('formato', [
+            'ruta_mostrar' => "views/modules/pqr/formatos/{$name}/mostrar.php",
+            'ruta_editar' => "views/modules/pqr/formatos/{$name}/editar.html",
+            'ruta_adicionar' => "views/modules/pqr/formatos/{$name}/adicionar.html",
+            'ruta_buscar' => "views/modules/pqr/formatos/{$name}/buscar.html",
+        ], [
+            'nombre' => $name
+        ]);
+
+        $name = 'pqr_calificacion';
+        $this->connection->update('formato', [
+            'ruta_mostrar' => "views/modules/pqr/formatos/{$name}/mostrar.php",
+            'ruta_editar' => "views/modules/pqr/formatos/{$name}/editar.html",
+            'ruta_adicionar' => "views/modules/pqr/formatos/{$name}/adicionar.html",
+            'ruta_buscar' => "views/modules/pqr/formatos/{$name}/buscar.html",
+        ], [
+            'nombre' => $name
+        ]);
+
 
         if ($schema->hasTable('pqr_migrations')) {
             $schema->dropTable('pqr_migrations');

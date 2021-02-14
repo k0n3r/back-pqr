@@ -6,6 +6,7 @@ namespace App\Bundles\pqr\Resources\migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Saia\models\Modulo;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -25,6 +26,27 @@ final class Version20200310032827 extends AbstractMigration
     {
         $idformato = $this->createFormat();
         $this->createFields($idformato);
+        $this->createModuleFormat();
+    }
+
+    public function createModuleFormat(): int
+    {
+        $moduleName = sprintf(
+            "crear_%s",
+            $this->formatName
+        );
+        $sql = "SELECT idmodulo FROM modulo WHERE nombre like 'modulo_formatos'";
+        $idModulo = $this->connection->fetchOne($sql);
+
+        $attributes = [
+            'nombre' => $moduleName,
+            'tipo' => Modulo::TIPO_HIJO,
+            'etiqueta' => 'COMUNICACIÓN EXTERNA -(PQRSF)',
+            'enlace' => "views/modules/pqr/formatos/{$this->formatName}/adicionar.html",
+            'cod_padre' => $idModulo
+        ];
+
+        $this->createModulo($attributes, $moduleName);
     }
 
     protected function createFormat()
@@ -53,7 +75,7 @@ final class Version20200310032827 extends AbstractMigration
             'ruta_mostrar' => "views/modules/pqr/formatos/{$name}/mostrar.php",
             'ruta_editar' => "views/modules/pqr/formatos/{$name}/editar.html",
             'ruta_adicionar' => "views/modules/pqr/formatos/{$name}/adicionar.html",
-            'ruta_buscar' => "views/modules/pqr/formatos/{$name}/buscar.html°",
+            'ruta_buscar' => "views/modules/pqr/formatos/{$name}/buscar.html",
             'encabezado' => 1,
             'cuerpo' => '<p>{*showTemplate*}</p>',
             'pie_pagina' => 0,
@@ -67,14 +89,14 @@ final class Version20200310032827 extends AbstractMigration
             'font_size' => 11,
             'banderas' => 'e',
             'mostrar_pdf' => 1,
-            'orden' => NULL,
-            'fk_categoria_formato' => NULL,
+            'orden' => null,
+            'fk_categoria_formato' => null,
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Formulario utilizado para responder las PQRSF',
             'version' => 1,
             'publicar' => 1,
             'module' => 'pqr',
-            'class_name' => NULL,
+            'class_name' => null,
             'generador_pdf' => 'Mpdf'
         ];
 

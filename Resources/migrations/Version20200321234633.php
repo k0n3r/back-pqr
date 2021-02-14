@@ -6,6 +6,7 @@ namespace App\Bundles\pqr\Resources\migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Saia\models\Modulo;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -25,6 +26,27 @@ final class Version20200321234633 extends AbstractMigration
     {
         $idformato = $this->createFormat();
         $this->createFields($idformato);
+        $this->createModuleFormat();
+    }
+
+    public function createModuleFormat(): int
+    {
+        $moduleName = sprintf(
+            "crear_%s",
+            $this->formatName
+        );
+        $sql = "SELECT idmodulo FROM modulo WHERE nombre like 'modulo_formatos'";
+        $idModulo = $this->connection->fetchOne($sql);
+
+        $attributes = [
+            'nombre' => $moduleName,
+            'tipo' => Modulo::TIPO_HIJO,
+            'etiqueta' => 'CALIFICACIÓN -PQRSF',
+            'enlace' => "views/modules/pqr/formatos/{$this->formatName}/adicionar.html",
+            'cod_padre' => $idModulo
+        ];
+
+        $this->createModulo($attributes, $moduleName);
     }
 
     protected function createFormat()
@@ -73,14 +95,14 @@ final class Version20200321234633 extends AbstractMigration
             'font_size' => 11,
             'banderas' => 'e',
             'mostrar_pdf' => 1,
-            'orden' => NULL,
-            'fk_categoria_formato' => NULL,
+            'orden' => null,
+            'fk_categoria_formato' => null,
             'pertenece_nucleo' => 0,
             'descripcion_formato' => 'Formulario de calificación de las PQR',
             'version' => 1,
             'publicar' => 1,
             'module' => 'pqr',
-            'class_name' => NULL,
+            'class_name' => null,
             'generador_pdf' => 'Mpdf'
 
         ];
@@ -106,8 +128,8 @@ final class Version20200321234633 extends AbstractMigration
                 'etiqueta_html' => 'Method',
                 'acciones' => 'a',
                 'listable' => 1,
-                'ayuda' => NULL,
-                'longitud_vis' => NULL
+                'ayuda' => null,
+                'longitud_vis' => null
             ],
             'experiencia_gestion' => [
                 'formato_idformato' => $idformato,
@@ -117,14 +139,14 @@ final class Version20200321234633 extends AbstractMigration
                 'nombre' => 'experiencia_gestion',
                 'etiqueta' => 'Valora tu experiencia con la gestión a tu Petición, Queja, Reclamo o Solicitud',
                 'tipo_dato' => 'integer',
-                'longitud' => NULL,
+                'longitud' => null,
                 'etiqueta_html' => 'Radio',
                 'acciones' => 'a,e,p',
-                'placeholder' => NULL,
+                'placeholder' => null,
                 'listable' => 1,
-                'opciones' => NULL,
-                'ayuda' => NULL,
-                'longitud_vis' => NULL,
+                'opciones' => null,
+                'ayuda' => null,
+                'longitud_vis' => null,
                 'campoOpciones' => [
                     [
                         'llave' => 4,
@@ -152,14 +174,14 @@ final class Version20200321234633 extends AbstractMigration
                 'nombre' => 'experiencia_servicio',
                 'etiqueta' => 'Valora tu experiencia global con respecto a los servicios que has recibido',
                 'tipo_dato' => 'integer',
-                'longitud' => NULL,
+                'longitud' => null,
                 'etiqueta_html' => 'Radio',
                 'acciones' => 'a,e',
-                'placeholder' => NULL,
+                'placeholder' => null,
                 'listable' => 1,
-                'opciones' => NULL,
-                'ayuda' => NULL,
-                'longitud_vis' => NULL,
+                'opciones' => null,
+                'ayuda' => null,
+                'longitud_vis' => null,
                 'campoOpciones' => [
                     [
                         'llave' => 4,
