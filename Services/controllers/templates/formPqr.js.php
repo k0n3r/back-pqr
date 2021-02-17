@@ -1,5 +1,6 @@
 <?php
 $code = <<<JAVASCRIPT
+
 $(function () {
     var baseUrl = window.baseUrl;
 
@@ -33,55 +34,65 @@ $(function () {
             }
         },
         submitHandler: function (form) {
-            let dataForm = window.getFormObject($('#formulario').serializeArray());
-            let data = Object.assign(dataForm, {
-                formatId: {$formatId},
-                dependencia: localStorage.getItem('WsRol')
-            });
+            grecaptcha.ready(function () {
+                grecaptcha.execute('{$recaptchaPublicKey}', { action: 'submit' }).then(function (tokenRecaptcha) {
 
-            $.ajax({
-                method: 'post',
-                url: baseUrl + `api/document`,
-                data,
-            }).done((response) => {
-                console.log(response);
-                if (response.success) {
-                    clearForm(form);
-                    let id = response.data.id;
+                    let dataForm = window.getFormObject($('#formulario').serializeArray());
+                    let data = Object.assign(dataForm, {
+                        formatId: {$formatId},
+                        dependencia: localStorage.getItem('WsRol'),
+                        key: localStorage.getItem('key'),
+                        token:localStorage.getItem('token'),
+                        tokenRecaptcha: tokenRecaptcha
+                    });
+        
                     $.ajax({
-                        method: 'get',
-                        url: baseUrl + `api/pqr/\${id}/getMessage`,
+                        method: 'post',
+                        url: baseUrl + `api/document/register`,
                         data,
                     }).done((response) => {
                         console.log(response);
-                        window.notification({
-                            title: "Radicado No " + response.number,
-                            color: 'green',
-                            position: "center",
-                            overlay: true,
-                            timeout: false,
-                            icon: 'fa fa-check',
-                            layout: 2,
-                            message: response.message,
-                            onClosed: function (instance, toast, closedBy) {
-                                window.location.reload()
-                            }
-                        });
+                        if (response.success) {
+                            clearForm(form);
+                            let id = response.data.id;
+                            $.ajax({
+                                method: 'get',
+                                url: baseUrl + `api/pqr/\${id}/getMessage`,
+                                data,
+                            }).done((response) => {
+                                console.log(response);
+                                window.notification({
+                                    title: "Radicado No " + response.number,
+                                    color: 'green',
+                                    position: "center",
+                                    overlay: true,
+                                    timeout: false,
+                                    icon: 'fa fa-check',
+                                    layout: 2,
+                                    message: response.message,
+                                    onClosed: function (instance, toast, closedBy) {
+                                        window.location.reload()
+                                    }
+                                });
+                            });
+        
+                        } else {
+                            console.error(response.message);
+                            window.notification({
+                                title: 'Error!',
+                                icon: 'fa fa-exclamation-circle',
+                                color: 'red',
+                                message: +response.code == 200 ? response.message : 'No fue posible radicar su solicitud'
+                            });
+                        }
+                    }).fail(function () {
+                        console.error(...arguments)
+                    }).always(function () {
+                        toggleButton();
                     });
 
-                } else {
-                    console.error(response.message);
-                    window.notification({
-                        title: 'Error!',
-                        icon: 'fa fa-exclamation-circle',
-                        color: 'red',
-                        message: +response.code == 200 ? response.message : 'No fue posible radicar su solicitud'
-                    });
-                }
-            }).fail(function () {
-                console.error(...arguments)
-            }).always(function () {
-                toggleButton();
+
+                });
             });
 
             return false;

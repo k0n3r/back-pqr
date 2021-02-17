@@ -23,13 +23,15 @@ class PqrController extends AbstractController
     public function searchByNumber(
         Request $request,
         ISaiaResponse $saiaResponse
-    ): Response {
+    ): Response
+    {
 
         try {
 
             if (empty($request->get('numero'))) {
                 throw new \Exception("Se debe indicar el numero de radicado", 200);
             }
+            $email = trim($request->get('sys_email'));
 
             $Connection = DatabaseConnection::getDefaultConnection();
 
@@ -46,11 +48,13 @@ class PqrController extends AbstractController
 
             $data = [];
             foreach ($records as $FtPqr) {
-                $data[] = [
-                    'fecha' => DateController::convertDate($FtPqr->Documento->fecha),
-                    'descripcion' => array_filter(explode("<br>", $FtPqr->Documento->getDescription())),
-                    'url' => $FtPqr->getUrlQR()
-                ];
+                if (trim($FtPqr->sys_email)==$email) {
+                    $data[] = [
+                        'fecha' => DateController::convertDate($FtPqr->Documento->fecha),
+                        'descripcion' => array_filter(explode("<br>", $FtPqr->Documento->getDescription())),
+                        'url' => $FtPqr->getUrlQR()
+                    ];
+                }
             }
 
             $saiaResponse->replaceData($data);
@@ -68,7 +72,8 @@ class PqrController extends AbstractController
     public function getHistoryForTimeline(
         Request $request,
         ISaiaResponse $saiaResponse
-    ): Response {
+    ): Response
+    {
 
         try {
             $data = json_decode(CryptController::decrypt($request->get('infoCryp')));
@@ -95,7 +100,8 @@ class PqrController extends AbstractController
     public function decrypt(
         Request $request,
         ISaiaResponse $saiaResponse
-    ): Response {
+    ): Response
+    {
 
         try {
 

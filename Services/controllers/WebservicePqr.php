@@ -3,6 +3,7 @@
 namespace App\Bundles\pqr\Services\controllers;
 
 use App\Bundles\pqr\Services\models\PqrForm;
+use Saia\controllers\generator\webservice\IWsFields;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\controllers\generator\webservice\WsFt;
@@ -30,14 +31,10 @@ class WebservicePqr extends WsFt implements IWsHtml
      */
     public function getHtmlContentForm(array $filesToInclude, ?string $urlSearch): string
     {
-        $this->setContentForm($filesToInclude);
-        $moreFiles = [];
+        $this->setContentForm();
         if ($this->moreFiles) {
-            $moreFiles = WsGenerator::getRouteFile($this->moreFiles);
-        }
-        if ($moreFiles) {
             $lastFiles = array_slice($filesToInclude, -2);
-            array_splice($filesToInclude, -2, 2, $moreFiles);
+            array_splice($filesToInclude, -2, 2, WsGenerator::getRouteFile($this->moreFiles));
             $filesToInclude = array_merge($filesToInclude, $lastFiles);
         }
 
@@ -46,8 +43,10 @@ class WebservicePqr extends WsFt implements IWsHtml
         $html = $urlSearch ? "<a href='{$urlSearch}'>Consultar</a>" : '';
 
         $values = [
-            'showAnonymous' => (int) $this->PqrForm->show_anonymous,
-            'showLabel' => (int) $this->PqrForm->show_label,
+            'recaptchaPublicKey' => RECAPTCHA_PUBLIC_KEY,
+            'emailLabel' => $this->PqrForm->getRow('sys_email')->label,
+            'showAnonymous' => (int)$this->PqrForm->show_anonymous,
+            'showLabel' => (int)$this->PqrForm->show_label,
             'contentFields' => $this->htmlContent,
             'nameForm' => mb_strtoupper($this->Formato->etiqueta),
             'linksCss' => $this->getCssLinks(),
@@ -67,6 +66,7 @@ class WebservicePqr extends WsFt implements IWsHtml
     public function getJsContentForm(): string
     {
         $values = [
+            'recaptchaPublicKey' => RECAPTCHA_PUBLIC_KEY,
             'baseUrl' => ABSOLUTE_SAIA_ROUTE,
             'formatId' => $this->Formato->getPK(),
             'content' => $this->jsContent,
@@ -110,7 +110,7 @@ class WebservicePqr extends WsFt implements IWsHtml
      *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function setContentForm(): void
     {
@@ -118,8 +118,10 @@ class WebservicePqr extends WsFt implements IWsHtml
         $fields = $this->getFields();
 
         foreach ($fields as $IWsFields) {
-            ($files = $IWsFields->aditionalFiles()) ?
-                $this->moreFiles = array_merge($this->moreFiles, $files) : '';
+            $files = $IWsFields->aditionalFiles();
+            if ($files) {
+                $this->moreFiles = array_merge($this->moreFiles, $files);
+            }
 
             $codeHtml .= $IWsFields->htmlContent() . "\n";
 
@@ -137,7 +139,7 @@ class WebservicePqr extends WsFt implements IWsHtml
      *
      * @return IWsFields[]
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     protected function getFields(): array
     {
@@ -175,12 +177,12 @@ class WebservicePqr extends WsFt implements IWsHtml
     {
         array_push($this->objectFields, [
             'name' => $PqrFormField->name,
-            'required' => (int) $PqrFormField->required,
+            'required' => (int)$PqrFormField->required,
         ]);
         array_push($this->objectFieldsForAnonymous, [
             'name' => $PqrFormField->name,
-            'show' => (int) $PqrFormField->anonymous,
-            'required' => (int) ($PqrFormField->anonymous ? $PqrFormField->required_anonymous : 0)
+            'show' => (int)$PqrFormField->anonymous,
+            'required' => (int)($PqrFormField->anonymous ? $PqrFormField->required_anonymous : 0)
         ]);
     }
 
@@ -191,9 +193,9 @@ class WebservicePqr extends WsFt implements IWsHtml
      * @param String $typeField
      * @return string|null
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
-    protected function resolveCustomClass(String $typeField): ?string
+    protected function resolveCustomClass(string $typeField): ?string
     {
         $className = "App\\Bundles\\pqr\\Services\\controllers\\customFields\\$typeField";
         if (class_exists($className)) {
