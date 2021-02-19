@@ -446,7 +446,7 @@ class PqrFormService
      */
     private function createView(string $name, string $select): void
     {
-        $Connection = DatabaseConnection::getInstance();
+        $Connection = DatabaseConnection::getDefaultConnection();
 
         switch (MOTOR) {
             case 'MySql':

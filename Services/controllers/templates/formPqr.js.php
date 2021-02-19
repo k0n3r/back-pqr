@@ -48,7 +48,7 @@ $(function () {
         
                     $.ajax({
                         method: 'post',
-                        url: baseUrl + `api/document/register`,
+                        url: baseUrl + `api/captcha/saveDocument`,
                         data,
                     }).done((response) => {
                         console.log(response);

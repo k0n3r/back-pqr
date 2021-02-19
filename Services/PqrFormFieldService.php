@@ -213,7 +213,7 @@ class PqrFormFieldService
      */
     private function columnExistsDB(string $name): bool
     {
-        $schema = DatabaseConnection::getInstance()->getSchemaManager();
+        $schema = DatabaseConnection::getDefaultConnection()->getSchemaManager();
         $Table = $schema->listTableDetails('ft_pqr');
 
         return $Table->hasColumn($name);
