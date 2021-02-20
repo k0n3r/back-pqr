@@ -30,7 +30,7 @@ final class Version20200226192642 extends AbstractMigration
             'nombre' => 'reporte_pqr',
             'etiqueta' => 'Reporte de PQRSF',
             'estado' => 1,
-            'campos' => NULL,
+            'campos' => null,
             'tablas' => 'vpqr v',
             'cantidad_registros' => 20,
             'tipo_busqueda' => 2
@@ -43,7 +43,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->createComponenteTodos($idbusqueda);
     }
 
-    protected function getDefaultData(string $nameReport)
+    protected function getDefaultData(string $nameReport): array
     {
         switch ($nameReport) {
             case PqrForm::NOMBRE_REPORTE_TODOS:
@@ -62,14 +62,14 @@ final class Version20200226192642 extends AbstractMigration
         return [
             'url' => 'views/buzones/grilla.php',
             'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},{"title":"E-MAIL","field":"{*sys_email*}","align":"center"},{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
-            'encabezado_componente' => NULL,
+            'encabezado_componente' => null,
             'campos_adicionales' => 'v.numero,v.fecha,v.sys_email,v.sys_tipo,v.sys_estado,v.idft',
-            'tablas_adicionales' => NULL,
+            'tablas_adicionales' => null,
             'ordenado_por' => 'v.fecha',
             'direccion' => 'ASC',
-            'agrupado_por' => NULL,
+            'agrupado_por' => null,
             'busqueda_avanzada' => 'views/modules/pqr/formatos/pqr/busqueda.php',
-            'enlace_adicionar' => NULL,
+            'enlace_adicionar' => null,
             'llave' => 'v.iddocumento',
             'ruta_libreria' => 'src/Bundles/pqr/formatos/pqr/reporteFunciones.php,src/Bundles/pqr/formatos/reporteFuncionesGenerales.php',
             'ruta_libreria_pantalla' => 'views/modules/pqr/formatos/pqr/reporteAcciones.js',
@@ -79,6 +79,7 @@ final class Version20200226192642 extends AbstractMigration
     protected function createComponentePendientes(int $idbusqueda)
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_PENDIENTE;
+        $estado = FtPqr::ESTADO_PENDIENTE;
 
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
@@ -86,15 +87,13 @@ final class Version20200226192642 extends AbstractMigration
             'nombre' => $nombreComponente,
             'orden' => 1
         ];
-        $busquedaComponente = array_merge($dataComponente, $this->getDefaultData($nombreComponente));
 
         $idbusquedaComponente = $this->createBusquedaComponente(
             $idbusqueda,
-            $busquedaComponente,
+            array_merge($dataComponente, $this->getDefaultData($nombreComponente)),
             $nombreComponente
         );
 
-        $estado = FtPqr::ESTADO_PENDIENTE;
         $busquedaCondicion = [
             'fk_busqueda_componente' => $idbusquedaComponente,
             'codigo_where' => "sys_estado='{$estado}'",
@@ -143,21 +142,21 @@ final class Version20200226192642 extends AbstractMigration
     protected function createComponenteTerminados(int $idbusqueda)
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_TERMINADO;
+        $estado = FtPqr::ESTADO_TERMINADO;
+
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta' => 'Terminados',
             'nombre' => $nombreComponente,
             'orden' => 3
         ];
-        $busquedaComponente = array_merge($dataComponente, $this->getDefaultData($nombreComponente));
 
         $idbusquedaComponente = $this->createBusquedaComponente(
             $idbusqueda,
-            $busquedaComponente,
+            array_merge($dataComponente, $this->getDefaultData($nombreComponente)),
             $nombreComponente
         );
 
-        $estado = FtPqr::ESTADO_TERMINADO;
         $busquedaCondicion = [
             'fk_busqueda_componente' => $idbusquedaComponente,
             'codigo_where' => "sys_estado='{$estado}'",

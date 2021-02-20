@@ -6,10 +6,10 @@ use Doctrine\DBAL\Schema\Schema;
 
 trait TMigrations
 {
-    protected $idperfil;
-    protected $idperfilInterno;
+    protected int $idperfil = 0;
+    protected int $idperfilInterno = 0;
 
-    protected function getNameMainModule()
+    protected function getNameMainModule(): string
     {
         return 'agrupador_pqr';
     }
@@ -19,7 +19,7 @@ trait TMigrations
         $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like 'ADMINISTRADOR'";
         $perfil = $this->connection->fetchAllAssociative($sql);
         if ($perfil) {
-            $this->idperfil = (int) $perfil[0]['idperfil'];
+            $this->idperfil = (int)$perfil[0]['idperfil'];
         } else {
             $this->abortIf(true, "No se encontro el perfil del administador");
         }
@@ -27,7 +27,7 @@ trait TMigrations
         $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like 'ADMINISTRADOR INTERNO'";
         $perfil2 = $this->connection->fetchAllAssociative($sql);
         if ($perfil2) {
-            $this->idperfilInterno = (int) $perfil2[0]['idperfil'];
+            $this->idperfilInterno = (int)$perfil2[0]['idperfil'];
         } else {
             $this->abortIf(true, "No se encontro el perfil del administador interno");
         }
@@ -36,11 +36,11 @@ trait TMigrations
     /**
      * Crea o actualiza un modulo
      *
-     * @param array $data
+     * @param array  $data
      * @param string $search
      * @return integer
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     protected function createModulo(array $data, string $search): int
     {
@@ -57,10 +57,10 @@ trait TMigrations
             $id = $this->connection->lastInsertId();
         }
 
-        $this->createPermiso((int) $id, $this->idperfil);
-        $this->createPermiso((int) $id, $this->idperfilInterno);
+        $this->createPermiso((int)$id, $this->idperfil);
+        $this->createPermiso((int)$id, $this->idperfilInterno);
 
-        return (int) $id;
+        return (int)$id;
     }
 
     protected function createPermiso(int $idmodulo, int $idperfil): void
@@ -108,7 +108,7 @@ trait TMigrations
             $id = $this->connection->lastInsertId();
         }
 
-        return (int) $id;
+        return (int)$id;
     }
 
     protected function createBusquedaComponente(int $idbusqueda, array $data, string $search): int
@@ -128,7 +128,7 @@ trait TMigrations
             $id = $this->connection->lastInsertId();
         }
 
-        return (int) $id;
+        return (int)$id;
     }
 
     protected function createBusquedaCondicion(int $idbusquedaComponente, array $data, string $search): int
@@ -147,7 +147,7 @@ trait TMigrations
             $id = $this->connection->lastInsertId();
         }
 
-        return (int) $id;
+        return (int)$id;
     }
 
     protected function deleteBusqueda(string $search): void

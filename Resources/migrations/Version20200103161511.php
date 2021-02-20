@@ -35,7 +35,7 @@ final class Version20200103161511 extends AbstractMigration
             'pqr_forms',
             $this->getDataPqrForms()
         );
-        $idform = (int) $this->connection->lastInsertId();
+        $idform = (int)$this->connection->lastInsertId();
 
 
         $fields = $this->getDataPqrFormFields($idform, $idsHtmlFields);
@@ -217,14 +217,14 @@ final class Version20200103161511 extends AbstractMigration
         ];
     }
 
-    protected function getDataPqrNotyMessages()
+    protected function getDataPqrNotyMessages(): array
     {
         return [
             [
                 'name' => 'ws_noty_radicado',
                 'label' => 'Radicar solicitud (Notificación)',
                 'description' => 'Mensaje informativo que se muestra al radicar la solicitud desde el webservice',
-                'subject' => NULL,
+                'subject' => null,
                 'message_body' => '<br/>Su solicitud ha sido generada con el número de radicado <strong>{*n_numeroPqr*}</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!',
                 'type' => 1,
                 'active' => 1,

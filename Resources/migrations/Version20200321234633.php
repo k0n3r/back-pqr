@@ -15,7 +15,7 @@ final class Version20200321234633 extends AbstractMigration
 {
     use TMigrations;
 
-    protected $formatName = 'pqr_calificacion';
+    protected string $formatName = 'pqr_calificacion';
 
     public function getDescription(): string
     {
@@ -46,10 +46,10 @@ final class Version20200321234633 extends AbstractMigration
             'cod_padre' => $idModulo
         ];
 
-        $this->createModulo($attributes, $moduleName);
+        return $this->createModulo($attributes, $moduleName);
     }
 
-    protected function createFormat()
+    protected function createFormat(): int
     {
         $sql = "SELECT idcontador FROM contador WHERE nombre like 'apoyo'";
         $contador = $this->connection->fetchAllAssociative($sql);
@@ -109,7 +109,7 @@ final class Version20200321234633 extends AbstractMigration
 
         $this->connection->insert('formato', $data);
 
-        return $this->connection->lastInsertId();
+        return (int)$this->connection->lastInsertId();
     }
 
     protected function createFields($idformato): void
