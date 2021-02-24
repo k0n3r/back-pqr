@@ -2,61 +2,21 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\services\models\ModelService;
 use Saia\controllers\functions\Header;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
 
-class PqrNotyMessageService
+class PqrNotyMessageService extends ModelService
 {
 
-    private PqrNotyMessage $PqrNotyMessage;
-    private string $errorMessage;
-
-    public function __construct(PqrNotyMessage $PqrNotyMessage)
-    {
-        $this->PqrNotyMessage = $PqrNotyMessage;
-    }
-
-
     /**
-     * Retorna el mensaje de error
-     *
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
-     */
-    public function getErrorMessage(): string
-    {
-        return $this->errorMessage;
-    }
-
-    /**
-     * Obtiene la instancia de PqrNotyMessage actualizada
-     *
-     * @return PqrNotyMessage
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @inheritDoc
      */
     public function getModel(): PqrNotyMessage
     {
-        return $this->PqrNotyMessage;
+        return $this->Model;
     }
-
-    /**
-     * Actualiza un registro
-     * 
-     * @param array $data
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
-     */
-    public function update(array $data): bool
-    {
-        $this->PqrNotyMessage->setAttributes($data);
-
-        return $this->PqrNotyMessage->save();
-    }
-
 
     /**
      * Obtiene los registros para actualizar el cuerpo de las notificaciones
@@ -135,12 +95,12 @@ class PqrNotyMessageService
      *
      * @see resolveVariables
      * @param FtPqr $FtPqr
-     * @return integer
+     * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2021
      */
     public static function n_nombreFormularioPqr(FtPqr $FtPqr): string
     {
-        return $FtPqr->PqrForm->label;
+        return $FtPqr->getService()->getPqrForm()->label;
     }
 }

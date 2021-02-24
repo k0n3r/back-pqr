@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\formatos\pqr_respuesta;
 
+use Exception;
 use Saia\models\Tercero;
 use Saia\models\BuzonSalida;
 use Saia\models\Funcionario;
@@ -51,7 +52,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         parent::__construct($id);
 
         if (!$this->PqrForm = PqrForm::getInstance()) {
-            throw new \Exception("No se encuentra el formulario activo", 200);
+            throw new Exception("No se encuentra el formulario activo", 200);
         }
 
         //TODO: Al Leer el QR se invoca el contructor
@@ -60,9 +61,6 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         }
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function defineMoreAttributes(): array
     {
         return [
@@ -192,7 +190,7 @@ HTML;
         $Qr = CoreFunctions::mostrar_qr($this);
         $firmas = CoreFunctions::mostrar_estado_proceso($this);
 
-        $code = <<<HTML
+        return <<<HTML
             <table border="0" cellspacing="0" style="width: 100%;">
                 <tbody>
                     <tr>
@@ -247,7 +245,6 @@ HTML;
             <p>{$this->getOtherData()}</p>
 HTML;
 
-        return $code;
     }
 
     /**
@@ -402,44 +399,24 @@ HTML;
     {
         $email = $this->Tercero->correo;
         if (!$email) {
-            throw new \Exception("Debe ingresar el email (Destino)");
+            throw new Exception("Debe ingresar el email (Destino)");
         }
 
         if (!UtilitiesPqr::isEmailValid($email)) {
-            throw new \Exception("El email ({$email}) NO es valido");
+            throw new Exception("El email ({$email}) NO es valido");
         }
 
         if ($emailCopy = $this->getCopyEmail()) {
             foreach ($emailCopy as $copia) {
                 if (!$copia) {
-                    throw new \Exception("Debe ingresar el email (Con copia a)");
+                    throw new Exception("Debe ingresar el email (Con copia a)");
                 }
 
                 if (!UtilitiesPqr::isEmailValid($copia)) {
-                    throw new \Exception("El email en copia externa ({$copia}) NO es valido");
+                    throw new Exception("El email en copia externa ({$copia}) NO es valido");
                 }
             }
         }
-    }
-
-    /**
-     * Seteo la funcion principal y devuelvo solo
-     * los parametros necesarios al editar
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public function getRouteParams(string $scope): array
-    {
-        $data = [];
-        if ($scope == self::SCOPE_ROUTE_PARAMS_EDIT) {
-            $data = [
-                'numero' => (int) $this->Documento->numero
-            ];
-        }
-
-        return $data;
     }
 
     /**
@@ -462,8 +439,9 @@ HTML;
             'descripcion' => $description
         ];
 
-        if (!PqrHistory::newRecord($history)) {
-            throw new \Exception("No fue posible guardar el historial", 200);
+        $PqrHistoryService=(new PqrHistory)->getService();
+        if (!$PqrHistoryService->save($history)) {
+            throw new Exception("No fue posible guardar el historial", 200);
         }
 
         return true;
@@ -496,8 +474,7 @@ HTML;
                 break;
 
             default:
-                throw new \Exception("Tipo de distribucion no definida", 200);
-                break;
+                throw new Exception("Tipo de distribucion no definida", 200);
         }
         $DistributionService = new DistributionService($this->Documento);
         $DistributionService->start(
@@ -617,7 +594,7 @@ HTML;
                 $log
             );
 
-            throw new \Exception("No fue posible notificar la respuesta", 200);
+            throw new Exception("No fue posible notificar la respuesta", 200);
         }
 
         $description = "Se le notificó a: (" . implode(", ", $SendMailController->getDestinations()) . ")";
@@ -701,7 +678,7 @@ HTML;
     {
         $email = $this->Tercero->correo;
         if (!UtilitiesPqr::isEmailValid($email)) {
-            throw new \Exception("El email ({$email}) NO es valido");
+            throw new Exception("El email ({$email}) NO es valido");
         }
 
         $nameFormat = $this->getFormat()->etiqueta;
@@ -733,7 +710,7 @@ HTML;
                 $message,
                 $log
             );
-            throw new \Exception($message);
+            throw new Exception($message);
         }
 
         $description = "Se solicita la calificación de la ({$nameFormat}) # {$this->Documento->numero} al e-mail: ({$email})";

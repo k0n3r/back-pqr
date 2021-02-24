@@ -21,7 +21,7 @@ class QRDocumentoPqrController extends QRDocumentoController
      */
     protected function configureQR($url = null): void
     {
-        $url = $this->FtPqr->getUrlQR();
+        $url = $this->FtPqr->getService()->getUrlQR();
 
         $this->QR = new QRController($url);
 

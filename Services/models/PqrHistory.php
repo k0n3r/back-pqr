@@ -5,7 +5,6 @@ namespace App\Bundles\pqr\Services\models;
 use Saia\core\model\Model;
 use Saia\models\Funcionario;
 use Saia\controllers\DateController;
-
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\Services\PqrHistoryService;
 

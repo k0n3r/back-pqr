@@ -13,11 +13,20 @@ use Saia\models\documento\Documento;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CampoSeleccionados;
 
-function viewFtPqr(int $idft, $numero): String
+function setFtPqr()
 {
-    global $FtPqr;
-
     $GLOBALS['FtPqr'] = new FtPqr($idft);
+}
+
+function getFtPqr(): FtPqr
+{
+    return $GLOBALS['FtPqr'];
+}
+
+function viewFtPqr(int $idft, $numero): string
+{
+    setFtPqr();
+    $FtPqr = getFtPqr();
 
     $enlace = <<<HTML
     <div class='kenlace_saia'
@@ -32,30 +41,26 @@ HTML;
 
 function getExpiration(int $idft)
 {
-    global $FtPqr;
-
-    return $FtPqr->getColorExpiration();
+    $FtPqr = getFtPqr();
+    return $FtPqr->getService()->getColorExpiration();
 }
 
 function getEndDate(int $idft)
 {
-    global $FtPqr;
-
-    return $FtPqr->getEndDate();
+    $FtPqr = getFtPqr();
+    return $FtPqr->getService()->getEndDate();
 }
 
 function getDaysLate(int $idft)
 {
-    global $FtPqr;
-
-    return $FtPqr->getDaysLate();
+    $FtPqr = getFtPqr();
+    return $FtPqr->getService()->getDaysLate();
 }
 
 function getDaysWait(int $idft)
 {
-    global $FtPqr;
-
-    return $FtPqr->getDaysWait();
+    $FtPqr = getFtPqr();
+    return $FtPqr->getService()->getDaysWait();
 }
 
 function getValueSysTipo(int $iddocumento, $fkCampoOpciones)
@@ -84,7 +89,9 @@ function totalTask(int $iddocumento): string
 
 function totalAnswers(int $idft): string
 {
-    global $idbusquedaComponenteRespuesta, $FtPqr;
+    global $idbusquedaComponenteRespuesta;
+
+    $FtPqr = getFtPqr();
 
     if (!$idbusquedaComponenteRespuesta) {
         $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
@@ -92,7 +99,7 @@ function totalAnswers(int $idft): string
         ])[0];
     }
 
-    $records = $FtPqr->getPqrAnswers();
+    $records = $FtPqr->getService()->getPqrAnswers();
     $cant = count($records);
     if (!$cant) {
         return 0;

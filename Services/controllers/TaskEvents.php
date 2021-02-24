@@ -158,7 +158,7 @@ class TaskEvents implements IExternalEventsTask
             }
         }
 
-        $Ft->changeStatus($estado);
+        $Ft->getService()->changeStatus($estado);
 
         return true;
     }

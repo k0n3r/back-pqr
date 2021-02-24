@@ -3,6 +3,7 @@
 namespace App\Bundles\pqr\Services;
 
 use Doctrine\DBAL\Types\Type;
+use Exception;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\grafico\PantallaGrafico;
@@ -12,10 +13,8 @@ use App\Bundles\pqr\Services\models\PqrHtmlField;
 
 class PqrService
 {
-
-    private $subTypeExist;
-    private $dependencyExist;
-
+    private ?bool $subTypeExist = null;
+    private ?bool $dependencyExist=null;
     private PqrForm $PqrForm;
 
     public function __construct()
@@ -23,13 +22,19 @@ class PqrService
         $this->PqrForm = PqrForm::getInstance();
     }
 
+    public function getPqrForm(): PqrForm
+    {
+        return $this->PqrForm;
+    }
+
     /**
-     * Obtiene los datos 
+     * Obtiene los datos
      *
      * @param string $type
+     * @param array  $data
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     public function findDataForAutocomplete(string $type, array $data): array
     {
@@ -63,7 +68,7 @@ class PqrService
      * @param array $data
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getListDependency(array $data): array
     {
@@ -80,7 +85,7 @@ class PqrService
             $Qb->andWhere('nombre like :nombre')
                 ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
         }
-        return $Qb->execute()->fetchAll();
+        return $Qb->execute()->fetchAllAssociative();
     }
 
     /**
@@ -89,7 +94,7 @@ class PqrService
      * @param array $data
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getListPais(array $data): array
     {
@@ -106,7 +111,8 @@ class PqrService
             $Qb->andWhere('nombre like :nombre')
                 ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
         }
-        return $Qb->execute()->fetchAll();
+        return $Qb->execute()->fetchAllAssociative();
+
     }
 
     /**
@@ -115,7 +121,7 @@ class PqrService
      * @param array $data
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getListDepartamento(array $data): array
     {
@@ -138,7 +144,7 @@ class PqrService
                 ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
         }
 
-        return $Qb->execute()->fetchAll();
+        return $Qb->execute()->fetchAllAssociative();
     }
 
 
@@ -148,7 +154,7 @@ class PqrService
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getDataForEditTypes(): array
     {
@@ -156,7 +162,7 @@ class PqrService
 
         $records = (CamposFormato::findByAttributes([
             'nombre' => 'sys_tipo',
-            'formato_idformato' => $this->PqrForm->fk_formato
+            'formato_idformato' => $this->getPqrForm()->fk_formato
         ]))->CampoOpciones;
 
         $data = [];
@@ -172,7 +178,7 @@ class PqrService
         return [
             'dataType' => $data,
             'dataSubType' => $subType ?? [],
-            'activeDependency' => (int) $this->dependencyExist()
+            'activeDependency' => (int)$this->dependencyExist()
         ];
     }
 
@@ -181,7 +187,7 @@ class PqrService
      *
      * @return null|array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getSubTypes(): ?array
     {
@@ -189,7 +195,7 @@ class PqrService
             return null;
         }
 
-        $PqrFormField = $this->PqrForm->getRow('sys_subtipo');
+        $PqrFormField = $this->getPqrForm()->getRow('sys_subtipo');
         $records = $PqrFormField->CamposFormato->CampoOpciones;
 
         $data = [];
@@ -210,7 +216,7 @@ class PqrService
      *
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function subTypeExist(): bool
     {
@@ -218,7 +224,7 @@ class PqrService
             return $this->subTypeExist;
         }
 
-        $this->subTypeExist = (bool) $this->PqrForm->getRow('sys_subtipo');
+        $this->subTypeExist = (bool)$this->getPqrForm()->getRow('sys_subtipo');
 
         return $this->subTypeExist;
     }
@@ -228,7 +234,7 @@ class PqrService
      *
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function dependencyExist(): bool
     {
@@ -236,7 +242,7 @@ class PqrService
             return $this->dependencyExist;
         }
 
-        $this->dependencyExist = (bool) $this->PqrForm->getRow('sys_dependencia');
+        $this->dependencyExist = (bool)$this->getPqrForm()->getRow('sys_dependencia');
 
         return $this->dependencyExist;
     }
@@ -247,7 +253,7 @@ class PqrService
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public static function getTextFields(): array
     {
@@ -297,17 +303,16 @@ class PqrService
      * Activa los indicadores preestablecidos
      *
      * @return void
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     * 
      * @throws Exception
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date   2020
      */
     public static function activeGraphics(): void
     {
         if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
         ])) {
-            throw new \Exception("No se encuentra la pantalla de los grafico", 200);
+            throw new Exception("No se encuentra la pantalla de los grafico", 200);
         }
 
         DatabaseConnection::getDefaultConnection()

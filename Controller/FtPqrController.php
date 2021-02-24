@@ -11,7 +11,6 @@ use Saia\controllers\DateController;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
-use Saia\models\documento\Documento;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -68,7 +67,7 @@ class FtPqrController extends AbstractController
             $FtPqr = new FtPqr($idft);
             $FtPqr->sys_tipo = $request->get('type');
             $date = DateController::convertDate(
-                $FtPqr->getDateForType(),
+                $FtPqr->getService()->getDateForType(),
                 'Y-m-d',
                 'Y-m-d H:i:s'
             );
@@ -109,7 +108,7 @@ class FtPqrController extends AbstractController
             if ($idDependencia) {
                 $options = [
                     'id' => $idDependencia,
-                    'text' => $FtPqr->getValueForReport('sys_dependencia')
+                    'text' => $FtPqr->getService()->getValueForReport('sys_dependencia')
                 ];
             }
 
