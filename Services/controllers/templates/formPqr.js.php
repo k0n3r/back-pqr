@@ -1,6 +1,5 @@
 <?php
 $code = <<<JAVASCRIPT
-
 $(function () {
     var baseUrl = window.baseUrl;
 
@@ -42,47 +41,38 @@ $(function () {
                         formatId: {$formatId},
                         dependencia: localStorage.getItem('WsRol'),
                         key: localStorage.getItem('key'),
-                        token:localStorage.getItem('token'),
+                        token: localStorage.getItem('token'),
                         tokenRecaptcha: tokenRecaptcha
                     });
-        
+
                     $.ajax({
                         method: 'post',
-                        url: baseUrl + `api/captcha/saveDocument`,
+                        url: baseUrl + `api/pqr/captcha/saveDocument`,
                         data,
                     }).done((response) => {
-                        console.log(response);
                         if (response.success) {
                             clearForm(form);
-                            let id = response.data.id;
-                            $.ajax({
-                                method: 'get',
-                                url: baseUrl + `api/pqr/\${id}/getMessage`,
-                                data,
-                            }).done((response) => {
-                                console.log(response);
-                                window.notification({
-                                    title: "Radicado No " + response.number,
-                                    color: 'green',
-                                    position: "center",
-                                    overlay: true,
-                                    timeout: false,
-                                    icon: 'fa fa-check',
-                                    layout: 2,
-                                    message: response.message,
-                                    onClosed: function (instance, toast, closedBy) {
-                                        window.location.reload()
-                                    }
-                                });
+                            window.notification({
+                                title: "Radicado No " + response.data.number,
+                                color: 'green',
+                                position: "center",
+                                overlay: true,
+                                timeout: false,
+                                icon: 'fa fa-check',
+                                layout: 2,
+                                message: response.data.messageBody,
+                                onClosed: function (instance, toast, closedBy) {
+                                    window.location.reload()
+                                }
                             });
-        
+
                         } else {
-                            console.error(response.message);
+                            console.error(response);
                             window.notification({
                                 title: 'Error!',
                                 icon: 'fa fa-exclamation-circle',
                                 color: 'red',
-                                message: +response.code == 200 ? response.message : 'No fue posible radicar su solicitud'
+                                message: 'No fue posible radicar su solicitud'
                             });
                         }
                     }).fail(function () {

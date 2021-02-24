@@ -109,25 +109,6 @@ class TaskEvents implements IExternalEventsTask
         return true;
     }
 
-    public function afterCreateDocumentoTarea(): bool
-    {
-        $history = [
-            'fecha' => date('Y-m-d H:i:s'),
-            'idft' => $this->Instance->Documento->getFt()->getPK(),
-            'fk_funcionario' => $this->Funcionario->getPK(),
-            'tipo' => PqrHistory::TIPO_TAREA,
-            'idfk' => $this->Tarea->getPK(),
-            'descripcion' => "Se crea la tarea: {$this->Tarea->nombre}"
-
-        ];
-        if (!PqrHistory::newRecord($history)) {
-            throw new \Exception("No fue posible guardar el historial del cambio", 200);
-        }
-
-        $this->updateEstado($this->Instance->Documento, FtPqr::ESTADO_PROCESO);
-        return true;
-    }
-
     /**
      * Actualiza el estado de la PQR
      *
@@ -136,7 +117,7 @@ class TaskEvents implements IExternalEventsTask
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    protected function updateEstado(Documento $Documento, ?string $estado = null): bool
+    public static function updateEstado(Documento $Documento, ?string $estado = null): bool
     {
         $estado = $estado ?? FtPqr::ESTADO_PENDIENTE;
 

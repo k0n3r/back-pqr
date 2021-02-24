@@ -2,8 +2,6 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\models\PqrNotyMessage;
-use App\Bundles\pqr\Services\PqrNotyMessageService;
 use Doctrine\DBAL\ConnectionException;
 use Exception;
 use Saia\core\DatabaseConnection;
@@ -223,36 +221,5 @@ class FtPqrController extends AbstractController
         }
 
         return $saiaResponse->getResponse();
-    }
-
-    /**
-     * @Route("/getMessage", name="getMessage", methods={"GET"})
-     * @param int $idft
-     * @return JsonResponse
-     */
-    public function getMessage(
-        int $idft
-    ): JsonResponse
-    {
-        try {
-           $FtPqr = new FtPqr($idft);
-           $Documento = $FtPqr->Documento;
-
-            $message = "<br/>Su solicitud ha sido generada con el número de radicado <strong>{$Documento->numero}</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
-
-            if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
-                'name' => 'ws_noty_radicado'
-            ])) {
-                $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $FtPqr);
-            }
-        } catch (Throwable $th) {
-            $message = 'Error al obtener la información';
-        }
-
-        return new JsonResponse([
-            'message' => $message,
-            'number' => $Documento->numero ?? 0
-        ]);
-
     }
 }
