@@ -228,7 +228,7 @@ class FtPqrRespuestaService extends ModelService
         $history = [
             'fecha' => date('Y-m-d H:i:s'),
             'idft' => $this->getModel()->FtPqr->getPK(),
-            'fk_funcionario' => $this->getModel()->Funcionario->getPK(),
+            'fk_funcionario' => $this->getFuncionario()->getPK(),
             'tipo' => $type,
             'idfk' => $this->getModel()->getPK(),
             'descripcion' => $description

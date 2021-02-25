@@ -148,7 +148,7 @@ class FtPqrService extends ModelService
         $PqrHtmlField = $PqrFormField->PqrHtmlField;
         $fieldName = $PqrFormField->name;
         $label = strtoupper($PqrFormField->label);
-        $data=[];
+        $data = [];
 
         switch ($PqrHtmlField->type_saia) {
             case 'Hidden':
@@ -662,7 +662,10 @@ HTML;
         if ($this->getPqrService()->subTypeExist()) {
             if ($data['subtype'] != $this->getModel()->sys_subtipo) {
                 $oldSubType = $this->getModel()->getFieldValue('sys_subtipo');
-                $newAttributes['sys_subtipo'] = $data['subtype'];
+                if (!$oldSubType) {
+                    $oldSubType = '-';
+                }
+                $newAttributes['sys_subtipo'] = $data['subtype' ];
                 $textField[] = "categoria/subtipo de {$oldSubType} a {newSubType}";
             }
         }
@@ -670,6 +673,9 @@ HTML;
         if ($this->getPqrService()->dependencyExist()) {
             if ($data['dependency'] != $this->getModel()->sys_dependencia) {
                 $oldDependency = $this->getValueForReport('sys_dependencia');
+                if (!$oldDependency) {
+                    $oldDependency = '-';
+                }
                 $newAttributes['sys_dependencia'] = $data['dependency'];
                 $textField[] = "dependencia de {$oldDependency} a {newDependency}";
             }

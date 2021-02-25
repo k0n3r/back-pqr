@@ -64,7 +64,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     public function afterAdd(): bool
     {
         if ($this->getService()->sendByEmail()) {
-            if ($this->getService()->validEmails()) {
+            if (!$this->getService()->validEmails()) {
                 throw new Exception($this->getService()->getErrorMessage());
             }
         }
@@ -77,7 +77,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     public function afterEdit(): bool
     {
         if ($this->getService()->sendByEmail()) {
-            if ($this->getService()->validEmails()) {
+            if (!$this->getService()->validEmails()) {
                 throw new Exception($this->getService()->getErrorMessage());
             }
         }
@@ -118,20 +118,6 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         }
 
         return $this->FtPqrRespuestaService;
-    }
-
-    /**
-     * Reemplazo la funcion principal para enviarle mas datos
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-24
-     */
-    public function getAttributes(): array
-    {
-        return array_merge(parent::getAttributes(), [
-            'numero' => $this->Documento->numero
-        ]);
-
     }
 
     /**

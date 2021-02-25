@@ -54,7 +54,7 @@ class PqrController extends AbstractController
                     $data[] = [
                         'fecha' => DateController::convertDate($FtPqr->Documento->fecha),
                         'descripcion' => array_filter(explode("<br>", $FtPqr->Documento->getDescription())),
-                        'url' => $FtPqr->getUrlQR()
+                        'url' => $FtPqr->getService()->getUrlQR()
                     ];
                 }
             }
