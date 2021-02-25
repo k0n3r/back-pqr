@@ -24,8 +24,6 @@ class PqrFormController extends AbstractController
 
     /**
      * @Route("/textFields", name="getTextFields", methods={"GET"})
-     * @param ISaiaResponse $saiaResponse
-     * @return Response
      */
     public function getTextFields(
         ISaiaResponse $saiaResponse
@@ -44,9 +42,6 @@ class PqrFormController extends AbstractController
 
     /**
      * @Route("/publish", name="publish", methods={"GET"})
-     * @param ISaiaResponse $saiaResponse
-     * @return Response
-     * @throws Exception
      */
     public function publish(
         ISaiaResponse $saiaResponse
@@ -80,8 +75,6 @@ class PqrFormController extends AbstractController
 
     /**
      * @Route("/setting", name="getSetting", methods={"GET"})
-     * @param ISaiaResponse $saiaResponse
-     * @return Response
      */
     public function getSetting(
         ISaiaResponse $saiaResponse
@@ -102,8 +95,6 @@ class PqrFormController extends AbstractController
 
     /**
      * @Route("/responseSetting", name="getResponseSetting", methods={"GET"})
-     * @param ISaiaResponse $saiaResponse
-     * @return Response
      */
     public function getResponseSetting(
         ISaiaResponse $saiaResponse
@@ -125,10 +116,6 @@ class PqrFormController extends AbstractController
 
     /**
      * @Route("/sortFields", name="sortFields", methods={"PUT"})
-     * @param Request       $request
-     * @param ISaiaResponse $saiaResponse
-     * @return Response
-     * @throws Exception
      */
     public function sortFields(
         Request $request,
@@ -163,10 +150,6 @@ class PqrFormController extends AbstractController
 
     /**
      * @Route("/updateSetting", name="updateSetting", methods={"PUT"})
-     * @param Request       $request
-     * @param ISaiaResponse $saiaResponse
-     * @return Response
-     * @throws Exception
      */
     public function updateSetting(
         Request $request,
@@ -201,10 +184,6 @@ class PqrFormController extends AbstractController
 
     /**
      * @Route("/updateResponseSetting", name="updateResponseSetting", methods={"PUT"})
-     * @param Request       $request
-     * @param ISaiaResponse $saiaResponse
-     * @return Response
-     * @throws Exception
      */
     public function updateResponseSetting(
         Request $request,
@@ -233,10 +212,6 @@ class PqrFormController extends AbstractController
 
     /**
      * @Route("/updatePqrTypes", name="updatePqrTypes", methods={"PUT"})
-     * @param Request       $request
-     * @param ISaiaResponse $saiaResponse
-     * @return Response
-     * @throws Exception
      */
     public function updatePqrTypes(
         Request $request,
@@ -265,10 +240,6 @@ class PqrFormController extends AbstractController
 
     /**
      * @Route("/updateShowReport", name="updateShowReport", methods={"PUT"})
-     * @param Request       $request
-     * @param ISaiaResponse $saiaResponse
-     * @return Response
-     * @throws Exception
      */
     public function updateShowReport(
         Request $request,

@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use Exception;
 use Saia\core\DatabaseConnection;
 use App\services\response\ISaiaResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -9,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Throwable;
 
 /**
  * @Route("/formField", name="formField_") 
@@ -29,7 +31,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField())->getService();
             if (!$PqrFormFieldService->create($request->get('data'))) {
-                throw new \Exception($PqrFormFieldService->getErrorMessage(), 1);
+                throw new Exception($PqrFormFieldService->getErrorMessage(), 1);
             }
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
@@ -38,7 +40,7 @@ class PqrFormFieldController extends AbstractController
             $saiaResponse->replaceData($data);
 
             $Connection->commit();
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $Connection->rollBack();
             $saiaResponse->setMessage($th->getMessage());
         }
@@ -61,7 +63,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->update($request->get('data'))) {
-                throw new \Exception($PqrFormFieldService->getErrorMessage(), 1);
+                throw new Exception($PqrFormFieldService->getErrorMessage(), 1);
             }
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
@@ -70,7 +72,7 @@ class PqrFormFieldController extends AbstractController
             $saiaResponse->replaceData($data);
 
             $Connection->commit();
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $Connection->rollBack();
             $saiaResponse->setMessage($th->getMessage());
         }
@@ -112,7 +114,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->updateActive($status)) {
-                throw new \Exception($PqrFormFieldService->getErrorMessage(), 1);
+                throw new Exception($PqrFormFieldService->getErrorMessage(), 1);
             }
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
@@ -120,7 +122,7 @@ class PqrFormFieldController extends AbstractController
             $saiaResponse->setSuccess(1);
             $saiaResponse->replaceData($data);
             $Connection->commit();
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $Connection->rollBack();
             $saiaResponse->setMessage($th->getMessage());
         }
@@ -142,12 +144,12 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->delete()) {
-                throw new \Exception($PqrFormFieldService->getErrorMessage(), 1);
+                throw new Exception($PqrFormFieldService->getErrorMessage(), 1);
             }
 
             $saiaResponse->setSuccess(1);
             $Connection->commit();
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $Connection->rollBack();
             $saiaResponse->setMessage($th->getMessage());
         }

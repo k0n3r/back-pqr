@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Bundles\pqr\EventListener;
+namespace App\Bundles\pqr\EventSubscriber;
 
-use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\controllers\TaskEvents;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrHistory;
@@ -47,10 +46,14 @@ class PqrSubscriber implements EventSubscriberInterface
                     'descripcion' => "Se crea la tarea: {$TareaService->getModel()->nombre}"
                 ];
 
-                if (!PqrHistory::newRecord($history)) {
-                    throw new \Exception("No fue posible guardar el historial del cambio", 200);
+                $PqrHistoryService = (new PqrHistory)->getService();
+                if (!$PqrHistoryService->save($history)) {
+                    throw new Exception($PqrHistoryService->getErrorMessage(), 200);
                 }
-                TaskEvents::updateEstado($Documento, FtPqr::ESTADO_PROCESO);
+
+                if (!TaskEvents::updateEstado($Documento)) {
+                    throw new Exception("No fue posible actualizar el estado de la solicitud", 200);
+                }
             }
         }
         return true;

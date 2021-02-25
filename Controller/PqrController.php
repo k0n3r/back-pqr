@@ -3,6 +3,7 @@
 namespace App\Bundles\pqr\Controller;
 
 use Doctrine\DBAL\Types\Types;
+use Exception;
 use Saia\core\DatabaseConnection;
 use Saia\controllers\DateController;
 use Saia\models\documento\Documento;
@@ -13,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Throwable;
 
 class PqrController extends AbstractController
 {
@@ -29,7 +31,7 @@ class PqrController extends AbstractController
         try {
 
             if (empty($request->get('numero'))) {
-                throw new \Exception("Se debe indicar el numero de radicado", 200);
+                throw new Exception("Se debe indicar el numero de radicado", 200);
             }
             $email = trim($request->get('sys_email'));
 
@@ -48,7 +50,7 @@ class PqrController extends AbstractController
 
             $data = [];
             foreach ($records as $FtPqr) {
-                if (trim($FtPqr->sys_email)==$email) {
+                if (trim($FtPqr->sys_email) == $email) {
                     $data[] = [
                         'fecha' => DateController::convertDate($FtPqr->Documento->fecha),
                         'descripcion' => array_filter(explode("<br>", $FtPqr->Documento->getDescription())),
@@ -59,7 +61,7 @@ class PqrController extends AbstractController
 
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }
 
@@ -80,14 +82,14 @@ class PqrController extends AbstractController
             $FtPqr = FtPqr::findByDocumentId($data->documentId);
 
             if ($FtPqr->getPK() != $data->id) {
-                throw new \Exception("La URL ingresada NO existe o ha sido eliminada", 1);
+                throw new Exception("La URL ingresada NO existe o ha sido eliminada", 1);
             }
 
             $data = $FtPqr->getService()->getHistoryForTimeline();
 
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }
 
@@ -106,14 +108,14 @@ class PqrController extends AbstractController
         try {
 
             if (!$request->get('dataCrypt')) {
-                throw new \Exception("Faltan parametros", 1);
+                throw new Exception("Faltan parametros", 1);
             }
 
             $data = json_decode(CryptController::decrypt($request->get('dataCrypt')), true);
 
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }
 

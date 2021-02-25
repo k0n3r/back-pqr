@@ -5,11 +5,29 @@ use Saia\models\busqueda\BusquedaComponente;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 
 /**
+ * @param FtPqrRespuesta $FtPqrRespuesta
+ * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-24
+ */
+function setFtPqrRespuesta(FtPqrRespuesta $FtPqrRespuesta): void
+{
+    $GLOBALS['FtPqrRespuesta'] = $FtPqrRespuesta;
+}
+
+/**
+ * @return FtPqrRespuesta
+ * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-24
+ */
+function getFtPqrRespuesta(): FtPqrRespuesta
+{
+    return $GLOBALS['FtPqrRespuesta'];
+}
+
+/**
  * Obtiene el filtro por PQR
  *
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com>
- * @date 2020
+ * @date   2020
  */
 function filter_answer_by_pqr(): string
 {
@@ -26,14 +44,11 @@ function filter_answer_by_pqr(): string
  * @param integer $iddocumento
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com>
- * @date 2020
- * 
+ * @date   2020
  */
 function getResponsable(int $iddocumento): string
 {
-    $FtPqrRespuesta = FtPqrRespuesta::findByDocumentId($iddocumento);
-    $GLOBALS['FtPqrRespuesta'] = $FtPqrRespuesta;
-
+    setFtPqrRespuesta(FtPqrRespuesta::findByDocumentId($iddocumento));
     $Funcionario = RutaService::getApprover($iddocumento);
 
     return $Funcionario ? $Funcionario->getName() : '';
@@ -45,14 +60,14 @@ function getResponsable(int $iddocumento): string
  * @param integer $idft
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com>
- * @date 2020
- * 
+ * @date   2020
  */
 function viewCalificacion(int $idft): string
 {
-    global $FtPqrRespuesta, $idbusquedaComponenteCalificacion;
+    global $idbusquedaComponenteCalificacion;
 
-    $records = $FtPqrRespuesta->getFtPqrCalificacion();
+    $FtPqrRespuesta = getFtPqrRespuesta();
+    $records = $FtPqrRespuesta->getService()->getFtPqrCalificacion();
 
     if (!$cant = count($records)) {
         $email = $FtPqrRespuesta->Tercero->correo ?? '';

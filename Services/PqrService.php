@@ -14,7 +14,7 @@ use App\Bundles\pqr\Services\models\PqrHtmlField;
 class PqrService
 {
     private ?bool $subTypeExist = null;
-    private ?bool $dependencyExist=null;
+    private ?bool $dependencyExist = null;
     private PqrForm $PqrForm;
 
     public function __construct()
@@ -324,4 +324,5 @@ class PqrService
             ->andWhere("nombre<>'Dependencia'")
             ->execute();
     }
+
 }

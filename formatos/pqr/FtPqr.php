@@ -84,11 +84,10 @@ class FtPqr extends FtPqrProperties
      */
     public function beforeRad(): bool
     {
-        if (!$this->getService()->createBackup()) {
-            throw new Exception($this->getService()->getErrorMessage(), 200);
-        }
-
-        if (!$this->getService()->updateFechaVencimiento()) {
+        if (
+            !$this->getService()->createBackup() ||
+            !$this->getService()->updateFechaVencimiento()
+        ) {
             throw new Exception($this->getService()->getErrorMessage(), 200);
         }
 

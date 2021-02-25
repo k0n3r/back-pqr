@@ -1,10 +1,5 @@
 <?php
 
-$fileAdditionalFunctions = ROOT_PATH . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
-if (file_exists($fileAdditionalFunctions)) {
-    include_once $fileAdditionalFunctions;
-}
-
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Saia\models\tarea\TareaEstado;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
@@ -13,7 +8,12 @@ use Saia\models\documento\Documento;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CampoSeleccionados;
 
-function setFtPqr()
+$fileAdditionalFunctions = ROOT_PATH . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
+if (file_exists($fileAdditionalFunctions)) {
+    include_once $fileAdditionalFunctions;
+}
+
+function setFtPqr(int $idft)
 {
     $GLOBALS['FtPqr'] = new FtPqr($idft);
 }
@@ -25,10 +25,10 @@ function getFtPqr(): FtPqr
 
 function viewFtPqr(int $idft, $numero): string
 {
-    setFtPqr();
+    setFtPqr($idft);
     $FtPqr = getFtPqr();
 
-    $enlace = <<<HTML
+    return <<<HTML
     <div class='kenlace_saia'
     enlace='views/documento/index_acordeon.php?documentId={$FtPqr->documento_iddocumento}' 
     conector='iframe'
@@ -36,34 +36,33 @@ function viewFtPqr(int $idft, $numero): string
         <button class='btn btn-complete' style='margin:auto'>{$numero}</button>
     </div>
 HTML;
-    return $enlace;
 }
 
-function getExpiration(int $idft)
+function getExpiration(): string
 {
     $FtPqr = getFtPqr();
     return $FtPqr->getService()->getColorExpiration();
 }
 
-function getEndDate(int $idft)
+function getEndDate()
 {
     $FtPqr = getFtPqr();
     return $FtPqr->getService()->getEndDate();
 }
 
-function getDaysLate(int $idft)
+function getDaysLate(): string
 {
     $FtPqr = getFtPqr();
     return $FtPqr->getService()->getDaysLate();
 }
 
-function getDaysWait(int $idft)
+function getDaysWait(): string
 {
     $FtPqr = getFtPqr();
     return $FtPqr->getService()->getDaysWait();
 }
 
-function getValueSysTipo(int $iddocumento, $fkCampoOpciones)
+function getValueSysTipo(int $iddocumento, $fkCampoOpciones): string
 {
     if ($fkCampoOpciones == 'sys_tipo') {
         return 'Sin Tipo';
@@ -121,7 +120,7 @@ function totalAnswers(int $idft): string
     return implode('<br/>', $answers);
 }
 
-function getResponsible(int $iddocumento)
+function getResponsible(int $iddocumento): string
 {
     $tareas = (new Documento($iddocumento))->getService()->getTasks();
     if (!$tareas) {
@@ -210,7 +209,7 @@ HTML;
             break;
     }
 
-    $code = <<<HTML
+    return <<<HTML
     <div class="dropdown">
         <button class="btn bg-institutional mx-1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fa fa-ellipsis-v"></i>
@@ -221,5 +220,4 @@ HTML;
     </div>
 HTML;
 
-    return $code;
 }

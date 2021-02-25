@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Services\controllers;
 
+use Exception;
 use Saia\core\model\Model;
 use Saia\models\Funcionario;
 use Saia\models\tarea\Tarea;
@@ -15,8 +16,8 @@ use Saia\models\tarea\IExternalEventsTask;
 class TaskEvents implements IExternalEventsTask
 {
     private Tarea $Tarea;
-    private $Instance;
-    private Funcionario $Funcionario;
+    private Model $Instance;
+    private ?Funcionario $Funcionario;
 
     public function __construct(Model $Instance, Tarea $Tarea)
     {
@@ -46,8 +47,10 @@ class TaskEvents implements IExternalEventsTask
                 'idfk' => $this->Tarea->getPK(),
                 'descripcion' => "Se elimina la tarea: {$this->Tarea->nombre}"
             ];
-            if (!PqrHistory::newRecord($history)) {
-                throw new \Exception("No fue posible guardar el historial de la eliminación de la tarea", 200);
+
+            $PqrHistoryService = (new PqrHistory)->getService();
+            if (!$PqrHistoryService->save($history)) {
+                throw new Exception($PqrHistoryService->getErrorMessage(), 200);
             }
 
             $this->updateEstado($Documento);
@@ -76,9 +79,12 @@ class TaskEvents implements IExternalEventsTask
                 'idfk' => $this->Tarea->getPK(),
                 'descripcion' => "Se actualiza el estado de la tarea ({$this->Tarea->nombre}) a : {$this->Instance->getValueLabel('valor')}"
             ];
-            if (!PqrHistory::newRecord($history)) {
-                throw new \Exception("No fue posible guardar el historial del cambio", 200);
+
+            $PqrHistoryService = (new PqrHistory)->getService();
+            if (!$PqrHistoryService->save($history)) {
+                throw new Exception($PqrHistoryService->getErrorMessage(), 200);
             }
+
             $this->updateEstado($Documento);
         }
         return true;
@@ -115,11 +121,11 @@ class TaskEvents implements IExternalEventsTask
      * @param Documento $Documento
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
-    public static function updateEstado(Documento $Documento, ?string $estado = null): bool
+    public static function updateEstado(Documento $Documento): bool
     {
-        $estado = $estado ?? FtPqr::ESTADO_PENDIENTE;
+        $estado = FtPqr::ESTADO_PENDIENTE;
 
         $data = UtilitiesPqr::getFinishTotalTask($Documento);
         if ($data['total']) {
@@ -128,7 +134,8 @@ class TaskEvents implements IExternalEventsTask
         }
 
         $Ft = $Documento->getFt();
-        if ($estado == FtPqr::ESTADO_PENDIENTE) {
+
+        if ($estado == FtPqr::ESTADO_PENDIENTE && $Ft->sys_estado != FtPqr::ESTADO_PROCESO) {
             if ($records = $Ft->PqrRespuesta) {
                 foreach ($records as $PqrRespuesta) {
                     if (!$PqrRespuesta->Documento->isDeleted()) {
@@ -139,8 +146,6 @@ class TaskEvents implements IExternalEventsTask
             }
         }
 
-        $Ft->getService()->changeStatus($estado);
-
-        return true;
+        return $Ft->getService()->changeStatus($estado);
     }
 }

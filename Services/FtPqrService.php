@@ -28,9 +28,9 @@ class FtPqrService extends ModelService
 {
     private PqrService $PqrService;
 
-    public function __construct(FtPqr $FtPqr)
+    public function __construct(FtPqr $Ft)
     {
-        parent::__construct($FtPqr);
+        parent::__construct($Ft);
 
         $this->setFuncionario(SessionController::getUser());
         $this->PqrService = new PqrService();
@@ -148,6 +148,7 @@ class FtPqrService extends ModelService
         $PqrHtmlField = $PqrFormField->PqrHtmlField;
         $fieldName = $PqrFormField->name;
         $label = strtoupper($PqrFormField->label);
+        $data=[];
 
         switch ($PqrHtmlField->type_saia) {
             case 'Hidden':
@@ -161,6 +162,7 @@ class FtPqrService extends ModelService
                 break;
             case 'AutocompleteD';
             case 'AutocompleteM';
+                $value = null;
                 if ($this->getModel()->$fieldName) {
                     $value = $PqrFormField->getService()->getListDataForAutocomplete(['id' => $this->getModel()->$fieldName]);
                 }
@@ -208,9 +210,10 @@ class FtPqrService extends ModelService
 
             $PqrHistoryService = (new PqrHistory)->getService();
             if (!$PqrHistoryService->save($history)) {
-                $this->errorMessage = "No fue posible actualizar el historial";
+                $this->errorMessage = $PqrHistoryService->getErrorMessage();
                 return false;
             }
+
         }
 
         return true;
@@ -649,6 +652,7 @@ HTML;
         }
 
         $newAttributes = [];
+        $textField = [];
         if ($data['type'] != $this->getModel()->sys_tipo) {
             $oldType = $this->getModel()->getFieldValue('sys_tipo');
             $newAttributes['sys_tipo'] = $data['type'];
@@ -932,7 +936,7 @@ HTML;
 
             $PqrHistoryService = (new PqrHistory)->getService();
             if (!$PqrHistoryService->save($history)) {
-                $this->errorMessage = "No fue posible guardar el historial del cambio";
+                $this->errorMessage = $PqrHistoryService->getErrorMessage();
                 return false;
             }
         }
