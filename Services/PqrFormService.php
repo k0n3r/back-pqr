@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Services;
 
+use Exception;
 use Saia\models\grafico\Grafico;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
@@ -20,9 +21,6 @@ use App\Bundles\pqr\Services\controllers\AddEditFormat\IAddEditFormat;
 
 class PqrFormService
 {
-    const URLWSPQR = PROTOCOLO_CONEXION . DOMINIO . '/ws/pqr/index.html';
-    const URLWSCALIFICACION = PROTOCOLO_CONEXION . DOMINIO . '/ws/pqr_calificacion/index.html';
-
     private PqrForm $PqrForm;
     private string $errorMessage;
 
@@ -32,11 +30,33 @@ class PqrFormService
     }
 
     /**
+     * Ruta del Ws de PQR
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-25
+     */
+    public static function getUrlWsPQR(): string
+    {
+        return $_SERVER['APP_DOMAIN'] . '/ws/pqr/index.html';
+    }
+
+    /**
+     * Ruta del Ws de la Calificacion de la PQR
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-25
+     */
+    public static function getUrlWsCalificacion(): string
+    {
+        return $_SERVER['APP_DOMAIN'] . '/ws/pqr_calificacion/index.html';
+    }
+
+    /**
      * Retorna el mensaje de error
      *
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     public function getErrorMessage(): string
     {
@@ -48,7 +68,7 @@ class PqrFormService
      *
      * @return PqrForm
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getModel(): PqrForm
     {
@@ -57,11 +77,11 @@ class PqrFormService
 
     /**
      * Actualiza un registro
-     * 
+     *
      * @param array $data
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     public function update(array $data): bool
     {
@@ -76,7 +96,7 @@ class PqrFormService
      * @param array $data
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function updateSetting(array $data): bool
     {
@@ -119,11 +139,11 @@ class PqrFormService
 
     /**
      * Actualiza la configuracion para la respuesta
-     * 
+     *
      * @param array $data
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function updateResponseSetting(array $data): bool
     {
@@ -146,12 +166,12 @@ class PqrFormService
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getSetting(): array
     {
         return [
-            'urlWs' => self::URLWSPQR,
+            'urlWs' => $this->getUrlWsPQR(),
             'publish' => $this->PqrForm->fk_formato ? 1 : 0,
             'pqrForm' => $this->getDataPqrForm(),
             'pqrTypes' => $this->getTypes(),
@@ -163,11 +183,11 @@ class PqrFormService
 
     /**
      * Actualiza los dias de vencimientos de los tipo de PQR
-     * 
+     *
      * @param array $data
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function updatePqrTypes(array $data): bool
     {
@@ -192,7 +212,7 @@ class PqrFormService
      *
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function publish(): bool
     {
@@ -266,7 +286,7 @@ class PqrFormService
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getDataPqrFormFields(): array
     {
@@ -284,7 +304,7 @@ class PqrFormService
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getDataPqrForm(): array
     {
@@ -296,7 +316,7 @@ class PqrFormService
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getTypes(): array
     {
@@ -308,7 +328,7 @@ class PqrFormService
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getDataPqrNotifications(): array
     {
@@ -327,7 +347,7 @@ class PqrFormService
      * @param IAddEditFormat $Instance
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function addEditFormat(IAddEditFormat $Instance): bool
     {
@@ -341,7 +361,7 @@ class PqrFormService
      * @param Formato $Formato
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     private function generateForm(Formato $Formato): bool
     {
@@ -356,7 +376,7 @@ class PqrFormService
      *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function generaReport(): void
     {
@@ -373,7 +393,7 @@ class PqrFormService
      * @param boolean $instance :obtener instancia o campos
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getFieldsReport(bool $instance = false): array
     {
@@ -397,7 +417,7 @@ class PqrFormService
      *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function viewPqr(): void
     {
@@ -419,7 +439,7 @@ class PqrFormService
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     private function defaultFieldsReport(): array
     {
@@ -442,7 +462,7 @@ class PqrFormService
      * @param string $select
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function createView(string $name, string $select): void
     {
@@ -465,8 +485,7 @@ class PqrFormService
                 break;
 
             default:
-                throw new \Exception("No fue posible generar la vista {$name}", 200);
-                break;
+                throw new Exception("No fue posible generar la vista {$name}", 200);
         }
     }
 
@@ -476,7 +495,7 @@ class PqrFormService
      * @param PqrFormField[] $fields
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function generateFuncionReport(array $fields): bool
     {
@@ -484,11 +503,11 @@ class PqrFormService
         foreach ($fields as $PqrFormField) {
             $code = '';
             switch ($PqrFormField->PqrHtmlField->type_saia) {
-                    // case 'Textarea':
-                    //     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
-                    //         return substr(\$value, 0, 30).' ...';
-                    //     }";
-                    //     break;
+                // case 'Textarea':
+                //     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                //         return substr(\$value, 0, 30).' ...';
+                //     }";
+                //     break;
                 case 'Select':
                 case 'Radio':
                     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
@@ -535,7 +554,7 @@ class PqrFormService
         $codeFunction = "<?php \n\n" . implode("\n", $fieldCode) . "\n ?>";
 
         if (!file_put_contents($file, $codeFunction)) {
-            throw new \Exception("No fue posible crear las funciones del formulario", 200);
+            throw new Exception("No fue posible crear las funciones del formulario", 200);
         }
 
         return true;
@@ -547,7 +566,7 @@ class PqrFormService
      * @param PqrFormField[] $fields
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function updateReport(array $fields): bool
     {
@@ -573,7 +592,7 @@ class PqrFormService
             if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
                 'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
             ])) {
-                throw new \Exception("No se encuentra la pantalla de los grafico", 200);
+                throw new Exception("No se encuentra la pantalla de los grafico", 200);
             }
 
             $Grafico = Grafico::findByAttributes([
@@ -632,18 +651,19 @@ class PqrFormService
      * Obtiene los campos y el info por defecto
      * de los reportes (busqueda componente)
      *
-     * @param array $infoFields
-     * @param array $nameFields
+     * @param array  $infoFields
+     * @param array  $nameFields
      * @param string $nameReport
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getDefaultDataComponente(
         array $infoFields,
         array $nameFields,
         string $nameReport
-    ): array {
+    ): array
+    {
 
         $aditionalInfo = '';
         if ($infoFields) {
@@ -680,7 +700,7 @@ class PqrFormService
      *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function viewRespuestaPqr(): void
     {
@@ -696,7 +716,7 @@ class PqrFormService
      *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function viewCalificacionPqr(): void
     {
@@ -712,7 +732,7 @@ class PqrFormService
      *
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function generatePqrWs(): bool
     {
@@ -744,7 +764,7 @@ class PqrFormService
      * @param Formato $FormatoC
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function generateCalificacionWs(Formato $FormatoC): bool
     {
@@ -770,14 +790,15 @@ class PqrFormService
      * @param string $urlFolderTemplate
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function generateFile(
         string $templateName,
         string $urlFolderTemplate
-    ): string {
+    ): string
+    {
         $values = [
-            'baseUrl' => ABSOLUTE_SAIA_ROUTE
+            'baseUrl' => $_SERVER['APP_DOMAIN']
         ];
 
         $content = WsFt::getContent(
@@ -787,7 +808,7 @@ class PqrFormService
         $fileName = SessionController::getTemporalDir() . "/{$templateName}";
 
         if (!file_put_contents(PUBLIC_PATH . $fileName, $content)) {
-            throw new \Exception("Imposible crear el archivo {$templateName} para el ws", 1);
+            throw new Exception("Imposible crear el archivo {$templateName} para el ws", 1);
         }
 
         return $fileName;

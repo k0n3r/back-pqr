@@ -13,33 +13,28 @@ class FtPqrRespuestaProperties extends ModelFormat
     
     public $isPDF=false;
 
-    public function __construct($id = null)
-    {
-        parent::__construct($id);
-    }
-
     protected function defaultDbAttributes()
     {
         return [
             'safe' => [
-                'anexos_digitales',
-				'anexos_fisicos',
-				'asunto',
-				'ciudad_origen',
-				'contenido',
-				'copia',
-				'copia_interna',
-				'dependencia',
-				'despedida',
-				'destino',
+                'idft_pqr_respuesta',
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
+				'dependencia',
 				'ft_pqr',
-				'idft_pqr_respuesta',
+				'ciudad_origen',
+				'destino',
+				'tipo_distribucion',
+				'copia',
+				'asunto',
+				'contenido',
+				'despedida',
 				'otra_despedida',
-				'sol_encuesta',
-				'tipo_distribucion' 
+				'anexos_digitales',
+				'anexos_fisicos',
+				'copia_interna',
+				'sol_encuesta' 
             ],
             'date' => [],
             'table' => 'ft_pqr_respuesta',

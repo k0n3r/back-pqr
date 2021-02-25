@@ -439,7 +439,7 @@ class FtPqrRespuestaService extends ModelService
             'anterior' => $this->getModel()->Documento->getPK()
         ]));
 
-        return PqrFormService::URLWSCALIFICACION . "?d={$params}";
+        return PqrFormService::getUrlWsCalificacion() . "?d={$params}";
     }
 
     /**

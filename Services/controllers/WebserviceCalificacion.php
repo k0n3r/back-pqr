@@ -12,7 +12,7 @@ class WebserviceCalificacion extends WsFormulario
     public function getJsContentForm(): string
     {
         $values = [
-            'baseUrl' => ABSOLUTE_SAIA_ROUTE,
+            'baseUrl' => $_SERVER['APP_DOMAIN'],
             'formatId' => $this->Formato->getPK(),
             'content' => $this->jsContent
         ];

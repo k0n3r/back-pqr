@@ -38,7 +38,7 @@ class QRDocumentoPqrController extends QRDocumentoController
      */
     public function getImageQR(): string
     {
-        $route = ABSOLUTE_SAIA_ROUTE . $this->getRouteQR();
+        $route = $_SERVER['APP_DOMAIN'] . $this->getRouteQR();
         return '<img src="' . $route . '" width="80px" height="80px" />';
     }
 }

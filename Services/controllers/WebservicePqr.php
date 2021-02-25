@@ -67,7 +67,7 @@ class WebservicePqr extends WsFt implements IWsHtml
     {
         $values = [
             'recaptchaPublicKey' => $_SERVER['RECAPTCHA_PUBLIC_KEY'],
-            'baseUrl' => ABSOLUTE_SAIA_ROUTE,
+            'baseUrl' => $_SERVER['APP_DOMAIN'],
             'formatId' => $this->Formato->getPK(),
             'content' => $this->jsContent,
             'fieldsWithoutAnonymous' => json_encode($this->objectFields),
@@ -83,7 +83,7 @@ class WebservicePqr extends WsFt implements IWsHtml
     /**
      * @inheritDoc
      */
-    public function getHtmlContentSearchForm(array $filesToInclude, string $urlForm): string
+    public function getHtmlContentSearchForm(array $filesToInclude, string $urlForm = null): string
     {
         return '';
     }

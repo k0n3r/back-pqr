@@ -13,23 +13,18 @@ class FtPqrCalificacionProperties extends ModelFormat
     
     public $isPDF=false;
 
-    public function __construct($id = null)
-    {
-        parent::__construct($id);
-    }
-
     protected function defaultDbAttributes()
     {
         return [
             'safe' => [
-                'dependencia',
+                'idft_pqr_calificacion',
 				'documento_iddocumento',
 				'encabezado',
-				'experiencia_gestion',
-				'experiencia_servicio',
 				'firma',
+				'dependencia',
 				'ft_pqr_respuesta',
-				'idft_pqr_calificacion' 
+				'experiencia_gestion',
+				'experiencia_servicio' 
             ],
             'date' => [],
             'table' => 'ft_pqr_calificacion',

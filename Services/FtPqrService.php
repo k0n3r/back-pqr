@@ -665,7 +665,7 @@ HTML;
                 if (!$oldSubType) {
                     $oldSubType = '-';
                 }
-                $newAttributes['sys_subtipo'] = $data['subtype' ];
+                $newAttributes['sys_subtipo'] = $data['subtype'];
                 $textField[] = "categoria/subtipo de {$oldSubType} a {newSubType}";
             }
         }
@@ -902,7 +902,7 @@ HTML;
 
         return sprintf(
             "%s/ws/%s/infoQR.html?data=%s",
-            PROTOCOLO_CONEXION . DOMINIO,
+            $_SERVER['APP_DOMAIN'],
             $this->getModel()->getFormat()->nombre,
             $data
         );

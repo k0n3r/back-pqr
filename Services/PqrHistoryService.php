@@ -90,7 +90,7 @@ class PqrHistoryService extends ModelService
 
             $FileJson = new FileJson($Configuracion->getValue());
             $FileTemporal = $FileJson->convertToFileTemporal();
-            $this->logo = ABSOLUTE_SAIA_ROUTE . $FileTemporal->getRouteFromRoot();
+            $this->logo = $_SERVER['APP_DOMAIN'] . $FileTemporal->getRouteFromRoot();
         }
 
         return $this->logo;

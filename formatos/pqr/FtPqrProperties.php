@@ -13,39 +13,22 @@ class FtPqrProperties extends ModelFormat
     
     public $isPDF=false;
 
-    public function __construct($id = null)
-    {
-        parent::__construct($id);
-    }
-
     protected function defaultDbAttributes()
     {
         return [
             'safe' => [
-                'andres',
-				'anexos',
-				'area_de_texto',
-				'checkbox',
-				'correo',
-				'dependencia',
+                'idft_pqr',
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
-				'idft_pqr',
-				'listado',
-				'listado_municipio',
-				'numerico',
-				'radio',
-				'sys_anonimo',
-				'sys_dependencia',
-				'sys_email',
 				'sys_estado',
-				'sys_fecha_terminado',
-				'sys_fecha_vencimiento',
-				'sys_subtipo',
 				'sys_tercero',
+				'sys_fecha_vencimiento',
+				'sys_fecha_terminado',
+				'sys_anonimo',
+				'dependencia',
 				'sys_tipo',
-				'sys_tratamiento' 
+				'sys_email' 
             ],
             'date' => ['sys_fecha_vencimiento',
 				'sys_fecha_terminado'],

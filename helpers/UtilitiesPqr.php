@@ -176,7 +176,7 @@ class UtilitiesPqr
 
             $Object = TemporalController::createTemporalFile($Documento->pdf, '', true);
             if ($Object->success) {
-                return ABSOLUTE_SAIA_ROUTE . $Object->route;
+                return $_SERVER['APP_DOMAIN'] . $Object->route;
             }
         } catch (\Throwable $th) {
             $log = [
