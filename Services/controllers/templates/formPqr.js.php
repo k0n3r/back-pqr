@@ -39,9 +39,9 @@ $(function () {
                     let dataForm = window.getFormObject($('#formulario').serializeArray());
                     let data = Object.assign(dataForm, {
                         formatId: {$formatId},
-                        dependencia: localStorage.getItem('WsRol'),
-                        key: localStorage.getItem('key'),
-                        token: localStorage.getItem('token'),
+                        dependencia: window.credential.WsRol,
+                        key: window.credential.key,
+                        token: window.credential.token,
                         tokenRecaptcha: tokenRecaptcha
                     });
 
@@ -217,5 +217,4 @@ $(function () {
     }
 });
 JAVASCRIPT;
-
 echo $code;

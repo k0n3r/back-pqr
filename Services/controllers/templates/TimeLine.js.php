@@ -95,8 +95,5 @@ class TimeLine {
         return response;
     }
 }
-
-
 JAVASCRIPT;
-
 echo $code;

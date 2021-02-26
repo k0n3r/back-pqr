@@ -43,7 +43,7 @@ class WebservicePqr extends WsFt implements IWsHtml
         $html = $urlSearch ? "<a href='{$urlSearch}'>Consultar</a>" : '';
 
         $values = [
-            'recaptchaPublicKey' => $_SERVER['RECAPTCHA_PUBLIC_KEY'],
+            'recaptchaPublicKey' => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'],
             'emailLabel' => $this->PqrForm->getRow('sys_email')->label,
             'showAnonymous' => (int)$this->PqrForm->show_anonymous,
             'showLabel' => (int)$this->PqrForm->show_label,
@@ -66,7 +66,7 @@ class WebservicePqr extends WsFt implements IWsHtml
     public function getJsContentForm(): string
     {
         $values = [
-            'recaptchaPublicKey' => $_SERVER['RECAPTCHA_PUBLIC_KEY'],
+            'recaptchaPublicKey' => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'],
             'baseUrl' => $_SERVER['APP_DOMAIN'],
             'formatId' => $this->Formato->getPK(),
             'content' => $this->jsContent,

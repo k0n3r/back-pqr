@@ -37,7 +37,7 @@ class PqrFormService
      */
     public static function getUrlWsPQR(): string
     {
-        return $_SERVER['APP_DOMAIN'] . '/ws/pqr/index.html';
+        return $_SERVER['APP_DOMAIN'] . 'ws/pqr/index.html';
     }
 
     /**
@@ -48,7 +48,7 @@ class PqrFormService
      */
     public static function getUrlWsCalificacion(): string
     {
-        return $_SERVER['APP_DOMAIN'] . '/ws/pqr_calificacion/index.html';
+        return $_SERVER['APP_DOMAIN'] . 'ws/pqr_calificacion/index.html';
     }
 
     /**

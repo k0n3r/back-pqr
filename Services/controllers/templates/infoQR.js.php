@@ -14,7 +14,7 @@ $(function () {
         return;
     }
     
-    if (!localStorage.getItem('key')) {
+    if (!window.credential.key) {
         window.getCredentials();
     }
 
@@ -27,8 +27,8 @@ $(function () {
                     url: window.baseUrl + `api/pqr/historyForTimeline`,
                     async: false,
                     data: {
-                        key: localStorage.getItem('key'),
-                        token: localStorage.getItem('token'),
+                        key: window.credential.key,
+                        token: window.credential.token,
                         infoCryp: d
                     },
                 }).done((response) => {
@@ -58,5 +58,4 @@ $(function () {
 
 });
 JAVASCRIPT;
-
 echo $code;
