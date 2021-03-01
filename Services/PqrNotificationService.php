@@ -4,32 +4,11 @@ namespace App\Bundles\pqr\Services;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrNotification;
+use App\services\models\ModelService;
 
-class PqrNotificationService
+class PqrNotificationService extends ModelService
 {
-
-    private PqrNotification $PqrNotification;
-    private string $errorMessage;
-
-    public function __construct(PqrNotification $PqrNotification)
-    {
-        $this->PqrNotification = $PqrNotification;
-    }
-
-
-    /**
-     * Retorna el mensaje de error
-     *
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
-     */
-    public function getErrorMessage(): string
-    {
-        return $this->errorMessage;
-    }
-
-    /**
+        /**
      * Obtiene la instancia de PqrNotification actualizada
      *
      * @return PqrNotification
@@ -38,7 +17,7 @@ class PqrNotificationService
      */
     public function getModel(): PqrNotification
     {
-        return $this->PqrNotification;
+        return $this->Model;
     }
 
     /**
@@ -72,9 +51,9 @@ class PqrNotificationService
         if (!isset($data['fk_pqr_form'])) {
             $data['fk_pqr_form'] = PqrForm::getInstance()->getPK();
         }
-        $this->PqrNotification->setAttributes($data);
+        $this->getModel()->setAttributes($data);
 
-        return $this->PqrNotification->save();
+        return $this->getModel()->save();
     }
 
     /**
@@ -86,6 +65,6 @@ class PqrNotificationService
      */
     public function delete(): bool
     {
-        return $this->PqrNotification->delete();
+        return $this->getModel()->delete();
     }
 }

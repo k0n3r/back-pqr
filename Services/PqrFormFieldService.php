@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\services\models\ModelService;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use Saia\core\DatabaseConnection;
@@ -9,33 +10,13 @@ use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrHtmlField;
 
-class PqrFormFieldService
+class PqrFormFieldService extends ModelService
 {
 
     /**
      * Bandera que indica el numero minimo donde empezara el orden de los campos
      */
     const INITIAL_ORDER = 2;
-
-    private PqrFormField $PqrFormField;
-    private string $errorMessage;
-
-    public function __construct(PqrFormField $PqrFormField)
-    {
-        $this->PqrFormField = $PqrFormField;
-    }
-
-    /**
-     * Retorna el mensaje de error
-     *
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
-     */
-    public function getErrorMessage(): string
-    {
-        return $this->errorMessage;
-    }
 
     /**
      * Obtiene la instancia de PqrFormField actualizada
@@ -46,7 +27,7 @@ class PqrFormFieldService
      */
     public function getModel(): PqrFormField
     {
-        return $this->PqrFormField;
+        return $this->Model;
     }
 
     /**
@@ -96,9 +77,9 @@ class PqrFormFieldService
             $data['setting'] = json_encode($data['setting']);
         }
 
-        $this->PqrFormField->setAttributes($data);
+        $this->getModel()->setAttributes($data);
 
-        return $this->PqrFormField->save();
+        return $this->getModel()->save();
     }
 
     /**
@@ -110,9 +91,9 @@ class PqrFormFieldService
      */
     public function delete(): bool
     {
-        if ($this->PqrFormField->delete()) {
-            if ($this->PqrFormField->fk_campos_formato) {
-                if (!$this->PqrFormField->CamposFormato->delete()) {
+        if ($this->getModel()->delete()) {
+            if ($this->getModel()->fk_campos_formato) {
+                if (!$this->getModel()->CamposFormato->delete()) {
                     $this->errorMessage = "No fue posible eliminar el campo";
                     return false;
                 }
@@ -140,8 +121,8 @@ class PqrFormFieldService
         ];
 
         if (
-            $this->PqrFormField->name != 'sys_subtipo'
-            && $this->PqrFormField->name != 'sys_dependencia'
+            $this->getModel()->name != 'sys_subtipo'
+            && $this->getModel()->name != 'sys_dependencia'
         ) {
             $attributes['show_report'] = 0;
         }
@@ -231,13 +212,13 @@ class PqrFormFieldService
     {
         $list = [];
 
-        switch ($this->PqrFormField->PqrHtmlField->type) {
+        switch ($this->getModel()->PqrHtmlField->type) {
             case PqrHtmlField::TYPE_DEPENDENCIA:
-                $list = $this->getDependencys($this->PqrFormField->getSetting(), $data);
+                $list = $this->getDependencys($this->getModel()->getSetting(), $data);
                 break;
 
             case PqrHtmlField::TYPE_LOCALIDAD:
-                $list = $this->getListLocalidad($this->PqrFormField->getSetting(), $data);
+                $list = $this->getListLocalidad($this->getModel()->getSetting(), $data);
                 break;
         }
 

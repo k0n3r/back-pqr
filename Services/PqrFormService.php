@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\services\models\ModelService;
 use Exception;
 use Saia\models\grafico\Grafico;
 use Saia\core\DatabaseConnection;
@@ -19,16 +20,8 @@ use App\Bundles\pqr\Services\controllers\WebserviceCalificacion;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\IAddEditFormat;
 
-class PqrFormService
+class PqrFormService extends ModelService
 {
-    private PqrForm $PqrForm;
-    private string $errorMessage;
-
-    public function __construct(PqrForm $PqrForm)
-    {
-        $this->PqrForm = $PqrForm;
-    }
-
     /**
      * Ruta del Ws de PQR
      *
@@ -52,18 +45,6 @@ class PqrFormService
     }
 
     /**
-     * Retorna el mensaje de error
-     *
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2021
-     */
-    public function getErrorMessage(): string
-    {
-        return $this->errorMessage;
-    }
-
-    /**
      * Obtiene la instancia de PqrForm actualizada
      *
      * @return PqrForm
@@ -72,22 +53,7 @@ class PqrFormService
      */
     public function getModel(): PqrForm
     {
-        return $this->PqrForm;
-    }
-
-    /**
-     * Actualiza un registro
-     *
-     * @param array $data
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2021
-     */
-    public function update(array $data): bool
-    {
-        $this->PqrForm->setAttributes($data);
-
-        return $this->PqrForm->save();
+        return $this->Model;
     }
 
     /**
@@ -112,7 +78,7 @@ class PqrFormService
             ->set('required_anonymous', 0)
             ->where("name<>'sys_tipo'")->execute();
 
-        if ($this->PqrForm->show_anonymous) {
+        if ($this->getModel()->show_anonymous) {
             if ($formFields = $data['formFields']) {
                 foreach ($formFields['dataShowAnonymous'] as $id) {
 
@@ -172,7 +138,7 @@ class PqrFormService
     {
         return [
             'urlWs' => $this->getUrlWsPQR(),
-            'publish' => $this->PqrForm->fk_formato ? 1 : 0,
+            'publish' => $this->getModel()->fk_formato ? 1 : 0,
             'pqrForm' => $this->getDataPqrForm(),
             'pqrTypes' => $this->getTypes(),
             'pqrFormFields' => $this->getDataPqrFormFields(),
@@ -192,7 +158,7 @@ class PqrFormService
     public function updatePqrTypes(array $data): bool
     {
 
-        $PqrFormFieldService = ($this->PqrForm->getRow('sys_tipo'))->getService();
+        $PqrFormFieldService = ($this->getModel()->getRow('sys_tipo'))->getService();
         if (!$PqrFormFieldService->update([
             'setting' => $data
         ])) {
@@ -216,12 +182,12 @@ class PqrFormService
      */
     public function publish(): bool
     {
-        if (!$this->PqrForm->fk_formato) {
+        if (!$this->getModel()->fk_formato) {
             PqrService::activeGraphics();
         }
 
         if (!$this->addEditFormat(
-            new AddEditFtPqr($this->PqrForm)
+            new AddEditFtPqr($this->getModel())
         )) {
             $this->errorMessage = "No fue posible generar el formulario";
             return false;
@@ -234,7 +200,7 @@ class PqrFormService
             return false;
         }
 
-        $formatNameR = "COMUNICACIÓN EXTERNA ({$this->PqrForm->label})";
+        $formatNameR = "COMUNICACIÓN EXTERNA ({$this->getModel()->label})";
         if ($FormatoR->etiqueta != $formatNameR) {
             $FormatoR->etiqueta = $formatNameR;
             $FormatoR->save();
@@ -252,7 +218,7 @@ class PqrFormService
             return false;
         }
 
-        $formatNameC = "CALIFICACIÓN ({$this->PqrForm->label})";
+        $formatNameC = "CALIFICACIÓN ({$this->getModel()->label})";
         if ($FormatoC->etiqueta != $formatNameC) {
             $FormatoC->etiqueta = $formatNameC;
             $FormatoC->save();
@@ -291,7 +257,7 @@ class PqrFormService
     public function getDataPqrFormFields(): array
     {
         $data = [];
-        if ($records = $this->PqrForm->PqrFormFields) {
+        if ($records = $this->getModel()->PqrFormFields) {
             foreach ($records as $PqrFormField) {
                 $data[] = $PqrFormField->getDataAttributes();
             }
@@ -308,7 +274,7 @@ class PqrFormService
      */
     public function getDataPqrForm(): array
     {
-        return $this->PqrForm->getDataAttributes();
+        return $this->getModel()->getDataAttributes();
     }
 
     /**
@@ -320,7 +286,7 @@ class PqrFormService
      */
     public function getTypes(): array
     {
-        return $this->PqrForm->getRow('sys_tipo')->getSetting()->options;
+        return $this->getModel()->getRow('sys_tipo')->getSetting()->options;
     }
 
     /**
@@ -333,7 +299,7 @@ class PqrFormService
     public function getDataPqrNotifications(): array
     {
         $data = [];
-        if ($records = $this->PqrForm->PqrNotifications) {
+        if ($records = $this->getModel()->PqrNotifications) {
             foreach ($records as $PqrNotification) {
                 $data[] = $PqrNotification->getDataAttributes();
             }
@@ -398,7 +364,7 @@ class PqrFormService
     private function getFieldsReport(bool $instance = false): array
     {
         $data = [];
-        $fields = $this->PqrForm->PqrFormFields;
+        $fields = $this->getModel()->PqrFormFields;
         foreach ($fields as $PqrFormField) {
             if ($PqrFormField->show_report) {
                 if ($instance) {
@@ -745,10 +711,10 @@ class PqrFormService
         $infoQRJsFile = $this->generateFile('infoQR.js', $urlFolderTemplate);
         $timelineFile = $this->generateFile('TimeLine.js', $urlFolderTemplate);
 
-        $IWsHtml = new WebservicePqr($this->PqrForm->Formato);
+        $IWsHtml = new WebservicePqr($this->getModel()->Formato);
         $WsGenerator = new WsGenerator(
             $IWsHtml,
-            $this->PqrForm->Formato->nombre,
+            $this->getModel()->Formato->nombre,
             false
         );
 
