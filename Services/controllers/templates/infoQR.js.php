@@ -14,7 +14,7 @@ $(function () {
         return;
     }
     
-    if (!window.credential.key) {
+    if (typeof window.credential === 'undefined') {
         window.getCredentials();
     }
 
