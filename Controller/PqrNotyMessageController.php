@@ -31,7 +31,7 @@ class PqrNotyMessageController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrNotyMessageService = (new PqrNotyMessage($id))->getService();
-            if (!$PqrNotyMessageService->update($request->get('data'))) {
+            if (!$PqrNotyMessageService->save($request->get('data'))) {
                 throw new \Exception($PqrNotyMessageService->getErrorMessage(), 1);
             }
 
