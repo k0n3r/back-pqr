@@ -56,7 +56,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
 
         $table->addColumn('label', 'string', [
-            'length' => 50
+            'length' => 255
         ]);
 
         $table->addColumn('required', 'boolean', [

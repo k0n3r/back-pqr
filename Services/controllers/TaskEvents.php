@@ -26,38 +26,6 @@ class TaskEvents implements IExternalEventsTask
         $this->Funcionario = SessionController::getUser();
     }
 
-    public function afterCreateTarea(): bool
-    {
-        return true;
-    }
-
-    public function afterUpdateTarea(): bool
-    {
-        return true;
-    }
-
-    public function afterDeleteTarea(): bool
-    {
-        if ($Documento = $this->Tarea->getService()->getDocument()) {
-            $history = [
-                'fecha' => date('Y-m-d H:i:s'),
-                'idft' => $Documento->getFt()->getPK(),
-                'fk_funcionario' => $this->Funcionario->getPK(),
-                'tipo' => PqrHistory::TIPO_TAREA,
-                'idfk' => $this->Tarea->getPK(),
-                'descripcion' => "Se elimina la tarea: {$this->Tarea->nombre}"
-            ];
-
-            $PqrHistoryService = (new PqrHistory)->getService();
-            if (!$PqrHistoryService->save($history)) {
-                throw new Exception($PqrHistoryService->getErrorMessage(), 200);
-            }
-
-            $this->updateEstado($Documento);
-        }
-        return true;
-    }
-
     public function afterCreateTareaAnexo(): bool
     {
         return true;
@@ -70,6 +38,7 @@ class TaskEvents implements IExternalEventsTask
 
     public function afterCreateTareaEstado(): bool
     {
+
         if ($Documento = $this->Tarea->getService()->getDocument()) {
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
