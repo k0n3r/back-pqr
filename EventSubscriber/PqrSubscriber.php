@@ -40,7 +40,7 @@ class PqrSubscriber implements EventSubscriberInterface
                 $history = [
                     'fecha' => date('Y-m-d H:i:s'),
                     'idft' => $Documento->getFt()->getPK(),
-                    'fk_funcionario' => $TaskCreatedEvent->getFuncionario()->getPK(),
+                    'fk_funcionario' => $TareaService->getFuncionario()->getPK(),
                     'tipo' => PqrHistory::TIPO_TAREA,
                     'idfk' => $TareaService->getModel()->getPK(),
                     'descripcion' => "Se crea la tarea: {$TareaService->getModel()->nombre}"
