@@ -117,7 +117,6 @@ class AddEditFtPqr implements IAddEditFormat
             'descripcion_formato' => 'Modulo de PQR',
             'version' => 1,
             'module' => 'pqr',
-            'class_name' => 'App\Bundles\pqr\Services\controllers\TaskEvents',
             'publicar' => 1
         ];
 
