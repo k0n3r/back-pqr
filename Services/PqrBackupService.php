@@ -3,7 +3,7 @@
 namespace App\Bundles\pqr\Services;
 
 use App\Bundles\pqr\Services\models\PqrBackup;
-use App\services\models\ModelService;
+use App\services\models\ModelService\ModelService;
 
 class PqrBackupService extends ModelService
 {

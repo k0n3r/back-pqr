@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Services;
 
-use App\services\models\ModelService;
+use App\services\models\ModelService\ModelService;
 use Saia\controllers\functions\Header;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;

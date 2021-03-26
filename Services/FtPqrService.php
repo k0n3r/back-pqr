@@ -6,7 +6,7 @@ use App\Bundles\pqr\Services\models\PqrBackup;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
-use App\services\models\ModelService;
+use App\services\models\ModelService\ModelService;
 use DateTime;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
@@ -31,8 +31,6 @@ class FtPqrService extends ModelService
     public function __construct(FtPqr $Ft)
     {
         parent::__construct($Ft);
-
-        $this->setFuncionario(SessionController::getUser());
         $this->PqrService = new PqrService();
     }
 

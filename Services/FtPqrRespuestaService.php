@@ -8,15 +8,13 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
-use App\services\models\ModelService;
+use App\services\models\ModelService\ModelService;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
 use Saia\controllers\DateController;
 use Saia\controllers\DistributionService;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
-use Saia\controllers\SessionController;
-use Saia\core\model\Model;
 use Saia\models\anexos\Anexos;
 use Saia\models\BuzonSalida;
 use Saia\models\Tercero;
@@ -28,13 +26,11 @@ class FtPqrRespuestaService extends ModelService
     public function __construct(FtPqrRespuesta $Ft)
     {
         parent::__construct($Ft);
-
-        $this->setFuncionario(SessionController::getUser());
         $this->PqrForm = PqrForm::getInstance();
 
     }
 
-    public function getModel(): Model
+    public function getModel(): FtPqrRespuesta
     {
         return $this->Model;
     }
@@ -311,7 +307,7 @@ class FtPqrRespuestaService extends ModelService
         if ($this->getModel()->copia_interna) {
             $Transfer = new Transfer(
                 $this->getModel()->Documento,
-                $this->getModel()->Funcionario->funcionario_codigo,
+                $this->getFuncionario()->funcionario_codigo,
                 BuzonSalida::NOMBRE_COPIA
             );
             $destinations = explode(',', $this->getModel()->copia_interna);

@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Services;
 
-use App\services\models\ModelService;
+use App\services\models\ModelService\ModelService;
 use Saia\models\Dependencia;
 use Saia\models\Configuracion;
 use Saia\controllers\anexos\FileJson;

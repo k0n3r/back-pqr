@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Services;
 
-use App\services\models\ModelService;
+use App\services\models\ModelService\ModelService;
 use Exception;
 use Saia\models\grafico\Grafico;
 use Saia\core\DatabaseConnection;

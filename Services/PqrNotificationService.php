@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Services;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrNotification;
-use App\services\models\ModelService;
+use App\services\models\ModelService\ModelService;
 
 class PqrNotificationService extends ModelService
 {

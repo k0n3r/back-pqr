@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Services;
 
-use App\services\models\ModelService;
+use App\services\models\ModelService\ModelService;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use Saia\core\DatabaseConnection;
