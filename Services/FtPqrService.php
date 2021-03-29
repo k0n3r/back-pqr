@@ -151,7 +151,7 @@ class FtPqrService extends ModelService
         switch ($PqrHtmlField->type_saia) {
             case 'Hidden':
             case 'Attached':
-                continue;
+                break;
 
             case 'Radio':
             case 'Checkbox':
