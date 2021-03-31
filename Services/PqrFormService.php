@@ -434,14 +434,14 @@ class PqrFormService extends ModelService
     {
         $Connection = DatabaseConnection::getDefaultConnection();
 
-        switch (MOTOR) {
-            case 'MySql':
-            case 'Oracle':
+        switch ($_SERVER['APP_DATABASE_DRIVER']) {
+            case 'pdo_mysql':
+            case 'oci8':
                 $create = "CREATE OR REPLACE VIEW {$name} AS {$select}";
                 $Connection->executeQuery($create);
                 break;
 
-            case 'SqlServer':
+            case 'pdo_sqlserver':
                 $drop = "DROP VIEW {$name}";
                 $Connection->executeQuery($drop);
 
