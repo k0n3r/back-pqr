@@ -513,7 +513,7 @@ class PqrFormService extends ModelService
                 $fieldCode[] = $code;
             }
         }
-        $file = ROOT_PATH . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
+        $file = $_SERVER["ROOT_PATH"] . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
         if (file_exists($file)) {
             unlink($file);
         }
@@ -773,7 +773,7 @@ class PqrFormService extends ModelService
         );
         $fileName = SessionController::getTemporalDir() . "/{$templateName}";
 
-        if (!file_put_contents(PUBLIC_PATH . $fileName, $content)) {
+        if (!file_put_contents($_SERVER["PUBLIC_PATH"] . $fileName, $content)) {
             throw new Exception("Imposible crear el archivo {$templateName} para el ws", 1);
         }
 
