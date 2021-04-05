@@ -88,7 +88,7 @@ function viewCalificacion(int $idft): string
         'variable_busqueda' => json_encode(['idft_pqr_respuesta' => $idft]),
         'idbusqueda_componente' => $idbusquedaComponenteCalificacion
     ]);
-    $numero = $FtPqrRespuesta->Documento->numero;
+    $numero = $FtPqrRespuesta->getDocument()->numero;
     $nombreFormato = $FtPqrRespuesta->Formato->etiqueta;
 
     $enlace = <<<HTML

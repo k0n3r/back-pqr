@@ -144,12 +144,12 @@ class FtPqr extends FtPqrProperties
     {
         $Qr = UtilitiesPqr::showQr($this);
 
-        $fecha = DateController::convertDate($this->Documento->fecha, 'Ymd');
+        $fecha = DateController::convertDate($this->getDocument()->fecha, 'Ymd');
         $text = sprintf(
             '%s %s-%s',
             'Radicado:',
             $fecha,
-            $this->Documento->numero
+            $this->getDocument()->numero
         );
 
         $labelPQR = strtoupper($this->getService()->getPqrForm()->label);

@@ -44,8 +44,8 @@ class FtPqrRespuestaService extends ModelService
      */
     public function getRadicado(): string
     {
-        return DateController::convertDate($this->getModel()->Documento->fecha, 'Ymd')
-            . " - " . $this->getModel()->Documento->numero;
+        return DateController::convertDate($this->getModel()->getDocument()->fecha, 'Ymd')
+            . " - " . $this->getModel()->getDocument()->numero;
     }
 
     /**
@@ -57,7 +57,7 @@ class FtPqrRespuestaService extends ModelService
      */
     public function getFechaCiudad(): string
     {
-        return $this->getModel()->Municipio->nombre . ", " . strftime("%d de %B de %Y", strtotime($this->getModel()->Documento->fecha));
+        return $this->getModel()->Municipio->nombre . ", " . strftime("%d de %B de %Y", strtotime($this->getModel()->getDocument()->fecha));
     }
 
     /**
@@ -133,7 +133,7 @@ class FtPqrRespuestaService extends ModelService
         $id = $this->getModel()->Formato->getField('anexos_digitales')->getPK();
 
         $names = Anexos::findColumn('etiqueta', [
-            'documento_iddocumento' => $this->getModel()->Documento->getPK(),
+            'documento_iddocumento' => $this->getModel()->getDocument()->getPK(),
             'campos_formato' => $id
         ]);
 
@@ -171,7 +171,7 @@ class FtPqrRespuestaService extends ModelService
      */
     private function getCreador(): string
     {
-        return $this->getModel()->Documento->Funcionario->getName();
+        return $this->getModel()->getDocument()->Funcionario->getName();
     }
 
     /**
@@ -366,10 +366,10 @@ class FtPqrRespuestaService extends ModelService
         }
 
         $anexos = [];
-        $File = new FileJson($this->getModel()->Documento->getPdfJson());
+        $File = new FileJson($this->getModel()->getDocument()->getPdfJson());
         $anexos[] = $File;
 
-        if ($records = $this->getModel()->Documento->Anexos) {
+        if ($records = $this->getModel()->getDocument()->Anexos) {
             foreach ($records as $Anexo) {
                 $anexos[] = new FileJson($Anexo->ruta);
             }
@@ -432,7 +432,7 @@ class FtPqrRespuestaService extends ModelService
     {
         $params = CryptController::encrypt(json_encode([
             'ft_pqr_respuesta' => $this->getModel()->getPK(),
-            'anterior' => $this->getModel()->Documento->getPK()
+            'anterior' => $this->getModel()->getDocument()->getPK()
         ]));
 
         return PqrFormService::getUrlWsCalificacion() . "?d={$params}";
@@ -472,7 +472,7 @@ class FtPqrRespuestaService extends ModelService
 
         $send = $SendMailController->send();
         if ($send !== true) {
-            $message = "No fue posible solicitar la calificacion de la ({$nameFormat}) # {$this->getModel()->Documento->numero}";
+            $message = "No fue posible solicitar la calificacion de la ({$nameFormat}) # {$this->getModel()->getDocument()->numero}";
             $log = [
                 'error' => $send,
                 'message' => $message
@@ -487,7 +487,7 @@ class FtPqrRespuestaService extends ModelService
             return false;
         }
 
-        $description = "Se solicita la calificación de la ({$nameFormat}) # {$this->getModel()->Documento->numero} al e-mail: ({$email})";
+        $description = "Se solicita la calificación de la ({$nameFormat}) # {$this->getModel()->getDocument()->numero} al e-mail: ({$email})";
         $tipo = PqrHistory::TIPO_CALIFICACION;
 
         return $this->saveHistory($description, $tipo);
@@ -506,7 +506,7 @@ class FtPqrRespuestaService extends ModelService
         $data = [];
         if ($records = $this->getModel()->FtPqrCalificacion) {
             foreach ($records as $FtPqrCalificacion) {
-                if (!$FtPqrCalificacion->Documento->isActive()) {
+                if (!$FtPqrCalificacion->getDocument()->isActive()) {
                     $data[] = $FtPqrCalificacion;
                 }
             }

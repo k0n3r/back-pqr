@@ -13,12 +13,9 @@ class QRDocumentoPqrController extends QRDocumentoController
     public function __construct(FtPqr $FtPqr)
     {
         $this->FtPqr = $FtPqr;
-        parent::__construct($FtPqr->Documento);
+        parent::__construct($FtPqr->getDocument());
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function configureQR($url = null): void
     {
         $url = $this->FtPqr->getService()->getUrlQR();

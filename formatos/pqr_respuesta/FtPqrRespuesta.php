@@ -89,7 +89,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
      */
     public function afterRad(): bool
     {
-        $description = "Se genera la respuesta con radicado # {$this->Documento->numero}";
+        $description = "Se genera la respuesta con radicado # {$this->getDocument()->numero}";
         $tipo = PqrHistory::TIPO_RESPUESTA;
 
         if (

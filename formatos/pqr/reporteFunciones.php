@@ -8,7 +8,7 @@ use Saia\models\documento\Documento;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CampoSeleccionados;
 
-$fileAdditionalFunctions = ROOT_PATH . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
+$fileAdditionalFunctions = $_SERVER['ROOT_PATH'] . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
 if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
 }

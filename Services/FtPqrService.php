@@ -189,8 +189,8 @@ class FtPqrService extends ModelService
         $this->getModel()->sys_fecha_vencimiento = $fecha;
         $this->getModel()->update();
 
-        $this->getModel()->Documento->fecha_limite = $fecha;
-        $this->getModel()->Documento->update();
+        $this->getModel()->getDocument()->fecha_limite = $fecha;
+        $this->getModel()->getDocument()->update();
 
         if ($oldDate != $this->getModel()->sys_fecha_vencimiento) {
             $history = [
@@ -238,7 +238,7 @@ class FtPqrService extends ModelService
         }
 
         return (DateController::addBusinessDays(
-            new DateTime($this->getModel()->Documento->fecha),
+            new DateTime($this->getModel()->getDocument()->fecha),
             $dias
         ))->format('Y-m-d H:i:s');
     }
@@ -285,11 +285,11 @@ class FtPqrService extends ModelService
         }
 
         return [
-            'iddocPqr' => $this->getModel()->Documento->getPK(),
+            'iddocPqr' => $this->getModel()->getDocument()->getPK(),
             'destino' => $destino ?? 0,
             'tipo_distribucion' => $tipoDistribucion ?? 0,
             'despedida' => $despedida ?? 0,
-            'asunto' => "Respondiendo a la {$this->getModel()->getFormat()->etiqueta} No {$this->getModel()->Documento->numero}"
+            'asunto' => "Respondiendo a la {$this->getModel()->getFormat()->etiqueta} No {$this->getModel()->getDocument()->numero}"
         ];
     }
 
@@ -397,9 +397,9 @@ class FtPqrService extends ModelService
         return [
             'iconPoint' => 'fa fa-map-marker',
             'iconPointColor' => 'success',
-            'date' => DateController::convertDate($this->getModel()->Documento->fecha),
-            'description' => "Se registra la solicitud No # {$this->getModel()->Documento->numero}",
-            'url' => UtilitiesPqr::getRoutePdf($this->getModel()->Documento)
+            'date' => DateController::convertDate($this->getModel()->getDocument()->fecha),
+            'description' => "Se registra la solicitud No # {$this->getModel()->getDocument()->numero}",
+            'url' => UtilitiesPqr::getRoutePdf($this->getModel()->getDocument())
         ];
     }
 
@@ -438,9 +438,9 @@ class FtPqrService extends ModelService
             return true;
         }
 
-        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {$this->getModel()->Documento->numero}, adjunto encontrará una copia de la {$this->getPqrForm()->label} diligenciada el día de hoy.<br/><br/>
+        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {$this->getModel()->getDocument()->numero}, adjunto encontrará una copia de la {$this->getPqrForm()->label} diligenciada el día de hoy.<br/><br/>
         El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado";
-        $subject = "Solicitud de {$this->getPqrForm()->label} # {$this->getModel()->Documento->numero}";
+        $subject = "Solicitud de {$this->getPqrForm()->label} # {$this->getModel()->getDocument()->numero}";
 
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
             'name' => 'f1_email_solicitante'
@@ -459,17 +459,17 @@ class FtPqrService extends ModelService
             [$this->getModel()->sys_email]
         );
 
-        $File = new FileJson($this->getModel()->Documento->getPdfJson());
+        $File = new FileJson($this->getModel()->getDocument()->getPdfJson());
         $SendMailController->setAttachments([$File]);
 
         $send = $SendMailController->send();
         if ($send !== true) {
             $log = [
                 'error' => $send,
-                'message' => "No fue posible notificar la PQR # {$this->getModel()->Documento->numero}"
+                'message' => "No fue posible notificar la PQR # {$this->getModel()->getDocument()->numero}"
             ];
             UtilitiesPqr::notifyAdministrator(
-                "No fue posible notificar la PQR # {$this->getModel()->Documento->numero}",
+                "No fue posible notificar la PQR # {$this->getModel()->getDocument()->numero}",
                 $log
             );
         }
@@ -547,11 +547,11 @@ HTML;
         }
 
         if ($emails) {
-            $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->getPqrForm()->label} con radicado {$this->getModel()->Documento->numero}.<br/><br/>
+            $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->getPqrForm()->label} con radicado {$this->getModel()->getDocument()->numero}.<br/><br/>
             El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado";
 
             $SendMailController = new SendMailController(
-                "Notificación de {$this->getPqrForm()->label} # {$this->getModel()->Documento->numero}",
+                "Notificación de {$this->getPqrForm()->label} # {$this->getModel()->getDocument()->numero}",
                 $message
             );
 
@@ -564,10 +564,10 @@ HTML;
             if ($send !== true) {
                 $log = [
                     'error' => $send,
-                    'message' => "No fue posible notificar a los funcionarios # {$this->getModel()->Documento->numero}"
+                    'message' => "No fue posible notificar a los funcionarios # {$this->getModel()->getDocument()->numero}"
                 ];
                 UtilitiesPqr::notifyAdministrator(
-                    "No fue posible notificar a los funcionarios # {$this->getModel()->Documento->numero}",
+                    "No fue posible notificar a los funcionarios # {$this->getModel()->getDocument()->numero}",
                     $log
                 );
             }
@@ -683,8 +683,8 @@ HTML;
         if ($data['expirationDate'] != $expiration) {
 
             $newAttributes['sys_fecha_vencimiento'] = $data['expirationDate'];
-            $this->getModel()->Documento->fecha_limite = $data['expirationDate'];
-            $this->getModel()->Documento->update();
+            $this->getModel()->getDocument()->fecha_limite = $data['expirationDate'];
+            $this->getModel()->getDocument()->update();
 
             $oldDate = DateController::convertDate(
                 $expiration,
@@ -702,7 +702,7 @@ HTML;
 
         $SaveFt = new SaveFt($this->getModel()->Documento);
         $SaveFt->edit($newAttributes);
-        $this->Model = $this->getModel()->Documento->getFt();
+        $this->Model = $this->getModel()->getDocument()->getFt();
 
         $text = "Se actualiza: " . implode(', ', $textField);
         $newType = $this->getModel()->getFieldValue('sys_tipo');
@@ -847,7 +847,7 @@ HTML;
         $now = !$this->getModel()->sys_fecha_terminado ? new DateTime()
             : new DateTime($this->getModel()->sys_fecha_terminado);
 
-        $diff = $now->diff(new DateTime($this->getModel()->Documento->fecha));
+        $diff = $now->diff(new DateTime($this->getModel()->getDocument()->fecha));
 
         return $diff->days;
     }
@@ -894,7 +894,7 @@ HTML;
     {
         $params = [
             'id' => $this->getModel()->getPK(),
-            'documentId' => $this->getModel()->Documento->getPK()
+            'documentId' => $this->getModel()->getDocument()->getPK()
         ];
         $data = CryptController::encrypt(json_encode($params));
 

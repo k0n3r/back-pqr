@@ -136,8 +136,8 @@ class PqrSubscriber implements EventSubscriberInterface
 
         if ($estado == FtPqr::ESTADO_PENDIENTE && $Ft->sys_estado != FtPqr::ESTADO_PROCESO) {
             if ($records = $Ft->PqrRespuesta) {
-                foreach ($records as $PqrRespuesta) {
-                    if (!$PqrRespuesta->Documento->isDeleted()) {
+                foreach ($records as $FtPqrRespuesta) {
+                    if (!$FtPqrRespuesta->getDocument()->isDeleted()) {
                         $estado = FtPqr::ESTADO_PROCESO;
                         break;
                     }

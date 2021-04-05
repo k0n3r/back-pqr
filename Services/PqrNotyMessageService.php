@@ -87,7 +87,7 @@ class PqrNotyMessageService extends ModelService
      */
     public static function n_numeroPqr(FtPqr $FtPqr): int
     {
-        return (int) $FtPqr->Documento->numero;
+        return (int) $FtPqr->getDocument()->numero;
     }
 
     /**

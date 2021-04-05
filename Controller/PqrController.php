@@ -52,8 +52,8 @@ class PqrController extends AbstractController
             foreach ($records as $FtPqr) {
                 if (trim($FtPqr->sys_email) == $email) {
                     $data[] = [
-                        'fecha' => DateController::convertDate($FtPqr->Documento->fecha),
-                        'descripcion' => array_filter(explode("<br>", $FtPqr->Documento->getDescription())),
+                        'fecha' => DateController::convertDate($FtPqr->getDocument()->fecha),
+                        'descripcion' => array_filter(explode("<br>", $FtPqr->getDocument()->getDescription())),
                         'url' => $FtPqr->getService()->getUrlQR()
                     ];
                 }

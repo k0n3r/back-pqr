@@ -53,7 +53,7 @@ class PqrHistoryService extends ModelService
                 $data = array_merge($data, [
                     'iconPoint' => 'fa fa-comment',
                     'iconPointColor' => 'danger',
-                    'description' => "Se solicita la calificación del servicio prestado a la respuesta # {$FtPqrRespuesta->Documento->numero}"
+                    'description' => "Se solicita la calificación del servicio prestado a la respuesta # {$FtPqrRespuesta->getDocument()->numero}"
                 ]);
                 break;
 
