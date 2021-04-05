@@ -110,11 +110,11 @@ function totalAnswers(int $idft): string
         'idbusqueda_componente' => $idbusquedaComponenteRespuesta
     ]);
 
-    $numero = $FtPqr->Documento->numero;
+    $numero = $FtPqr->getDocument()->numero;
     $answers = [];
     foreach ($records as $FtPqrRespuesta) {
-        $fecha = DateController::convertDate($FtPqrRespuesta->Documento->fecha, DateController::PUBLIC_DATE_FORMAT);
-        $answers[] = "<a class='kenlace_saia' enlace='{$url}' title='Ver las respuestas' conector='iframe' titulo='Respuestas a PQR No {$numero}' href='#'>{$FtPqrRespuesta->Documento->numero} - {$fecha}</a>";
+        $fecha = DateController::convertDate($FtPqrRespuesta->getDocument()->fecha, DateController::PUBLIC_DATE_FORMAT);
+        $answers[] = "<a class='kenlace_saia' enlace='{$url}' title='Ver las respuestas' conector='iframe' titulo='Respuestas a PQR No {$numero}' href='#'>{$FtPqrRespuesta->getDocument()->numero} - {$fecha}</a>";
     }
 
     return implode('<br/>', $answers);

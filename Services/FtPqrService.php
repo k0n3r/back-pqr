@@ -748,7 +748,7 @@ HTML;
     {
         $data = [];
         foreach ($this->getModel()->PqrRespuesta as $FtPqrRespuesta) {
-            if (!$FtPqrRespuesta->Documento->isActive()) {
+            if (!$FtPqrRespuesta->getDocument()->isActive()) {
                 $data[] = $FtPqrRespuesta;
             }
         }
