@@ -31,10 +31,14 @@ function getFtPqrRespuesta(): FtPqrRespuesta
  */
 function filter_answer_by_pqr(): string
 {
-    $idft = $_REQUEST['idft_pqr'];
-    if ($idft) {
-        return "ft_pqr={$idft}";
+    if ($_REQUEST['variable_busqueda']) {
+        $params = json_decode($_REQUEST['variable_busqueda'], true);
+        $idft = $params['idft_pqr'];
+        if ($idft) {
+            return "ft_pqr={$idft}";
+        }
     }
+
     return '1=1';
 }
 

@@ -7,13 +7,16 @@ use Saia\models\formatos\CampoSeleccionados;
  *
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com>
- * @date 2020
+ * @date   2020
  */
 function filter_calificacion(): string
 {
-    $idft = $_REQUEST['idft_pqr_respuesta'];
-    if ($idft) {
-        return "ft_pqr_respuesta={$idft}";
+    if ($_REQUEST['variable_busqueda']) {
+        $params = json_decode($_REQUEST['variable_busqueda'], true);
+        $idft = $params['idft_pqr_respuesta'];
+        if ($idft) {
+            return "ft_pqr_respuesta={$idft}";
+        }
     }
     return '1=1';
 }
@@ -25,7 +28,7 @@ function filter_calificacion(): string
  * @param integer $fkCampoOpciones
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com>
- * @date 2020
+ * @date   2020
  */
 function getGestion(int $iddocumento, int $fkCampoOpciones): string
 {
@@ -47,7 +50,7 @@ function getGestion(int $iddocumento, int $fkCampoOpciones): string
  * @param integer $fkCampoOpciones
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com>
- * @date 2020
+ * @date   2020
  */
 function getServicio(int $iddocumento, int $fkCampoOpciones): string
 {

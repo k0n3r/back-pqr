@@ -171,7 +171,7 @@ class FtPqrRespuestaService extends ModelService
      */
     private function getCreador(): string
     {
-        return $this->getModel()->getDocument()->Funcionario->getName();
+        return $this->getModel()->getDocument()->getMaker()->getName();
     }
 
     /**
