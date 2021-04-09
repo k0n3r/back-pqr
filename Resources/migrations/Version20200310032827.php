@@ -205,7 +205,7 @@ final class Version20200310032827 extends AbstractMigration
                 'tipo_dato' => 'text',
                 'obligatoriedad' => '1',
                 'valor' => 'avanzado',
-                'acciones' => 'a,e,p',
+                'acciones' => 'a,e',
                 'etiqueta_html' => 'Textarea',
                 'orden' => '7',
                 'fila_visible' => '1',
