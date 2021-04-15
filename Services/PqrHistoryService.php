@@ -44,7 +44,7 @@ class PqrHistoryService extends ModelService
                 $data = array_merge($data, [
                     'iconPoint' => 'fa fa-envelope-o',
                     'iconPointColor' => 'warning',
-                    'url' => UtilitiesPqr::getRoutePdf($FtPqrRespuesta->Documento)
+                    'url' => UtilitiesPqr::getRoutePdf($FtPqrRespuesta->getDocument())
                 ]);
                 break;
 

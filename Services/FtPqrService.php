@@ -537,7 +537,7 @@ HTML;
 
         if ($codes) {
             $Transfer = new Transfer(
-                $this->getModel()->Documento,
+                $this->getModel()->getDocument(),
                 SessionController::getValue('funcionario_codigo'),
                 BuzonSalida::NOMBRE_TRANSFERIDO
             );
@@ -700,7 +700,7 @@ HTML;
             $textField[] = "fecha de vencimiento de {$oldDate} a {$newDate}";
         }
 
-        $SaveFt = new SaveFt($this->getModel()->Documento);
+        $SaveFt = new SaveFt($this->getModel()->getDocument());
         $SaveFt->edit($newAttributes);
         $this->Model = $this->getModel()->getDocument()->getFt();
 

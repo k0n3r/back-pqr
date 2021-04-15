@@ -269,7 +269,7 @@ class FtPqrRespuestaService extends ModelService
                 $this->errorMessage = "Tipo de distribucion no definida";
                 return false;
         }
-        $DistributionService = new DistributionService($this->getModel()->Documento);
+        $DistributionService = new DistributionService($this->getModel()->getDocument());
         $DistributionService->start(
             $this->getModel()->dependencia,
             DistributionService::TIPO_INTERNO,
@@ -306,7 +306,7 @@ class FtPqrRespuestaService extends ModelService
     {
         if ($this->getModel()->copia_interna) {
             $Transfer = new Transfer(
-                $this->getModel()->Documento,
+                $this->getModel()->getDocument(),
                 $this->getFuncionario()->funcionario_codigo,
                 BuzonSalida::NOMBRE_COPIA
             );
@@ -332,7 +332,7 @@ class FtPqrRespuestaService extends ModelService
             return true;
         }
 
-        $DocumentoPqr = $this->getModel()->FtPqr->Documento;
+        $DocumentoPqr = $this->getModel()->FtPqr->getDocument();
         $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$this->getModel()->PqrForm->label} con número de radicado {$DocumentoPqr->numero}.<br/><br/>";
         $subject = "Respuesta solicitud de {$this->PqrForm->label} # {$DocumentoPqr->numero}";
 
@@ -454,7 +454,7 @@ class FtPqrRespuestaService extends ModelService
         }
 
         $nameFormat = $this->getModel()->getFormat()->etiqueta;
-        $DocumentoPqr = $this->getModel()->FtPqr->Documento;
+        $DocumentoPqr = $this->getModel()->FtPqr->getDocument();
 
         $url = $this->getUrlEncuesta();
         $message = "Cordial Saludo,<br/><br/>
