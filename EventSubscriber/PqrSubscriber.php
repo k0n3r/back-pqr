@@ -22,9 +22,15 @@ class PqrSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            TaskCreatedEvent::class => 'onTaskCreated',
-            TaskDeletedEvent::class => 'onTaskDeletedEvent',
-            TaskStatusCreatedEvent::class => 'onTaskStatusCreatedEvent'
+            TaskCreatedEvent::class => [
+                ['onTaskCreated', -1]
+            ],
+            TaskDeletedEvent::class => [
+                ['onTaskDeletedEvent', -1]
+            ],
+            TaskStatusCreatedEvent::class => [
+                ['onTaskStatusCreatedEvent', -1]
+            ]
         ];
     }
 
