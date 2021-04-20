@@ -2,8 +2,14 @@
 $code = <<<JAVASCRIPT
 $(function () {
     var baseUrl = window.baseUrl;
-
-    window.getCredentials();
+    
+    if (typeof window.credential === 'undefined') {
+        window.getCredentials();
+    }
+    
+    var key = window.credential.key;
+    var token = window.credential.token;
+    
     loadjsComponent();
 
     $("#sys_anonimo").change(function () {
@@ -40,9 +46,9 @@ $(function () {
                     let data = Object.assign(dataForm, {
                         formatId: {$formatId},
                         dependencia: window.credential.WsRol,
-                        key: window.credential.key,
-                        token: window.credential.token,
-                        tokenRecaptcha: tokenRecaptcha
+                        key,
+                        token,
+                        tokenRecaptcha
                     });
 
                     $.ajax({
