@@ -8,8 +8,10 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
+use App\services\models\anexos\AnexosService;
 use App\services\models\ModelService\ModelService;
 use Saia\controllers\anexos\FileJson;
+use Saia\controllers\anexos\FileRoute;
 use Saia\controllers\CryptController;
 use Saia\controllers\DateController;
 use Saia\controllers\DistributionService;
@@ -109,11 +111,11 @@ class FtPqrRespuestaService extends ModelService
         }
 
         if ($anexosDigitales = $this->getNameAnexosDigitales()) {
-            $data .= "Anexos digitales: {$anexosDigitales}<br/>";
+            $data .= "Anexos digitales: $anexosDigitales<br/>";
         }
 
         if ($copiaExterna = $this->getNameCopiaExterna()) {
-            $data .= "Copia externa: {$copiaExterna}<br/>";
+            $data .= "Copia externa: $copiaExterna<br/>";
         }
 
         $data .= "Proyectó: {$this->getCreador()}";
@@ -130,7 +132,7 @@ class FtPqrRespuestaService extends ModelService
      */
     private function getNameAnexosDigitales(): string
     {
-        $id = $this->getModel()->Formato->getField('anexos_digitales')->getPK();
+        $id = $this->getModel()->getFormat()->getField('anexos_digitales')->getPK();
 
         $names = Anexos::findColumn('etiqueta', [
             'documento_iddocumento' => $this->getModel()->getDocument()->getPK(),
@@ -190,7 +192,7 @@ class FtPqrRespuestaService extends ModelService
         }
 
         if (!UtilitiesPqr::isEmailValid($email)) {
-            $this->errorMessage = "El email ({$email}) NO es valido";
+            $this->errorMessage = "El email ($email) NO es valido";
             return false;
         }
 
@@ -202,7 +204,7 @@ class FtPqrRespuestaService extends ModelService
                 }
 
                 if (!UtilitiesPqr::isEmailValid($copia)) {
-                    $this->errorMessage = "El email en copia externa ({$copia}) NO es valido";
+                    $this->errorMessage = "El email en copia externa ($copia) NO es valido";
                     return false;
                 }
             }
@@ -333,8 +335,8 @@ class FtPqrRespuestaService extends ModelService
         }
 
         $DocumentoPqr = $this->getModel()->FtPqr->getDocument();
-        $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$this->getModel()->PqrForm->label} con número de radicado {$DocumentoPqr->numero}.<br/><br/>";
-        $subject = "Respuesta solicitud de {$this->PqrForm->label} # {$DocumentoPqr->numero}";
+        $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$this->getModel()->PqrForm->label} con número de radicado $DocumentoPqr->numero.<br/><br/>";
+        $subject = "Respuesta solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero";
 
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
             'name' => 'f2_email_respuesta'
@@ -345,7 +347,7 @@ class FtPqrRespuestaService extends ModelService
 
         if ($this->getModel()->sol_encuesta) {
             $url = $this->getUrlEncuesta();
-            $message .= "Califica nuestro servicio haciendo clic en el siguiente enlace: <a href='{$url}'>Calificar el servicio</a> .<br/><br/>";
+            $message .= "Califica nuestro servicio haciendo clic en el siguiente enlace: <a href='$url'>Calificar el servicio</a> .<br/><br/>";
         }
 
         $SendMailController = new SendMailController(
@@ -369,9 +371,9 @@ class FtPqrRespuestaService extends ModelService
         $File = new FileJson($this->getModel()->getDocument()->getPdfJson());
         $anexos[] = $File;
 
-        if ($records = $this->getModel()->getDocument()->Anexos) {
-            foreach ($records as $Anexo) {
-                $anexos[] = new FileJson($Anexo->ruta);
+        if ($records = AnexosService::getFiles($this->getModel()->getDocument()->getPK())) {
+            foreach ($records as $route) {
+                $anexos[] = new FileRoute($route);
             }
         }
         $SendMailController->setAttachments($anexos);
@@ -380,10 +382,10 @@ class FtPqrRespuestaService extends ModelService
         if ($send !== true) {
             $log = [
                 'error' => $send,
-                'message' => "No fue posible notificar la Respuesta a la PQR # {$DocumentoPqr->numero}"
+                'message' => "No fue posible notificar la Respuesta a la PQR # $DocumentoPqr->numero"
             ];
             UtilitiesPqr::notifyAdministrator(
-                "No fue posible notificar la Respuesta a la PQR # {$DocumentoPqr->numero}",
+                "No fue posible notificar la Respuesta a la PQR # $DocumentoPqr->numero",
                 $log
             );
 
@@ -394,7 +396,7 @@ class FtPqrRespuestaService extends ModelService
         $description = "Se le notificó a: (" . implode(", ", $SendMailController->getDestinations()) . ")";
         if ($copia = $SendMailController->getCopyDestinations()) {
             $texCopia = implode(", ", $copia);
-            $description .= " con copia a: ({$texCopia})";
+            $description .= " con copia a: ($texCopia)";
         }
         $tipo = PqrHistory::TIPO_NOTIFICACION;
 
@@ -435,7 +437,7 @@ class FtPqrRespuestaService extends ModelService
             'anterior' => $this->getModel()->getDocument()->getPK()
         ]));
 
-        return PqrFormService::getUrlWsCalificacion() . "?d={$params}";
+        return PqrFormService::getUrlWsCalificacion() . "?d=$params";
     }
 
     /**
@@ -449,7 +451,7 @@ class FtPqrRespuestaService extends ModelService
     {
         $email = $this->getModel()->Tercero->correo;
         if (!UtilitiesPqr::isEmailValid($email)) {
-            $this->errorMessage = "El email ({$email}) NO es valido";
+            $this->errorMessage = "El email ($email) NO es valido";
             return false;
         }
 
@@ -458,10 +460,10 @@ class FtPqrRespuestaService extends ModelService
 
         $url = $this->getUrlEncuesta();
         $message = "Cordial Saludo,<br/><br/>
-        Nos gustaría recibir tus comentarios sobre el servicio que has recibido por parte de nuestro equipo.<br/><a href='{$url}'>Calificar el servicio</a>";
+        Nos gustaría recibir tus comentarios sobre el servicio que has recibido por parte de nuestro equipo.<br/><a href='$url'>Calificar el servicio</a>";
 
         $SendMailController = new SendMailController(
-            "Queremos conocer tu opinión! (Solicitud de {$this->PqrForm->label} # {$DocumentoPqr->numero})",
+            "Queremos conocer tu opinión! (Solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero)",
             $message
         );
 
@@ -472,7 +474,7 @@ class FtPqrRespuestaService extends ModelService
 
         $send = $SendMailController->send();
         if ($send !== true) {
-            $message = "No fue posible solicitar la calificacion de la ({$nameFormat}) # {$this->getModel()->getDocument()->numero}";
+            $message = "No fue posible solicitar la calificacion de la ($nameFormat) # {$this->getModel()->getDocument()->numero}";
             $log = [
                 'error' => $send,
                 'message' => $message
@@ -487,7 +489,7 @@ class FtPqrRespuestaService extends ModelService
             return false;
         }
 
-        $description = "Se solicita la calificación de la ({$nameFormat}) # {$this->getModel()->getDocument()->numero} al e-mail: ({$email})";
+        $description = "Se solicita la calificación de la ($nameFormat) # {$this->getModel()->getDocument()->numero} al e-mail: ($email)";
         $tipo = PqrHistory::TIPO_CALIFICACION;
 
         return $this->saveHistory($description, $tipo);
