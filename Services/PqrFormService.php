@@ -207,7 +207,7 @@ class PqrFormService extends ModelService
         }
 
         if (!$this->generateForm($FormatoR)) {
-            $this->errorMessage = "No fue posible generar el formulario: {$formatNameR} ";
+            $this->errorMessage = "No fue posible generar el formulario: $formatNameR ";
             return false;
         }
 
@@ -225,7 +225,7 @@ class PqrFormService extends ModelService
         }
 
         if (!$this->generateForm($FormatoC)) {
-            $this->errorMessage = "No fue posible generar el formulario: {$FormatoC->etiqueta} ";
+            $this->errorMessage = "No fue posible generar el formulario: $FormatoC->etiqueta ";
             return false;
         }
 
@@ -370,7 +370,7 @@ class PqrFormService extends ModelService
                 if ($instance) {
                     $data[] = $PqrFormField;
                 } else {
-                    $data[] = "ft.{$PqrFormField->name}";
+                    $data[] = "ft.$PqrFormField->name";
                 }
             }
         }
@@ -392,7 +392,7 @@ class PqrFormService extends ModelService
             $this->getFieldsReport()
         ));
 
-        $sql = "SELECT {$fields}
+        $sql = "SELECT $fields
         FROM ft_pqr ft,documento d
         WHERE ft.documento_iddocumento=d.iddocumento
         AND d.estado NOT IN ('ELIMINADO','ANULADO')";
@@ -437,21 +437,21 @@ class PqrFormService extends ModelService
         switch ($_SERVER['APP_DATABASE_DRIVER']) {
             case 'pdo_mysql':
             case 'oci8':
-                $create = "CREATE OR REPLACE VIEW {$name} AS {$select}";
+                $create = "CREATE OR REPLACE VIEW $name AS $select";
                 $Connection->executeQuery($create);
                 break;
 
             case 'pdo_sqlserver':
-                $drop = "DROP VIEW {$name}";
+                $drop = "DROP VIEW $name";
                 $Connection->executeQuery($drop);
 
-                $create = "CREATE VIEW {$name} AS {$select}";
+                $create = "CREATE VIEW $name AS $select";
                 $Connection->executeQuery($create);
 
                 break;
 
             default:
-                throw new Exception("No fue posible generar la vista {$name}", 200);
+                throw new Exception("No fue posible generar la vista $name", 200);
         }
     }
 
@@ -459,11 +459,11 @@ class PqrFormService extends ModelService
      * Genera el archivo de funciones para el reporte
      *
      * @param PqrFormField[] $fields
-     * @return boolean
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function generateFuncionReport(array $fields): bool
+    private function generateFuncionReport(array $fields): void
     {
         $fieldCode = [];
         foreach ($fields as $PqrFormField) {
@@ -476,7 +476,7 @@ class PqrFormService extends ModelService
                 //     break;
                 case 'Select':
                 case 'Radio':
-                    $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                    $code = "function get_$PqrFormField->name(int \$idft,\$value){
                         global \$FtPqr;
                         \$response = '';
                         if (\$valor = Saia\\models\\formatos\\CampoSeleccionados::findColumn('valor', [
@@ -489,11 +489,11 @@ class PqrFormService extends ModelService
                     }";
                     break;
                 case 'Checkbox':
-                    $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                    $code = "function get_$PqrFormField->name(int \$idft,\$value){
                         global \$FtPqr;
                         \$response = '';
                         if (\$valor = Saia\\models\\formatos\\CampoSeleccionados::findColumn('valor', [
-                            'fk_campos_formato' => {$PqrFormField->fk_campos_formato},
+                            'fk_campos_formato' => $PqrFormField->fk_campos_formato,
                             'fk_documento' => \$FtPqr->documento_iddocumento
                         ])) {
                             \$response = implode(',',\$valor);
@@ -503,9 +503,9 @@ class PqrFormService extends ModelService
                     break;
                 case 'AutocompleteM':
                 case 'AutocompleteD':
-                    $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                    $code = "function get_$PqrFormField->name(int \$idft,\$value){
                         global \$FtPqr;
-                        return \$FtPqr->getValueForReport('{$PqrFormField->name}');
+                        return \$FtPqr->getValueForReport('$PqrFormField->name');
                     }";
                     break;
             }
@@ -523,18 +523,17 @@ class PqrFormService extends ModelService
             throw new Exception("No fue posible crear las funciones del formulario", 200);
         }
 
-        return true;
     }
 
     /**
      * actualiza el reporte (busqueda componente)
      *
      * @param PqrFormField[] $fields
-     * @return boolean
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function updateReport(array $fields): bool
+    private function updateReport(array $fields): void
     {
         $code = $nameFields = [];
         $sysDependencia = false;
@@ -566,7 +565,7 @@ class PqrFormService extends ModelService
                 'nombre' => 'Dependencia'
             ]);
             $Grafico->estado = 1;
-            $Grafico->update();
+            $Grafico->save();
         }
 
         //REPORTE PENDIENTE
@@ -576,7 +575,7 @@ class PqrFormService extends ModelService
             $Pendiente->setAttributes(
                 $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_PENDIENTE)
             );
-            $Pendiente->update();
+            $Pendiente->save();
         }
 
         //REPORTE PROCESO
@@ -586,7 +585,7 @@ class PqrFormService extends ModelService
             $Proceso->setAttributes(
                 $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_PROCESO)
             );
-            $Proceso->update();
+            $Proceso->save();
         }
 
         //REPORTE TERMINADO
@@ -596,7 +595,7 @@ class PqrFormService extends ModelService
             $Terminado->setAttributes(
                 $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_TERMINADO)
             );
-            $Terminado->update();
+            $Terminado->save();
         }
 
         //REPORTE TODOS
@@ -606,10 +605,9 @@ class PqrFormService extends ModelService
             $Todos->setAttributes(
                 $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_TODOS)
             );
-            $Todos->update();
+            $Todos->save();
         }
 
-        return true;
     }
 
 
@@ -768,13 +766,13 @@ class PqrFormService extends ModelService
         ];
 
         $content = WsFt::getContent(
-            "{$urlFolderTemplate}{$templateName}.php",
+            "$urlFolderTemplate$templateName.php",
             $values
         );
-        $fileName = SessionController::getTemporalDir() . "/{$templateName}";
+        $fileName = SessionController::getTemporalDir() . "/$templateName";
 
         if (!file_put_contents($_SERVER["PUBLIC_PATH"] . $fileName, $content)) {
-            throw new Exception("Imposible crear el archivo {$templateName} para el ws", 1);
+            throw new Exception("Imposible crear el archivo $templateName para el ws", 1);
         }
 
         return $fileName;
