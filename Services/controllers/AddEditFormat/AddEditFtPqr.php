@@ -4,6 +4,7 @@ namespace App\Bundles\pqr\Services\controllers\AddEditFormat;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
+use Exception;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\controllers\SessionController;
@@ -79,10 +80,10 @@ class AddEditFtPqr implements IAddEditFormat
     /**
      * Obtiene los datos por defecto para la creacion del registro en Formato
      *
+     * @param bool $edit
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     * 
+     * @date   2020
      */
     private function getFormatDefaultData(bool $edit = false): array
     {
@@ -92,11 +93,11 @@ class AddEditFtPqr implements IAddEditFormat
             'etiqueta' => $this->PqrForm->label,
             'cod_padre' => 0,
             'contador_idcontador' => $this->PqrForm->fk_contador,
-            'nombre_tabla' => "ft_{$name}",
-            'ruta_mostrar' => "views/modules/pqr/formatos/{$name}/mostrar.php",
-            'ruta_editar' => "views/modules/pqr/formatos/{$name}/editar.html",
-            'ruta_adicionar' => "views/modules/pqr/formatos/{$name}/adicionar.html",
-            'ruta_buscar' => "views/modules/pqr/formatos/{$name}/buscar.html",
+            'nombre_tabla' => "ft_$name",
+            'ruta_mostrar' => "views/modules/pqr/formatos/$name/mostrar.php",
+            'ruta_editar' => "views/modules/pqr/formatos/$name/editar.html",
+            'ruta_adicionar' => "views/modules/pqr/formatos/$name/adicionar.html",
+            'ruta_buscar' => "views/modules/pqr/formatos/$name/buscar.html",
             'encabezado' => 1,
             'cuerpo' => '<p>{*showContent*}</p><p>{*mostrar_estado_proceso*}</p>',
             'pie_pagina' => 0,
@@ -148,18 +149,18 @@ class AddEditFtPqr implements IAddEditFormat
         $this->PqrForm->setAttributes([
             'fk_formato' => $id
         ]);
-        $this->PqrForm->update();
+        $this->PqrForm->save();
 
         if (!$Respuesta = Formato::findByAttributes([
             'nombre' => 'pqr_respuesta'
         ])) {
-            throw new \Exception("No se encontro el formato RESPUESTA PQR", 1);
+            throw new Exception("No se encontro el formato RESPUESTA PQR", 1);
         }
 
         $Respuesta->setAttributes([
             'cod_padre' => $id
         ]);
-        $Respuesta->update();
+        $Respuesta->save();
 
         return $this;
     }
@@ -175,7 +176,7 @@ class AddEditFtPqr implements IAddEditFormat
     {
         $Formato = new Formato($this->PqrForm->fk_formato);
         $Formato->setAttributes($this->getFormatDefaultData(true));
-        $Formato->update();
+        $Formato->save();
 
         return $this;
     }
@@ -248,7 +249,7 @@ class AddEditFtPqr implements IAddEditFormat
                 $CampoOpciones->setAttributes([
                     'estado' => 1
                 ]);
-                $CampoOpciones->update();
+                $CampoOpciones->save();
                 $id = $CampoOpciones->llave;
                 $idCampoOpcion = $CampoOpciones->getPK();
             } else {
@@ -274,23 +275,23 @@ class AddEditFtPqr implements IAddEditFormat
                     'item' => $option->text
                 ];
             }
-            $values[] = "{$id},{$option->text}";
+            $values[] = "$id,$option->text";
         }
         $CampoFormato->setAttributes([
             'opciones' => json_encode($data),
             'valor' => implode(';', $values)
         ]);
-        $CampoFormato->update();
+        $CampoFormato->save();
     }
 
     /**
      * Resuelve la clase a utilizar basado en la
      * etiqueta html del campo
      *
-     * @param String $typeField
+     * @param String $fieldType
      * @return string|null
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function resolveClass(String $fieldType): ?string
     {
@@ -314,7 +315,7 @@ class AddEditFtPqr implements IAddEditFormat
         $fieldType = $PqrFormField->PqrHtmlField->type_saia;
 
         if (!$className = $this->resolveClass($fieldType)) {
-            throw new \Exception("No se encontro la clase para el tipo {$fieldType}", 1);
+            throw new Exception("No se encontro la clase para el tipo $fieldType", 1);
         }
         $Fields = new $className($PqrFormField);
 
@@ -325,31 +326,29 @@ class AddEditFtPqr implements IAddEditFormat
      * Crea un nuevo campo del formulario
      *
      * @param PqrFormField $PqrFormField
-     * @return self
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function createRecordInFormatFields(PqrFormField $PqrFormField): self
+    private function createRecordInFormatFields(PqrFormField $PqrFormField): void
     {
         $id = CamposFormato::newRecord($this->getFormatFieldData($PqrFormField));
         $PqrFormField->setAttributes([
             'fk_campos_formato' => $id
         ]);
-        $PqrFormField->update();
+        $PqrFormField->save();
 
-        return $this;
     }
 
     /**
      * Adiciona campos adicionales predeterminados
      * al formulario (sys_estado)
      *
-     * @return self
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
-     * 
      */
-    private function addOtherFields(): self
+    private function addOtherFields(): void
     {
         $fields = [
             'sys_estado' => [
@@ -450,29 +449,27 @@ class AddEditFtPqr implements IAddEditFormat
                 'formato_idformato' => $this->PqrForm->fk_formato
             ])) {
                 $CamposFormato->setAttributes($data);
-                $CamposFormato->update(true);
+                $CamposFormato->save();
             } else {
                 CamposFormato::newRecord($data);
             }
         }
 
-        return $this;
     }
 
     /**
      * Actualiza un campo del formulario
      *
      * @param PqrFormField $PqrFormField
-     * @return self
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    private function updateRecordInFormatFields(PqrFormField $PqrFormField): self
+    private function updateRecordInFormatFields(PqrFormField $PqrFormField): void
     {
         $CamposFormato = new CamposFormato($PqrFormField->fk_campos_formato);
         $CamposFormato->setAttributes($this->getFormatFieldData($PqrFormField));
-        $CamposFormato->update(true);
+        $CamposFormato->save();
 
-        return $this;
     }
 }
