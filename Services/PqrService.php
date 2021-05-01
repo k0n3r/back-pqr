@@ -39,7 +39,7 @@ class PqrService
     public function findDataForAutocomplete(string $type, array $data): array
     {
         $list = [];
-
+        $records = [];
         switch ($type) {
             case 'dependencia':
                 $records = $this->getListDependency($data);

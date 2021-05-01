@@ -18,18 +18,20 @@ class FtPqrRespuestaController extends AbstractController
     /**
      * @Route("/requestSurveyByEmail", name="requestSurveyByEmail", methods={"GET"})
      */
-    public function requestSurveyByEmail(
+    public function requestSurvey(
         int $idft,
         ISaiaResponse $saiaResponse
-    ): Response
-    {
+    ): Response {
 
         try {
 
             $FtPqrRespuestaService = (new FtPqrRespuesta($idft))->getService();
 
             if (!$FtPqrRespuestaService->requestSurvey()) {
-                throw new Exception($FtPqrRespuestaService->getErrorMessage(), 1);
+                throw new Exception(
+                    $FtPqrRespuestaService->getErrorManager()->getMessage(),
+                    $FtPqrRespuestaService->getErrorManager()->getCode()
+                );
             }
 
             $saiaResponse->setSuccess(1);

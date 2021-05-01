@@ -75,7 +75,7 @@ class FtPqrService extends ModelService
     {
         if ($this->getModel()->sys_email) {
             if (!UtilitiesPqr::isEmailValid($this->getModel()->sys_email)) {
-                $this->errorMessage = "Esta dirección de correo ({$this->getModel()->sys_email}) no es válida.";
+                $this->getErrorManager()->setMessage("Esta dirección de correo ({$this->getModel()->sys_email}) no es válida.");
                 return false;
             }
         }
@@ -98,7 +98,7 @@ class FtPqrService extends ModelService
         ];
         $PqrBackupService = (new PqrBackup)->getService();
         if (!$PqrBackupService->save($data)) {
-            $this->errorMessage = "No fue posible registrar el backup";
+            $this->getErrorManager()->setMessage("No fue posible registrar el backup");
             return false;
         }
 
@@ -187,10 +187,10 @@ class FtPqrService extends ModelService
 
         $oldDate = $this->getModel()->sys_fecha_vencimiento;
         $this->getModel()->sys_fecha_vencimiento = $fecha;
-        $this->getModel()->update();
+        $this->getModel()->save();
 
         $this->getModel()->getDocument()->fecha_limite = $fecha;
-        $this->getModel()->getDocument()->update();
+        $this->getModel()->getDocument()->save();
 
         if ($oldDate != $this->getModel()->sys_fecha_vencimiento) {
             $history = [
@@ -208,7 +208,7 @@ class FtPqrService extends ModelService
 
             $PqrHistoryService = (new PqrHistory)->getService();
             if (!$PqrHistoryService->save($history)) {
-                $this->errorMessage = $PqrHistoryService->getErrorMessage();
+                $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
                 return false;
             }
 
@@ -258,7 +258,7 @@ class FtPqrService extends ModelService
         if ($Tercero = $this->getModel()->Tercero) {
             $destino = [
                 'id' => $Tercero->getPK(),
-                'text' => "{$Tercero->identificacion} - {$Tercero->nombre}"
+                'text' => "$Tercero->identificacion - $Tercero->nombre"
             ];
         }
 
@@ -420,7 +420,7 @@ class FtPqrService extends ModelService
                 $this->getExpirationDate(),
                 DateController::PUBLIC_DATE_FORMAT
             ),
-            'description' => "Fecha maxima para dar respuesta a la solicitud de tipo {$type}"
+            'description' => "Fecha maxima para dar respuesta a la solicitud de tipo $type"
         ];
     }
 
@@ -499,11 +499,11 @@ class FtPqrService extends ModelService
         }
 
         return <<<HTML
-    <div class='form-group form-group-default form-group-default-select2 {$required}' id='group_{$name}'>
-        <label>{$PqrFormField->label}</label>
+    <div class='form-group form-group-default form-group-default-select2 $required' id='group_$name'>
+        <label>$PqrFormField->label</label>
         <div class='form-group'>
-            <select class='full-width pqrAutocomplete {$required}' name='{$name}' id='{$name}'>
-                {$options}
+            <select class='full-width pqrAutocomplete $required' name='$name' id='$name'>
+                $options
             </select>
         </div>
     </div>
@@ -617,11 +617,11 @@ HTML;
             $Tercero ??= new Tercero();
             $TerceroService = new TerceroService($Tercero);
             if (!$TerceroService->save($data)) {
-                $this->errorMessage = $TerceroService->getErrorMessage();
+                $this->getErrorManager()->setMessage($TerceroService->getErrorMessage());
                 return false;
             }
             $this->getModel()->sys_tercero = $TerceroService->getModel()->getPK();
-            $this->getModel()->update();
+            $this->getModel()->save();
         }
 
         return true;
@@ -640,12 +640,12 @@ HTML;
     {
 
         if (!$data['type']) {
-            $this->errorMessage = "Error faltan parametros";
+            $this->getErrorManager()->setMessage("Error faltan parametros");
             return false;
         }
 
         if ($this->getPqrService()->subTypeExist() && !$data['subtype']) {
-            $this->errorMessage = "Error faltan parametros";
+            $this->getErrorManager()->setMessage("Error faltan parametros");
             return false;
         }
 
@@ -654,7 +654,7 @@ HTML;
         if ($data['type'] != $this->getModel()->sys_tipo) {
             $oldType = $this->getModel()->getFieldValue('sys_tipo');
             $newAttributes['sys_tipo'] = $data['type'];
-            $textField[] = "tipo de {$oldType} a {newType}";
+            $textField[] = "tipo de $oldType a {newType}";
         }
 
         if ($this->getPqrService()->subTypeExist()) {
@@ -664,7 +664,7 @@ HTML;
                     $oldSubType = '-';
                 }
                 $newAttributes['sys_subtipo'] = $data['subtype'];
-                $textField[] = "categoria/subtipo de {$oldSubType} a {newSubType}";
+                $textField[] = "categoria/subtipo de $oldSubType a {newSubType}";
             }
         }
 
@@ -675,7 +675,7 @@ HTML;
                     $oldDependency = '-';
                 }
                 $newAttributes['sys_dependencia'] = $data['dependency'];
-                $textField[] = "dependencia de {$oldDependency} a {newDependency}";
+                $textField[] = "dependencia de $oldDependency a {newDependency}";
             }
         }
 
@@ -684,7 +684,7 @@ HTML;
 
             $newAttributes['sys_fecha_vencimiento'] = $data['expirationDate'];
             $this->getModel()->getDocument()->fecha_limite = $data['expirationDate'];
-            $this->getModel()->getDocument()->update();
+            $this->getModel()->getDocument()->save();
 
             $oldDate = DateController::convertDate(
                 $expiration,
@@ -697,7 +697,7 @@ HTML;
                 DateController::PUBLIC_DATE_FORMAT,
                 'Y-m-d'
             );
-            $textField[] = "fecha de vencimiento de {$oldDate} a {$newDate}";
+            $textField[] = "fecha de vencimiento de $oldDate a $newDate";
         }
 
         $SaveFt = new SaveFt($this->getModel()->getDocument());
@@ -730,7 +730,7 @@ HTML;
 
         $PqrHistoryService = (new PqrHistory)->getService();
         if (!$PqrHistoryService->save($history)) {
-            $this->errorMessage = $PqrHistoryService->getErrorMessage();
+            $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
             return false;
         }
 
@@ -775,8 +775,10 @@ HTML;
         $color = "success";
         if ($diff->invert || $diff->days <= FtPqr::VENCIMIENTO_ROJO) {
             $color = 'danger';
-        } else if ($diff->days <= FtPqr::VENCIMIENTO_AMARILLO) {
-            $color = 'warning';
+        } else {
+            if ($diff->days <= FtPqr::VENCIMIENTO_AMARILLO) {
+                $color = 'warning';
+            }
         }
 
         $date = DateController::convertDate(
@@ -784,7 +786,7 @@ HTML;
             DateController::PUBLIC_DATE_FORMAT
         );
 
-        return "<span class='badge badge-{$color}'>{$date}</span>";
+        return "<span class='badge badge-$color'>$date</span>";
     }
 
 
@@ -829,7 +831,7 @@ HTML;
 
         $dias = 0;
         if ($diff->invert) {
-            $dias = "<span class='badge badge-danger'>{$diff->days}</span>";
+            $dias = "<span class='badge badge-danger'>$diff->days</span>";
         }
 
         return $dias;
@@ -927,7 +929,7 @@ HTML;
             } else {
                 $this->getModel()->sys_fecha_terminado = null;
             }
-            $this->getModel()->update(true);
+            $this->getModel()->save();
 
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
@@ -935,12 +937,12 @@ HTML;
                 'fk_funcionario' => $this->getFuncionario()->getPK(),
                 'tipo' => PqrHistory::TIPO_CAMBIO_ESTADO,
                 'idfk' => 0,
-                'descripcion' => "Se actualiza el estado de la solicitud de {$actualStatus} a {$newStatus}. {$observations}"
+                'descripcion' => "Se actualiza el estado de la solicitud de $actualStatus a $newStatus. $observations"
             ];
 
             $PqrHistoryService = (new PqrHistory)->getService();
             if (!$PqrHistoryService->save($history)) {
-                $this->errorMessage = $PqrHistoryService->getErrorMessage();
+                $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
                 return false;
             }
         }

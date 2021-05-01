@@ -23,7 +23,7 @@ class PqrFormFieldService extends ModelService
      *
      * @return PqrFormField
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getModel(): PqrFormField
     {
@@ -33,22 +33,22 @@ class PqrFormFieldService extends ModelService
     /**
      * Crea el registro en la DB
      *
-     * @param array $data
+     * @param array $attributes
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
-    public function create(array $data): bool
+    public function create(array $attributes): bool
     {
-        if (!isset($data['fk_pqr_form'])) {
-            $this->errorMessage = "Falta el identificador del formulario";
+        if (!isset($attributes['fk_pqr_form'])) {
+            $this->getErrorManager()->setMessage("Falta el identificador del formulario");
             return false;
         }
 
-        $PqrForm = new PqrForm($data['fk_pqr_form']);
+        $PqrForm = new PqrForm($attributes['fk_pqr_form']);
 
         $defaultFields = [
-            'name' => $this->generateName(trim(strtolower($data['label']))),
+            'name' => $this->generateName(trim(strtolower($attributes['label']))),
             'required' => 0,
             'show_anonymous' => 0,
             'fk_pqr_form' => $PqrForm->getPK(),
@@ -57,27 +57,27 @@ class PqrFormFieldService extends ModelService
             'orden' => ($PqrForm->countFields()) + self::INITIAL_ORDER,
             'active' => 1
         ];
-        $attributes = array_merge($defaultFields, $data);
+        $attributes = array_merge($defaultFields, $attributes);
 
         return $this->update($attributes);
     }
 
     /**
      * Actualiza un registro
-     * 
-     * @param array $data
+     *
+     * @param array $attributes
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
-    public function update(array $data): bool
+    public function update(array $attributes): bool
     {
 
-        if (isset($data['setting'])) {
-            $data['setting'] = json_encode($data['setting']);
+        if (isset($attributes['setting'])) {
+            $attributes['setting'] = json_encode($attributes['setting']);
         }
 
-        $this->getModel()->setAttributes($data);
+        $this->getModel()->setAttributes($attributes);
 
         return $this->getModel()->save();
     }
@@ -87,20 +87,20 @@ class PqrFormFieldService extends ModelService
      *
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function delete(): bool
     {
         if ($this->getModel()->delete()) {
             if ($this->getModel()->fk_campos_formato) {
                 if (!$this->getModel()->CamposFormato->delete()) {
-                    $this->errorMessage = "No fue posible eliminar el campo";
+                    $this->getErrorManager()->setMessage("No fue posible eliminar el campo");
                     return false;
                 }
             }
             return true;
         } else {
-            $this->errorMessage = "No fue posible eliminar";
+            $this->getErrorManager()->setMessage("No fue posible eliminar");
             return false;
         }
     }
@@ -108,9 +108,10 @@ class PqrFormFieldService extends ModelService
     /**
      * Actualiza el estado(active) del campo
      *
+     * @param int $status
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function updateActive(int $status): bool
     {
@@ -133,11 +134,11 @@ class PqrFormFieldService extends ModelService
     /**
      * genera un nombre unico para el campo del formulario
      *
-     * @param string $label
+     * @param string  $label
      * @param integer $pref
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function generateName(string $label, int $pref = 0): string
     {
@@ -145,10 +146,10 @@ class PqrFormFieldService extends ModelService
         $cadena = implode('_', array_filter(explode('_', $cadena)));
         $cadena = trim(substr($cadena, 0, 15), '_');
 
-        $name = $pref ? "{$cadena}_{$pref}" : $cadena;
+        $name = $pref ? "{$cadena}_$pref" : $cadena;
 
         if ($this->isReservedWords($name)) {
-            $name = $pref ? "{$cadena}_{$pref}" : "{$cadena}_1";
+            $name = $pref ? "{$cadena}_$pref" : "{$cadena}_1";
         }
 
         if (PqrFormField::findAllByAttributes([
@@ -172,13 +173,24 @@ class PqrFormFieldService extends ModelService
      * @param string $label
      * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     private function isReservedWords(string $label): bool
     {
         $reservedWords = [
-            'select', 'from', 'where', 'and', 'in', 'or', 'like', 'is',
-            'system', 'uniq', 'numero', 'fecha', 'idft'
+            'select',
+            'from',
+            'where',
+            'and',
+            'in',
+            'or',
+            'like',
+            'is',
+            'system',
+            'uniq',
+            'numero',
+            'fecha',
+            'idft'
         ];
 
         return in_array($label, $reservedWords);
@@ -190,7 +202,7 @@ class PqrFormFieldService extends ModelService
      * @param string $name
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     private function columnExistsDB(string $name): bool
     {
@@ -206,7 +218,7 @@ class PqrFormFieldService extends ModelService
      * @param array $data
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getListDataForAutocomplete(array $data = []): array
     {
@@ -231,10 +243,10 @@ class PqrFormFieldService extends ModelService
      * del campo
      *
      * @param object $ObjSettings
-     * @param array $data
+     * @param array  $data
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getDependencys(object $ObjSettings, array $data = []): array
     {
@@ -247,7 +259,7 @@ class PqrFormFieldService extends ModelService
             $Qb->where('iddependencia=:iddependencia')
                 ->setParameter(':iddependencia', $data['id'], Type::getType('integer'));
 
-            return $Qb->execute()->fetchAll();
+            return $Qb->execute()->fetchAllAssociative();
         }
 
         $Qb->where('estado=1')
@@ -262,6 +274,7 @@ class PqrFormFieldService extends ModelService
 
         if (!$ObjSettings->allDependency) {
             $records = $ObjSettings->options;
+            $ids = [];
             foreach ($records as $row) {
                 $ids[] = $row->id;
             }
@@ -269,7 +282,7 @@ class PqrFormFieldService extends ModelService
                 ->setParameter(':ids', $ids, Connection::PARAM_INT_ARRAY);
         }
 
-        return $Qb->execute()->fetchAll();
+        return $Qb->execute()->fetchAllAssociative();
     }
 
     /**
@@ -277,10 +290,10 @@ class PqrFormFieldService extends ModelService
      * del campo
      *
      * @param object $ObjSettings
-     * @param array $data
+     * @param array  $data
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getListLocalidad(object $ObjSettings, array $data = []): array
     {
@@ -306,7 +319,7 @@ class PqrFormFieldService extends ModelService
             $Qb->andWhere('idmunicipio=:idmunicipio')
                 ->setParameter(':idmunicipio', $data['id'], Type::getType('integer'));
 
-            return $Qb->execute()->fetchAll();
+            return $Qb->execute()->fetchAllAssociative();
         }
 
         $Qb->where("CONCAT(a.nombre,CONCAT(' ',b.nombre)) like :query")
@@ -321,6 +334,6 @@ class PqrFormFieldService extends ModelService
                 ->setParameter(':idpais', $ObjSettings->country->id);
         }
 
-        return $Qb->execute()->fetchAll();
+        return $Qb->execute()->fetchAllAssociative();
     }
 }

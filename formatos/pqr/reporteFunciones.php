@@ -30,10 +30,10 @@ function viewFtPqr(int $idft, $numero): string
 
     return <<<HTML
     <div class='kenlace_saia'
-    enlace='views/documento/index_acordeon.php?documentId={$FtPqr->documento_iddocumento}' 
+    enlace='views/documento/index_acordeon.php?documentId=$FtPqr->documento_iddocumento' 
     conector='iframe'
-    titulo='No Registro {$numero}'>
-        <button class='btn btn-complete' style='margin:auto'>{$numero}</button>
+    titulo='No Registro $numero'>
+        <button class='btn btn-complete' style='margin:auto'>$numero</button>
     </div>
 HTML;
 }
@@ -44,7 +44,7 @@ function getExpiration(): string
     return $FtPqr->getService()->getColorExpiration();
 }
 
-function getEndDate()
+function getEndDate(): string
 {
     $FtPqr = getFtPqr();
     return $FtPqr->getService()->getEndDate();
@@ -114,7 +114,7 @@ function totalAnswers(int $idft): string
     $answers = [];
     foreach ($records as $FtPqrRespuesta) {
         $fecha = DateController::convertDate($FtPqrRespuesta->getDocument()->fecha, DateController::PUBLIC_DATE_FORMAT);
-        $answers[] = "<a class='kenlace_saia' enlace='{$url}' title='Ver las respuestas' conector='iframe' titulo='Respuestas a PQR No {$numero}' href='#'>{$FtPqrRespuesta->getDocument()->numero} - {$fecha}</a>";
+        $answers[] = "<a class='kenlace_saia' enlace='$url' title='Ver las respuestas' conector='iframe' titulo='Respuestas a PQR No $numero' href='#'>{$FtPqrRespuesta->getDocument()->numero} - $fecha</a>";
     }
 
     return implode('<br/>', $answers);
@@ -147,19 +147,19 @@ function options(int $iddocumento, string $estado, int $idft): string
     switch ($estado) {
         case FtPqr::ESTADO_PROCESO:
             $options = <<<HTML
-            <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-plus"></i> Asignar tarea
             </a>
-            <a href="#" class="dropdown-item viewTask" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item viewTask" data-id="$iddocumento" data-idft="$idft">
                <i class="fa fa-eye"></i> Tareas
            </a>
-           <a href="#" class="dropdown-item edit" data-id="{$iddocumento}" data-idft="{$idft}">
+           <a href="#" class="dropdown-item edit" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-edit"></i> Editar tipo
             </a>
-            <a href="#" class="dropdown-item history" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-history"></i> Historial
             </a>
-            <a href="#" class="dropdown-item answer" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
                <i class="fa fa-mail-reply"></i> Responder
            </a>
 
@@ -168,16 +168,16 @@ HTML;
 
         case FtPqr::ESTADO_TERMINADO:
             $options = <<<HTML
-            <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-plus"></i> Asignar tarea
             </a>
-            <a href="#" class="dropdown-item viewTask" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item viewTask" data-id="$iddocumento" data-idft="$idft">
                <i class="fa fa-eye"></i> Tareas
            </a>
-            <a href="#" class="dropdown-item history" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-history"></i> Historial
             </a>
-            <a href="#" class="dropdown-item answer" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
                <i class="fa fa-mail-reply"></i> Responder
            </a>
 
@@ -187,22 +187,22 @@ HTML;
         case FtPqr::ESTADO_PENDIENTE:
         default:
             $options = <<<HTML
-            <a href="#" class="dropdown-item addTask" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-plus"></i> Asignar tarea
             </a>
-           <a href="#" class="dropdown-item edit" data-id="{$iddocumento}" data-idft="{$idft}">
+           <a href="#" class="dropdown-item edit" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-edit"></i> Editar tipo
             </a>
-            <a href="#" class="dropdown-item history" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-history"></i> Historial
             </a>
-            <a href="#" class="dropdown-item answer" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
                <i class="fa fa-mail-reply"></i> Responder
            </a>
-            <a href="#" class="dropdown-item finish" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item finish" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-check"></i> Terminar
             </a>
-            <a href="#" class="dropdown-item cancel" data-id="{$iddocumento}" data-idft="{$idft}">
+            <a href="#" class="dropdown-item cancel" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-exclamation-triangle"></i> Anular
             </a>
 HTML;
@@ -215,7 +215,7 @@ HTML;
             <i class="fa fa-ellipsis-v"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-left bg-white" role="menu">
-           {$options}
+           $options
         </div>
     </div>
 HTML;

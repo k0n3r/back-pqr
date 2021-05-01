@@ -24,6 +24,9 @@ class CaptchaController extends AbstractController implements IHasCaptcha
 {
     /**
      * @Route("/saveDocument", name="register", methods={"POST"})
+     * @param Request       $Request
+     * @param ISaiaResponse $saiaResponse
+     * @param Connection    $Connection
      * @return Response
      */
     public function save(
@@ -56,7 +59,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
 
             $Documento = $SaveDocument->getDocument();
 
-            $message = "<br/>Su solicitud ha sido generada con el número de radicado <strong>{$Documento->numero}</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
+            $message = "<br/>Su solicitud ha sido generada con el número de radicado <strong>$Documento->numero</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
             if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
                 'name' => 'ws_noty_radicado'
             ])) {

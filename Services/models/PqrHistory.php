@@ -21,7 +21,7 @@ class PqrHistory extends Model
 
     protected function defineAttributes(): void
     {
-        $this->dbAttributes = (object) [
+        $this->dbAttributes = (object)[
             'safe' => [
                 'fecha',
                 'fk_funcionario',
@@ -47,11 +47,20 @@ class PqrHistory extends Model
     }
 
     /**
+     * @return Funcionario
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-01
+     */
+    public function getFuncionario(): Funcionario
+    {
+        return new Funcionario($this->fk_funcionario);
+    }
+
+    /**
      * Retorna el servicio
      *
      * @return PqrHistoryService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     public function getService(): PqrHistoryService
     {
@@ -63,7 +72,7 @@ class PqrHistory extends Model
      *
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getFecha(): string
     {
@@ -75,7 +84,7 @@ class PqrHistory extends Model
      *
      * @return FtPqrRespuesta|null
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getRespuestaPqr(): ?FtPqrRespuesta
     {

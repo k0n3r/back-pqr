@@ -67,7 +67,7 @@ class PqrFormService extends ModelService
     public function updateSetting(array $data): bool
     {
         if (!$this->update($data['pqrForm'])) {
-            $this->errorMessage = "No fue posible actualizar";
+            $this->getErrorManager()->setMessage("No fue posible actualizar");
             return false;
         }
 
@@ -93,7 +93,7 @@ class PqrFormService extends ModelService
 
                     $PqrFormFieldService = (new PqrFormField($id))->getService();
                     if (!$PqrFormFieldService->update($attributes)) {
-                        $this->errorMessage = "No fue posible actualizar";
+                        $this->getErrorManager()->setMessage("No fue posible actualizar");
                         return false;
                     }
                 }
@@ -137,7 +137,7 @@ class PqrFormService extends ModelService
     public function getSetting(): array
     {
         return [
-            'urlWs' => $this->getUrlWsPQR(),
+            'urlWs' => static::getUrlWsPQR(),
             'publish' => $this->getModel()->fk_formato ? 1 : 0,
             'pqrForm' => $this->getDataPqrForm(),
             'pqrTypes' => $this->getTypes(),
@@ -162,7 +162,7 @@ class PqrFormService extends ModelService
         if (!$PqrFormFieldService->update([
             'setting' => $data
         ])) {
-            $this->errorMessage = "No fue posible actualizar los tipos";
+            $this->getErrorManager()->setMessage("No fue posible actualizar los tipos");
             return false;
         }
 
@@ -189,14 +189,14 @@ class PqrFormService extends ModelService
         if (!$this->addEditFormat(
             new AddEditFtPqr($this->getModel())
         )) {
-            $this->errorMessage = "No fue posible generar el formulario";
+            $this->getErrorManager()->setMessage("No fue posible generar el formulario");
             return false;
         }
 
         if (!$FormatoR = Formato::findByAttributes([
             'nombre' => 'pqr_respuesta'
         ])) {
-            $this->errorMessage = "El formato de respuesta PQR no fue encontrado";
+            $this->getErrorManager()->setMessage("El formato de respuesta PQR no fue encontrado");
             return false;
         }
 
@@ -207,14 +207,14 @@ class PqrFormService extends ModelService
         }
 
         if (!$this->generateForm($FormatoR)) {
-            $this->errorMessage = "No fue posible generar el formulario: $formatNameR ";
+            $this->getErrorManager()->setMessage("No fue posible generar el formulario: $formatNameR ");
             return false;
         }
 
         if (!$FormatoC = Formato::findByAttributes([
             'nombre' => 'pqr_calificacion'
         ])) {
-            $this->errorMessage = "El formato de calificacion PQR no fue encontrado";
+            $this->getErrorManager()->setMessage("El formato de calificacion PQR no fue encontrado");
             return false;
         }
 
@@ -225,7 +225,7 @@ class PqrFormService extends ModelService
         }
 
         if (!$this->generateForm($FormatoC)) {
-            $this->errorMessage = "No fue posible generar el formulario: $FormatoC->etiqueta ";
+            $this->getErrorManager()->setMessage("No fue posible generar el formulario: $FormatoC->etiqueta ");
             return false;
         }
 
@@ -234,12 +234,12 @@ class PqrFormService extends ModelService
         $this->viewCalificacionPqr();
 
         if (!$this->generatePqrWs()) {
-            $this->errorMessage = "No fue posible generar el Ws";
+            $this->getErrorManager()->setMessage("No fue posible generar el Ws");
             return false;
         }
 
         if (!$this->generateCalificacionWs($FormatoC)) {
-            $this->errorMessage = "No fue posible generar el Ws Calificacion";
+            $this->getErrorManager()->setMessage("No fue posible generar el Ws Calificacion");
             return false;
         }
 
@@ -626,8 +626,7 @@ class PqrFormService extends ModelService
         array $infoFields,
         array $nameFields,
         string $nameReport
-    ): array
-    {
+    ): array {
 
         $aditionalInfo = '';
         if ($infoFields) {
@@ -759,8 +758,7 @@ class PqrFormService extends ModelService
     private function generateFile(
         string $templateName,
         string $urlFolderTemplate
-    ): string
-    {
+    ): string {
         $values = [
             'baseUrl' => $_SERVER['APP_DOMAIN']
         ];

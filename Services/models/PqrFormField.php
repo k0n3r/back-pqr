@@ -4,7 +4,6 @@ namespace App\Bundles\pqr\Services\models;
 
 use Saia\core\model\Model;
 use Saia\models\formatos\CamposFormato;
-use App\Bundles\pqr\Services\models\PqrHtmlField;
 use App\Bundles\pqr\Services\PqrFormFieldService;
 
 class PqrFormField extends Model

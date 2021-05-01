@@ -15,7 +15,7 @@ function filter_calificacion(): string
         $params = json_decode($_REQUEST['variable_busqueda'], true);
         $idft = $params['idft_pqr_respuesta'];
         if ($idft) {
-            return "ft_pqr_respuesta={$idft}";
+            return "ft_pqr_respuesta=$idft";
         }
     }
     return '1=1';

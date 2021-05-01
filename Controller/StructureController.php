@@ -8,6 +8,7 @@ use App\Bundles\pqr\Services\models\PqrForm;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Throwable;
 
 /**
  * @Route("/structure", name="structure_")
@@ -33,7 +34,7 @@ class StructureController extends AbstractController
 
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }
 
@@ -41,9 +42,9 @@ class StructureController extends AbstractController
     }
 
     /**
-     * @Route("/dataModalViewEditType", name="getDataModalViewEditType", methods={"GET"})
+     * @Route("/dataModalViewEditType", name="getDataEditType", methods={"GET"})
      */
-    public function getDataModalViewEditType(
+    public function getDataEditType(
         ISaiaResponse $saiaResponse
     ): Response {
 
@@ -52,7 +53,7 @@ class StructureController extends AbstractController
 
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }
 

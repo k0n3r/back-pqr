@@ -32,7 +32,7 @@ class PqrHistoryService extends ModelService
         $data = [
             'header' => true,
             'imgRoute' => $this->getLogo(),
-            'userName' => $this->getModel()->Funcionario->getName(),
+            'userName' => $this->getModel()->getFuncionario()->getName(),
             'business' => $this->getCustomerName(),
             'date' => $this->getModel()->getFecha(),
             'description' => $this->getModel()->descripcion

@@ -35,7 +35,7 @@ function filter_answer_by_pqr(): string
         $params = json_decode($_REQUEST['variable_busqueda'], true);
         $idft = $params['idft_pqr'];
         if ($idft) {
-            return "ft_pqr={$idft}";
+            return "ft_pqr=$idft";
         }
     }
 
@@ -95,13 +95,12 @@ function viewCalificacion(int $idft): string
     $numero = $FtPqrRespuesta->getDocument()->numero;
     $nombreFormato = $FtPqrRespuesta->Formato->etiqueta;
 
-    $enlace = <<<HTML
+    return <<<HTML
     <div class='kenlace_saia'
-    enlace='{$url}' 
+    enlace='$url' 
     conector='iframe'
-    titulo='Calificación a {$nombreFormato} No {$numero}'>
-        <button class='btn btn-complete' style='margin:auto'>{$cant}</button>
+    titulo='Calificación a $nombreFormato No $numero'>
+        <button class='btn btn-complete' style='margin:auto'>$cant</button>
     </div>
 HTML;
-    return $enlace;
 }

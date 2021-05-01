@@ -19,10 +19,9 @@ class AddEditFtPqr implements IAddEditFormat
     private PqrForm $PqrForm;
 
     /**
-     *
      * @param PqrForm $PqrForm
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function __construct(PqrForm $PqrForm)
     {
@@ -53,7 +52,7 @@ class AddEditFtPqr implements IAddEditFormat
      *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function createForm(): void
     {
@@ -67,7 +66,7 @@ class AddEditFtPqr implements IAddEditFormat
      *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function updateForm(): void
     {
@@ -140,11 +139,14 @@ class AddEditFtPqr implements IAddEditFormat
      *
      * @return self
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function createRecordInFormat(): self
     {
-        $id = Formato::newRecord($this->getFormatDefaultData());
+        $FormatoService = (new Formato())->getService();
+        $FormatoService->save($this->getFormatDefaultData());
+
+        $id = $FormatoService->getModel()->getPK();
 
         $this->PqrForm->setAttributes([
             'fk_formato' => $id
@@ -170,7 +172,7 @@ class AddEditFtPqr implements IAddEditFormat
      *
      * @return self
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function updateRecordInFormat(): self
     {
@@ -186,7 +188,7 @@ class AddEditFtPqr implements IAddEditFormat
      *
      * @return self
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function addEditRecordsInFormatFields(): self
     {
@@ -207,7 +209,7 @@ class AddEditFtPqr implements IAddEditFormat
                 in_array($PqrFormField->PqrHtmlField->type_saia, $allowOptions)
                 && $PqrFormField->getSetting()->options
             ) {
-                $this->addEditformatOptions($PqrFormField);
+                static::addEditformatOptions($PqrFormField);
             }
         }
         return $this;
@@ -219,7 +221,7 @@ class AddEditFtPqr implements IAddEditFormat
      * @param PqrFormField $PqrFormField
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public static function addEditformatOptions(PqrFormField $PqrFormField): void
     {
@@ -227,10 +229,10 @@ class AddEditFtPqr implements IAddEditFormat
         $llave = 0;
         foreach ($CampoFormato->CampoOpciones as $CampoOpciones) {
 
-            if ((int) $CampoOpciones->llave > $llave) {
-                $llave = (int) $CampoOpciones->llave;
+            if ((int)$CampoOpciones->llave > $llave) {
+                $llave = (int)$CampoOpciones->llave;
             }
-            if ((int) $CampoOpciones->estado) {
+            if ((int)$CampoOpciones->estado) {
                 $CampoOpciones->setAttributes([
                     'estado' => 0
                 ]);
@@ -255,12 +257,16 @@ class AddEditFtPqr implements IAddEditFormat
             } else {
                 $id = $llave + 1;
                 $llave = $id;
-                $idCampoOpcion = CampoOpciones::newRecord([
+
+                $CampoOpcionesService = (new CampoOpciones())->getService();
+                $CampoOpcionesService->save([
                     'llave' => $id,
                     'valor' => $option->text,
                     'fk_campos_formato' => $CampoFormato->getPK(),
                     'estado' => 1
                 ]);
+
+                $idCampoOpcion = $CampoOpcionesService->getModel()->getPK();
             }
             if ($PqrFormField->name == 'sys_tipo') {
                 $data[] = [
@@ -293,7 +299,7 @@ class AddEditFtPqr implements IAddEditFormat
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function resolveClass(String $fieldType): ?string
+    private function resolveClass(string $fieldType): ?string
     {
         $className = "App\\Bundles\\pqr\\Services\\controllers\\AddEditFormat\\fields\\$fieldType";
         if (class_exists($className)) {
@@ -308,7 +314,7 @@ class AddEditFtPqr implements IAddEditFormat
      * @param PqrFormField $PqrFormField
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function getFormatFieldData(PqrFormField $PqrFormField): array
     {
@@ -328,16 +334,19 @@ class AddEditFtPqr implements IAddEditFormat
      * @param PqrFormField $PqrFormField
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function createRecordInFormatFields(PqrFormField $PqrFormField): void
     {
-        $id = CamposFormato::newRecord($this->getFormatFieldData($PqrFormField));
+        $CamposFormatoService = (new CamposFormato())->getService();
+        $CamposFormatoService->save($this->getFormatFieldData($PqrFormField));
+        $id = $CamposFormatoService->getModel()->getPK();
+
         $PqrFormField->setAttributes([
             'fk_campos_formato' => $id
         ]);
-        $PqrFormField->save();
 
+        $PqrFormField->save();
     }
 
     /**
@@ -346,7 +355,7 @@ class AddEditFtPqr implements IAddEditFormat
      *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function addOtherFields(): void
     {
@@ -362,12 +371,12 @@ class AddEditFtPqr implements IAddEditFormat
                 'longitud' => '30',
                 'predeterminado' => FtPqr::ESTADO_PENDIENTE,
                 'etiqueta_html' => 'Hidden',
-                'acciones' => NULL,
+                'acciones' => null,
                 'placeholder' => 'Estado de la PQR',
                 'listable' => 1,
-                'opciones' => NULL,
-                'ayuda' => NULL,
-                'longitud_vis' => NULL
+                'opciones' => null,
+                'ayuda' => null,
+                'longitud_vis' => null
             ],
             'sys_tercero' => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -380,12 +389,12 @@ class AddEditFtPqr implements IAddEditFormat
                 'longitud' => '11',
                 'predeterminado' => 0,
                 'etiqueta_html' => 'Hidden',
-                'acciones' => NULL,
+                'acciones' => null,
                 'placeholder' => 'Destinatario de la respuesta',
                 'listable' => 1,
-                'opciones' => NULL,
-                'ayuda' => NULL,
-                'longitud_vis' => NULL
+                'opciones' => null,
+                'ayuda' => null,
+                'longitud_vis' => null
             ],
             'sys_fecha_vencimiento' => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -395,15 +404,15 @@ class AddEditFtPqr implements IAddEditFormat
                 'nombre' => 'sys_fecha_vencimiento',
                 'etiqueta' => 'Fecha vecimiento PQR',
                 'tipo_dato' => 'datetime',
-                'longitud' => NULL,
-                'predeterminado' => NULL,
+                'longitud' => null,
+                'predeterminado' => null,
                 'etiqueta_html' => 'Hidden',
-                'acciones' => NULL,
-                'placeholder' => NULL,
+                'acciones' => null,
+                'placeholder' => null,
                 'listable' => 1,
                 'opciones' => '{"hoy":false,"tipo":"date"}',
-                'ayuda' => NULL,
-                'longitud_vis' => NULL
+                'ayuda' => null,
+                'longitud_vis' => null
             ],
             'sys_fecha_terminado' => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -413,15 +422,15 @@ class AddEditFtPqr implements IAddEditFormat
                 'nombre' => 'sys_fecha_terminado',
                 'etiqueta' => 'Fecha Terminacion PQR',
                 'tipo_dato' => 'datetime',
-                'longitud' => NULL,
-                'predeterminado' => NULL,
+                'longitud' => null,
+                'predeterminado' => null,
                 'etiqueta_html' => 'Hidden',
-                'acciones' => NULL,
-                'placeholder' => NULL,
+                'acciones' => null,
+                'placeholder' => null,
                 'listable' => 1,
                 'opciones' => '{"hoy":false,"tipo":"date"}',
-                'ayuda' => NULL,
-                'longitud_vis' => NULL
+                'ayuda' => null,
+                'longitud_vis' => null
             ],
             'sys_anonimo' => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -434,12 +443,12 @@ class AddEditFtPqr implements IAddEditFormat
                 'longitud' => 1,
                 'predeterminado' => 0,
                 'etiqueta_html' => 'Hidden',
-                'acciones' => NULL,
-                'placeholder' => NULL,
+                'acciones' => null,
+                'placeholder' => null,
                 'listable' => 1,
                 'opciones' => '{"type":"hidden"}',
-                'ayuda' => NULL,
-                'longitud_vis' => NULL
+                'ayuda' => null,
+                'longitud_vis' => null
             ]
         ];
 
@@ -451,7 +460,8 @@ class AddEditFtPqr implements IAddEditFormat
                 $CamposFormato->setAttributes($data);
                 $CamposFormato->save();
             } else {
-                CamposFormato::newRecord($data);
+                $CamposFormatoService = (new CamposFormato())->getService();
+                $CamposFormatoService->save($data);
             }
         }
 
@@ -463,7 +473,7 @@ class AddEditFtPqr implements IAddEditFormat
      * @param PqrFormField $PqrFormField
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     private function updateRecordInFormatFields(PqrFormField $PqrFormField): void
     {

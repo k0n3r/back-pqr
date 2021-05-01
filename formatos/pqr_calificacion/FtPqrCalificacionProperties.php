@@ -11,9 +11,9 @@ use Saia\core\model\ModelFormat;
 class FtPqrCalificacionProperties extends ModelFormat
 {
     
-    public $isPDF=false;
+    public bool $isPDF = false;
 
-    protected function defaultDbAttributes()
+    protected function defaultDbAttributes(): array
     {
         return [
             'safe' => [
@@ -21,8 +21,8 @@ class FtPqrCalificacionProperties extends ModelFormat
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
-				'dependencia',
 				'ft_pqr_respuesta',
+				'dependencia',
 				'experiencia_gestion',
 				'experiencia_servicio' 
             ],
@@ -32,7 +32,7 @@ class FtPqrCalificacionProperties extends ModelFormat
         ];
     }
 
-    protected function defineMoreAttributes()
+    protected function defineMoreAttributes(): array
     {
         return [];
     }

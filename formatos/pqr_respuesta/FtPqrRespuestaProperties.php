@@ -11,9 +11,9 @@ use Saia\core\model\ModelFormat;
 class FtPqrRespuestaProperties extends ModelFormat
 {
     
-    public $isPDF=false;
+    public bool $isPDF = false;
 
-    protected function defaultDbAttributes()
+    protected function defaultDbAttributes(): array
     {
         return [
             'safe' => [
@@ -21,8 +21,8 @@ class FtPqrRespuestaProperties extends ModelFormat
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
-				'dependencia',
 				'ft_pqr',
+				'dependencia',
 				'ciudad_origen',
 				'destino',
 				'tipo_distribucion',
@@ -42,7 +42,7 @@ class FtPqrRespuestaProperties extends ModelFormat
         ];
     }
 
-    protected function defineMoreAttributes()
+    protected function defineMoreAttributes(): array
     {
         return [];
     }

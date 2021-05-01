@@ -168,14 +168,14 @@ class FtPqr extends FtPqrProperties
         <table class="table table-borderless" style="width:100%">';
             <tr>
                 <td style="width:50%;">
-                    <p>Hemos recibido su {$labelPQR} <br/><br/>
-                        Puede hacer seguimiento en la opción CONSULTAR MI {$labelPQR} de nuestro sitio Web.
+                    <p>Hemos recibido su $labelPQR <br/><br/>
+                        Puede hacer seguimiento en la opción CONSULTAR MI $labelPQR de nuestro sitio Web.
                     </p>
                 </td>
-                <td style="width:50%;text-align:center">{$Qr}<br/>{$text}</td>
+                <td style="width:50%;text-align:center">$Qr<br/>$text</td>
             </tr>
             <tr><td colspan="2">&nbsp;</td></tr>
-            {$trs}
+            $trs
         </table>
 HTML;
 

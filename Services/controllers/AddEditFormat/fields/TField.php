@@ -2,6 +2,8 @@
 
 namespace App\Bundles\pqr\Services\controllers\AddEditFormat\fields;
 
+use ReflectionClass;
+
 trait TField
 {
     public function getDefaultValues(): array
@@ -20,7 +22,7 @@ trait TField
             'ayuda' => NULL,
             'predeterminado' => NULL,
             'banderas' => NULL,
-            'etiqueta_html' => (new \ReflectionClass($this))->getShortName(),
+            'etiqueta_html' => (new ReflectionClass($this))->getShortName(),
             'orden' => $PqrFormField->orden,
             'adicionales' => NULL,
             'fila_visible' => 1,

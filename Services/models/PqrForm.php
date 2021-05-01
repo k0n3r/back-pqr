@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Services\models;
 
-use Masterminds\HTML5\Exception;
+use Exception;
 use Saia\models\Contador;
 use Saia\core\model\Model;
 use Saia\models\formatos\Formato;

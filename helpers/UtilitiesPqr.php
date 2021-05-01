@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\helpers;
 
+use Saia\controllers\anexos\FileJson;
 use Saia\models\Configuracion;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Saia\models\tarea\TareaEstado;
@@ -9,46 +10,10 @@ use Saia\models\documento\Documento;
 use Saia\controllers\SendMailController;
 use Saia\controllers\TemporalController;
 use App\Bundles\pqr\Services\controllers\QRDocumentoPqrController;
+use Throwable;
 
 class UtilitiesPqr
 {
-
-    /**
-     * Copia un archivo o directorio
-     *
-     * @param string $source Carpeta/archivo origen
-     * @param string $dest Carpeta/archivo destino
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     */
-    public static function copyToDir(string $source, string $dest): bool
-    {
-        if (is_link($source)) {
-            return symlink(readlink($source), $dest);
-        }
-
-        if (is_file($source)) {
-            return copy($source, $dest);
-        }
-
-        if (!is_dir($dest)) {
-            TemporalController::createFolder($dest);
-        }
-
-        $dir = dir($source);
-        while (false !== $entry = $dir->read()) {
-            if ($entry == '.' || $entry == '..') {
-                continue;
-            }
-
-            self::copyToDir("$source/$entry", "$dest/$entry");
-        }
-
-        $dir->close();
-
-        return true;
-    }
 
     public static function notifyAdministrator(string $message, ?array $log = null): void
     {
@@ -94,13 +59,13 @@ class UtilitiesPqr
     }
 
     /**
-     * Obtiene la cantidad de tareas y cantidad de tareas finalizadas 
+     * Obtiene la cantidad de tareas y cantidad de tareas finalizadas
      * del documento
      *
      * @param Documento $Documento
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public static function getFinishTotalTask(Documento $Documento): array
     {
@@ -132,7 +97,7 @@ class UtilitiesPqr
      * @param string $email
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public static function isEmailValid(string $email): bool
     {
@@ -148,7 +113,7 @@ class UtilitiesPqr
      * @param FtPqr $FtPqr
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public static function showQr(FtPqr $FtPqr): string
     {
@@ -162,9 +127,7 @@ class UtilitiesPqr
      * @param Documento $Documento
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
-     * 
-     * @throws Exception
+     * @date   2020
      */
     public static function getRoutePdf(Documento $Documento): string
     {
@@ -173,17 +136,17 @@ class UtilitiesPqr
             if (!$Documento->pdf) {
                 $Documento->getPdfJson(true);
             }
+            $FileJson = new FileJson($Documento->pdf);
+            $FileTemporal = $FileJson->convertToFileTemporal();
 
-            $Object = TemporalController::createTemporalFile($Documento->pdf, '', true);
-            if ($Object->success) {
-                return $_SERVER['APP_DOMAIN'] . $Object->route;
-            }
-        } catch (\Throwable $th) {
+            return $_SERVER['APP_DOMAIN'] . $FileTemporal->getRouteFromRoot();
+
+        } catch (Throwable $th) {
             $log = [
                 'errorMessage' => $th->getMessage(),
                 'iddocumento' => $Documento->getPK()
             ];
-            $message = "No se ha podido generar el pdf del documento con radicado: {$Documento->numero} (ID:{$Documento->getPK()})";
+            $message = "No se ha podido generar el pdf del documento con radicado: $Documento->numero (ID:{$Documento->getPK()})";
             self::notifyAdministrator($message, $log);
         }
 

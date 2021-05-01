@@ -11,9 +11,9 @@ use Saia\core\model\ModelFormat;
 class FtPqrProperties extends ModelFormat
 {
     
-    public $isPDF=false;
+    public bool $isPDF = false;
 
-    protected function defaultDbAttributes()
+    protected function defaultDbAttributes(): array
     {
         return [
             'safe' => [
@@ -37,7 +37,7 @@ class FtPqrProperties extends ModelFormat
         ];
     }
 
-    protected function defineMoreAttributes()
+    protected function defineMoreAttributes(): array
     {
         return [];
     }

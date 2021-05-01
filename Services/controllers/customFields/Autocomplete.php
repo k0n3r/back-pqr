@@ -39,14 +39,12 @@ class Autocomplete extends Field implements IWsFields
     $requiredClass = $this->getRequiredClass();
     $title = $this->CamposFormato->ayuda ? " title='{$this->CamposFormato->ayuda}'" : '';
 
-    $code = "<div class='form-group form-group-default form-group-default-select2 {$requiredClass}' id='group_{$this->CamposFormato->nombre}'>
-            <label{$title}>{$this->getLabel()}</label>
-            <select class='full-width {$requiredClass}' name='{$this->CamposFormato->nombre}' id='{$this->CamposFormato->nombre}'>
-            <option value=''>Por favor seleccione...</option>
-            </select>
-        </div>";
-
-    return $code;
+      return "<div class='form-group form-group-default form-group-default-select2 $requiredClass' id='group_{$this->CamposFormato->nombre}'>
+              <label$title>{$this->getLabel()}</label>
+              <select class='full-width $requiredClass' name='{$this->CamposFormato->nombre}' id='{$this->CamposFormato->nombre}'>
+              <option value=''>Por favor seleccione...</option>
+              </select>
+          </div>";
   }
 
   public function jsContent(): ?string

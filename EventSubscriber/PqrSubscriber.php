@@ -109,7 +109,10 @@ class PqrSubscriber implements EventSubscriberInterface
 
                 $PqrHistoryService = (new PqrHistory)->getService();
                 if (!$PqrHistoryService->save($history)) {
-                    throw new Exception($PqrHistoryService->getErrorMessage(), 200);
+                    throw new Exception(
+                        $PqrHistoryService->getErrorManager()->getMessage(),
+                        $PqrHistoryService->getErrorManager()->getCode()
+                    );
                 }
 
                 if (!$this->updateEstado($Documento)) {

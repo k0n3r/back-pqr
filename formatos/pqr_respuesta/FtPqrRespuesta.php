@@ -133,9 +133,9 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         $CamposFormato = new CamposFormato($idCamposFormato);
 
         return <<<HTML
-        <div class='form-group form-group-default form-group-default-select2 required' id='group_{$CamposFormato->nombre}'>
-            <label title='Ciudad origen' class='autocomplete'>{$CamposFormato->etiqueta}</label>
-            <select class="full-width required" id='ciudad_origen' name='{$CamposFormato->nombre}'></select>
+        <div class='form-group form-group-default form-group-default-select2 required' id='group_$CamposFormato->nombre'>
+            <label title='Ciudad origen' class='autocomplete'>$CamposFormato->etiqueta</label>
+            <select class="full-width required" id='ciudad_origen' name='$CamposFormato->nombre'></select>
         </div>
 HTML;
     }
@@ -156,7 +156,7 @@ HTML;
             <div class='checkbox check-success input-group'>
                 <input type='checkbox' name='sol_encuesta' id='sol_encuesta' value='1'>
                 <label for='sol_encuesta' class='mr-3'>
-                    {$CamposFormato->etiqueta}
+                    $CamposFormato->etiqueta
                 </label>
             </div>
         </div>";
@@ -196,7 +196,7 @@ HTML;
 
                     <tr>
                         <td>{$Service->getInfoDestino()}</td>
-                        <td style="text-align:center">{$Qr}<br/>No.{$Service->getRadicado()}</td>
+                        <td style="text-align:center">$Qr<br/>No.{$Service->getRadicado()}</td>
                     </tr>
 
                     <tr>
@@ -207,7 +207,7 @@ HTML;
                     </tr>
 
                     <tr>
-                        <td colspan="2">ASUNTO: {$this->asunto}</td>
+                        <td colspan="2">ASUNTO: $this->asunto</td>
                     </tr>
 
                     <tr>
@@ -226,9 +226,9 @@ HTML;
                     </tr>
                 </tbody>
             </table>
-            {$this->contenido}
+            $this->contenido
             <p>{$Service->getDespedida()}<br/><br/></p>
-            {$firmas}
+            $firmas
             <p>{$Service->getOtherData()}</p>
 HTML;
 

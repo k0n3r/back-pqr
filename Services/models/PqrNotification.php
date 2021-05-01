@@ -51,7 +51,7 @@ class PqrNotification extends Model
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */
-    public function getFkFuncionario()
+    public function getFkFuncionario(): array
     {
         return [
             'text' => $this->Funcionario->getName(),

@@ -67,7 +67,7 @@ class PqrNotyMessageService extends ModelService
         foreach ($functions as $variable) {
             $value = call_user_func([self::class, $variable], $FtPqr);
             $baseContent = str_replace(
-                "{*{$variable}*}",
+                "{*$variable*}",
                 $value,
                 $baseContent
             );

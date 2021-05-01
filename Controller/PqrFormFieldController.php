@@ -2,8 +2,8 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use Doctrine\DBAL\Connection;
 use Exception;
-use Saia\core\DatabaseConnection;
 use App\services\response\ISaiaResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,25 +13,28 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
 /**
- * @Route("/formField", name="formField_") 
+ * @Route("/formField", name="formField_")
  */
 class PqrFormFieldController extends AbstractController
 {
     /**
-     * @Route("", name="store", methods={"POST"}) 
+     * @Route("", name="store", methods={"POST"})
      */
     public function store(
         Request $request,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
     ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $PqrFormFieldService = (new PqrFormField())->getService();
             if (!$PqrFormFieldService->create($request->get('data'))) {
-                throw new Exception($PqrFormFieldService->getErrorMessage(), 1);
+                throw new Exception(
+                    $PqrFormFieldService->getErrorManager()->getMessage(),
+                    $PqrFormFieldService->getErrorManager()->getCode()
+                );
             }
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
@@ -54,16 +57,19 @@ class PqrFormFieldController extends AbstractController
     public function update(
         int $id,
         Request $request,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
     ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->update($request->get('data'))) {
-                throw new Exception($PqrFormFieldService->getErrorMessage(), 1);
+                throw new Exception(
+                    $PqrFormFieldService->getErrorManager()->getMessage(),
+                    $PqrFormFieldService->getErrorManager()->getCode()
+                );
             }
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
@@ -85,10 +91,11 @@ class PqrFormFieldController extends AbstractController
      */
     public function active(
         int $id,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
     ): Response {
 
-        return $this->activeInactive($id, PqrFormField::ACTIVE, $saiaResponse);
+        return $this->activeInactive($id, PqrFormField::ACTIVE, $saiaResponse, $Connection);
     }
 
     /**
@@ -96,25 +103,29 @@ class PqrFormFieldController extends AbstractController
      */
     public function inactive(
         int $id,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
     ): Response {
 
-        return $this->activeInactive($id, PqrFormField::INACTIVE, $saiaResponse);
+        return $this->activeInactive($id, PqrFormField::INACTIVE, $saiaResponse, $Connection);
     }
 
     private function activeInactive(
         int $id,
         int $status,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
     ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->updateActive($status)) {
-                throw new Exception($PqrFormFieldService->getErrorMessage(), 1);
+                throw new Exception(
+                    $PqrFormFieldService->getErrorManager()->getMessage(),
+                    $PqrFormFieldService->getErrorManager()->getCode()
+                );
             }
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
@@ -135,16 +146,19 @@ class PqrFormFieldController extends AbstractController
      */
     public function destroy(
         int $id,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
     ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->delete()) {
-                throw new Exception($PqrFormFieldService->getErrorMessage(), 1);
+                throw new Exception(
+                    $PqrFormFieldService->getErrorManager()->getMessage(),
+                    $PqrFormFieldService->getErrorManager()->getCode()
+                );
             }
 
             $saiaResponse->setSuccess(1);

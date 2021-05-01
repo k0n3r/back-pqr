@@ -2,9 +2,8 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use Doctrine\DBAL\ConnectionException;
+use Doctrine\DBAL\Connection;
 use Exception;
-use Saia\core\DatabaseConnection;
 use Saia\controllers\DateController;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\PqrService;
@@ -32,8 +31,7 @@ class FtPqrController extends AbstractController
     public function getDataToLoadResponse(
         int $idft,
         ISaiaResponse $saiaResponse
-    ): Response
-    {
+    ): Response {
 
         try {
             $data = (new FtPqr($idft))->getService()->getDataToLoadResponse();
@@ -58,8 +56,7 @@ class FtPqrController extends AbstractController
         int $idft,
         ISaiaResponse $saiaResponse,
         Request $request
-    ): Response
-    {
+    ): Response {
 
         try {
             $FtPqr = new FtPqr($idft);
@@ -90,8 +87,7 @@ class FtPqrController extends AbstractController
     public function getValuesForType(
         int $idft,
         ISaiaResponse $saiaResponse
-    ): Response
-    {
+    ): Response {
 
         try {
 
@@ -134,8 +130,7 @@ class FtPqrController extends AbstractController
      */
     public function getHistory(
         int $idft
-    ): JsonResponse
-    {
+    ): JsonResponse {
 
         try {
 
@@ -160,23 +155,25 @@ class FtPqrController extends AbstractController
      * @param int           $idft
      * @param Request       $request
      * @param ISaiaResponse $saiaResponse
+     * @param Connection    $Connection
      * @return Response
-     * @throws ConnectionException
      */
     public function updateType(
         int $idft,
         Request $request,
-        ISaiaResponse $saiaResponse
-    ): Response
-    {
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $FtPqrService = (new FtPqr($idft))->getService();
             if (!$FtPqrService->updateType($request->get('data'))) {
-                throw new Exception($FtPqrService->getErrorMessage(), 1);
+                throw new Exception(
+                    $FtPqrService->getErrorManager()->getMessage(),
+                    $FtPqrService->getErrorManager()->getCode(),
+                );
             }
 
             $saiaResponse->setSuccess(1);
@@ -194,23 +191,25 @@ class FtPqrController extends AbstractController
      * @param int           $idft
      * @param Request       $request
      * @param ISaiaResponse $saiaResponse
+     * @param Connection    $Connection
      * @return Response
-     * @throws ConnectionException
      */
     public function finish(
         int $idft,
         Request $request,
-        ISaiaResponse $saiaResponse
-    ): Response
-    {
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $FtPqrService = (new FtPqr($idft))->getService();
             if (!$FtPqrService->finish($request->get('observaciones'))) {
-                throw new Exception($FtPqrService->getErrorMessage(), 1);
+                throw new Exception(
+                    $FtPqrService->getErrorManager()->getMessage(),
+                    $FtPqrService->getErrorManager()->getCode(),
+                );
             }
 
             $saiaResponse->setSuccess(1);

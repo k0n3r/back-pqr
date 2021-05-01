@@ -59,7 +59,8 @@ class FtPqrRespuestaService extends ModelService
      */
     public function getFechaCiudad(): string
     {
-        return $this->getModel()->Municipio->nombre . ", " . strftime("%d de %B de %Y", strtotime($this->getModel()->getDocument()->fecha));
+        return $this->getModel()->Municipio->nombre . ", " . strftime("%d de %B de %Y",
+                strtotime($this->getModel()->getDocument()->fecha));
     }
 
     /**
@@ -187,24 +188,24 @@ class FtPqrRespuestaService extends ModelService
     {
         $email = $this->getModel()->Tercero->correo;
         if (!$email) {
-            $this->errorMessage = "Debe ingresar el email (Destino)";
+            $this->getErrorManager()->setMessage("Debe ingresar el email (Destino)");
             return false;
         }
 
         if (!UtilitiesPqr::isEmailValid($email)) {
-            $this->errorMessage = "El email ($email) NO es valido";
+            $this->getErrorManager()->setMessage("El email ($email) NO es valido");
             return false;
         }
 
         if ($emailCopy = $this->getCopyEmail()) {
             foreach ($emailCopy as $copia) {
                 if (!$copia) {
-                    $this->errorMessage = "Debe ingresar el email (Con copia a)";
+                    $this->getErrorManager()->setMessage("Debe ingresar el email (Con copia a)");
                     return false;
                 }
 
                 if (!UtilitiesPqr::isEmailValid($copia)) {
-                    $this->errorMessage = "El email en copia externa ($copia) NO es valido";
+                    $this->getErrorManager()->setMessage("El email en copia externa ($copia) NO es valido");
                     return false;
                 }
             }
@@ -234,7 +235,9 @@ class FtPqrRespuestaService extends ModelService
 
         $PqrHistoryService = (new PqrHistory)->getService();
         if (!$PqrHistoryService->save($history)) {
-            $this->errorMessage = $PqrHistoryService->getErrorMessage();
+            $this->getErrorManager()->setMessage(
+                $PqrHistoryService->getErrorManager()->getMessage()
+            );
             return false;
         }
 
@@ -268,7 +271,7 @@ class FtPqrRespuestaService extends ModelService
                 break;
 
             default:
-                $this->errorMessage = "Tipo de distribucion no definida";
+                $this->getErrorManager()->setMessage("Tipo de distribucion no definida");
                 return false;
         }
         $DistributionService = new DistributionService($this->getModel()->getDocument());
@@ -389,7 +392,7 @@ class FtPqrRespuestaService extends ModelService
                 $log
             );
 
-            $this->errorMessage = "No fue posible notificar la respuesta";
+            $this->getErrorManager()->setMessage("No fue posible notificar la respuesta");
             return false;
         }
 
@@ -451,7 +454,7 @@ class FtPqrRespuestaService extends ModelService
     {
         $email = $this->getModel()->Tercero->correo;
         if (!UtilitiesPqr::isEmailValid($email)) {
-            $this->errorMessage = "El email ($email) NO es valido";
+            $this->getErrorManager()->setMessage("El email ($email) NO es valido");
             return false;
         }
 
@@ -485,7 +488,7 @@ class FtPqrRespuestaService extends ModelService
                 $log
             );
 
-            $this->errorMessage = $message;
+            $this->getErrorManager()->setMessage($message);
             return false;
         }
 

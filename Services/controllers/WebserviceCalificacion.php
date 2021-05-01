@@ -19,7 +19,7 @@ class WebserviceCalificacion extends WsFormulario
             'urlSaveFt' => 'api/captcha/saveDocument'
         ];
 
-        return $this->getContent(
+        return static::getContent(
             'src/Bundles/pqr/Services/controllers/templates/formCalificacion.js.php',
             $values
         );

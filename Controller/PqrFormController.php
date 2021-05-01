@@ -2,8 +2,8 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use Doctrine\DBAL\Connection;
 use Exception;
-use Saia\core\DatabaseConnection;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
@@ -27,8 +27,7 @@ class PqrFormController extends AbstractController
      */
     public function getTextFields(
         ISaiaResponse $saiaResponse
-    ): Response
-    {
+    ): Response {
 
         try {
             $saiaResponse->replaceData(PqrService::getTextFields());
@@ -44,17 +43,19 @@ class PqrFormController extends AbstractController
      * @Route("/publish", name="publish", methods={"GET"})
      */
     public function publish(
-        ISaiaResponse $saiaResponse
-    ): Response
-    {
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->publish()) {
-                throw new Exception($PqrFormService->getErrorMessage(), 1);
+                throw new Exception(
+                    $PqrFormService->getErrorManager()->getMessage(),
+                    $PqrFormService->getErrorManager()->getCode(),
+                );
             }
 
             $data = [
@@ -78,8 +79,7 @@ class PqrFormController extends AbstractController
      */
     public function getSetting(
         ISaiaResponse $saiaResponse
-    ): Response
-    {
+    ): Response {
 
         try {
             $data = (PqrForm::getInstance())->getService()
@@ -98,8 +98,7 @@ class PqrFormController extends AbstractController
      */
     public function getResponseSetting(
         ISaiaResponse $saiaResponse
-    ): Response
-    {
+    ): Response {
 
         try {
             $data = (PqrForm::getInstance())
@@ -119,12 +118,11 @@ class PqrFormController extends AbstractController
      */
     public function sortFields(
         Request $request,
-        ISaiaResponse $saiaResponse
-    ): Response
-    {
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             foreach ($request->get('fieldOrder') as $record) {
@@ -153,17 +151,19 @@ class PqrFormController extends AbstractController
      */
     public function updateSetting(
         Request $request,
-        ISaiaResponse $saiaResponse
-    ): Response
-    {
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateSetting($request->get('data'))) {
-                throw new Exception($PqrFormService->getErrorMessage(), 1);
+                throw new Exception(
+                    $PqrFormService->getErrorManager()->getMessage(),
+                    $PqrFormService->getErrorManager()->getCode(),
+                );
             }
 
             $data = [
@@ -187,17 +187,19 @@ class PqrFormController extends AbstractController
      */
     public function updateResponseSetting(
         Request $request,
-        ISaiaResponse $saiaResponse
-    ): Response
-    {
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateResponseSetting($request->get('data'))) {
-                throw new Exception($PqrFormService->getErrorMessage(), 1);
+                throw new Exception(
+                    $PqrFormService->getErrorManager()->getMessage(),
+                    $PqrFormService->getErrorManager()->getCode(),
+                );
             }
 
             $saiaResponse->setSuccess(1);
@@ -211,21 +213,23 @@ class PqrFormController extends AbstractController
     }
 
     /**
-     * @Route("/updatePqrTypes", name="updatePqrTypes", methods={"PUT"})
+     * @Route("/updatePqrTypes", name="updateTypes", methods={"PUT"})
      */
-    public function updatePqrTypes(
+    public function updateTypes(
         Request $request,
-        ISaiaResponse $saiaResponse
-    ): Response
-    {
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updatePqrTypes($request->get('data'))) {
-                throw new Exception($PqrFormService->getErrorMessage(), 1);
+                throw new Exception(
+                    $PqrFormService->getErrorManager()->getMessage(),
+                    $PqrFormService->getErrorManager()->getCode(),
+                );
             }
 
             $saiaResponse->setSuccess(1);
@@ -243,12 +247,11 @@ class PqrFormController extends AbstractController
      */
     public function updateShowReport(
         Request $request,
-        ISaiaResponse $saiaResponse
-    ): Response
-    {
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
 
         try {
-            $Connection = DatabaseConnection::getDefaultConnection();
             $Connection->beginTransaction();
 
             $Connection->createQueryBuilder()

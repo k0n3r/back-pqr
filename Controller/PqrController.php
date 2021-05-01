@@ -22,7 +22,7 @@ class PqrController extends AbstractController
     /**
      * @Route("/searchByNumber", name="search", methods={"GET"})
      */
-    public function searchByNumber(
+    public function search(
         Request $request,
         ISaiaResponse $saiaResponse
     ): Response

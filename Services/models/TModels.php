@@ -2,6 +2,8 @@
 
 namespace App\Bundles\pqr\Services\models;
 
+use Stringy\Stringy;
+
 trait TModels
 {
 
@@ -20,7 +22,7 @@ trait TModels
         $data = [];
         foreach ($attributes as $value) {
 
-            $Stringy = new \Stringy\Stringy("get_{$value}");
+            $Stringy = new Stringy("get_$value");
             $method = (string) $Stringy->upperCamelize();
             $data[$value] = (method_exists($this, $method)) ? $this->$method() : $this->$value;
         }

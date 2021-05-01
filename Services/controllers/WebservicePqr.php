@@ -8,14 +8,10 @@ use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\controllers\generator\webservice\WsFt;
 use Saia\controllers\generator\webservice\IWsHtml;
-use Saia\controllers\generator\webservice\WsGenerator;
 
 class WebservicePqr extends WsFt implements IWsHtml
 {
 
-    private string $jsContent;
-    private string $htmlContent;
-    private array $moreFiles = [];
     private PqrForm $PqrForm;
     private array $objectFieldsForAnonymous = [];
     private array $objectFields = [];
@@ -31,16 +27,8 @@ class WebservicePqr extends WsFt implements IWsHtml
      */
     public function getHtmlContentForm(array $filesToInclude, ?string $urlSearch): string
     {
-        $this->setContentForm();
-        if ($this->moreFiles) {
-            $lastFiles = array_slice($filesToInclude, -2);
-            array_splice($filesToInclude, -2, 2, WsGenerator::getRouteFile($this->moreFiles));
-            $filesToInclude = array_merge($filesToInclude, $lastFiles);
-        }
-
-        $this->addFilesToForm($filesToInclude);
-
-        $html = $urlSearch ? "<a href='{$urlSearch}'>Consultar</a>" : '';
+        $this->addFilesToLoad($filesToInclude);
+        $html = $urlSearch ? "<a href='$urlSearch'>Consultar</a>" : '';
 
         $values = [
             'recaptchaPublicKey' => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'],
@@ -49,12 +37,12 @@ class WebservicePqr extends WsFt implements IWsHtml
             'showLabel' => (int)$this->PqrForm->show_label,
             'contentFields' => $this->htmlContent,
             'nameForm' => mb_strtoupper($this->Formato->etiqueta),
-            'linksCss' => $this->getCssLinks(),
-            'scripts' => $this->getScriptLinks(),
+            'linksCss' => $this->getLinks(self::TYPE_CSS),
+            'scripts' => $this->getLinks(self::TYPE_JS),
             'hrefSearch' => $html
         ];
 
-        return $this->getContent(
+        return static::getContent(
             'src/Bundles/pqr/Services/controllers/templates/formPqr.html.php',
             $values
         );
@@ -74,7 +62,7 @@ class WebservicePqr extends WsFt implements IWsHtml
             'fieldsWithAnonymous' => json_encode($this->objectFieldsForAnonymous)
         ];
 
-        return $this->getContent(
+        return static::getContent(
             'src/Bundles/pqr/Services/controllers/templates/formPqr.js.php',
             $values
         );
@@ -104,35 +92,6 @@ class WebservicePqr extends WsFt implements IWsHtml
         return $this->moreFiles;
     }
 
-
-    /**
-     * Setea las variables que tendran el contenido del formulario
-     *
-     * @return void
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    private function setContentForm(): void
-    {
-        $codeHtml = $codeJs = '';
-        $fields = $this->getFields();
-
-        foreach ($fields as $IWsFields) {
-            $files = $IWsFields->aditionalFiles();
-            if ($files) {
-                $this->moreFiles = array_merge($this->moreFiles, $files);
-            }
-
-            $codeHtml .= $IWsFields->htmlContent() . "\n";
-
-            $codeJs .= $IWsFields->jsContent() ?
-                $IWsFields->jsContent() . "\n" : '';
-        }
-
-        $this->jsContent = $codeJs;
-        $this->htmlContent = $codeHtml;
-    }
-
     /**
      * Obtiene los campos que seran creados para el cuerpo
      * del ws
@@ -141,7 +100,7 @@ class WebservicePqr extends WsFt implements IWsHtml
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    protected function getFields(): array
+    protected function getFormatFields(): array
     {
         $fields = [];
 
