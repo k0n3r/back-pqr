@@ -380,9 +380,8 @@ class FtPqrService extends ModelService
      */
     private function getExpirationDate(): DateTime
     {
-        $expiration = DateController::convertDate($this->getModel()->sys_fecha_vencimiento, 'Y-m-d');
+        return DateController::getDateTimeFromDataBase($this->getModel()->sys_fecha_vencimiento);
 
-        return new DateTime($expiration);
     }
 
     /**
@@ -413,11 +412,12 @@ class FtPqrService extends ModelService
     private function getDataFinish(): array
     {
         $type = $this->getModel()->getFieldValue('sys_tipo');
+
         return [
             'iconPoint' => 'fa fa-flag-checkered',
             'iconPointColor' => 'success',
             'date' => DateController::convertDate(
-                $this->getExpirationDate(),
+                $this->getModel()->sys_fecha_vencimiento,
                 DateController::PUBLIC_DATE_FORMAT
             ),
             'description' => "Fecha maxima para dar respuesta a la solicitud de tipo $type"

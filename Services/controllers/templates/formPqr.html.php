@@ -94,7 +94,7 @@
                     </div>
                 <?php endif; ?>
 
-                <?= $contentFields ?>
+                <?= $fields ?>
                 <div class='form-group' id='form_buttons'>
                     <button class='btn btn-complete' id='save_document' type='button'>Continuar</button>
                     <div class='progress-circle-indeterminate d-none' id='spiner'></div>

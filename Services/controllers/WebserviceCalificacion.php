@@ -11,17 +11,9 @@ class WebserviceCalificacion extends WsFormulario
      */
     public function getJsContentForm(): string
     {
-        $values = [
-            'recaptchaPublicKey' => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'],
-            'baseUrl' => $_SERVER['APP_DOMAIN'],
-            'formatId' => $this->Formato->getPK(),
-            'content' => $this->jsContent,
-            'urlSaveFt' => 'api/captcha/saveDocument'
-        ];
-
         return static::getContent(
             'src/Bundles/pqr/Services/controllers/templates/formCalificacion.js.php',
-            $values
+            $this->getDefaultValuesForJsContent()
         );
     }
 }

@@ -2,13 +2,8 @@
 $code = <<<JAVASCRIPT
 $(function () {
     var baseUrl = window.baseUrl;
-    
-    if (typeof window.credential === 'undefined') {
-        window.getCredentials();
-    }
-    
-    var key = window.credential.key;
-    var token = window.credential.token;
+    var key= window.credential.key; //Componente dropzone   
+    var token= window.credential.token; //Componente dropzone    
     
     loadjsComponent();
 
@@ -26,6 +21,7 @@ $(function () {
     });
 
     $("#formulario").validate({
+        ignore: [],
         errorPlacement: function (error, element) {
             let node = element[0];
             if (
@@ -40,20 +36,18 @@ $(function () {
         },
         submitHandler: function (form) {
             grecaptcha.ready(function () {
-                grecaptcha.execute('{$recaptchaPublicKey}', { action: 'submit' }).then(function (tokenRecaptcha) {
+                grecaptcha.execute('$recaptchaPublicKey', { action: 'submit' }).then(function (tokenRecaptcha) {
 
                     let dataForm = window.getFormObject($('#formulario').serializeArray());
                     let data = Object.assign(dataForm, {
-                        formatId: {$formatId},
+                        formatId: $formatId,
                         dependencia: window.credential.WsRol,
-                        key,
-                        token,
                         tokenRecaptcha
                     });
 
                     $.ajax({
                         method: 'post',
-                        url: baseUrl + `api/pqr/captcha/saveDocument`,
+                        url: baseUrl + '$urlSaveFt',
                         data,
                     }).done((response) => {
                         if (response.success) {
@@ -186,11 +180,11 @@ $(function () {
     }
 
     function loadjsComponent() {
-        {$content}
+        $content
     }
 
     function showAnonymousFields() {
-        let fields = {$fieldsWithAnonymous};
+        let fields = $fieldsWithAnonymous;
         $.each(fields, function (i, field) {
             if (field.required) {
                 $("#" + field.name).rules("add", { required: true });
@@ -208,7 +202,7 @@ $(function () {
     }
 
     function hideAnonymousFields() {
-        let fields = {$fieldsWithoutAnonymous};
+        let fields = $fieldsWithoutAnonymous;
         $.each(fields, function (i, field) {
             $("#group_" + field.name).show();
 

@@ -7,12 +7,10 @@ use Exception;
 use Saia\models\grafico\Grafico;
 use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
-use Saia\controllers\SessionController;
 use Saia\models\grafico\PantallaGrafico;
 use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
-use Saia\controllers\generator\webservice\WsFt;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\controllers\generator\webservice\WsGenerator;
 use App\Bundles\pqr\Services\controllers\WebservicePqr;
@@ -699,14 +697,11 @@ class PqrFormService extends ModelService
      */
     private function generatePqrWs(): bool
     {
-
-        $urlFolderTemplate = "src/Bundles/pqr/Services/controllers/templates/";
-
-        $defineFile = $this->generateFile('define.js', 'src/legacy/controllers/generator/webservice/templates/');
-        $page404 = $this->generateFile('404.html', $urlFolderTemplate);
-        $infoQrFile = $this->generateFile('infoQR.html', $urlFolderTemplate);
-        $infoQRJsFile = $this->generateFile('infoQR.js', $urlFolderTemplate);
-        $timelineFile = $this->generateFile('TimeLine.js', $urlFolderTemplate);
+        $folder = 'src/Bundles/pqr/Services/controllers/templates/';
+        $page404 = WsGenerator::generateFileForWs('src/legacy/controllers/generator/webservice/templates/404.html');
+        $infoQrFile = WsGenerator::generateFileForWs($folder . 'infoQR.html');
+        $infoQRJsFile = WsGenerator::generateFileForWs($folder . 'infoQR.js');
+        $timelineFile = WsGenerator::generateFileForWs($folder . 'TimeLine.js');
 
         $IWsHtml = new WebservicePqr($this->getModel()->Formato);
         $WsGenerator = new WsGenerator(
@@ -715,7 +710,6 @@ class PqrFormService extends ModelService
             false
         );
 
-        $WsGenerator->loadAdditionalFiles([$defineFile]);
         $WsGenerator->addFiles([$infoQrFile, $infoQRJsFile, $timelineFile, $page404]);
 
         return $WsGenerator->create();
@@ -731,8 +725,7 @@ class PqrFormService extends ModelService
      */
     private function generateCalificacionWs(Formato $FormatoC): bool
     {
-        $errorPage = $this->generateFile('404.html', 'src/Bundles/pqr/Services/controllers/templates/');
-        $fileName = $this->generateFile('define.js', 'src/legacy/controllers/generator/webservice/templates/');
+        $page404 = WsGenerator::generateFileForWs('src/legacy/controllers/generator/webservice/templates/404.html');
 
         $IWsHtml = new WebserviceCalificacion($FormatoC);
         $WsGenerator = new WsGenerator(
@@ -740,39 +733,8 @@ class PqrFormService extends ModelService
             $FormatoC->nombre,
             false
         );
-        $WsGenerator->addFiles([$errorPage]);
-        $WsGenerator->loadAdditionalFiles([$fileName]);
+        $WsGenerator->addFiles([$page404]);
 
         return $WsGenerator->create();
-    }
-
-    /**
-     * Genera un archivo basado en el template recibido
-     *
-     * @param string $templateName
-     * @param string $urlFolderTemplate
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    private function generateFile(
-        string $templateName,
-        string $urlFolderTemplate
-    ): string {
-        $values = [
-            'baseUrl' => $_SERVER['APP_DOMAIN']
-        ];
-
-        $content = WsFt::getContent(
-            "$urlFolderTemplate$templateName.php",
-            $values
-        );
-        $fileName = SessionController::getTemporalDir() . "/$templateName";
-
-        if (!file_put_contents($_SERVER["PUBLIC_PATH"] . $fileName, $content)) {
-            throw new Exception("Imposible crear el archivo $templateName para el ws", 1);
-        }
-
-        return $fileName;
     }
 }

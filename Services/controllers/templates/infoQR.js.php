@@ -13,10 +13,6 @@ $(function () {
         setTimeout(function () { window.location.href = "404.html" }, 5000);
         return;
     }
-    
-    if (typeof window.credential === 'undefined') {
-        window.getCredentials();
-    }
 
     let options = {
             selector: '#timeline-container',
@@ -27,8 +23,6 @@ $(function () {
                     url: window.baseUrl + `api/pqr/historyForTimeline`,
                     async: false,
                     data: {
-                        key: window.credential.key,
-                        token: window.credential.token,
                         infoCryp: d
                     },
                 }).done((response) => {

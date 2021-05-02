@@ -52,7 +52,7 @@ class Autocomplete extends Field implements IWsFields
     return <<<JAVASCRIPT
         let options_{$this->CamposFormato->nombre} = {
           language: "es",
-           minimumInputLength: 3,
+          minimumInputLength: 3,
           placeholder: "Ingrese el nombre",
           multiple: false,
           ajax: {
@@ -60,15 +60,12 @@ class Autocomplete extends Field implements IWsFields
             url: baseUrl+`api/pqr/components/autocomplete/list`,
             dataType: "json",
             data: function(p) {
-              var query = {
-                key: localStorage.getItem("key"),
-                token: localStorage.getItem("token"),
+              return {
                 name: '{$this->CamposFormato->nombre}',
                 data: {
                   term: p.term
                 }
               };
-              return query;
             }
           }
         };

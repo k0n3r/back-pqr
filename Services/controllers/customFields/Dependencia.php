@@ -16,15 +16,12 @@ class Dependencia extends Autocomplete
               url: baseUrl+`api/pqr/components/autocomplete/list`,
               dataType: "json",
               data: function(p) {
-                var query = {
-                  key:  localStorage.getItem("key"),
-                  token: localStorage.getItem("token"),
+                return {
                   name: '{$this->CamposFormato->nombre}',
                   data: {
                     term: p.term
                   }
                 };
-                return query;
               }
             }
           };

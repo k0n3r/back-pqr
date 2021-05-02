@@ -4,12 +4,11 @@ namespace App\Bundles\pqr\Services\controllers;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\controllers\generator\webservice\IWsFields;
+use Saia\controllers\generator\webservice\WsFt;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrFormField;
-use Saia\controllers\generator\webservice\WsFt;
-use Saia\controllers\generator\webservice\IWsHtml;
 
-class WebservicePqr extends WsFt implements IWsHtml
+class WebservicePqr extends WsFt
 {
 
     private PqrForm $PqrForm;
@@ -18,8 +17,8 @@ class WebservicePqr extends WsFt implements IWsHtml
 
     public function __construct(Formato $Formato)
     {
-        parent::__construct($Formato);
         $this->PqrForm = PqrForm::getInstance();
+        parent::__construct($Formato);
     }
 
     /**
@@ -30,17 +29,12 @@ class WebservicePqr extends WsFt implements IWsHtml
         $this->addFilesToLoad($filesToInclude);
         $html = $urlSearch ? "<a href='$urlSearch'>Consultar</a>" : '';
 
-        $values = [
-            'recaptchaPublicKey' => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'],
+        $values = array_merge($this->getDefaultValuesForHtmlContent(), [
             'emailLabel' => $this->PqrForm->getRow('sys_email')->label,
             'showAnonymous' => (int)$this->PqrForm->show_anonymous,
             'showLabel' => (int)$this->PqrForm->show_label,
-            'contentFields' => $this->htmlContent,
-            'nameForm' => mb_strtoupper($this->Formato->etiqueta),
-            'linksCss' => $this->getLinks(self::TYPE_CSS),
-            'scripts' => $this->getLinks(self::TYPE_JS),
             'hrefSearch' => $html
-        ];
+        ]);
 
         return static::getContent(
             'src/Bundles/pqr/Services/controllers/templates/formPqr.html.php',
@@ -53,43 +47,16 @@ class WebservicePqr extends WsFt implements IWsHtml
      */
     public function getJsContentForm(): string
     {
-        $values = [
-            'recaptchaPublicKey' => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'],
-            'baseUrl' => $_SERVER['APP_DOMAIN'],
-            'formatId' => $this->Formato->getPK(),
-            'content' => $this->jsContent,
+        $values = array_merge($this->getDefaultValuesForJsContent(), [
             'fieldsWithoutAnonymous' => json_encode($this->objectFields),
-            'fieldsWithAnonymous' => json_encode($this->objectFieldsForAnonymous)
-        ];
+            'fieldsWithAnonymous' => json_encode($this->objectFieldsForAnonymous),
+            'urlSaveFt' => 'api/pqr/captcha/saveDocument'
+        ]);
 
         return static::getContent(
             'src/Bundles/pqr/Services/controllers/templates/formPqr.js.php',
             $values
         );
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getHtmlContentSearchForm(array $filesToInclude, string $urlForm = null): string
-    {
-        return '';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getJsContentSearchForm(): string
-    {
-        return '';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getMoreFilesToCopy(): array
-    {
-        return $this->moreFiles;
     }
 
     /**
@@ -161,5 +128,29 @@ class WebservicePqr extends WsFt implements IWsHtml
             return $className;
         }
         return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getHtmlContentSearchForm(array $filesToInclude, ?string $urlForm): string
+    {
+        return '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getJsContentSearchForm(): string
+    {
+        return '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMoreFilesToCopy(): array
+    {
+        return [];
     }
 }

@@ -3,12 +3,8 @@
 $code = <<<JAVASCRIPT
     $(function () {
         var baseUrl = window.baseUrl;
-        let token = "";
-        let key = "";
-        let depenencia = "";
 
         (function init(){
-            getCredentials();
             loadjsComponent();
             validParameters();
         })();
@@ -34,21 +30,19 @@ $code = <<<JAVASCRIPT
                 }
             },
             submitHandler: function (form) {
-                grecaptcha.execute('{$recaptchaPublicKey}', { action: 'submit' }).then(function (tokenRecaptcha) {
+                grecaptcha.execute('$recaptchaPublicKey', { action: 'submit' }).then(function (tokenRecaptcha) {
 
                     let dataForm = window.getFormObject($('#formulario').serializeArray());
                     let data = Object.assign(dataForm, {
-                        formatId: {$formatId},
-                        dependencia,
-                        key,
-                        token,
+                        formatId: $formatId,
+                        dependencia:window.credential.WsRol,
                         tokenRecaptcha: tokenRecaptcha,
                         ft_pqr_respuesta: localStorage.getItem('WsFtPqr'),
                         anterior: localStorage.getItem('WsIddocPqr')
                     });
 
                     $.ajax({
-                        url: baseUrl + '{$urlSaveFt}',
+                        url: baseUrl + '$urlSaveFt',
                         data,
                     }).done((response) => {
                         if (response.success) {
@@ -102,25 +96,8 @@ $code = <<<JAVASCRIPT
             }
         }
 
-        function getCredentials() {
-            $.ajax({
-                url: `${baseUrl}api/free/generateWsToken`,
-                async: false,
-                data: {
-                    free_api_key: 'free_api_key'
-                },
-                dataType: 'json'
-            }).done((response) => {
-                token = response.data.token;
-                key = response.data.key;
-                dependencia = response.data.rol;
-            }).fail(function () {
-                console.error(...arguments)
-            });
-        }
-
         function loadjsComponent() {
-            {$content}
+            $content
         }
 
         function validParameters(){
@@ -145,8 +122,6 @@ $code = <<<JAVASCRIPT
                 url: baseUrl + `api/pqr/decrypt`,
                 async: false,
                 data:{
-                    token,
-                    key,
                     dataCrypt: d
                 }
             }).done((response) => {

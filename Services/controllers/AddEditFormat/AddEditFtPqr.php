@@ -236,7 +236,7 @@ class AddEditFtPqr implements IAddEditFormat
                 $CampoOpciones->setAttributes([
                     'estado' => 0
                 ]);
-                $CampoOpciones->update();
+                $CampoOpciones->save();
             }
         }
 
