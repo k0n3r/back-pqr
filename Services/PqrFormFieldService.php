@@ -50,7 +50,7 @@ class PqrFormFieldService extends ModelService
         $defaultFields = [
             'name' => $this->generateName(trim(strtolower($attributes['label']))),
             'required' => 0,
-            'show_anonymous' => 0,
+            'anonymous' => 0,
             'fk_pqr_form' => $PqrForm->getPK(),
             'fk_campos_formato' => 0,
             'is_system' => 0,

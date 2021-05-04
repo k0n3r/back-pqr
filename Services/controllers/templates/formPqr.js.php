@@ -187,10 +187,18 @@ $(function () {
         let fields = $fieldsWithAnonymous;
         $.each(fields, function (i, field) {
             if (field.required) {
-                $("#" + field.name).rules("add", { required: true });
+                if (field.type == "Radio" || field.type == "Checkbox") {
+                    $("[name^='" + field.name + "']").rules("add", {required: true});
+                } else {
+                    $("#" + field.name).rules("add", {required: true});
+                }
                 $("#group_" + field.name).addClass("required");
             } else {
-                $("#" + field.name).rules("add", { required: false });
+                if (field.type == "Radio" || field.type == "Checkbox") {
+                    $("[name^='" + field.name + "']").rules("add", {required: false});
+                } else {
+                    $("#" + field.name).rules("add", {required: false});
+                }
                 $("#group_" + field.name).removeClass("required");
             }
             if (field.show) {
@@ -208,10 +216,18 @@ $(function () {
 
             if (field.required) {
                 $("#group_" + field.name).addClass("required");
-                $("#" + field.name).rules("add", { required: true });
+                 if (field.type == "Radio" || field.type == "Checkbox") {
+                    $("[name^='" + field.name + "']").rules("add", {required: true});
+                } else {
+                    $("#" + field.name).rules("add", {required: true});
+                }
             } else {
                 $("#group_" + field.name).removeClass("required");
-                $("#" + field.name).rules("add", { required: false });
+                if (field.type == "Radio" || field.type == "Checkbox") {
+                    $("[name^='" + field.name + "']").rules("add", {required: false});
+                } else {
+                    $("#" + field.name).rules("add", {required: false});
+                }
             }
         });
     }

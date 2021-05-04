@@ -104,11 +104,13 @@ class WebservicePqr extends WsFt
         array_push($this->objectFields, [
             'name' => $PqrFormField->name,
             'required' => (int)$PqrFormField->required,
+            'type' => $PqrFormField->PqrHtmlField->type_saia
         ]);
         array_push($this->objectFieldsForAnonymous, [
             'name' => $PqrFormField->name,
             'show' => (int)$PqrFormField->anonymous,
-            'required' => (int)($PqrFormField->anonymous ? $PqrFormField->required_anonymous : 0)
+            'required' => (int)($PqrFormField->anonymous ? $PqrFormField->required_anonymous : 0),
+            'type' => $PqrFormField->PqrHtmlField->type_saia
         ]);
     }
 
