@@ -8,7 +8,6 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
-use App\services\models\anexos\AnexosService;
 use App\services\models\ModelService\ModelService;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\anexos\FileRoute;
@@ -337,18 +336,20 @@ class FtPqrRespuestaService extends ModelService
             return true;
         }
 
-        $DocumentoPqr = $this->getModel()->FtPqr->getDocument();
-        $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$this->getModel()->PqrForm->label} con número de radicado $DocumentoPqr->numero.<br/><br/>";
+        $FtPqrRespuesta = $this->getModel();
+        $DocumentoPqr = $FtPqrRespuesta->FtPqr->getDocument();
+
+        $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$FtPqrRespuesta->PqrForm->label} con número de radicado $DocumentoPqr->numero.<br/><br/>";
         $subject = "Respuesta solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero";
 
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
             'name' => 'f2_email_respuesta'
         ])) {
-            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $this->getModel()->FtPqr);
-            $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $this->getModel()->FtPqr);
+            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $FtPqrRespuesta->FtPqr);
+            $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $FtPqrRespuesta->FtPqr);
         }
 
-        if ($this->getModel()->sol_encuesta) {
+        if ($FtPqrRespuesta->sol_encuesta) {
             $url = $this->getUrlEncuesta();
             $message .= "Califica nuestro servicio haciendo clic en el siguiente enlace: <a href='$url'>Calificar el servicio</a> .<br/><br/>";
         }
@@ -360,7 +361,7 @@ class FtPqrRespuestaService extends ModelService
 
         $SendMailController->setDestinations(
             SendMailController::DESTINATION_TYPE_EMAIL,
-            [$this->getModel()->Tercero->correo]
+            [$FtPqrRespuesta->Tercero->correo]
         );
 
         if ($emailCopy = $this->getCopyEmail()) {
@@ -371,12 +372,13 @@ class FtPqrRespuestaService extends ModelService
         }
 
         $anexos = [];
-        $File = new FileJson($this->getModel()->getDocument()->getPdfJson());
+        $File = new FileJson($FtPqrRespuesta->getDocument()->getPdfJson());
         $anexos[] = $File;
 
-        if ($records = AnexosService::getFiles($this->getModel()->getDocument()->getPK())) {
+        $DocumentoService=$FtPqrRespuesta->getDocument()->getService();
+        if ($records = $DocumentoService->getAllFilesAnexos()) {
             foreach ($records as $route) {
-                $anexos[] = new FileRoute($route);
+                $anexos[] = new FileRoute($route['route']);
             }
         }
         $SendMailController->setAttachments($anexos);

@@ -297,7 +297,7 @@ final class Version20200310032827 extends AbstractMigration
                 'longitud' => '1',
                 'obligatoriedad' => 0,
                 'valor' => '{*fieldSatisfactionSurvey*}',
-                'acciones' => 'a',
+                'acciones' => 'a,e',
                 'etiqueta_html' => 'Method',
                 'orden' => '13',
                 'fila_visible' => '1',

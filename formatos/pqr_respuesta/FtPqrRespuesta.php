@@ -4,6 +4,8 @@ namespace App\Bundles\pqr\formatos\pqr_respuesta;
 
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
 use Exception;
+use Saia\controllers\localidad\MunicipioService;
+use Saia\models\formatos\CampoOpciones;
 use Saia\models\Tercero;
 use Saia\models\localidades\Municipio;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
@@ -132,12 +134,21 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     {
         $CamposFormato = new CamposFormato($idCamposFormato);
 
+        $options = '';
+        if ($this->ciudad_origen) {
+            $data = MunicipioService::getCityByIdForAutocomplete($this->ciudad_origen);
+            $options = "<option value='{$data[0]['id']}'>{$data[0]['text']}</option>";
+        }
+
         return <<<HTML
         <div class='form-group form-group-default form-group-default-select2 required' id='group_$CamposFormato->nombre'>
             <label title='Ciudad origen' class='autocomplete'>$CamposFormato->etiqueta</label>
-            <select class="full-width required" id='ciudad_origen' name='$CamposFormato->nombre'></select>
+            <select class="full-width required" id='ciudad_origen' name='$CamposFormato->nombre'>
+            $options
+            </select>
         </div>
 HTML;
+
     }
 
     /**
@@ -150,12 +161,22 @@ HTML;
      */
     public function fieldSatisfactionSurvey(int $idCamposFormato): string
     {
+
         $CamposFormato = new CamposFormato($idCamposFormato);
 
-        return "<div class='form-group form-group-default' id='group_sol_encuesta'>
+        $none = 'd-none';
+        $check = (int)$this->sol_encuesta;
+        $checked = $check ? 'checked' : '';
+
+        if ($this->tipo_distribucion) {
+            $none = (new CampoOpciones($this->tipo_distribucion))->llave != self::DISTRIBUCION_ENVIAR_EMAIL ? 'd-none' : '';
+        }
+
+        return "<div class='form-group form-group-default $none' id='group_sol_encuesta'>
+            <input type='hidden' name='sol_encuesta' id='sol_encuesta' value='$check'>
             <div class='checkbox check-success input-group'>
-                <input type='checkbox' name='sol_encuesta' id='sol_encuesta' value='1'>
-                <label for='sol_encuesta' class='mr-3'>
+                <input type='checkbox' id='sol_encuesta1' $checked>
+                <label for='sol_encuesta1' class='mr-3'>
                     $CamposFormato->etiqueta
                 </label>
             </div>
