@@ -67,7 +67,10 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     {
         if ($this->getService()->sendByEmail()) {
             if (!$this->getService()->validEmails()) {
-                throw new Exception($this->getService()->getErrorMessage());
+                throw new Exception(
+                    $this->getService()->getErrorManager()->getMessage(),
+                    $this->getService()->getErrorManager()->getCode()
+                );
             }
         }
         return true;
@@ -80,7 +83,10 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     {
         if ($this->getService()->sendByEmail()) {
             if (!$this->getService()->validEmails()) {
-                throw new Exception($this->getService()->getErrorMessage());
+                throw new Exception(
+                    $this->getService()->getErrorManager()->getMessage(),
+                    $this->getService()->getErrorManager()->getCode()
+                );
             }
         }
         return true;
@@ -99,7 +105,10 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
             !$this->getService()->saveDistribution() ||
             !$this->getService()->notifyEmail()
         ) {
-            throw new Exception($this->getService()->getErrorMessage());
+            throw new Exception(
+                $this->getService()->getErrorManager()->getMessage(),
+                $this->getService()->getErrorManager()->getCode()
+            );
         }
 
         return $this->getService()->transferCopiaInterna();
