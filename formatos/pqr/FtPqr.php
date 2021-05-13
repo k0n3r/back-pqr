@@ -80,6 +80,17 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
+     * Obtiene la url del Qr
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-13
+     */
+    public function getQrContent(): string
+    {
+        return $this->getService()->getUrlQR();
+    }
+
+    /**
      * @inheritDoc
      */
     public function beforeRad(): bool

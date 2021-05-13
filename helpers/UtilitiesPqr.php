@@ -117,8 +117,10 @@ class UtilitiesPqr
      */
     public static function showQr(FtPqr $FtPqr): string
     {
-        $QRDocumentoPqrController = new QRDocumentoPqrController($FtPqr);
-        return $QRDocumentoPqrController->getImageQR();
+        $qr = $FtPqr->getDocument()->getQR();
+        $route = $_SERVER['APP_DOMAIN'] . $qr;
+
+        return '<img src="' . $route . '" width="80px" height="80px" />';
     }
 
     /**
