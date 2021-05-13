@@ -617,7 +617,7 @@ HTML;
             $Tercero ??= new Tercero();
             $TerceroService = new TerceroService($Tercero);
             if (!$TerceroService->save($data)) {
-                $this->getErrorManager()->setMessage($TerceroService->getErrorMessage());
+                $this->getErrorManager()->setMessage($TerceroService->getErrorManager()->getMessage());
                 return false;
             }
             $this->getModel()->sys_tercero = $TerceroService->getModel()->getPK();
