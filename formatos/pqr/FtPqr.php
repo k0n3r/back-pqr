@@ -63,7 +63,7 @@ class FtPqr extends FtPqrProperties
     {
         $this->setDefaultValues();
         if (!$this->getService()->validSysEmail()) {
-            throw new Exception($this->getService()->getErrorMessage(), 200);
+            throw new Exception($this->getService()->getErrorManager()->getMessage(), 200);
         }
         return true;
     }
@@ -74,7 +74,7 @@ class FtPqr extends FtPqrProperties
     public function afterEdit(): bool
     {
         if (!$this->getService()->validSysEmail()) {
-            throw new Exception($this->getService()->getErrorMessage(), 200);
+            throw new Exception($this->getService()->getErrorManager()->getMessage(), 200);
         }
         return true;
     }
@@ -99,7 +99,7 @@ class FtPqr extends FtPqrProperties
             !$this->getService()->createBackup() ||
             !$this->getService()->updateFechaVencimiento()
         ) {
-            throw new Exception($this->getService()->getErrorMessage(), 200);
+            throw new Exception($this->getService()->getErrorManager()->getMessage(), 200);
         }
 
         return $this->getService()->createTercero();
