@@ -136,7 +136,9 @@ class FtPqrRespuestaService extends ModelService
 
         $names = Anexos::findColumn('etiqueta', [
             'documento_iddocumento' => $this->getModel()->getDocument()->getPK(),
-            'campos_formato' => $id
+	    'campos_formato' => $id,
+	    'estado' => 1,
+	    'eliminado' => 0
         ]);
 
         return $names ? implode(', ', $names) : '';
