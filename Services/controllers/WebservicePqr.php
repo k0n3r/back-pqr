@@ -71,7 +71,7 @@ class WebservicePqr extends WsFt
     {
         $fields = [];
 
-        $records = $this->PqrForm->PqrFormFields;
+        $records = $this->PqrForm->getPqrFormFields();
         $specialFields = [
             'tratamiento',
             'localidad',
@@ -83,14 +83,14 @@ class WebservicePqr extends WsFt
                 continue;
             }
 
-            if (in_array($PqrFormField->PqrHtmlField->type, $specialFields)) {
-                if ($class = $this->resolveCustomClass(ucfirst($PqrFormField->PqrHtmlField->type))) {
+            if (in_array($PqrFormField->getPqrHtmlField()->type, $specialFields)) {
+                if ($class = $this->resolveCustomClass(ucfirst($PqrFormField->getPqrHtmlField()->type))) {
                     $fields[] = new $class($PqrFormField);
                     $this->setFieldsAnonymous($PqrFormField);
                 }
             } else {
-                if ($class = $this->resolveClass($PqrFormField->CamposFormato->etiqueta_html)) {
-                    $fields[] = new $class($PqrFormField->CamposFormato);
+                if ($class = $this->resolveClass($PqrFormField->getCamposFormato()->etiqueta_html)) {
+                    $fields[] = new $class($PqrFormField->getCamposFormato());
                     $this->setFieldsAnonymous($PqrFormField);
                 }
             }
@@ -104,13 +104,13 @@ class WebservicePqr extends WsFt
         array_push($this->objectFields, [
             'name' => $PqrFormField->name,
             'required' => (int)$PqrFormField->required,
-            'type' => $PqrFormField->PqrHtmlField->type_saia
+            'type' => $PqrFormField->getPqrHtmlField()->type_saia
         ]);
         array_push($this->objectFieldsForAnonymous, [
             'name' => $PqrFormField->name,
             'show' => (int)$PqrFormField->anonymous,
             'required' => (int)($PqrFormField->anonymous ? $PqrFormField->required_anonymous : 0),
-            'type' => $PqrFormField->PqrHtmlField->type_saia
+            'type' => $PqrFormField->getPqrHtmlField()->type_saia
         ]);
     }
 

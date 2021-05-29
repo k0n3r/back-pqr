@@ -11,14 +11,14 @@ class Attached extends Field implements IField
      */
     public function getValues(): array
     {
-        $setting = $this->PqrFormField->getSetting();
+        $setting = $this->getPqrFormField()->getSetting();
 
         $data = array_merge($this->getDefaultValues(), [
             'valor' => $setting->typeFiles,
             'opciones' => '{"tipos":"' . $setting->typeFiles . '","longitud":"3","cantidad":"' . $setting->numberFiles . '","ruta_consulta":"app/anexos/consultar_anexos_campo.php"}'
         ]);
 
-        if (!$this->PqrFormField->active) {
+        if (!$this->getPqrFormField()->active) {
             $data['etiqueta_html'] = 'Hidden';
             $data['opciones'] = '{"type":"hidden"}';
         }

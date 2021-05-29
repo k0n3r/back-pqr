@@ -74,7 +74,7 @@ function viewCalificacion(int $idft): string
     $records = $FtPqrRespuesta->getService()->getFtPqrCalificacion();
 
     if (!$cant = count($records)) {
-        $email = $FtPqrRespuesta->Tercero->correo ?? '';
+        $email = $FtPqrRespuesta->getTercero()->correo ?? '';
         return '<a class="requestSurvey" href="#" data-email="' . $email . '" data-idft="' . $idft . '">SOLICITAR CALIFICACIÓN</a>';
     }
 
@@ -93,7 +93,7 @@ function viewCalificacion(int $idft): string
         'idbusqueda_componente' => $idbusquedaComponenteCalificacion
     ]);
     $numero = $FtPqrRespuesta->getDocument()->numero;
-    $nombreFormato = $FtPqrRespuesta->Formato->etiqueta;
+    $nombreFormato = $FtPqrRespuesta->getFormat()->etiqueta;
 
     return <<<HTML
     <div class='kenlace_saia'

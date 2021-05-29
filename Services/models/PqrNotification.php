@@ -12,7 +12,7 @@ class PqrNotification extends Model
 
     protected function defineAttributes(): void
     {
-        $this->dbAttributes = (object) [
+        $this->dbAttributes = (object)[
             'safe' => [
                 'fk_funcionario',
                 'fk_pqr_form',
@@ -20,16 +20,21 @@ class PqrNotification extends Model
                 'notify'
             ],
             'primary' => 'id',
-            'table' => 'pqr_notifications',
-            'relations' => [
-                'Funcionario' => [
-                    'model' => Funcionario::class,
-                    'attribute' => 'idfuncionario',
-                    'primary' => 'fk_funcionario',
-                    'relation' => self::BELONGS_TO_ONE
-                ]
-            ]
+            'table' => 'pqr_notifications'
         ];
+    }
+
+    /**
+     * @return Funcionario
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-01
+     */
+    public function getFuncionario(): Funcionario
+    {
+        if (!$this->Funcionario) {
+            $this->Funcionario = new Funcionario($this->fk_funcionario);
+        }
+
+        return $this->Funcionario;
     }
 
     /**
@@ -37,7 +42,7 @@ class PqrNotification extends Model
      *
      * @return PqrNotificationService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     public function getService(): PqrNotificationService
     {
@@ -49,13 +54,13 @@ class PqrNotification extends Model
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getFkFuncionario(): array
     {
         return [
-            'text' => $this->Funcionario->getName(),
-            'id' => $this->Funcionario->getPK()
+            'text' => $this->getFuncionario()->getName(),
+            'id' => $this->getFuncionario()->getPK()
         ];
     }
 }

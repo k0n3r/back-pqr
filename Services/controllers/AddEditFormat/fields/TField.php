@@ -6,30 +6,35 @@ use ReflectionClass;
 
 trait TField
 {
+
+    /**
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
     public function getDefaultValues(): array
     {
-        $PqrFormField = $this->PqrFormField;
+        $PqrFormField = $this->getPqrFormField();
 
         return [
-            'formato_idformato' => $PqrFormField->PqrForm->fk_formato,
+            'formato_idformato' => $PqrFormField->getPqrForm()->fk_formato,
             'nombre' => $PqrFormField->name,
             'etiqueta' => $PqrFormField->label,
             'tipo_dato' => 'string',
             'longitud' => 255,
             'obligatoriedad' => $PqrFormField->required,
-            'valor' => NULL,
+            'valor' => null,
             'acciones' => implode(',', $this->getActions()),
-            'ayuda' => NULL,
-            'predeterminado' => NULL,
-            'banderas' => NULL,
+            'ayuda' => null,
+            'predeterminado' => null,
+            'banderas' => null,
             'etiqueta_html' => (new ReflectionClass($this))->getShortName(),
             'orden' => $PqrFormField->orden,
-            'adicionales' => NULL,
+            'adicionales' => null,
             'fila_visible' => 1,
-            'placeholder' => NULL,
-            'longitud_vis' => NULL,
-            'opciones' => NULL,
-            'estilo' => NULL,
+            'placeholder' => null,
+            'longitud_vis' => null,
+            'opciones' => null,
+            'estilo' => null,
             'listable' => 1
         ];
     }

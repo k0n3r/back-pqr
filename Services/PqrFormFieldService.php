@@ -93,7 +93,7 @@ class PqrFormFieldService extends ModelService
     {
         if ($this->getModel()->delete()) {
             if ($this->getModel()->fk_campos_formato) {
-                if (!$this->getModel()->CamposFormato->delete()) {
+                if (!$this->getModel()->getCamposFormato()->delete()) {
                     $this->getErrorManager()->setMessage("No fue posible eliminar el campo");
                     return false;
                 }
@@ -224,7 +224,7 @@ class PqrFormFieldService extends ModelService
     {
         $list = [];
 
-        switch ($this->getModel()->PqrHtmlField->type) {
+        switch ($this->getModel()->getPqrHtmlField()->type) {
             case PqrHtmlField::TYPE_DEPENDENCIA:
                 $list = $this->getDependencys($this->getModel()->getSetting(), $data);
                 break;

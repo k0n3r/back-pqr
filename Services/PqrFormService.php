@@ -141,7 +141,8 @@ class PqrFormService extends ModelService
             'pqrTypes' => $this->getTypes(),
             'pqrFormFields' => $this->getDataPqrFormFields(),
             'pqrNotifications' => $this->getDataPqrNotifications(),
-            'optionsNotyMessages' => PqrNotyMessageService::getDataPqrNotyMessages()
+            'optionsNotyMessages' => PqrNotyMessageService::getDataPqrNotyMessages(),
+            'responseTimeOptions' => $this->getDataresponseTime()
         ];
     }
 
@@ -255,7 +256,7 @@ class PqrFormService extends ModelService
     public function getDataPqrFormFields(): array
     {
         $data = [];
-        if ($records = $this->getModel()->PqrFormFields) {
+        if ($records = $this->getModel()->getPqrFormFields()) {
             foreach ($records as $PqrFormField) {
                 $data[] = $PqrFormField->getDataAttributes();
             }
@@ -297,7 +298,7 @@ class PqrFormService extends ModelService
     public function getDataPqrNotifications(): array
     {
         $data = [];
-        if ($records = $this->getModel()->PqrNotifications) {
+        if ($records = $this->getModel()->getPqrNotifications()) {
             foreach ($records as $PqrNotification) {
                 $data[] = $PqrNotification->getDataAttributes();
             }
@@ -362,7 +363,7 @@ class PqrFormService extends ModelService
     private function getFieldsReport(bool $instance = false): array
     {
         $data = [];
-        $fields = $this->getModel()->PqrFormFields;
+        $fields = $this->getModel()->getPqrFormFields();
         foreach ($fields as $PqrFormField) {
             if ($PqrFormField->show_report) {
                 if ($instance) {
@@ -466,7 +467,7 @@ class PqrFormService extends ModelService
         $fieldCode = [];
         foreach ($fields as $PqrFormField) {
             $code = '';
-            switch ($PqrFormField->PqrHtmlField->type_saia) {
+            switch ($PqrFormField->getPqrHtmlField()->type_saia) {
                 // case 'Textarea':
                 //     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
                 //         return substr(\$value, 0, 30).' ...';
@@ -540,7 +541,7 @@ class PqrFormService extends ModelService
             if ($PqrFormField->name == 'sys_dependencia') {
                 $sysDependencia = true;
             }
-            $type = $PqrFormField->PqrHtmlField->type_saia;
+            $type = $PqrFormField->getPqrHtmlField()->type_saia;
             switch ($type) {
                 case 'Text':
                 case 'Textarea':
@@ -703,10 +704,10 @@ class PqrFormService extends ModelService
         $infoQRJsFile = WsGenerator::generateFileForWs($folder . 'infoQR.js');
         $timelineFile = WsGenerator::generateFileForWs($folder . 'TimeLine.js');
 
-        $IWsHtml = new WebservicePqr($this->getModel()->Formato);
+        $IWsHtml = new WebservicePqr($this->getModel()->getFormatoFk());
         $WsGenerator = new WsGenerator(
             $IWsHtml,
-            $this->getModel()->Formato->nombre,
+            $this->getModel()->getFormatoFk()->nombre,
             false
         );
 
@@ -736,5 +737,28 @@ class PqrFormService extends ModelService
         $WsGenerator->addFiles([$page404]);
 
         return $WsGenerator->create();
+    }
+
+    private function getDataresponseTime(): array
+    {
+        $allow = [
+            'radio',
+            'select'
+        ];
+
+        $data = [];
+
+        if ($records = $this->getModel()->getPqrFormFields()) {
+            foreach ($records as $PqrFormField) {
+                $PqrHtmlField = $PqrFormField->getPqrHtmlField();
+                if (in_array($PqrHtmlField->type, $allow) && $PqrFormField->fk_campos_formato) {
+                    $data[] = [
+                        'fieldId' => $PqrFormField->fk_campos_formato
+                    ];
+                }
+            }
+        }
+
+        return $data;
     }
 }

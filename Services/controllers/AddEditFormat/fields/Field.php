@@ -9,7 +9,7 @@ use Saia\models\formatos\CamposFormato;
 abstract class Field
 {
     /**
-     * Campos que seran utilizados como descripcion/detalle en el modulo 
+     * Campos que seran utilizados como descripcion/detalle en el modulo
      */
     const FIELDS_DESCRIPTION = [
         'sys_tipo',
@@ -17,11 +17,16 @@ abstract class Field
         'sys_estado'
     ];
 
-    protected PqrFormField $PqrFormField;
+    private PqrFormField $PqrFormField;
 
     public function __construct(PqrFormField $PqrFormField)
     {
         $this->PqrFormField = $PqrFormField;
+    }
+
+    public function getPqrFormField(): PqrFormField
+    {
+        return $this->PqrFormField;
     }
 
     protected function getActions(): array

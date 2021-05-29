@@ -58,7 +58,7 @@ class FtPqrRespuestaService extends ModelService
      */
     public function getFechaCiudad(): string
     {
-        return $this->getModel()->Municipio->nombre . ", " . strftime("%d de %B de %Y",
+        return $this->getModel()->getMunicipio()->nombre . ", " . strftime("%d de %B de %Y",
                 strtotime($this->getModel()->getDocument()->fecha));
     }
 
@@ -72,12 +72,13 @@ class FtPqrRespuestaService extends ModelService
     public function getInfoDestino(): string
     {
         $code = '';
-        if ($this->getModel()->Tercero) {
-            $code .= $this->getModel()->Tercero->titulo ? $this->getModel()->Tercero->titulo . "<br/>" : '';
-            $code .= $this->getModel()->Tercero->nombre . "<br/>";
-            $code .= $this->getModel()->Tercero->cargo ? $this->getModel()->Tercero->cargo . "<br/>" : '';
-            $code .= $this->getModel()->Tercero->direccion ? $this->getModel()->Tercero->direccion . "<br/>" : '';
-            $code .= $this->getModel()->Tercero->telefono ? $this->getModel()->Tercero->telefono . "<br/>" : '';
+        $Tercero = $this->getModel()->getTercero();
+        if ($Tercero) {
+            $code .= $Tercero->titulo ? $Tercero->titulo . "<br/>" : '';
+            $code .= $Tercero->nombre . "<br/>";
+            $code .= $Tercero->cargo ? $Tercero->cargo . "<br/>" : '';
+            $code .= $Tercero->direccion ? $Tercero->direccion . "<br/>" : '';
+            $code .= $Tercero->telefono ? $Tercero->telefono . "<br/>" : '';
         }
 
         return $code;
@@ -185,7 +186,7 @@ class FtPqrRespuestaService extends ModelService
      */
     public function validEmails(): bool
     {
-        $email = $this->getModel()->Tercero->correo;
+        $email = $this->getModel()->getTercero()->correo;
         if (!$email) {
             $this->getErrorManager()->setMessage("Debe ingresar el email (Destino)");
             return false;
@@ -225,7 +226,7 @@ class FtPqrRespuestaService extends ModelService
     {
         $history = [
             'fecha' => date('Y-m-d H:i:s'),
-            'idft' => $this->getModel()->FtPqr->getPK(),
+            'idft' => $this->getModel()->getFtPqr()->getPK(),
             'fk_funcionario' => $this->getFuncionario()->getPK(),
             'tipo' => $type,
             'idfk' => $this->getModel()->getPK(),
@@ -337,7 +338,8 @@ class FtPqrRespuestaService extends ModelService
         }
 
         $FtPqrRespuesta = $this->getModel();
-        $DocumentoPqr = $FtPqrRespuesta->FtPqr->getDocument();
+        $FtPqr = $FtPqrRespuesta->getFtPqr();
+        $DocumentoPqr = $FtPqr->getDocument();
 
         $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$FtPqrRespuesta->PqrForm->label} con número de radicado $DocumentoPqr->numero.<br/><br/>";
         $subject = "Respuesta solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero";
@@ -345,8 +347,8 @@ class FtPqrRespuestaService extends ModelService
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
             'name' => 'f2_email_respuesta'
         ])) {
-            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $FtPqrRespuesta->FtPqr);
-            $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $FtPqrRespuesta->FtPqr);
+            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $FtPqr);
+            $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $FtPqr);
         }
 
         if ($FtPqrRespuesta->sol_encuesta) {
@@ -361,7 +363,7 @@ class FtPqrRespuestaService extends ModelService
 
         $SendMailController->setDestinations(
             SendMailController::DESTINATION_TYPE_EMAIL,
-            [$FtPqrRespuesta->Tercero->correo]
+            [$FtPqrRespuesta->getTercero()->correo]
         );
 
         if ($emailCopy = $this->getCopyEmail()) {
@@ -375,7 +377,7 @@ class FtPqrRespuestaService extends ModelService
         $File = new FileJson($FtPqrRespuesta->getDocument()->getPdfJson());
         $anexos[] = $File;
 
-        $DocumentoService=$FtPqrRespuesta->getDocument()->getService();
+        $DocumentoService = $FtPqrRespuesta->getDocument()->getService();
         if ($records = $DocumentoService->getAllFilesAnexos()) {
             foreach ($records as $route) {
                 $anexos[] = new FileRoute($route['route']);
@@ -454,14 +456,14 @@ class FtPqrRespuestaService extends ModelService
      */
     public function requestSurvey(): bool
     {
-        $email = $this->getModel()->Tercero->correo;
+        $email = $this->getModel()->getTercero()->correo;
         if (!UtilitiesPqr::isEmailValid($email)) {
             $this->getErrorManager()->setMessage("El email ($email) NO es valido");
             return false;
         }
 
         $nameFormat = $this->getModel()->getFormat()->etiqueta;
-        $DocumentoPqr = $this->getModel()->FtPqr->getDocument();
+        $DocumentoPqr = $this->getModel()->getFtPqr()->getDocument();
 
         $url = $this->getUrlEncuesta();
         $message = "Cordial Saludo,<br/><br/>
@@ -511,7 +513,7 @@ class FtPqrRespuestaService extends ModelService
     public function getFtPqrCalificacion(): array
     {
         $data = [];
-        if ($records = $this->getModel()->FtPqrCalificacion) {
+        if ($records = $this->getModel()->getFtPqrCalificaciones()) {
             foreach ($records as $FtPqrCalificacion) {
                 if (!$FtPqrCalificacion->getDocument()->isActive()) {
                     $data[] = $FtPqrCalificacion;

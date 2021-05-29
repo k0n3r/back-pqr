@@ -196,7 +196,7 @@ class PqrService
         }
 
         $PqrFormField = $this->getPqrForm()->getRow('sys_subtipo');
-        $records = $PqrFormField->CamposFormato->CampoOpciones;
+        $records = $PqrFormField->getCamposFormato()->CampoOpciones;
 
         $data = [];
         foreach ($records as $CampoOpciones) {

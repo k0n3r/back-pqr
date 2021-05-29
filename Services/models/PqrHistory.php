@@ -34,15 +34,7 @@ class PqrHistory extends Model
                 'fecha'
             ],
             'primary' => 'id',
-            'table' => 'pqr_history',
-            'relations' => [
-                'Funcionario' => [
-                    'model' => Funcionario::class,
-                    'attribute' => 'idfuncionario',
-                    'primary' => 'fk_funcionario',
-                    'relation' => self::BELONGS_TO_ONE
-                ],
-            ],
+            'table' => 'pqr_history'
         ];
     }
 
@@ -52,7 +44,11 @@ class PqrHistory extends Model
      */
     public function getFuncionario(): Funcionario
     {
-        return new Funcionario($this->fk_funcionario);
+        if (!$this->Funcionario) {
+            $this->Funcionario = new Funcionario($this->fk_funcionario);
+        }
+
+        return $this->Funcionario;
     }
 
     /**

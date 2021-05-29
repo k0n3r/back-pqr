@@ -15,7 +15,7 @@ class PqrFormField extends Model
 
     protected function defineAttributes(): void
     {
-        $this->dbAttributes = (object) [
+        $this->dbAttributes = (object)[
             'safe' => [
                 'name',
                 'label',
@@ -32,28 +32,47 @@ class PqrFormField extends Model
                 'active'
             ],
             'primary' => 'id',
-            'table' => 'pqr_form_fields',
-            'relations' => [
-                'PqrHtmlField' => [
-                    'model' => PqrHtmlField::class,
-                    'attribute' => 'id',
-                    'primary' => 'fk_pqr_html_field',
-                    'relation' => self::BELONGS_TO_ONE
-                ],
-                'PqrForm' => [
-                    'model' => PqrForm::class,
-                    'attribute' => 'id',
-                    'primary' => 'fk_pqr_form',
-                    'relation' => self::BELONGS_TO_ONE
-                ],
-                'CamposFormato' => [
-                    'model' => CamposFormato::class,
-                    'attribute' => 'idcampos_formato',
-                    'primary' => 'fk_campos_formato',
-                    'relation' => self::BELONGS_TO_ONE
-                ]
-            ]
+            'table' => 'pqr_form_fields'
         ];
+    }
+
+    /**
+     * @return PqrHtmlField
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getPqrHtmlField(): PqrHtmlField
+    {
+        if (!$this->PqrHtmlField) {
+            $this->PqrHtmlField = new PqrHtmlField($this->fk_pqr_html_field);
+        }
+
+        return $this->PqrHtmlField;
+    }
+
+    /**
+     * @return CamposFormato
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getCamposFormato(): CamposFormato
+    {
+        if (!$this->CamposFormato) {
+            $this->CamposFormato = new CamposFormato($this->fk_campos_formato);
+        }
+
+        return $this->CamposFormato;
+    }
+
+    /**
+     * @return PqrForm
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getPqrForm(): PqrForm
+    {
+        if (!$this->PqrForm) {
+            $this->PqrForm = new PqrForm($this->fk_pqr_form);
+        }
+
+        return $this->PqrForm;
     }
 
     /**
@@ -61,7 +80,7 @@ class PqrFormField extends Model
      *
      * @return PqrFormFieldService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     public function getService(): PqrFormFieldService
     {
@@ -69,11 +88,11 @@ class PqrFormField extends Model
     }
 
     /**
-     * obtiene el atributo de setting decodificado 
+     * obtiene el atributo de setting decodificado
      *
      * @return object
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getSetting(): object
     {
@@ -86,10 +105,10 @@ class PqrFormField extends Model
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public function getFkPqrHtmlField(): array
     {
-        return $this->PqrHtmlField->getDataAttributes();
+        return $this->getPqrHtmlField()->getDataAttributes();
     }
 }

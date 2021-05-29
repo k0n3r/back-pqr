@@ -28,36 +28,54 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     private ?FtPqrRespuestaService $FtPqrRespuestaService = null;
 
 
-    protected function defineMoreAttributes(): array
+    /**
+     * @return FtPqr
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getFtPqr(): FtPqr
     {
-        return [
-            'relations' => [
-                'FtPqr' => [
-                    'model' => FtPqr::class,
-                    'attribute' => 'idft_pqr',
-                    'primary' => 'ft_pqr',
-                    'relation' => self::BELONGS_TO_ONE
-                ],
-                'FtPqrCalificacion' => [
-                    'model' => FtPqrCalificacion::class,
-                    'attribute' => 'ft_pqr_respuesta',
-                    'primary' => 'idft_pqr_respuesta',
-                    'relation' => self::BELONGS_TO_MANY
-                ],
-                'Municipio' => [
-                    'model' => Municipio::class,
-                    'attribute' => 'idmunicipio',
-                    'primary' => 'ciudad_origen',
-                    'relation' => self::BELONGS_TO_ONE
-                ],
-                'Tercero' => [
-                    'model' => Tercero::class,
-                    'attribute' => 'idtercero',
-                    'primary' => 'destino',
-                    'relation' => self::BELONGS_TO_ONE
-                ],
-            ]
-        ];
+        if (!$this->FtPqr) {
+            $this->FtPqr = new FtPqr($this->ft_pqr);
+        }
+
+        return $this->FtPqr;
+    }
+
+    /**
+     * @return Tercero
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getTercero(): Tercero
+    {
+        if (!$this->Tercero) {
+            $this->Tercero = new Tercero($this->destino);
+        }
+
+        return $this->Tercero;
+    }
+
+    /**
+     * @return Municipio
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getMunicipio(): Municipio
+    {
+        if (!$this->Municipio) {
+            $this->Municipio = new Municipio($this->ciudad_origen);
+        }
+
+        return $this->Municipio;
+    }
+
+    /**
+     * @return FtPqrCalificacion[]
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getFtPqrCalificaciones(): array
+    {
+        return FtPqrCalificacion::findAllByAttributes([
+            'ft_pqr_respuesta' => $this->getPK()
+        ]);
     }
 
     /**

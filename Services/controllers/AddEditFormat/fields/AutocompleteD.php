@@ -18,7 +18,7 @@ class AutocompleteD extends Field implements IField
             'etiqueta_html' => 'Method'
         ]);
 
-        if (!$this->PqrFormField->active) {
+        if (!$this->getPqrFormField()->active) {
             $data['etiqueta_html'] = 'Hidden';
             $data['opciones'] = '{"type":"hidden"}';
         }

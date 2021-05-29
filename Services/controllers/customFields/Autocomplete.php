@@ -12,7 +12,7 @@ class Autocomplete extends Field implements IWsFields
 
   public function __construct(PqrFormField $PqrFormField)
   {
-    parent::__construct($PqrFormField->CamposFormato);
+    parent::__construct($PqrFormField->getCamposFormato());
   }
 
   public function aditionalFiles(): array

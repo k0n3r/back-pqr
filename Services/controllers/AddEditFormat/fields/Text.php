@@ -11,15 +11,15 @@ class Text extends Field implements IField
      */
     public function getValues(): array
     {
-        $PqrFormField = $this->PqrFormField;
-        $typeHtml = $PqrFormField->PqrHtmlField->type;
+        $PqrFormField = $this->getPqrFormField();
+        $typeHtml = $PqrFormField->getPqrHtmlField()->type;
 
         $data = array_merge($this->getDefaultValues(), [
             'placeholder' => $PqrFormField->getSetting()->placeholder,
             'opciones' => '{"type":"' . $typeHtml . '"}'
         ]);
 
-        if (!$this->PqrFormField->active) {
+        if (!$PqrFormField->active) {
             $data['etiqueta_html'] = 'Hidden';
             $data['opciones'] = '{"type":"hidden"}';
         }

@@ -121,7 +121,7 @@ class FtPqrService extends ModelService
             ];
         }
 
-        $Fields = $this->getPqrForm()->PqrFormFields;
+        $Fields = $this->getPqrForm()->getPqrFormFields();
         foreach ($Fields as $PqrFormField) {
             if ($PqrFormField->active) {
                 if ($value = $this->getValue($PqrFormField)) {
@@ -143,7 +143,7 @@ class FtPqrService extends ModelService
      */
     private function getValue(PqrFormField $PqrFormField): ?array
     {
-        $PqrHtmlField = $PqrFormField->PqrHtmlField;
+        $PqrHtmlField = $PqrFormField->getPqrHtmlField();
         $fieldName = $PqrFormField->name;
         $label = strtoupper($PqrFormField->label);
         $data = [];
@@ -227,7 +227,7 @@ class FtPqrService extends ModelService
      */
     public function getDateForType(): string
     {
-        $options = json_decode($this->getPqrForm()->getRow('sys_tipo')->CamposFormato->opciones);
+        $options = json_decode($this->getPqrForm()->getRow('sys_tipo')->getCamposFormato()->opciones);
 
         $dias = 1;
         foreach ($options as $option) {
@@ -255,7 +255,7 @@ class FtPqrService extends ModelService
     public function getDataToLoadResponse(): array
     {
 
-        if ($Tercero = $this->getModel()->Tercero) {
+        if ($Tercero = $this->getModel()->getTercero()) {
             $destino = [
                 'id' => $Tercero->getPK(),
                 'text' => "$Tercero->identificacion - $Tercero->nombre"
@@ -324,7 +324,7 @@ class FtPqrService extends ModelService
             $rows[] = array_merge(
                 $PqrHistory->getDataAttributes(),
                 [
-                    'nombre_funcionario' => $PqrHistory->Funcionario->getName()
+                    'nombre_funcionario' => $PqrHistory->getFuncionario()->getName()
                 ]
             );
         }
@@ -520,17 +520,17 @@ HTML;
     public function sendNotifications(): bool
     {
         $emails = $codes = [];
-        $records = $this->getPqrForm()->PqrNotifications;
+        $records = $this->getPqrForm()->getPqrNotifications();
         if ($records) {
             foreach ($records as $PqrNotifications) {
                 if ($PqrNotifications->email) {
-                    $email = $PqrNotifications->Funcionario->email;
+                    $email = $PqrNotifications->getFuncionario()->email;
                     if (UtilitiesPqr::isEmailValid($email)) {
                         $emails[] = $email;
                     }
                 }
                 if ($PqrNotifications->notify) {
-                    $codes[] = $PqrNotifications->Funcionario->funcionario_codigo;
+                    $codes[] = $PqrNotifications->getFuncionario()->funcionario_codigo;
                 }
             }
         }
@@ -747,7 +747,7 @@ HTML;
     public function getPqrAnswers(): array
     {
         $data = [];
-        foreach ($this->getModel()->PqrRespuesta as $FtPqrRespuesta) {
+        foreach ($this->getModel()->getPqrRespuestas() as $FtPqrRespuesta) {
             if (!$FtPqrRespuesta->getDocument()->isActive()) {
                 $data[] = $FtPqrRespuesta;
             }

@@ -44,7 +44,7 @@ class AddEditFtPqr implements IAddEditFormat
      */
     public function getFormat(): Formato
     {
-        return $this->PqrForm->Formato;
+        return $this->PqrForm->getFormatoFk();
     }
 
     /**
@@ -197,7 +197,7 @@ class AddEditFtPqr implements IAddEditFormat
             'Radio',
             'Checkbox'
         ];
-        $fields = $this->PqrForm->PqrFormFields;
+        $fields = $this->PqrForm->getPqrFormFields();
         foreach ($fields as $PqrFormField) {
             if (!$PqrFormField->fk_campos_formato) {
                 $this->createRecordInFormatFields($PqrFormField);
@@ -206,7 +206,7 @@ class AddEditFtPqr implements IAddEditFormat
             }
 
             if (
-                in_array($PqrFormField->PqrHtmlField->type_saia, $allowOptions)
+                in_array($PqrFormField->getPqrHtmlField()->type_saia, $allowOptions)
                 && $PqrFormField->getSetting()->options
             ) {
                 static::addEditformatOptions($PqrFormField);
@@ -225,7 +225,7 @@ class AddEditFtPqr implements IAddEditFormat
      */
     public static function addEditformatOptions(PqrFormField $PqrFormField): void
     {
-        $CampoFormato = $PqrFormField->CamposFormato;
+        $CampoFormato = $PqrFormField->getCamposFormato();
         $llave = 0;
         foreach ($CampoFormato->CampoOpciones as $CampoOpciones) {
 
@@ -318,7 +318,7 @@ class AddEditFtPqr implements IAddEditFormat
      */
     private function getFormatFieldData(PqrFormField $PqrFormField): array
     {
-        $fieldType = $PqrFormField->PqrHtmlField->type_saia;
+        $fieldType = $PqrFormField->getPqrHtmlField()->type_saia;
 
         if (!$className = $this->resolveClass($fieldType)) {
             throw new Exception("No se encontro la clase para el tipo $fieldType", 1);

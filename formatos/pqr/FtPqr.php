@@ -24,36 +24,42 @@ class FtPqr extends FtPqrProperties
 
 
     /**
-     * more Attributes
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
+     * @return PqrBackup
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
      */
-    protected function defineMoreAttributes(): array
+    public function getPqrBackup(): PqrBackup
     {
-        return [
-            'relations' => [
-                'PqrBackup' => [
-                    'model' => PqrBackup::class,
-                    'attribute' => 'fk_documento',
-                    'primary' => 'documento_iddocumento',
-                    'relation' => self::BELONGS_TO_ONE
-                ],
-                'PqrRespuesta' => [
-                    'model' => FtPqrRespuesta::class,
-                    'attribute' => 'ft_pqr',
-                    'primary' => 'idft_pqr',
-                    'relation' => self::BELONGS_TO_MANY
-                ],
-                'Tercero' => [
-                    'model' => Tercero::class,
-                    'attribute' => 'idtercero',
-                    'primary' => 'sys_tercero',
-                    'relation' => self::BELONGS_TO_ONE
-                ]
-            ]
-        ];
+        if (!$this->PqrBackup) {
+            $this->PqrBackup = PqrBackup::findByAttributes([
+                'fk_documento' => $this->documento_iddocumento
+            ]);
+        }
+
+        return $this->PqrBackup;
+    }
+
+    /**
+     * @return FtPqrRespuesta[]
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getPqrRespuestas(): array
+    {
+        return FtPqrRespuesta::findAllByAttributes([
+            'ft_pqr' => $this->getPK()
+        ]);
+    }
+
+    /**
+     * @return Tercero
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getTercero(): Tercero
+    {
+        if (!$this->Tercero) {
+            $this->Tercero = new Tercero($this->sys_tercero);
+        }
+
+        return $this->Tercero;
     }
 
     /**
@@ -165,7 +171,7 @@ class FtPqr extends FtPqrProperties
 
         $labelPQR = strtoupper($this->getService()->getPqrForm()->label);
 
-        $data = $this->PqrBackup->getDataJson();
+        $data = $this->getPqrBackup()->getDataJson();
 
         $trs = '';
         foreach ($data as $key => $value) {

@@ -3,7 +3,6 @@
 namespace App\Bundles\pqr\Services\models;
 
 use Exception;
-use Saia\models\Contador;
 use Saia\core\model\Model;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\PqrFormService;
@@ -35,35 +34,43 @@ class PqrForm extends Model
                 'response_configuration'
             ],
             'primary' => 'id',
-            'table' => 'pqr_forms',
-            'relations' => [
-                'Formato' => [
-                    'model' => Formato::class,
-                    'attribute' => 'idformato',
-                    'primary' => 'fk_formato',
-                    'relation' => self::BELONGS_TO_ONE
-                ],
-                'Contador' => [
-                    'model' => Contador::class,
-                    'attribute' => 'idcontador',
-                    'primary' => 'fk_contador',
-                    'relation' => self::BELONGS_TO_ONE
-                ],
-                'PqrFormFields' => [
-                    'model' => PqrFormField::class,
-                    'attribute' => 'fk_pqr_form',
-                    'primary' => 'id',
-                    'relation' => self::BELONGS_TO_MANY,
-                    'order' => 'orden ASC'
-                ],
-                'PqrNotifications' => [
-                    'model' => PqrNotification::class,
-                    'attribute' => 'fk_pqr_form',
-                    'primary' => 'id',
-                    'relation' => self::BELONGS_TO_MANY
-                ]
-            ]
+            'table' => 'pqr_forms'
         ];
+    }
+
+    /**
+     * @return Formato
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getFormatoFk(): Formato
+    {
+        return new Formato($this->fk_formato);
+    }
+
+    /**
+     * Obtiene los campos del formato
+     *
+     * @return PqrFormField[]
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getPqrFormFields(): array
+    {
+        return PqrFormField::findAllByAttributes([
+            'fk_pqr_form' => $this->getPK()
+        ], [], 'orden ASC');
+    }
+
+    /**
+     * Obtiene los campos del formato
+     *
+     * @return PqrNotification[]
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
+     */
+    public function getPqrNotifications(): array
+    {
+        return PqrNotification::findAllByAttributes([
+            'fk_pqr_form' => $this->getPK()
+        ]);
     }
 
     /**
@@ -87,7 +94,7 @@ class PqrForm extends Model
      */
     public function countFields(): int
     {
-        $fields = $this->PqrFormFields;
+        $fields = $this->getPqrFormFields();
 
         return $fields ? count($fields) : 0;
     }
@@ -123,7 +130,7 @@ class PqrForm extends Model
      */
     public function getRow(string $name): ?PqrFormField
     {
-        foreach ($this->PqrFormFields as $PqrFormField) {
+        foreach ($this->getPqrFormFields() as $PqrFormField) {
             if ($PqrFormField->name == $name) {
                 return $PqrFormField;
             }

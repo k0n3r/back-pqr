@@ -14,7 +14,7 @@ class Checkbox extends Field implements IField
     {
         $data = $this->getDefaultValues();
 
-        if (!$this->PqrFormField->active) {
+        if (!$this->getPqrFormField()->active) {
             $data['etiqueta_html'] = 'Hidden';
             $data['opciones'] = '{"type":"hidden"}';
         }
