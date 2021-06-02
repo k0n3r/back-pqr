@@ -504,7 +504,7 @@ class PqrFormService extends ModelService
                 case 'AutocompleteD':
                     $code = "function get_$PqrFormField->name(int \$idft,\$value){
                         global \$FtPqr;
-                        return \$FtPqr->getValueForReport('$PqrFormField->name');
+                        return \$FtPqr->getService()->getValueForReport('$PqrFormField->name');
                     }";
                     break;
             }
