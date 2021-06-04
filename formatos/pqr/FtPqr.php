@@ -163,14 +163,14 @@ class FtPqr extends FtPqrProperties
             $this->getDocument()->numero
         );
 
-        $labelPQR = strtoupper($this->getService()->getPqrForm()->label);
+        $labelPQR = mb_strtoupper($this->getService()->getPqrForm()->label, 'UTF-8');
 
         $data = $this->PqrBackup->getDataJson();
 
         $trs = '';
         foreach ($data as $key => $value) {
             $trs .= '<tr>
-                <td style="width:50%"><strong>' . $key . '</strong></td>
+                <td style="width:50%"><strong>' . mb_strtoupper($key, 'UTF-8') . '</strong></td>
                 <td style="width:50%">' . $value . '</td>
             </tr>';
         }
