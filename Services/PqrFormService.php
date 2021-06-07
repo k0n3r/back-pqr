@@ -2,10 +2,10 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use Exception;
 use Saia\models\grafico\Grafico;
-use Saia\core\DatabaseConnection;
 use Saia\models\formatos\Formato;
 use Saia\models\grafico\PantallaGrafico;
 use App\Bundles\pqr\Services\models\PqrForm;
@@ -69,7 +69,7 @@ class PqrFormService extends ModelService
             return false;
         }
 
-        DatabaseConnection::getDefaultConnection()
+        GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->update('pqr_form_fields')
             ->set('anonymous', 0)
@@ -138,7 +138,6 @@ class PqrFormService extends ModelService
             'urlWs' => static::getUrlWsPQR(),
             'publish' => $this->getModel()->fk_formato ? 1 : 0,
             'pqrForm' => $this->getDataPqrForm(),
-            'pqrTypes' => $this->getTypes(),
             'pqrFormFields' => $this->getDataPqrFormFields(),
             'pqrNotifications' => $this->getDataPqrNotifications(),
             'optionsNotyMessages' => PqrNotyMessageService::getDataPqrNotyMessages(),
@@ -157,7 +156,7 @@ class PqrFormService extends ModelService
     public function updatePqrTypes(array $data): bool
     {
 
-        $PqrFormFieldService = ($this->getModel()->getRow('sys_tipo'))->getService();
+        $PqrFormFieldService = ($this->getModel()->getRow(PqrFormField::FIELD_NAME_SYS_TIPO))->getService();
         if (!$PqrFormFieldService->update([
             'setting' => $data
         ])) {
@@ -166,7 +165,7 @@ class PqrFormService extends ModelService
         }
 
         if ($PqrFormFieldService->getModel()->fk_campos_formato) {
-            AddEditFtPqr::addEditformatOptions($PqrFormFieldService->getModel());
+            $PqrFormFieldService->addEditformatOptions();
         }
 
         return true;
@@ -191,6 +190,7 @@ class PqrFormService extends ModelService
             $this->getErrorManager()->setMessage("No fue posible generar el formulario");
             return false;
         }
+        $this->editFieldTime();
 
         if (!$FormatoR = Formato::findByAttributes([
             'nombre' => 'pqr_respuesta'
@@ -274,18 +274,6 @@ class PqrFormService extends ModelService
     public function getDataPqrForm(): array
     {
         return $this->getModel()->getDataAttributes();
-    }
-
-    /**
-     * Obtiene los tipos de PQR
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    public function getTypes(): array
-    {
-        return $this->getModel()->getRow('sys_tipo')->getSetting()->options;
     }
 
     /**
@@ -431,7 +419,7 @@ class PqrFormService extends ModelService
      */
     private function createView(string $name, string $select): void
     {
-        $Connection = DatabaseConnection::getDefaultConnection();
+        $Connection = GlobalContainer::getConnection();
 
         switch ($_SERVER['APP_DATABASE_DRIVER']) {
             case 'pdo_mysql':
@@ -739,26 +727,55 @@ class PqrFormService extends ModelService
         return $WsGenerator->create();
     }
 
+    /**
+     * Obtiene los campos que se utilizaran para la combinacion
+     * de dias de respuesta
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-05
+     */
     private function getDataresponseTime(): array
     {
-        $allow = [
-            'radio',
-            'select'
-        ];
-
         $data = [];
-
         if ($records = $this->getModel()->getPqrFormFields()) {
             foreach ($records as $PqrFormField) {
                 $PqrHtmlField = $PqrFormField->getPqrHtmlField();
-                if (in_array($PqrHtmlField->type, $allow) && $PqrFormField->fk_campos_formato) {
+                if ($PqrHtmlField->isValidFieldForResponseDays() && $PqrFormField->fk_campos_formato) {
+                    $fieldOptions = [];
+
+                    if ($PqrFormField->name != PqrFormField::FIELD_NAME_SYS_TIPO) {
+                        $options = $PqrFormField->getCamposFormato()->getCampoOpciones();
+                        foreach ($options as $CampoOpcion) {
+                            $fieldOptions[] = [
+                                'id' => $CampoOpcion->getPK(),
+                                'label' => $CampoOpcion->valor
+                            ];
+                        }
+                    }
+
                     $data[] = [
-                        'fieldId' => $PqrFormField->fk_campos_formato
+                        'id' => $PqrFormField->fk_campos_formato,
+                        'label' => $PqrFormField->label,
+                        'options' => $fieldOptions
                     ];
                 }
             }
         }
 
         return $data;
+    }
+
+    /**
+     * Actualiza el valor por defecto del campo fieldTime
+     *
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     */
+    private function editFieldTime(): void
+    {
+        if (!$this->getModel()->fk_field_time) {
+            $this->save([
+                'fk_field_time' => PqrFormField::getSysTipoField()->getCamposFormato()->getPK()
+            ]);
+        }
     }
 }

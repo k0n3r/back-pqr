@@ -13,7 +13,7 @@ class PqrHtmlField extends Model
 
     protected function defineAttributes(): void
     {
-        $this->dbAttributes = (object) [
+        $this->dbAttributes = (object)[
             'safe' => [
                 'label',
                 'type',
@@ -25,4 +25,39 @@ class PqrHtmlField extends Model
             'table' => 'pqr_html_fields'
         ];
     }
+
+    /**
+     * Valida si el tipo de campo es valido
+     * para guardar como dias de respuesta
+     *
+     * @return bool
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-05
+     */
+    public function isValidFieldForResponseDays(): bool
+    {
+        $allow = [
+            'Select',
+            'Radio'
+        ];
+
+        return in_array($this->type_saia, $allow);
+    }
+
+    /**
+     * Valida si el campo ingresa datos en campo opciones
+     *
+     * @return bool
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-05
+     */
+    public function isValidForOptions(): bool
+    {
+        $allowOptions = [
+            'Select',
+            'Radio',
+            'Checkbox'
+        ];
+
+        return in_array($this->type_saia, $allowOptions);
+    }
+
 }

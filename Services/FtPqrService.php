@@ -6,6 +6,7 @@ use App\Bundles\pqr\Services\models\PqrBackup;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
+use App\Bundles\pqr\Services\models\PqrResponseTime;
 use App\services\models\ModelService\ModelService;
 use DateTime;
 use Saia\controllers\anexos\FileJson;
@@ -183,16 +184,19 @@ class FtPqrService extends ModelService
      */
     public function updateFechaVencimiento(): bool
     {
+        $FtPqr = $this->getModel();
+        $Documento = $FtPqr->getDocument();
+
         $fecha = $this->getDateForType();
 
-        $oldDate = $this->getModel()->sys_fecha_vencimiento;
-        $this->getModel()->sys_fecha_vencimiento = $fecha;
-        $this->getModel()->save();
+        $oldDate = $FtPqr->sys_fecha_vencimiento;
+        $FtPqr->sys_fecha_vencimiento = $fecha;
+        $FtPqr->save();
 
-        $this->getModel()->getDocument()->fecha_limite = $fecha;
-        $this->getModel()->getDocument()->save();
+        $Documento->fecha_limite = $fecha;
+        $Documento->save();
 
-        if ($oldDate != $this->getModel()->sys_fecha_vencimiento) {
+        if ($oldDate != $FtPqr->sys_fecha_vencimiento) {
             $history = [
                 'fecha' => date('Y-m-d H:i:s'),
                 'idft' => $this->getModel()->getPK(),
@@ -227,20 +231,64 @@ class FtPqrService extends ModelService
      */
     public function getDateForType(): string
     {
-        $options = json_decode($this->getPqrForm()->getRow('sys_tipo')->getCamposFormato()->opciones);
-
-        $dias = 1;
-        foreach ($options as $option) {
-            if ($option->idcampo_opciones == $this->getModel()->sys_tipo) {
-                $dias = $option->dias ?? 0;
-                break;
-            }
-        }
-
         return (DateController::addBusinessDays(
             new DateTime($this->getModel()->getDocument()->fecha),
-            $dias
+            $this->getDays()
         ))->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * Obtiene los dias configurados como respuesta a la solicitud
+     *
+     * @return int
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     */
+    private function getDays(): int
+    {
+        if ($PqrResponseTime = PqrResponseTime::findByAttributes([
+            'fk_campo_opciones' => $this->getIdFromResponseTimes(),
+            'fk_sys_tipo' => $this->getModel()->sys_tipo
+        ])) {
+            return $PqrResponseTime->number_days ?: 1;
+        }
+
+        $this->registerErrorResponseTime();
+
+        return 1;
+
+    }
+
+    private function registerErrorResponseTime(): void
+    {
+        $history = [
+            'fecha' => date('Y-m-d H:i:s'),
+            'idft' => $this->getModel()->getPK(),
+            'fk_funcionario' => $this->getFuncionario()->getPK(),
+            'tipo' => PqrHistory::TIPO_ERROR_DIAS_VENCIMIENTO,
+            'idfk' => 0,
+            'descripcion' => "No se configuro dias de vencimiento para los opciones seleccionadas por el cliente"
+        ];
+
+        $PqrHistoryService = (new PqrHistory)->getService();
+        $PqrHistoryService->save($history);
+    }
+
+    /**
+     * Obtiene el id del campo seleccionado como
+     * tiempo de respuesta
+     *
+     * @return int
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     */
+    private function getIdFromResponseTimes(): int
+    {
+        $CamposFormato = $this->getPqrForm()->getCampoFormatoForFieldTime();
+        if ($CamposFormato->getPK() == PqrFormField::getSysTipoField()->fk_campos_formato) {
+            return -1;
+        }
+        $nameField = $CamposFormato->nombre;
+        return (int)$this->getModel()->$nameField;
+
     }
 
 
@@ -411,7 +459,7 @@ class FtPqrService extends ModelService
      */
     private function getDataFinish(): array
     {
-        $type = $this->getModel()->getFieldValue('sys_tipo');
+        $type = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
 
         return [
             'iconPoint' => 'fa fa-flag-checkered',
@@ -465,8 +513,7 @@ class FtPqrService extends ModelService
         $send = $SendMailController->send();
         if ($send !== true) {
             $log = [
-                'error' => $send,
-                'message' => "No fue posible notificar la PQR # {$this->getModel()->getDocument()->numero}"
+                'error' => $send
             ];
             UtilitiesPqr::notifyAdministrator(
                 "No fue posible notificar la PQR # {$this->getModel()->getDocument()->numero}",
@@ -563,8 +610,7 @@ HTML;
             $send = $SendMailController->send();
             if ($send !== true) {
                 $log = [
-                    'error' => $send,
-                    'message' => "No fue posible notificar a los funcionarios # {$this->getModel()->getDocument()->numero}"
+                    'error' => $send
                 ];
                 UtilitiesPqr::notifyAdministrator(
                     "No fue posible notificar a los funcionarios # {$this->getModel()->getDocument()->numero}",
@@ -652,7 +698,7 @@ HTML;
         $newAttributes = [];
         $textField = [];
         if ($data['type'] != $this->getModel()->sys_tipo) {
-            $oldType = $this->getModel()->getFieldValue('sys_tipo');
+            $oldType = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
             $newAttributes['sys_tipo'] = $data['type'];
             $textField[] = "tipo de $oldType a {newType}";
         }
@@ -705,7 +751,7 @@ HTML;
         $this->Model = $this->getModel()->getDocument()->getFt();
 
         $text = "Se actualiza: " . implode(', ', $textField);
-        $newType = $this->getModel()->getFieldValue('sys_tipo');
+        $newType = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
         $newSubType = $this->getPqrService()->subTypeExist() ? $this->getModel()->getFieldValue('sys_subtipo') : '';
         $newDependency = $this->getPqrService()->dependencyExist() ? $this->getValueForReport('sys_dependencia') : '';
 

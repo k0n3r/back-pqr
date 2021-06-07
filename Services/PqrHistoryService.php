@@ -63,6 +63,7 @@ class PqrHistoryService extends ModelService
 
             case PqrHistory::TIPO_TAREA:
             case PqrHistory::TIPO_NOTIFICACION:
+            case PqrHistory::TIPO_ERROR_DIAS_VENCIMIENTO:
             default:
                 return null;
         }

@@ -4,6 +4,7 @@ namespace App\Bundles\pqr\Services\models;
 
 use Exception;
 use Saia\core\model\Model;
+use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\PqrFormService;
 
@@ -31,7 +32,8 @@ class PqrForm extends Model
                 'show_label',
                 'rad_email',
                 'active',
-                'response_configuration'
+                'response_configuration',
+                'fk_field_time'
             ],
             'primary' => 'id',
             'table' => 'pqr_forms'
@@ -150,5 +152,16 @@ class PqrForm extends Model
     public function getResponseConfiguration(bool $inArray = false)
     {
         return json_decode($this->response_configuration, $inArray);
+    }
+
+    /**
+     * Obtiene la instancia de CamposFormato sobre el cual
+     * se valida el tiempo de respuesta
+     *
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     */
+    public function getCampoFormatoForFieldTime(): CamposFormato
+    {
+        return new CamposFormato($this->fk_field_time);
     }
 }

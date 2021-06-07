@@ -2,13 +2,15 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\Bundles\pqr\Services\models\PqrResponseTime;
+use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
-use Saia\core\DatabaseConnection;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrHtmlField;
+use Saia\models\formatos\CampoOpciones;
 
 class PqrFormFieldService extends ModelService
 {
@@ -17,6 +19,7 @@ class PqrFormFieldService extends ModelService
      * Bandera que indica el numero minimo donde empezara el orden de los campos
      */
     const INITIAL_ORDER = 2;
+    const DEFAULT_DAY = 15;
 
     /**
      * Obtiene la instancia de PqrFormField actualizada
@@ -206,7 +209,7 @@ class PqrFormFieldService extends ModelService
      */
     private function columnExistsDB(string $name): bool
     {
-        $schema = DatabaseConnection::getDefaultConnection()->getSchemaManager();
+        $schema = GlobalContainer::getConnection()->getSchemaManager();
         $Table = $schema->listTableDetails('ft_pqr');
 
         return $Table->hasColumn($name);
@@ -250,7 +253,7 @@ class PqrFormFieldService extends ModelService
      */
     private function getDependencys(object $ObjSettings, array $data = []): array
     {
-        $Qb = DatabaseConnection::getDefaultConnection()
+        $Qb = GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->select('iddependencia as id,nombre as text')
             ->from('dependencia');
@@ -297,7 +300,7 @@ class PqrFormFieldService extends ModelService
      */
     private function getListLocalidad(object $ObjSettings, array $data = []): array
     {
-        $Qb = DatabaseConnection::getDefaultConnection()
+        $Qb = GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->select("CONCAT(a.nombre,
             CONCAT(
@@ -335,5 +338,209 @@ class PqrFormFieldService extends ModelService
         }
 
         return $Qb->execute()->fetchAllAssociative();
+    }
+
+    /**
+     * Crea o edita las opciones de tipo select, radio y checkbox
+     *
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-05
+     */
+    public function addEditformatOptions(): void
+    {
+        $PqrFormField = $this->getModel();
+        $CampoFormato = $PqrFormField->getCamposFormato();
+        $llave = 0;
+        foreach ($CampoFormato->CampoOpciones as $CampoOpciones) {
+
+            if ((int)$CampoOpciones->llave > $llave) {
+                $llave = (int)$CampoOpciones->llave;
+            }
+            if ((int)$CampoOpciones->estado) {
+                $CampoOpciones->setAttributes([
+                    'estado' => 0
+                ]);
+                $CampoOpciones->save();
+            }
+        }
+
+        $data = $values = [];
+        foreach ($PqrFormField->getSetting()->options as $option) {
+
+            if ($CampoOpciones = CampoOpciones::findByAttributes([
+                'valor' => $option->text,
+                'fk_campos_formato' => $CampoFormato->getPk()
+            ])) {
+                $CampoOpcionesService = $CampoOpciones->getService();
+                $CampoOpcionesService->save([
+                    'estado' => 1
+                ]);
+                $id = $CampoOpcionesService->getModel()->llave;
+            } else {
+                $id = $llave + 1;
+                $llave = $id;
+
+                $CampoOpcionesService = (new CampoOpciones())->getService();
+                $CampoOpcionesService->save([
+                    'llave' => $id,
+                    'valor' => $option->text,
+                    'fk_campos_formato' => $CampoFormato->getPK(),
+                    'estado' => 1
+                ]);
+            }
+
+            $data[] = [
+                'llave' => $id,
+                'item' => $option->text
+            ];
+            $values[] = "$id,$option->text";
+        }
+
+        $CampoFormato->setAttributes([
+            'opciones' => json_encode($data),
+            'valor' => implode(';', $values)
+        ]);
+        $CampoFormato->save();
+
+        if ($PqrFormField->getPqrHtmlField()->isValidFieldForResponseDays()) {
+            $this->addEditPqrResponseTimes();
+        }
+    }
+
+    /**
+     * Inicializa los tiempos de respuesta
+     *
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     */
+    private function addEditPqrResponseTimes(): void
+    {
+        if ($this->getModel()->name == PqrFormField::FIELD_NAME_SYS_TIPO) {
+            $this->addEditPqrResponseTimesForSysTipo();
+        } else {
+            $this->addEditPqrResponseTimesForOtherFields();
+        }
+    }
+
+    /**
+     * Adiciona o edita los tiempos por defecto del campo por defecto sys_tipo
+     *
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     */
+    private function addEditPqrResponseTimesForSysTipo(): void
+    {
+        $sysTipoOptions = $this->getSysTipoOptions();
+
+        PqrResponseTime::executeUpdate([
+            'active' => 0
+        ], [
+            'fk_campo_opciones' => -1
+        ]);
+
+        foreach ($sysTipoOptions as $Option) {
+            if (!$Option->estado) {
+                continue;
+            }
+
+            $PqrResponseTime = PqrResponseTime::findByAttributes([
+                'fk_campo_opciones' => -1,
+                'fk_sys_tipo' => $Option->getPK(),
+            ]);
+
+            if ($PqrResponseTime) {
+                if (!$PqrResponseTime->active) {
+                    $PqrResponseTime->getService()->save([
+                        'active' => 1
+                    ]);
+                }
+            } else {
+                $PqrResponseTimeService = (new PqrResponseTime)->getService();
+                $PqrResponseTimeService->save([
+                    'fk_campo_opciones' => -1,
+                    'fk_sys_tipo' => $Option->getPK(),
+                    'number_days' => $this->getDaysForSystipo($Option->valor),
+                    'active' => 1
+                ]);
+            }
+        }
+
+
+    }
+
+    /**
+     * Adiciona o edita los tiempos por defecto de los campos
+     * donde se calculara el tiempo de respuesta
+     *
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     */
+    private function addEditPqrResponseTimesForOtherFields(): void
+    {
+        $sysTipoOptions = $this->getSysTipoOptions();
+        $records = $this->getModel()->getCamposFormato()->getCampoOpciones();
+
+        foreach ($records as $CampoOpciones) {
+            PqrResponseTime::executeUpdate([
+                'active' => 0
+            ], [
+                'fk_campo_opciones' => $CampoOpciones->getPK()
+            ]);
+
+            if (!$CampoOpciones->estado) {
+                continue;
+            }
+
+            foreach ($sysTipoOptions as $Option) {
+                if (!$Option->estado) {
+                    continue;
+                }
+
+                $PqrResponseTime = PqrResponseTime::findByAttributes([
+                    'fk_campo_opciones' => $CampoOpciones->getPK(),
+                    'fk_sys_tipo' => $Option->getPK(),
+                ]);
+
+                if ($PqrResponseTime) {
+                    if (!$PqrResponseTime->active) {
+                        $PqrResponseTime->getService()->save([
+                            'active' => 1
+                        ]);
+                    }
+                } else {
+                    $PqrResponseTimeService = (new PqrResponseTime)->getService();
+                    $PqrResponseTimeService->save([
+                        'fk_campo_opciones' => $CampoOpciones->getPK(),
+                        'fk_sys_tipo' => $Option->getPK(),
+                        'number_days' => $this->getDaysForSystipo($Option->valor),
+                        'active' => 1
+                    ]);
+                }
+            }
+        }
+    }
+
+    /**
+     * Retorna los dias por defecto que tendra el campo
+     * sys_tipo
+     *
+     * @param string $text
+     * @return int
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     */
+    private function getDaysForSystipo(string $text): int
+    {
+        $setting = PqrFormField::getSysTipoField()->getSetting()->options;
+        foreach ($setting as $option) {
+            if ($option->text == $text) {
+                return (int)$option->dias ?: 1;
+            }
+        }
+        return static::DEFAULT_DAY;
+    }
+
+    /**
+     * @return CampoOpciones[]
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     */
+    private function getSysTipoOptions(): array
+    {
+        return $this->getModel()::getSysTipoField()->getCamposFormato()->getCampoOpciones();
     }
 }

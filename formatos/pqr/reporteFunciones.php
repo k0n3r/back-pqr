@@ -1,6 +1,7 @@
 <?php
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
+use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\models\tarea\TareaEstado;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use Saia\controllers\DateController;
@@ -64,7 +65,7 @@ function getDaysWait(): string
 
 function getValueSysTipo(int $iddocumento, $fkCampoOpciones): string
 {
-    if ($fkCampoOpciones == 'sys_tipo') {
+    if ($fkCampoOpciones == PqrFormField::FIELD_NAME_SYS_TIPO) {
         return 'Sin Tipo';
     }
 

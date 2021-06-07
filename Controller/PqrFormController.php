@@ -69,6 +69,7 @@ class PqrFormController extends AbstractController
         } catch (Throwable $th) {
             $Connection->rollBack();
             $saiaResponse->setMessage($th->getMessage());
+            dd($th);
         }
 
         return $saiaResponse->getResponse();
@@ -196,36 +197,6 @@ class PqrFormController extends AbstractController
 
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateResponseSetting($request->get('data'))) {
-                throw new Exception(
-                    $PqrFormService->getErrorManager()->getMessage(),
-                    $PqrFormService->getErrorManager()->getCode(),
-                );
-            }
-
-            $saiaResponse->setSuccess(1);
-            $Connection->commit();
-        } catch (Throwable $th) {
-            $Connection->rollBack();
-            $saiaResponse->setMessage($th->getMessage());
-        }
-
-        return $saiaResponse->getResponse();
-    }
-
-    /**
-     * @Route("/updatePqrTypes", name="updateTypes", methods={"PUT"})
-     */
-    public function updateTypes(
-        Request $request,
-        ISaiaResponse $saiaResponse,
-        Connection $Connection
-    ): Response {
-
-        try {
-            $Connection->beginTransaction();
-
-            $PqrFormService = (PqrForm::getInstance())->getService();
-            if (!$PqrFormService->updatePqrTypes($request->get('data'))) {
                 throw new Exception(
                     $PqrFormService->getErrorManager()->getMessage(),
                     $PqrFormService->getErrorManager()->getCode(),

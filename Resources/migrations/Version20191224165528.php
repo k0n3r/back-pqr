@@ -310,7 +310,7 @@ final class Version20191224165528 extends AbstractMigration
         }
 
         $sqlDependenciaCargo = "SELECT iddependencia_cargo FROM dependencia_cargo 
-        WHERE funcionario_idfuncionario={$idfuncionario} AND cargo_idcargo={$idcargo}";
+        WHERE funcionario_idfuncionario=$idfuncionario AND cargo_idcargo=$idcargo";
         $dependenciaCargo = $this->connection->fetchAllAssociative($sqlDependenciaCargo);
 
         if ($dependenciaCargo) {
@@ -382,7 +382,7 @@ final class Version20191224165528 extends AbstractMigration
         ];
 
         foreach ($screen as $name) {
-            $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE nombre='{$name}'";
+            $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE nombre='$name'";
             $data = $this->connection->fetchOne($sql);
 
             if ($data['idpantalla_grafico']) {

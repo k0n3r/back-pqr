@@ -8,7 +8,6 @@ use Exception;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\controllers\SessionController;
-use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
 
 class AddEditFtPqr implements IAddEditFormat
@@ -192,11 +191,6 @@ class AddEditFtPqr implements IAddEditFormat
      */
     private function addEditRecordsInFormatFields(): self
     {
-        $allowOptions = [
-            'Select',
-            'Radio',
-            'Checkbox'
-        ];
         $fields = $this->PqrForm->getPqrFormFields();
         foreach ($fields as $PqrFormField) {
             if (!$PqrFormField->fk_campos_formato) {
@@ -206,88 +200,13 @@ class AddEditFtPqr implements IAddEditFormat
             }
 
             if (
-                in_array($PqrFormField->getPqrHtmlField()->type_saia, $allowOptions)
+                $PqrFormField->getPqrHtmlField()->isValidForOptions()
                 && $PqrFormField->getSetting()->options
             ) {
-                static::addEditformatOptions($PqrFormField);
+                $PqrFormField->getService()->addEditformatOptions();
             }
         }
         return $this;
-    }
-
-    /**
-     * Crea o edita las opciones de los campos tipo select, radio o checkbox
-     *
-     * @param PqrFormField $PqrFormField
-     * @return void
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    public static function addEditformatOptions(PqrFormField $PqrFormField): void
-    {
-        $CampoFormato = $PqrFormField->getCamposFormato();
-        $llave = 0;
-        foreach ($CampoFormato->CampoOpciones as $CampoOpciones) {
-
-            if ((int)$CampoOpciones->llave > $llave) {
-                $llave = (int)$CampoOpciones->llave;
-            }
-            if ((int)$CampoOpciones->estado) {
-                $CampoOpciones->setAttributes([
-                    'estado' => 0
-                ]);
-                $CampoOpciones->save();
-            }
-        }
-
-        $data = $values = [];
-
-        foreach ($PqrFormField->getSetting()->options as $option) {
-
-            if ($CampoOpciones = CampoOpciones::findByAttributes([
-                'valor' => $option->text,
-                'fk_campos_formato' => $CampoFormato->getPk()
-            ])) {
-                $CampoOpciones->setAttributes([
-                    'estado' => 1
-                ]);
-                $CampoOpciones->save();
-                $id = $CampoOpciones->llave;
-                $idCampoOpcion = $CampoOpciones->getPK();
-            } else {
-                $id = $llave + 1;
-                $llave = $id;
-
-                $CampoOpcionesService = (new CampoOpciones())->getService();
-                $CampoOpcionesService->save([
-                    'llave' => $id,
-                    'valor' => $option->text,
-                    'fk_campos_formato' => $CampoFormato->getPK(),
-                    'estado' => 1
-                ]);
-
-                $idCampoOpcion = $CampoOpcionesService->getModel()->getPK();
-            }
-            if ($PqrFormField->name == 'sys_tipo') {
-                $data[] = [
-                    'idcampo_opciones' => $idCampoOpcion,
-                    'llave' => $id,
-                    'item' => $option->text,
-                    'dias' => $option->dias
-                ];
-            } else {
-                $data[] = [
-                    'llave' => $id,
-                    'item' => $option->text
-                ];
-            }
-            $values[] = "$id,$option->text";
-        }
-        $CampoFormato->setAttributes([
-            'opciones' => json_encode($data),
-            'valor' => implode(';', $values)
-        ]);
-        $CampoFormato->save();
     }
 
     /**

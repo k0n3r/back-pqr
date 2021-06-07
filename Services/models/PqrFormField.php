@@ -13,6 +13,8 @@ class PqrFormField extends Model
     const ACTIVE = 1;
     const INACTIVE = 0;
 
+    const FIELD_NAME_SYS_TIPO = 'sys_tipo';
+
     protected function defineAttributes(): void
     {
         $this->dbAttributes = (object)[
@@ -97,6 +99,19 @@ class PqrFormField extends Model
     public function getSetting(): object
     {
         return json_decode($this->setting);
+    }
+
+    /**
+     * Obtiene los campo opciones del campo sys_tipo
+     *
+     * @return PqrFormField
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-05
+     */
+    public static function getSysTipoField(): PqrFormField
+    {
+        return self::findByAttributes([
+            'name' => PqrFormField::FIELD_NAME_SYS_TIPO
+        ]);
     }
 
     /**

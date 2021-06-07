@@ -137,9 +137,9 @@ class FtPqrRespuestaService extends ModelService
 
         $names = Anexos::findColumn('etiqueta', [
             'documento_iddocumento' => $this->getModel()->getDocument()->getPK(),
-	    'campos_formato' => $id,
-	    'estado' => 1,
-	    'eliminado' => 0
+            'campos_formato' => $id,
+            'estado' => 1,
+            'eliminado' => 0
         ]);
 
         return $names ? implode(', ', $names) : '';
@@ -390,8 +390,7 @@ class FtPqrRespuestaService extends ModelService
         $send = $SendMailController->send();
         if ($send !== true) {
             $log = [
-                'error' => $send,
-                'message' => "No fue posible notificar la Respuesta a la PQR # $DocumentoPqr->numero"
+                'error' => $send
             ];
             UtilitiesPqr::notifyAdministrator(
                 "No fue posible notificar la Respuesta a la PQR # $DocumentoPqr->numero",
@@ -485,8 +484,7 @@ class FtPqrRespuestaService extends ModelService
         if ($send !== true) {
             $message = "No fue posible solicitar la calificacion de la ($nameFormat) # {$this->getModel()->getDocument()->numero}";
             $log = [
-                'error' => $send,
-                'message' => $message
+                'error' => $send
             ];
 
             UtilitiesPqr::notifyAdministrator(

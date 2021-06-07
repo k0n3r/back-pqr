@@ -259,7 +259,7 @@ final class Version20200103161511 extends AbstractMigration
             'pqr_noty_messages'
         ];
         foreach ($tables as $table) {
-            $this->addSql("TRUNCATE TABLE {$table}");
+            $this->addSql("TRUNCATE TABLE $table");
         }
     }
 }

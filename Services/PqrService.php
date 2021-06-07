@@ -2,9 +2,9 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Type;
 use Exception;
-use Saia\core\DatabaseConnection;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\grafico\PantallaGrafico;
 use App\Bundles\pqr\Services\models\PqrForm;
@@ -72,7 +72,7 @@ class PqrService
      */
     private function getListDependency(array $data): array
     {
-        $Qb = DatabaseConnection::getDefaultConnection()
+        $Qb = GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->select('iddependencia as id,nombre')
             ->from('dependencia')
@@ -98,7 +98,7 @@ class PqrService
      */
     private function getListPais(array $data): array
     {
-        $Qb = DatabaseConnection::getDefaultConnection()
+        $Qb = GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->select('idpais as id,nombre')
             ->from('pais')
@@ -125,7 +125,7 @@ class PqrService
      */
     private function getListDepartamento(array $data): array
     {
-        $Qb = DatabaseConnection::getDefaultConnection()
+        $Qb = GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->select('iddepartamento as id,nombre')
             ->from('departamento')
@@ -161,7 +161,7 @@ class PqrService
         $subType = $this->getSubTypes();
 
         $records = (CamposFormato::findByAttributes([
-            'nombre' => 'sys_tipo',
+            'nombre' => PqrFormField::FIELD_NAME_SYS_TIPO,
             'formato_idformato' => $this->getPqrForm()->fk_formato
         ]))->CampoOpciones;
 
@@ -257,7 +257,7 @@ class PqrService
      */
     public static function getTextFields(): array
     {
-        $Qb = DatabaseConnection::getDefaultConnection()
+        $Qb = GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->select('ff.*')
             ->from('pqr_form_fields', 'ff')
@@ -315,7 +315,7 @@ class PqrService
             throw new Exception("No se encuentra la pantalla de los grafico", 200);
         }
 
-        DatabaseConnection::getDefaultConnection()
+        GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->update('grafico')
             ->set('estado', 1)

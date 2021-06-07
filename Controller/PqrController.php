@@ -2,9 +2,9 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Types;
 use Exception;
-use Saia\core\DatabaseConnection;
 use Saia\controllers\DateController;
 use Saia\models\documento\Documento;
 use Saia\controllers\CryptController;
@@ -35,7 +35,7 @@ class PqrController extends AbstractController
             }
             $email = trim($request->get('sys_email'));
 
-            $Connection = DatabaseConnection::getDefaultConnection();
+            $Connection = GlobalContainer::getConnection();
 
             $Qb = $Connection->createQueryBuilder()
                 ->select('ft.*')

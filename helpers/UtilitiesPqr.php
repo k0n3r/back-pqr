@@ -2,60 +2,34 @@
 
 namespace App\Bundles\pqr\helpers;
 
+use App\services\GlobalContainer;
 use Saia\controllers\anexos\FileJson;
-use Saia\models\Configuracion;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\documento\Documento;
 use Saia\controllers\SendMailController;
-use Saia\controllers\TemporalController;
-use App\Bundles\pqr\Services\controllers\QRDocumentoPqrController;
+
 use Throwable;
 
 class UtilitiesPqr
 {
 
-    public static function notifyAdministrator(string $message, ?array $log = null): void
+    public static function notifyAdministrator(string $message, array $log = []): void
     {
-        if ($log) {
-            self::saveLog($log);
-        }
+        $Logger = GlobalContainer::getLogger();
+        $Logger->error($message, $log);
 
         $SendMailController = new SendMailController(
-            "Notificación del sistema",
+            "Error en el modulo de PQR",
             $message
         );
 
-        if ($Configuracion = Configuracion::findByAttributes([
-            'nombre' => 'correo_administrador'
-        ])) {
-            if (filter_var($Configuracion->valor, FILTER_VALIDATE_EMAIL)) {
-                $SendMailController->setDestinations(
-                    SendMailController::DESTINATION_TYPE_EMAIL,
-                    [$Configuracion->valor]
-                );
-            }
-        }
-
-        $SendMailController->setHiddenCopyDestinations(
+        $SendMailController->setDestinations(
             SendMailController::DESTINATION_TYPE_EMAIL,
-            ["andres.agudelo@cerok.com"]
+            ["soporte@cerok.com"]
         );
 
         $SendMailController->send();
-    }
-
-    public static function saveLog(array $log): void
-    {
-
-        $path = $_SERVER["ROOT_PATH"] . 'src/Bundles/pqr/logs/';
-        TemporalController::createFolder($path);
-
-        $data = [
-            'date' => date('Y-m-d H:i:s'),
-            'log' => $log
-        ];
-        file_put_contents($path . 'log.txt', json_encode($data) . "\n", FILE_APPEND);
     }
 
     /**

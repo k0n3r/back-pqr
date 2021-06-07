@@ -44,7 +44,7 @@ trait TMigrations
      */
     protected function createModulo(array $data, string $search): int
     {
-        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '{$search}'";
+        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '$search'";
         $modulo = $this->connection->fetchAllAssociative($sql);
 
         if ($modulo) {
@@ -65,7 +65,7 @@ trait TMigrations
 
     protected function createPermiso(int $idmodulo, int $idperfil): void
     {
-        $sql = "SELECT idpermiso_perfil FROM permiso_perfil WHERE modulo_idmodulo={$idmodulo} AND perfil_idperfil={$idperfil}";
+        $sql = "SELECT idpermiso_perfil FROM permiso_perfil WHERE modulo_idmodulo=$idmodulo AND perfil_idperfil=$idperfil";
         $permiso = $this->connection->fetchAllAssociative($sql);
 
         if (!$permiso) {
@@ -78,7 +78,7 @@ trait TMigrations
 
     protected function deleteModulo(string $search): void
     {
-        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '{$search}'";
+        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '$search'";
         $modulo = $this->connection->fetchAllAssociative($sql);
 
         if ($modulo[0]['idmodulo']) {
@@ -95,7 +95,7 @@ trait TMigrations
 
     protected function createBusqueda(array $data, string $search): int
     {
-        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '{$search}'";
+        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '$search'";
         $record = $this->connection->fetchAllAssociative($sql);
 
         if ($record) {
@@ -114,7 +114,7 @@ trait TMigrations
     protected function createBusquedaComponente(int $idbusqueda, array $data, string $search): int
     {
         $sql = "SELECT idbusqueda_componente FROM busqueda_componente
-        WHERE busqueda_idbusqueda={$idbusqueda} AND lower(nombre) like '{$search}'";
+        WHERE busqueda_idbusqueda=$idbusqueda AND lower(nombre) like '$search'";
         $record = $this->connection->fetchAllAssociative($sql);
 
         if ($record) {
@@ -134,7 +134,7 @@ trait TMigrations
     protected function createBusquedaCondicion(int $idbusquedaComponente, array $data, string $search): int
     {
         $sql = "SELECT idbusqueda_condicion FROM busqueda_condicion
-        WHERE fk_busqueda_componente={$idbusquedaComponente} AND lower(etiqueta_condicion) like '{$search}'";
+        WHERE fk_busqueda_componente=$idbusquedaComponente AND lower(etiqueta_condicion) like '$search'";
         $record = $this->connection->fetchAllAssociative($sql);
 
         if ($record) {
@@ -152,7 +152,7 @@ trait TMigrations
 
     protected function deleteBusqueda(string $search): void
     {
-        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '{$search}'";
+        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '$search'";
         $busqueda = $this->connection->fetchAllAssociative($sql);
 
         if ($busqueda) {
@@ -161,7 +161,7 @@ trait TMigrations
                 'idbusqueda' => $idbusqueda
             ]);
 
-            $sql = "SELECT idbusqueda_componente FROM busqueda_componente WHERE busqueda_idbusqueda={$idbusqueda}";
+            $sql = "SELECT idbusqueda_componente FROM busqueda_componente WHERE busqueda_idbusqueda=$idbusqueda";
             $records = $this->connection->fetchAllAssociative($sql);
 
             foreach ($records as $busquedaComponente) {
@@ -180,10 +180,10 @@ trait TMigrations
     protected function deleteFormat(string $formatName, Schema $schema)
     {
 
-        $sql = "SELECT idformato FROM formato WHERE nombre like '{$formatName}'";
+        $sql = "SELECT idformato FROM formato WHERE nombre like '$formatName'";
         $data = $this->connection->executeQuery($sql)->fetchAllAssociative();
         if (!$data[0]['idformato']) {
-            $this->abortIf(true, "No se encontro el formato {$formatName}");
+            $this->abortIf(true, "No se encontro el formato $formatName");
         }
 
         $idformato = $data[0]['idformato'];
@@ -201,7 +201,7 @@ trait TMigrations
             ]
         );
 
-        $table = "ft_{$formatName}";
+        $table = "ft_$formatName";
         if ($schema->hasTable($table)) {
             $schema->dropTable($table);
         }
