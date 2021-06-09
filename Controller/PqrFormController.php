@@ -262,9 +262,9 @@ class PqrFormController extends AbstractController
     {
         try {
             $PqrFormField = (PqrForm::getInstance())->getRow('sys_subtipo');
-            $active = $PqrFormField->active;
+            $active = $PqrFormField->isActive();
         } catch (Throwable $th) {
-            $active = 0;
+            $active = false;
         }
 
         return new JsonResponse([

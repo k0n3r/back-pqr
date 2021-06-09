@@ -2,6 +2,8 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\services\GlobalContainer;
+use App\services\response\SaiaResponse;
 use Doctrine\DBAL\Connection;
 use Exception;
 use App\services\response\ISaiaResponse;
@@ -90,32 +92,29 @@ class PqrFormFieldController extends AbstractController
      * @Route("/{id}/active", name="active", methods={"PUT"})
      */
     public function active(
-        int $id,
-        ISaiaResponse $saiaResponse,
-        Connection $Connection
+        int $id
     ): Response {
 
-        return $this->activeInactive($id, PqrFormField::ACTIVE, $saiaResponse, $Connection);
+        return $this->activeInactive($id, PqrFormField::ACTIVE);
     }
 
     /**
      * @Route("/{id}/inactive", name="inactive", methods={"PUT"})
      */
     public function inactive(
-        int $id,
-        ISaiaResponse $saiaResponse,
-        Connection $Connection
+        int $id
     ): Response {
 
-        return $this->activeInactive($id, PqrFormField::INACTIVE, $saiaResponse, $Connection);
+        return $this->activeInactive($id, PqrFormField::INACTIVE);
     }
 
     private function activeInactive(
         int $id,
-        int $status,
-        ISaiaResponse $saiaResponse,
-        Connection $Connection
+        int $status
     ): Response {
+
+        $saiaResponse = new SaiaResponse();
+        $Connection = GlobalContainer::getConnection();
 
         try {
             $Connection->beginTransaction();

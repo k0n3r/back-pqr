@@ -15,6 +15,8 @@ class PqrFormField extends Model
 
     const FIELD_NAME_SYS_TIPO = 'sys_tipo';
 
+    public static ?PqrFormField $PqrFormField_sysTipo = null;
+
     protected function defineAttributes(): void
     {
         $this->dbAttributes = (object)[
@@ -109,9 +111,23 @@ class PqrFormField extends Model
      */
     public static function getSysTipoField(): PqrFormField
     {
-        return self::findByAttributes([
-            'name' => PqrFormField::FIELD_NAME_SYS_TIPO
-        ]);
+        if (!static::$PqrFormField_sysTipo) {
+            static::$PqrFormField_sysTipo = self::findByAttributes([
+                'name' => PqrFormField::FIELD_NAME_SYS_TIPO
+            ]);
+        }
+        return static::$PqrFormField_sysTipo;
+    }
+
+    /**
+     * Valida si el campo esta activo
+     *
+     * @return bool
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-09
+     */
+    public function isActive(): bool
+    {
+        return $this->active == static::ACTIVE;
     }
 
     /**

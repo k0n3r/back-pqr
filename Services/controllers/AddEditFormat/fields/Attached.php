@@ -15,7 +15,7 @@ class Attached extends Field implements IField
 
         $data = array_merge($this->getDefaultValues(), [
             'valor' => $setting->typeFiles,
-            'opciones' => '{"tipos":"' . $setting->typeFiles . '","longitud":"3","cantidad":"' . $setting->numberFiles . '","ruta_consulta":"app/anexos/consultar_anexos_campo.php"}'
+            'opciones' => '{"tipos":"' . $setting->typeFiles . '","longitud":"' . $this->getSize() . '","cantidad":"' . $setting->numberFiles . '","ruta_consulta":"app/anexos/consultar_anexos_campo.php"}'
         ]);
 
         if (!$this->getPqrFormField()->active) {
@@ -23,5 +23,22 @@ class Attached extends Field implements IField
             $data['opciones'] = '{"type":"hidden"}';
         }
         return $data;
+    }
+
+    /**
+     * Obtiene el tamaño permitido
+     *
+     * @return int
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-09
+     */
+    private function getSize(): int
+    {
+        $size = 3;
+        $CampoFormato = $this->getPqrFormField()->getCamposFormato();
+        if ($CampoFormato->getPK()) {
+            $size = ((int)$CampoFormato->getOptions()->longitud) ?: 3;
+        }
+
+        return $size;
     }
 }

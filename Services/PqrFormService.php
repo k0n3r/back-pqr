@@ -190,7 +190,10 @@ class PqrFormService extends ModelService
             $this->getErrorManager()->setMessage("No fue posible generar el formulario");
             return false;
         }
-        $this->editFieldTime();
+
+        if (!$this->getModel()->fk_field_time) {
+            $this->editFieldTime(PqrFormField::getSysTipoField()->fk_campos_formato);
+        }
 
         if (!$FormatoR = Formato::findByAttributes([
             'nombre' => 'pqr_respuesta'
@@ -740,7 +743,11 @@ class PqrFormService extends ModelService
         if ($records = $this->getModel()->getPqrFormFields()) {
             foreach ($records as $PqrFormField) {
                 $PqrHtmlField = $PqrFormField->getPqrHtmlField();
-                if ($PqrHtmlField->isValidFieldForResponseDays() && $PqrFormField->fk_campos_formato) {
+
+                if ($PqrHtmlField->isValidFieldForResponseDays() &&
+                    $PqrFormField->isActive() &&
+                    $PqrFormField->fk_campos_formato
+                ) {
                     $fieldOptions = [];
 
                     if ($PqrFormField->name != PqrFormField::FIELD_NAME_SYS_TIPO) {
@@ -768,16 +775,15 @@ class PqrFormService extends ModelService
     }
 
     /**
-     * Actualiza el valor por defecto del campo fieldTime
+     * Actualiza el campo que define los tiempos de respuesta
      *
-     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     * @param int $idCampoFormato
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-09
      */
-    private function editFieldTime(): void
+    public function editFieldTime(int $idCampoFormato): void
     {
-        if (!$this->getModel()->fk_field_time) {
-            $this->save([
-                'fk_field_time' => PqrFormField::getSysTipoField()->getCamposFormato()->getPK()
-            ]);
-        }
+        $this->save([
+            'fk_field_time' => $idCampoFormato
+        ]);
     }
 }

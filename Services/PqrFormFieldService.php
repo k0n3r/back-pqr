@@ -131,7 +131,27 @@ class PqrFormFieldService extends ModelService
             $attributes['show_report'] = 0;
         }
 
+        if (!$status && $this->isFieldTime()) {
+            $this->getModel()->getPqrForm()->getService()
+                ->editFieldTime(PqrFormField::getSysTipoField()->fk_campos_formato);
+        }
+
         return $this->update($attributes);
+    }
+
+
+    /**
+     * Valida si el campo es el campo que define los tiempos de respuesta
+     *
+     * @return bool
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-09
+     */
+    private function isFieldTime(): bool
+    {
+        $idCampoFormato = $this->getModel()->fk_campos_formato;
+        $idField = $this->getModel()->getPqrForm()->fk_field_time;
+
+        return $idCampoFormato == $idField;
     }
 
     /**
