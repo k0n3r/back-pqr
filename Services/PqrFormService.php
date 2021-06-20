@@ -428,16 +428,15 @@ class PqrFormService extends ModelService
             case 'pdo_mysql':
             case 'oci8':
                 $create = "CREATE OR REPLACE VIEW $name AS $select";
-                $Connection->executeQuery($create);
+                $Connection->executeStatement($create);
                 break;
 
             case 'pdo_sqlserver':
-                $drop = "DROP VIEW $name";
-                $Connection->executeQuery($drop);
+                $drop = "DROP VIEW IF EXISTS $name";
+                $Connection->executeStatement($drop);
 
                 $create = "CREATE VIEW $name AS $select";
-                $Connection->executeQuery($create);
-
+                $Connection->executeStatement($create);
                 break;
 
             default:

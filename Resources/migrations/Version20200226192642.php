@@ -27,13 +27,13 @@ final class Version20200226192642 extends AbstractMigration
         $this->init();
 
         $busqueda = [
-            'nombre' => 'reporte_pqr',
-            'etiqueta' => 'Reporte de PQRSF',
-            'estado' => 1,
-            'campos' => null,
-            'tablas' => 'vpqr v',
+            'nombre'             => 'reporte_pqr',
+            'etiqueta'           => 'Reporte de PQRSF',
+            'estado'             => 1,
+            'campos'             => null,
+            'tablas'             => 'vpqr v',
             'cantidad_registros' => 20,
-            'tipo_busqueda' => 2
+            'tipo_busqueda'      => 2
         ];
         $idbusqueda = $this->createBusqueda($busqueda, 'reporte_pqr');
 
@@ -60,18 +60,18 @@ final class Version20200226192642 extends AbstractMigration
         }
 
         return [
-            'url' => 'views/buzones/grilla.php',
-            'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},{"title":"E-MAIL","field":"{*sys_email*}","align":"center"},{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
-            'encabezado_componente' => null,
-            'campos_adicionales' => 'v.numero,v.fecha,v.sys_email,v.sys_tipo,v.sys_estado,v.idft',
-            'tablas_adicionales' => null,
-            'ordenado_por' => 'v.fecha',
-            'direccion' => 'ASC',
-            'agrupado_por' => null,
-            'busqueda_avanzada' => 'views/modules/pqr/formatos/pqr/busqueda.php',
-            'enlace_adicionar' => null,
-            'llave' => 'v.iddocumento',
-            'ruta_libreria' => 'src/Bundles/pqr/formatos/pqr/reporteFunciones.php,src/Bundles/pqr/formatos/reporteFuncionesGenerales.php',
+            'url'                    => 'views/buzones/grilla.php',
+            'info'                   => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},{"title":"E-MAIL","field":"{*sys_email*}","align":"center"},{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
+            'encabezado_componente'  => null,
+            'campos_adicionales'     => 'v.numero,v.fecha,v.sys_email,v.sys_tipo,v.sys_estado,v.idft',
+            'tablas_adicionales'     => null,
+            'ordenado_por'           => 'v.fecha',
+            'direccion'              => 'ASC',
+            'agrupado_por'           => null,
+            'busqueda_avanzada'      => 'views/modules/pqr/formatos/pqr/busqueda.php',
+            'enlace_adicionar'       => null,
+            'llave'                  => 'v.iddocumento',
+            'ruta_libreria'          => 'src/Bundles/pqr/formatos/pqr/reporteFunciones.php,src/Bundles/pqr/formatos/reporteFuncionesGenerales.php',
             'ruta_libreria_pantalla' => 'views/modules/pqr/formatos/pqr/reporteAcciones.js',
         ];
     }
@@ -83,28 +83,12 @@ final class Version20200226192642 extends AbstractMigration
 
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
-            'etiqueta' => 'Pendientes',
-            'nombre' => $nombreComponente,
-            'orden' => 1
+            'etiqueta'            => 'Pendientes',
+            'nombre'              => $nombreComponente,
+            'orden'               => 1
         ];
 
-        $idbusquedaComponente = $this->createBusquedaComponente(
-            $idbusqueda,
-            array_merge($dataComponente, $this->getDefaultData($nombreComponente)),
-            $nombreComponente
-        );
-
-        $busquedaCondicion = [
-            'fk_busqueda_componente' => $idbusquedaComponente,
-            'codigo_where' => "sys_estado='{$estado}'",
-            'etiqueta_condicion' => $nombreComponente
-        ];
-        $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
-
-        $data = [
-            'enlace' => 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector": "iframe","url": "views/buzones/grilla.php?idbusqueda_componente=' . $idbusquedaComponente . '"}]',
-        ];
-        $this->createModulo($data, $nombreComponente);
+        $this->createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado);
     }
 
     protected function createComponenteProcesos(int $idbusqueda)
@@ -113,9 +97,9 @@ final class Version20200226192642 extends AbstractMigration
 
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
-            'etiqueta' => 'En proceso',
-            'nombre' => $nombreComponente,
-            'orden' => 2
+            'etiqueta'            => 'En proceso',
+            'nombre'              => $nombreComponente,
+            'orden'               => 2
         ];
         $busquedaComponente = array_merge($dataComponente, $this->getDefaultData($nombreComponente));
 
@@ -128,8 +112,8 @@ final class Version20200226192642 extends AbstractMigration
         $estado = FtPqr::ESTADO_PROCESO;
         $busquedaCondicion = [
             'fk_busqueda_componente' => $idbusquedaComponente,
-            'codigo_where' => "sys_estado='{$estado}'",
-            'etiqueta_condicion' => $nombreComponente
+            'codigo_where'           => "sys_estado='$estado'",
+            'etiqueta_condicion'     => $nombreComponente
         ];
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
 
@@ -146,11 +130,16 @@ final class Version20200226192642 extends AbstractMigration
 
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
-            'etiqueta' => 'Terminados',
-            'nombre' => $nombreComponente,
-            'orden' => 3
+            'etiqueta'            => 'Terminados',
+            'nombre'              => $nombreComponente,
+            'orden'               => 3
         ];
 
+        $this->createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado);
+    }
+
+    private function createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado)
+    {
         $idbusquedaComponente = $this->createBusquedaComponente(
             $idbusqueda,
             array_merge($dataComponente, $this->getDefaultData($nombreComponente)),
@@ -159,8 +148,8 @@ final class Version20200226192642 extends AbstractMigration
 
         $busquedaCondicion = [
             'fk_busqueda_componente' => $idbusquedaComponente,
-            'codigo_where' => "sys_estado='{$estado}'",
-            'etiqueta_condicion' => $nombreComponente
+            'codigo_where'           => "sys_estado='$estado'",
+            'etiqueta_condicion'     => $nombreComponente
         ];
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
 
@@ -175,9 +164,9 @@ final class Version20200226192642 extends AbstractMigration
         $nombreComponente = PqrForm::NOMBRE_REPORTE_TODOS;
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
-            'etiqueta' => 'Todas',
-            'nombre' => $nombreComponente,
-            'orden' => 4
+            'etiqueta'            => 'Todas',
+            'nombre'              => $nombreComponente,
+            'orden'               => 4
         ];
         $busquedaComponente = array_merge($dataComponente, $this->getDefaultData($nombreComponente));
 
@@ -189,13 +178,13 @@ final class Version20200226192642 extends AbstractMigration
 
         $busquedaCondicion = [
             'fk_busqueda_componente' => $idbusquedaComponente,
-            'codigo_where' => "1=1",
-            'etiqueta_condicion' => $nombreComponente
+            'codigo_where'           => "1=1",
+            'etiqueta_condicion'     => $nombreComponente
         ];
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
 
         $nombre = PqrForm::NOMBRE_PANTALLA_GRAFICO;
-        $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE lower(nombre) like '{$nombre}'";
+        $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE lower(nombre) like '$nombre'";
         $pantallaGrafico = $this->connection->fetchAllAssociative($sql);
 
         $idPantallaGrafico = $pantallaGrafico[0]['idpantalla_grafico'];

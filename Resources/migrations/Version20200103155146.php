@@ -146,10 +146,10 @@ final class Version20200103155146 extends AbstractMigration
         $table->setPrimaryKey(['id']);
 
         $table->addColumn('fk_formato', 'integer');
-        $table->addIndex(['fk_formato'], 'i_fk_formato');
+        $table->addIndex(['fk_formato'], 'ipqr_formsfk_format');
 
         $table->addColumn('fk_contador', 'integer');
-        $table->addIndex(['fk_contador'], 'i_fk_contador');
+        $table->addIndex(['fk_contador'], 'ipqr_formsfk_contad');
 
         $table->addColumn('label', 'string');
         $table->addColumn('name', 'string');
@@ -173,10 +173,10 @@ final class Version20200103155146 extends AbstractMigration
         $table->setPrimaryKey(['id']);
 
         $table->addColumn('fk_documento', 'integer');
-        $table->addIndex(['fk_documento'], 'i_fk_documento');
+        $table->addIndex(['fk_documento'], 'ipqr_backufk_docume');
 
         $table->addColumn('fk_pqr', 'integer');
-        $table->addIndex(['fk_pqr'], 'i_fk_pqr');
+        $table->addIndex(['fk_pqr'], 'ipqr_backufk_pqr');
 
         $table->addColumn('data_json', 'text');
     }
@@ -189,10 +189,10 @@ final class Version20200103155146 extends AbstractMigration
         $table->setPrimaryKey(['id']);
 
         $table->addColumn('fk_funcionario', 'integer');
-        $table->addIndex(['fk_funcionario'], 'i_fk_funcionario');
+        $table->addIndex(['fk_funcionario'], 'ipqr_notiffk_funcio');
 
         $table->addColumn('fk_pqr_form', 'integer');
-        $table->addIndex(['fk_pqr_form'], 'i_fk_pqr_form');
+        $table->addIndex(['fk_pqr_form'], 'ipqr_notiffk_pqr_fo');
 
         $table->addColumn('email', 'boolean', [
             'default' => false
