@@ -6,6 +6,7 @@ namespace App\Bundles\pqr\Resources\migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -26,7 +27,7 @@ final class Version20200103161511 extends AbstractMigration
                 'pqr_html_fields',
                 $field
             );
-            $id = $this->connection->lastInsertId();
+            $id = (new OtherQueriesForPlatform($this->connection))->lastInsertId('pqr_html_fields');
 
             $idsHtmlFields[$field['type']] = $id;
         }
@@ -35,7 +36,7 @@ final class Version20200103161511 extends AbstractMigration
             'pqr_forms',
             $this->getDataPqrForms()
         );
-        $idform = (int)$this->connection->lastInsertId();
+        $idform = (new OtherQueriesForPlatform($this->connection))->lastInsertId('pqr_forms');
 
 
         $fields = $this->getDataPqrFormFields($idform, $idsHtmlFields);
@@ -258,9 +259,9 @@ final class Version20200103161511 extends AbstractMigration
             'pqr_form_fields',
             'pqr_noty_messages'
         ];
+        $OtherQueriesForPlatform = (new OtherQueriesForPlatform($this->connection));
         foreach ($tables as $table) {
-            $sql = $this->connection->getDatabasePlatform()->getTruncateTableSQL($table);
-            $this->connection->executeStatement($sql);
+            $OtherQueriesForPlatform->truncateTable($table);
         }
     }
 }

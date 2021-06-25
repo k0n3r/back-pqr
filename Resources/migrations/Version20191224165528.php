@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\Resources\migrations;
 
+use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\Perfil;
 use App\Bundles\pqr\Services\models\PqrForm;
 use Doctrine\DBAL\Schema\Schema;
@@ -174,7 +175,7 @@ final class Version20191224165528 extends AbstractMigration
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
         ]);
 
-        $id = $this->connection->lastInsertId();
+        $id = (new OtherQueriesForPlatform($this->connection))->lastInsertId('pantalla_grafico');
 
         $this->createGraphic($id);
     }
@@ -273,7 +274,8 @@ final class Version20191224165528 extends AbstractMigration
             $this->connection->insert('grafico', $graphic);
 
             if ($graphicSerie) {
-                $this->createGraphicSerie($graphicSerie, $this->connection->lastInsertId());
+                $id = (new OtherQueriesForPlatform($this->connection))->lastInsertId('grafico');
+                $this->createGraphicSerie($graphicSerie, $id);
             }
         }
     }
@@ -311,7 +313,7 @@ final class Version20191224165528 extends AbstractMigration
                 'estado'           => 1,
                 'pertenece_nucleo' => 1
             ]);
-            $idcargo = $this->connection->lastInsertId();
+            $idcargo = (new OtherQueriesForPlatform($this->connection))->lastInsertId('cargo');
         } else {
             $idcargo = $cargo[0]['idcargo'];
         }
@@ -335,7 +337,7 @@ final class Version20191224165528 extends AbstractMigration
                 'pertenece_nucleo'      => 1,
                 'ventanilla_radicacion' => 0, //TODO: De donde se obtiene este campo
             ]);
-            $idfuncionario = $this->connection->lastInsertId();
+            $idfuncionario = (new OtherQueriesForPlatform($this->connection))->lastInsertId('funcionario');
         } else {
             $idfuncionario = $funcionario[0]['idfuncionario'];
         }

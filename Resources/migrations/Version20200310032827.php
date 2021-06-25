@@ -6,6 +6,7 @@ namespace App\Bundles\pqr\Resources\migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\Modulo;
 
 /**
@@ -102,7 +103,7 @@ final class Version20200310032827 extends AbstractMigration
 
         $this->connection->insert('formato', $data);
 
-        return (int)$this->connection->lastInsertId();
+        return (new OtherQueriesForPlatform($this->connection))->lastInsertId('formato');
     }
 
     protected function createFields($idformato): void
@@ -166,20 +167,23 @@ final class Version20200310032827 extends AbstractMigration
                 'listable'          => '1',
                 'campoOpciones'     => [
                     ['llave' => '4', 'valor' => 'Enviar por E-mail', 'estado' => '1', 'orden' => '0'],
-                    ['llave'  => '1',
-                     'valor'  => 'Requiero recogida de documento y entrega al destinatario',
-                     'estado' => '1',
-                     'orden'  => '1'
+                    [
+                        'llave'  => '1',
+                        'valor'  => 'Requiero recogida de documento y entrega al destinatario',
+                        'estado' => '1',
+                        'orden'  => '1'
                     ],
-                    ['llave'  => '2',
-                     'valor'  => 'Requiero sólo entrega al destinatario',
-                     'estado' => '1',
-                     'orden'  => '2'
+                    [
+                        'llave'  => '2',
+                        'valor'  => 'Requiero sólo entrega al destinatario',
+                        'estado' => '1',
+                        'orden'  => '2'
                     ],
-                    ['llave'  => '3',
-                     'valor'  => 'No requiero servicio de mensajería, lo entregaré yo mismo',
-                     'estado' => '1',
-                     'orden'  => '3'
+                    [
+                        'llave'  => '3',
+                        'valor'  => 'No requiero servicio de mensajería, lo entregaré yo mismo',
+                        'estado' => '1',
+                        'orden'  => '3'
                     ],
                 ]
             ],
@@ -326,7 +330,7 @@ final class Version20200310032827 extends AbstractMigration
             }
 
             $this->connection->insert('campos_formato', $field);
-            $id = $this->connection->lastInsertId();
+            $id = (new OtherQueriesForPlatform($this->connection))->lastInsertId('campos_formato');
 
             if ($campoOpciones) {
                 foreach ($campoOpciones as $row) {

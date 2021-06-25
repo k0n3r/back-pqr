@@ -3,6 +3,7 @@
 namespace App\Bundles\pqr\Resources\migrations;
 
 use Doctrine\DBAL\Schema\Schema;
+use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 
 trait TMigrations
 {
@@ -54,7 +55,7 @@ trait TMigrations
             ]);
         } else {
             $this->connection->insert('modulo', $data);
-            $id = $this->connection->lastInsertId();
+            $id = (new OtherQueriesForPlatform($this->connection))->lastInsertId('modulo');
         }
 
         $this->createPermiso((int)$id, $this->idperfil);
@@ -105,7 +106,7 @@ trait TMigrations
             ]);
         } else {
             $this->connection->insert('busqueda', $data);
-            $id = $this->connection->lastInsertId();
+            $id = (new OtherQueriesForPlatform($this->connection))->lastInsertId('busqueda');
         }
 
         return (int)$id;
@@ -125,7 +126,7 @@ trait TMigrations
             ]);
         } else {
             $this->connection->insert('busqueda_componente', $data);
-            $id = $this->connection->lastInsertId();
+            $id = (new OtherQueriesForPlatform($this->connection))->lastInsertId('busqueda_componente');
         }
 
         return (int)$id;
@@ -144,7 +145,7 @@ trait TMigrations
             ]);
         } else {
             $this->connection->insert('busqueda_condicion', $data);
-            $id = $this->connection->lastInsertId();
+            $id = (new OtherQueriesForPlatform($this->connection))->lastInsertId('busqueda_condicion');
         }
 
         return (int)$id;
