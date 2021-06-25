@@ -6,7 +6,6 @@ namespace App\Bundles\pqr\Resources\migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\Modulo;
 
 /**
@@ -110,7 +109,7 @@ final class Version20200321234633 extends AbstractMigration
 
         $this->connection->insert('formato', $data);
 
-        return (new OtherQueriesForPlatform($this->connection))->lastInsertId('formato');
+        return $this->connection->lastInsertId('formato');
     }
 
     protected function createFields($idformato): void
@@ -212,7 +211,7 @@ final class Version20200321234633 extends AbstractMigration
             }
 
             $this->connection->insert('campos_formato', $field);
-            $id = (new OtherQueriesForPlatform($this->connection))->lastInsertId('campos_formato');
+            $id = $this->connection->lastInsertId('campos_formato');
 
             if ($campoOpciones) {
                 foreach ($campoOpciones as $option) {

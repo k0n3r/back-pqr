@@ -27,7 +27,7 @@ final class Version20200103161511 extends AbstractMigration
                 'pqr_html_fields',
                 $field
             );
-            $id = (new OtherQueriesForPlatform($this->connection))->lastInsertId('pqr_html_fields');
+            $id = $this->connection->lastInsertId('pqr_html_fields');
 
             $idsHtmlFields[$field['type']] = $id;
         }
@@ -36,7 +36,7 @@ final class Version20200103161511 extends AbstractMigration
             'pqr_forms',
             $this->getDataPqrForms()
         );
-        $idform = (new OtherQueriesForPlatform($this->connection))->lastInsertId('pqr_forms');
+        $idform = $this->connection->lastInsertId('pqr_forms');
 
 
         $fields = $this->getDataPqrFormFields($idform, $idsHtmlFields);
