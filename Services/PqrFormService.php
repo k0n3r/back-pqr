@@ -115,7 +115,7 @@ class PqrFormService extends ModelService
         $info = [];
         foreach ($data['tercero'] as $name => $value) {
             $info[] = [
-                'name' => $name,
+                'name'  => $name,
                 'value' => $value
             ];
         }
@@ -135,11 +135,11 @@ class PqrFormService extends ModelService
     public function getSetting(): array
     {
         return [
-            'urlWs' => static::getUrlWsPQR(),
-            'publish' => $this->getModel()->fk_formato ? 1 : 0,
-            'pqrForm' => $this->getDataPqrForm(),
-            'pqrFormFields' => $this->getDataPqrFormFields(),
-            'pqrNotifications' => $this->getDataPqrNotifications(),
+            'urlWs'               => static::getUrlWsPQR(),
+            'publish'             => $this->getModel()->fk_formato ? 1 : 0,
+            'pqrForm'             => $this->getDataPqrForm(),
+            'pqrFormFields'       => $this->getDataPqrFormFields(),
+            'pqrNotifications'    => $this->getDataPqrNotifications(),
             'optionsNotyMessages' => PqrNotyMessageService::getDataPqrNotyMessages(),
             'responseTimeOptions' => $this->getDataresponseTime()
         ];
@@ -336,35 +336,44 @@ class PqrFormService extends ModelService
      */
     public function generaReport(): void
     {
-        $fields = $this->getFieldsReport(true);
         $this->viewPqr();
+        $fields = $this->getFieldsReport();
         $this->generateFuncionReport($fields);
         $this->updateReport($fields);
     }
 
     /**
-     * Obtiene los campos adicionales que seran cargado
-     * en la vista y en el reporte
+     * Obtiene los campos en el reporte
      *
-     * @param boolean $instance :obtener instancia o campos
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function getFieldsReport(bool $instance = false): array
+    private function getFieldsReport(): array
     {
         $data = [];
         $fields = $this->getModel()->getPqrFormFields();
         foreach ($fields as $PqrFormField) {
             if ($PqrFormField->show_report) {
-                if ($instance) {
-                    $data[] = $PqrFormField;
-                } else {
-                    $data[] = "ft.$PqrFormField->name";
-                }
+                $data[] = $PqrFormField;
             }
         }
+        return $data;
+    }
 
+    /**
+     * Obtiene los campos para crear la vista
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-30
+     */
+    private function getFieldsView(): array
+    {
+        $data = [];
+        $fields = $this->getModel()->getPqrFormFields();
+        foreach ($fields as $PqrFormField) {
+            $data[] = "ft.$PqrFormField->name";
+        }
         return $data;
     }
 
@@ -379,7 +388,7 @@ class PqrFormService extends ModelService
     {
         $fields = implode(',', array_merge(
             $this->defaultFieldsReport(),
-            $this->getFieldsReport()
+            $this->getFieldsView()
         ));
 
         $sql = "SELECT $fields
@@ -403,7 +412,6 @@ class PqrFormService extends ModelService
             'd.iddocumento',
             'd.numero',
             'd.fecha',
-            'ft.sys_tipo',
             'ft.sys_estado',
             'ft.sys_fecha_vencimiento',
             'ft.sys_fecha_terminado',
@@ -551,7 +559,7 @@ class PqrFormService extends ModelService
 
             $Grafico = Grafico::findByAttributes([
                 'fk_pantalla_grafico' => $PantallaGrafico->getPK(),
-                'nombre' => 'Dependencia'
+                'nombre'              => 'Dependencia'
             ]);
             $Grafico->estado = 1;
             $Grafico->save();
@@ -642,7 +650,7 @@ class PqrFormService extends ModelService
         }
 
         return [
-            'info' => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
+            'info'               => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
             'campos_adicionales' => 'v.numero,v.fecha,v.sys_tipo,v.sys_estado,v.idft' . $otherFields
         ];
     }
@@ -754,7 +762,7 @@ class PqrFormService extends ModelService
                         foreach ($options as $CampoOpcion) {
                             if ($CampoOpcion->estado) {
                                 $fieldOptions[] = [
-                                    'id' => $CampoOpcion->getPK(),
+                                    'id'    => $CampoOpcion->getPK(),
                                     'label' => $CampoOpcion->valor
                                 ];
                             }
@@ -762,8 +770,8 @@ class PqrFormService extends ModelService
                     }
 
                     $data[] = [
-                        'id' => $PqrFormField->fk_campos_formato,
-                        'label' => $PqrFormField->label,
+                        'id'      => $PqrFormField->fk_campos_formato,
+                        'label'   => $PqrFormField->label,
                         'options' => $fieldOptions
                     ];
                 }

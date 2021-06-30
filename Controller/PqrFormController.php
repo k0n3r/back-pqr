@@ -69,7 +69,6 @@ class PqrFormController extends AbstractController
         } catch (Throwable $th) {
             $Connection->rollBack();
             $saiaResponse->setMessage($th->getMessage());
-            dd($th);
         }
 
         return $saiaResponse->getResponse();

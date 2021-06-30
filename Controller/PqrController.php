@@ -25,8 +25,7 @@ class PqrController extends AbstractController
     public function search(
         Request $request,
         ISaiaResponse $saiaResponse
-    ): Response
-    {
+    ): Response {
 
         try {
 
@@ -52,9 +51,9 @@ class PqrController extends AbstractController
             foreach ($records as $FtPqr) {
                 if (trim($FtPqr->sys_email) == $email) {
                     $data[] = [
-                        'fecha' => DateController::convertDate($FtPqr->getDocument()->fecha),
+                        'fecha'       => DateController::convertDate($FtPqr->getDocument()->fecha),
                         'descripcion' => array_filter(explode("<br>", $FtPqr->getDocument()->getDescription())),
-                        'url' => $FtPqr->getService()->getUrlQR()
+                        'url'         => $FtPqr->getService()->getUrlQR()
                     ];
                 }
             }
@@ -74,8 +73,7 @@ class PqrController extends AbstractController
     public function getHistoryForTimeline(
         Request $request,
         ISaiaResponse $saiaResponse
-    ): Response
-    {
+    ): Response {
 
         try {
             $data = json_decode(CryptController::decrypt($request->get('infoCryp')));
@@ -102,8 +100,7 @@ class PqrController extends AbstractController
     public function decrypt(
         Request $request,
         ISaiaResponse $saiaResponse
-    ): Response
-    {
+    ): Response {
 
         try {
 
