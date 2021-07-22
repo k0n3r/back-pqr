@@ -23,7 +23,7 @@ class PqrHistory extends Model
     protected function defineAttributes(): void
     {
         $this->dbAttributes = (object)[
-            'safe' => [
+            'safe'    => [
                 'fecha',
                 'fk_funcionario',
                 'descripcion',
@@ -31,11 +31,11 @@ class PqrHistory extends Model
                 'tipo',
                 'idfk'
             ],
-            'data' => [
+            'date'    => [
                 'fecha'
             ],
             'primary' => 'id',
-            'table' => 'pqr_history'
+            'table'   => 'pqr_history'
         ];
     }
 
