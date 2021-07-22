@@ -146,15 +146,13 @@ final class Version20200103161511 extends AbstractMigration
     protected function getDataPqrForms(): array
     {
         $sql = "SELECT idcontador FROM contador WHERE nombre='radicacion_entrada'";
-        $contador = $this->connection->fetchAllAssociative($sql);
+        $idcontador = (int)$this->connection->fetchOne($sql);
 
-        if (!$contador[0]['idcontador']) {
-            $this->abortIf(true, 'El contador Externo-Interno NO existe');
-        }
+        $this->abortIf(!$idcontador, 'El contador Externo-Interno NO existe');
 
         return [
             'fk_formato'  => 0,
-            'fk_contador' => $contador[0]['idcontador'],
+            'fk_contador' => $idcontador,
             'label'       => 'PQRSF',
             'name'        => 'pqr',
             'active'      => 1

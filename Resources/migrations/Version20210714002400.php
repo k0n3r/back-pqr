@@ -20,7 +20,7 @@ final class Version20210714002400 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $sql = "SELECT id FROM pqr_html_fields WHERE type LIKE 'date'";
-        $exist = $this->connection->fetchOne($sql);
+        $exist = (int)$this->connection->fetchOne($sql);
         if (!$exist) {
             $this->connection->insert('pqr_html_fields', [
                 'label'     => 'Fecha',

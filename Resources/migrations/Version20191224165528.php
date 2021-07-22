@@ -297,13 +297,13 @@ final class Version20191224165528 extends AbstractMigration
     protected function validateCreation(): void
     {
         $sql = "SELECT idformato FROM formato WHERE nombre='pqr' OR nombre_tabla='ft_pqr'";
-        $exist = $this->connection->fetchAllAssociative($sql);
+        $exist = (int)$this->connection->fetchOne($sql);
         if ($exist) {
             $this->abortIf(true, "Ya existe el formato PQR");
         }
 
         $sql = "SELECT idbusqueda FROM busqueda WHERE nombre='reporte_pqr'";
-        $exist = $this->connection->fetchAllAssociative($sql);
+        $exist = (int)$this->connection->fetchOne($sql);
         if ($exist) {
             $this->abortIf(true, "Ya existe un reporte de PQR");
         }
@@ -312,16 +312,14 @@ final class Version20191224165528 extends AbstractMigration
     protected function createRadicadorWeb(): void
     {
         $sqlCargo = "SELECT idcargo FROM cargo WHERE lower(nombre) like 'radicador web'";
-        $cargo = $this->connection->fetchAllAssociative($sqlCargo);
-        if (!$cargo) {
+        $idcargo = (int)$this->connection->fetchOne($sqlCargo);
+        if (!$idcargo) {
             $this->connection->insert('cargo', [
                 'nombre'           => 'Radicador Web',
                 'estado'           => 1,
                 'pertenece_nucleo' => 1
             ]);
             $idcargo = $this->connection->lastInsertId('cargo');
-        } else {
-            $idcargo = $cargo[0]['idcargo'];
         }
 
         if (!$idcargo) {
@@ -329,8 +327,8 @@ final class Version20191224165528 extends AbstractMigration
         }
 
         $sqlFuncionario = "SELECT idfuncionario FROM funcionario WHERE login='radicador_web'";
-        $funcionario = $this->connection->fetchAllAssociative($sqlFuncionario);
-        if (!$funcionario) {
+        $idfuncionario = (int)$this->connection->fetchOne($sqlFuncionario);
+        if (!$idfuncionario) {
             $this->connection->insert('funcionario', [
                 'login'                 => 'radicador_web',
                 'nombres'               => 'Ventanilla',
@@ -344,35 +342,34 @@ final class Version20191224165528 extends AbstractMigration
                 'ventanilla_radicacion' => 0, //TODO: De donde se obtiene este campo
             ]);
             $idfuncionario = $this->connection->lastInsertId('funcionario');
-        } else {
-            $idfuncionario = $funcionario[0]['idfuncionario'];
         }
+
         if (!$idfuncionario) {
             $this->abortIf(true, "No fue posible encontrar el funcionario Radicador Web");
         }
 
         $sqlDependenciaCargo = "SELECT iddependencia_cargo FROM dependencia_cargo 
         WHERE funcionario_idfuncionario=$idfuncionario AND cargo_idcargo=$idcargo";
-        $dependenciaCargo = $this->connection->fetchAllAssociative($sqlDependenciaCargo);
+        $iddependencia_cargo = (int)$this->connection->fetchOne($sqlDependenciaCargo);
 
-        if ($dependenciaCargo) {
+        if ($iddependencia_cargo) {
             $this->connection->update('dependencia_cargo', [
                 'fecha_final' => $this->convertDate(date('Y-12-31 23:59:59')),
                 'estado'      => 1
             ], [
-                'iddependencia_cargo' => $dependenciaCargo[0]['iddependencia_cargo']
+                'iddependencia_cargo' => $iddependencia_cargo
             ]);
         } else {
             $sqlDependencia = "SELECT iddependencia FROM dependencia WHERE cod_padre=0 OR cod_padre IS NULL";
-            $dependencia = $this->connection->fetchAllAssociative($sqlDependencia);
-            if (!$dependencia) {
+            $iddependencia = (int)$this->connection->fetchOne($sqlDependencia);
+            if (!$iddependencia) {
                 $this->abortIf(true, "No se encuentra la dependencia principal");
             }
 
             $this->connection->insert('dependencia_cargo', [
                 'funcionario_idfuncionario' => $idfuncionario,
                 'cargo_idcargo'             => $idcargo,
-                'dependencia_iddependencia' => $dependencia[0]['iddependencia'],
+                'dependencia_iddependencia' => $iddependencia,
                 'estado'                    => 1,
                 'fecha_ingreso'             => $this->convertDate(date('Y-m-d H:i:s')),
                 'fecha_inicial'             => $this->convertDate(date('Y-m-d H:i:s')),

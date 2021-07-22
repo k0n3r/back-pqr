@@ -17,10 +17,10 @@ final class Version20210411151159 extends AbstractMigration
         return 'Se quita tipo descripcion en campo contenido de respuesta pqr';
     }
 
-    private function getFormatId()
+    private function getFormatId(): int
     {
         $sql = "select idformato from formato where nombre='pqr_respuesta'";
-        return $this->connection->fetchOne($sql);
+        return (int)$this->connection->fetchOne($sql);
     }
 
     public function up(Schema $schema): void
@@ -30,7 +30,7 @@ final class Version20210411151159 extends AbstractMigration
         $this->connection->update('campos_formato', [
             'acciones' => 'a,e'
         ], [
-            'nombre' => 'contenido',
+            'nombre'            => 'contenido',
             'formato_idformato' => $formatId
         ]);
     }
@@ -42,7 +42,7 @@ final class Version20210411151159 extends AbstractMigration
         $this->connection->update('campos_formato', [
             'acciones' => 'p,a,e'
         ], [
-            'nombre' => 'contenido',
+            'nombre'            => 'contenido',
             'formato_idformato' => $formatId
         ]);
     }

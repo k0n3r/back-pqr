@@ -36,7 +36,7 @@ final class Version20200321234633 extends AbstractMigration
             $this->formatName
         );
         $sql = "SELECT idmodulo FROM modulo WHERE nombre like 'modulo_formatos'";
-        $idModulo = $this->connection->fetchOne($sql);
+        $idModulo = (int)$this->connection->fetchOne($sql);
 
         $attributes = [
             'nombre'      => $moduleName,
@@ -53,31 +53,23 @@ final class Version20200321234633 extends AbstractMigration
     protected function createFormat(): int
     {
         $sql = "SELECT idcontador FROM contador WHERE nombre like 'apoyo'";
-        $contador = $this->connection->fetchAllAssociative($sql);
-
-        if (!$contador[0]['idcontador']) {
-            $this->abortIf(true, "El contador apoyo NO existe");
-        }
+        $idcontador = (int)$this->connection->fetchOne($sql);
+        $this->abortIf(!$idcontador, "El contador apoyo NO existe");
 
         $sql = "SELECT idfuncionario FROM funcionario WHERE login='cerok'";
-        $funcionario = $this->connection->fetchAllAssociative($sql);
-
-        if (!$funcionario[0]['idfuncionario']) {
-            $this->abortIf(true, "El funcionario ceork NO existe");
-        }
+        $idfuncionario = (int)$this->connection->fetchOne($sql);
+        $this->abortIf(!$idfuncionario, "El funcionario ceork NO existe");
 
         $sqlCodPadre = "SELECT idformato FROM formato WHERE nombre='pqr_respuesta'";
-        $codPadre = $this->connection->fetchAllAssociative($sqlCodPadre);
-        if (!$codPadre[0]['idformato']) {
-            $this->abortIf(true, "No se encontro el formato padre Respuesta PQRSF");
-        }
+        $codPadre = (int)$this->connection->fetchOne($sqlCodPadre);
+        $this->abortIf(!$codPadre, "No se encontro el formato padre Respuesta PQRSF");
 
         $name = $this->formatName;
         $data = [
             'nombre'                    => $name,
             'etiqueta'                  => 'CALIFICACIÓN -PQRSF',
-            'cod_padre'                 => $codPadre[0]['idformato'],
-            'contador_idcontador'       => $contador[0]['idcontador'],
+            'cod_padre'                 => $codPadre,
+            'contador_idcontador'       => $idcontador,
             'nombre_tabla'              => "ft_$name",
             'ruta_mostrar'              => "views/modules/pqr/formatos/$name/mostrar.php",
             'ruta_editar'               => "views/modules/pqr/formatos/$name/editar.html",
@@ -89,7 +81,7 @@ final class Version20200321234633 extends AbstractMigration
             'margenes'                  => '25,25,50,25',
             'orientacion'               => 0,
             'papel'                     => 'Letter',
-            'funcionario_idfuncionario' => $funcionario[0]['idfuncionario'],
+            'funcionario_idfuncionario' => $idfuncionario,
             'detalle'                   => 1,
             'tipo_edicion'              => 0,
             'item'                      => 0,
@@ -109,7 +101,7 @@ final class Version20200321234633 extends AbstractMigration
 
         $this->connection->insert('formato', $data);
 
-        return $this->connection->lastInsertId('formato');
+        return (int)$this->connection->lastInsertId('formato');
     }
 
     protected function createFields($idformato): void

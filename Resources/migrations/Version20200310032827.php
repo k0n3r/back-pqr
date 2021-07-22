@@ -36,7 +36,7 @@ final class Version20200310032827 extends AbstractMigration
             $this->formatName
         );
         $sql = "SELECT idmodulo FROM modulo WHERE nombre like 'modulo_formatos'";
-        $idModulo = $this->connection->fetchOne($sql);
+        $idModulo = (int)$this->connection->fetchOne($sql);
 
         $attributes = [
             'nombre'      => $moduleName,
@@ -53,25 +53,20 @@ final class Version20200310032827 extends AbstractMigration
     protected function createFormat(): int
     {
         $sql = "SELECT idcontador FROM contador WHERE nombre like 'radicacion_salida'";
-        $contador = $this->connection->fetchAllAssociative($sql);
-
-        if (!$contador[0]['idcontador']) {
-            $this->abortIf(true, "El contador radicacion_salida NO existe");
-        }
+        $idcontador = (int)$this->connection->fetchOne($sql);
+        $this->abortIf(!$idcontador, "El contador radicacion_salida NO existe");
 
         $sql = "SELECT idfuncionario FROM funcionario WHERE login='cerok'";
-        $funcionario = $this->connection->fetchAllAssociative($sql);
+        $idfuncionario = (int)$this->connection->fetchOne($sql);
+        $this->abortIf(!$idfuncionario, "El funcionario cerok NO existe");
 
-        if (!$funcionario[0]['idfuncionario']) {
-            $this->abortIf(true, "El funcionario cerok NO existe");
-        }
 
         $name = $this->formatName;
         $data = [
             'nombre'                    => $name,
             'etiqueta'                  => 'COMUNICACIÓN EXTERNA -(PQRSF)',
             'cod_padre'                 => 0,
-            'contador_idcontador'       => $contador[0]['idcontador'],
+            'contador_idcontador'       => $idcontador,
             'nombre_tabla'              => "ft_$name",
             'ruta_mostrar'              => "views/modules/pqr/formatos/$name/mostrar.php",
             'ruta_editar'               => "views/modules/pqr/formatos/$name/editar.html",
@@ -83,7 +78,7 @@ final class Version20200310032827 extends AbstractMigration
             'margenes'                  => '25,25,50,25',
             'orientacion'               => 0,
             'papel'                     => 'Letter',
-            'funcionario_idfuncionario' => $funcionario[0]['idfuncionario'],
+            'funcionario_idfuncionario' => $idfuncionario,
             'detalle'                   => 1,
             'tipo_edicion'              => 0,
             'item'                      => 0,
@@ -102,7 +97,7 @@ final class Version20200310032827 extends AbstractMigration
 
         $this->connection->insert('formato', $data);
 
-        return $this->connection->lastInsertId('formato');
+        return (int)$this->connection->lastInsertId('formato');
     }
 
     protected function createFields($idformato): void
