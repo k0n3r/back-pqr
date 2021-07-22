@@ -184,10 +184,8 @@ final class Version20200226192642 extends AbstractMigration
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
 
         $nombre = PqrForm::NOMBRE_PANTALLA_GRAFICO;
-        $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE lower(nombre) like '$nombre'";
-        $pantallaGrafico = $this->connection->fetchAllAssociative($sql);
-
-        $idPantallaGrafico = $pantallaGrafico[0]['idpantalla_grafico'];
+        $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE lower(nombre) like lower('$nombre')";
+        $idPantallaGrafico = (int)$this->connection->fetchOne($sql);
 
         $this->abortIf(!$idPantallaGrafico, "No se encuentra la pantalla del grafico");
 

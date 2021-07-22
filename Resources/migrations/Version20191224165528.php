@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\Resources\migrations;
 
+use DateTime;
 use Saia\models\Perfil;
 use App\Bundles\pqr\Services\models\PqrForm;
 use Doctrine\DBAL\Schema\Schema;
@@ -31,6 +32,12 @@ final class Version20191224165528 extends AbstractMigration
         $this->generateModules($this->modulesDefaultData());
 
         $this->createIndicators();
+    }
+
+    protected function convertDate(string $date): string
+    {
+        $DateTime = DateTime::createFromFormat('Y-m-d H:i:s', $date);
+        return $DateTime->format($this->connection->getDatabasePlatform()->getDateTimeFormatString());
     }
 
     protected function modulesDefaultData(): array
@@ -329,7 +336,7 @@ final class Version20191224165528 extends AbstractMigration
                 'nombres'               => 'Ventanilla',
                 'apellidos'             => 'Web',
                 'estado'                => 1,
-                'fecha_ingreso'         => date('Y-m-d H:i:s'),
+                'fecha_ingreso'         => $this->convertDate(date('Y-m-d H:i:s')),
                 'clave'                 => CryptController::encrypt('cerok_saia'),
                 'nit'                   => '3',
                 'perfil'                => Perfil::GENERAL,
@@ -350,7 +357,7 @@ final class Version20191224165528 extends AbstractMigration
 
         if ($dependenciaCargo) {
             $this->connection->update('dependencia_cargo', [
-                'fecha_final' => date('Y-12-31 23:59:59'),
+                'fecha_final' => $this->convertDate(date('Y-12-31 23:59:59')),
                 'estado'      => 1
             ], [
                 'iddependencia_cargo' => $dependenciaCargo[0]['iddependencia_cargo']
@@ -367,9 +374,9 @@ final class Version20191224165528 extends AbstractMigration
                 'cargo_idcargo'             => $idcargo,
                 'dependencia_iddependencia' => $dependencia[0]['iddependencia'],
                 'estado'                    => 1,
-                'fecha_ingreso'             => date('Y-m-d H:i:s'),
-                'fecha_inicial'             => date('Y-m-d H:i:s'),
-                'fecha_final'               => date('Y-12-31 23:59:59')
+                'fecha_ingreso'             => $this->convertDate(date('Y-m-d H:i:s')),
+                'fecha_inicial'             => $this->convertDate(date('Y-m-d H:i:s')),
+                'fecha_final'               => $this->convertDate(date('Y-12-31 23:59:59'))
             ]);
         }
     }
