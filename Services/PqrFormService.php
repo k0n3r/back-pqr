@@ -5,6 +5,7 @@ namespace App\Bundles\pqr\Services;
 use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use Exception;
+use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\grafico\Grafico;
 use Saia\models\formatos\Formato;
 use Saia\models\grafico\PantallaGrafico;
@@ -430,26 +431,8 @@ class PqrFormService extends ModelService
      */
     private function createView(string $name, string $select): void
     {
-        $Connection = GlobalContainer::getConnection();
-
-        switch ($_SERVER['APP_DATABASE_DRIVER']) {
-            case 'pdo_mysql':
-            case 'oci8':
-                $create = "CREATE OR REPLACE VIEW $name AS $select";
-                $Connection->executeStatement($create);
-                break;
-
-            case 'pdo_sqlserver':
-                $drop = "DROP VIEW IF EXISTS $name";
-                $Connection->executeStatement($drop);
-
-                $create = "CREATE VIEW $name AS $select";
-                $Connection->executeStatement($create);
-                break;
-
-            default:
-                throw new Exception("No fue posible generar la vista $name", 200);
-        }
+        $OtherQueriesForPlatform = new OtherQueriesForPlatform();
+        $OtherQueriesForPlatform->createView($name, $select);
     }
 
     /**
