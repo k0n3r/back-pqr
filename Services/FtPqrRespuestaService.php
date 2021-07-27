@@ -137,9 +137,9 @@ class FtPqrRespuestaService extends ModelService
 
         $names = Anexos::findColumn('etiqueta', [
             'documento_iddocumento' => $this->getModel()->getDocument()->getPK(),
-            'campos_formato' => $id,
-            'estado' => 1,
-            'eliminado' => 0
+            'campos_formato'        => $id,
+            'estado'                => 1,
+            'eliminado'             => 0
         ]);
 
         return $names ? implode(', ', $names) : '';
@@ -227,12 +227,12 @@ class FtPqrRespuestaService extends ModelService
     public function saveHistory(string $description, int $type): bool
     {
         $history = [
-            'fecha' => date('Y-m-d H:i:s'),
-            'idft' => $this->getModel()->getFtPqr()->getPK(),
+            'fecha'          => date('Y-m-d H:i:s'),
+            'idft'           => $this->getModel()->getFtPqr()->getPK(),
             'fk_funcionario' => $this->getFuncionario()->getPK(),
-            'tipo' => $type,
-            'idfk' => $this->getModel()->getPK(),
-            'descripcion' => $description
+            'tipo'           => $type,
+            'idfk'           => $this->getModel()->getPK(),
+            'descripcion'    => $description
         ];
 
         $PqrHistoryService = (new PqrHistory)->getService();
@@ -375,17 +375,17 @@ class FtPqrRespuestaService extends ModelService
             );
         }
 
-        $anexos = [];
-        $File = new FileJson($FtPqrRespuesta->getDocument()->getPdfJson());
-        $anexos[] = $File;
+        $DocumentoRespuesta = $FtPqrRespuesta->getDocument();
+        $anexos[] = new FileJson($DocumentoRespuesta->getPdfJson());
 
-        $DocumentoService = $FtPqrRespuesta->getDocument()->getService();
-        if ($records = $DocumentoService->getAllFilesAnexos()) {
-            foreach ($records as $route) {
-                $anexos[] = new FileRoute($route['route']);
+        $DocumentoService = $DocumentoRespuesta->getService();
+        if ($records = $DocumentoService->getAllFilesAnexos(true)) {
+            foreach ($records as $Anexos) {
+                $anexos[] = new FileJson($Anexos->ruta);
             }
         }
         $SendMailController->setAttachments($anexos);
+        $SendMailController->saveShipmentTraceability($DocumentoRespuesta);
 
         $send = $SendMailController->send();
         if ($send !== true) {
@@ -442,7 +442,7 @@ class FtPqrRespuestaService extends ModelService
     {
         $params = CryptController::encrypt(json_encode([
             'ft_pqr_respuesta' => $this->getModel()->getPK(),
-            'anterior' => $this->getModel()->getDocument()->getPK()
+            'anterior'         => $this->getModel()->getDocument()->getPK()
         ]));
 
         return PqrFormService::getUrlWsCalificacion() . "?d=$params";
@@ -479,6 +479,7 @@ class FtPqrRespuestaService extends ModelService
             SendMailController::DESTINATION_TYPE_EMAIL,
             [$email]
         );
+        $SendMailController->saveShipmentTraceability($this->getModel()->getDocument());
 
         $send = $SendMailController->send();
         if ($send !== true) {

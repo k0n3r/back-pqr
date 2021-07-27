@@ -531,6 +531,7 @@ class FtPqrService extends ModelService
             $files[] = new FileJson($Anexos->ruta);
         }
         $SendMailController->setAttachments($files);
+        $SendMailController->saveShipmentTraceability($Documento);
 
         $send = $SendMailController->send();
         if ($send !== true) {
@@ -631,6 +632,7 @@ HTML;
 
             $files[] = new FileJson($Documento->getPdfJson());
             $SendMailController->setAttachments($files);
+            $SendMailController->saveShipmentTraceability($Documento);
 
             $send = $SendMailController->send();
 
