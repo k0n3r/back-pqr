@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\Resources\migrations;
 
 use DateTime;
+use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\Perfil;
 use App\Bundles\pqr\Services\models\PqrForm;
 use Doctrine\DBAL\Schema\Schema;
@@ -296,17 +297,13 @@ final class Version20191224165528 extends AbstractMigration
 
     protected function validateCreation(): void
     {
-        $sql = "SELECT idformato FROM formato WHERE nombre='pqr' OR nombre_tabla='ft_pqr'";
-        $exist = (int)$this->connection->fetchOne($sql);
-        if ($exist) {
-            $this->abortIf(true, "Ya existe el formato PQR");
-        }
+        $sql = "SELECT idformato FROM formato WHERE nombre LIKE 'pqr' OR nombre_tabla LIKE 'ft_pqr'";
+        $exist = (bool)$this->connection->fetchOne($sql);
+        $this->abortIf($exist, "Ya existe el formato PQR");
 
-        $sql = "SELECT idbusqueda FROM busqueda WHERE nombre='reporte_pqr'";
-        $exist = (int)$this->connection->fetchOne($sql);
-        if ($exist) {
-            $this->abortIf(true, "Ya existe un reporte de PQR");
-        }
+        $sql = "SELECT idbusqueda FROM busqueda WHERE nombre LIKE 'reporte_pqr'";
+        $exist = (bool)$this->connection->fetchOne($sql);
+        $this->abortIf($exist, "Ya existe un reporte de PQR");
     }
 
     protected function createRadicadorWeb(): void
@@ -321,10 +318,7 @@ final class Version20191224165528 extends AbstractMigration
             ]);
             $idcargo = $this->connection->lastInsertId('cargo');
         }
-
-        if (!$idcargo) {
-            $this->abortIf(true, "No fue posible encontrar el cargo Radicador Web");
-        }
+        $this->abortIf(!$idcargo, "No fue posible encontrar el cargo Radicador Web");
 
         $sqlFuncionario = "SELECT idfuncionario FROM funcionario WHERE login='radicador_web'";
         $idfuncionario = (int)$this->connection->fetchOne($sqlFuncionario);
@@ -343,10 +337,8 @@ final class Version20191224165528 extends AbstractMigration
             ]);
             $idfuncionario = $this->connection->lastInsertId('funcionario');
         }
+        $this->abortIf(!$idfuncionario, "No fue posible encontrar el funcionario Radicador Web");
 
-        if (!$idfuncionario) {
-            $this->abortIf(true, "No fue posible encontrar el funcionario Radicador Web");
-        }
 
         $sqlDependenciaCargo = "SELECT iddependencia_cargo FROM dependencia_cargo 
         WHERE funcionario_idfuncionario=$idfuncionario AND cargo_idcargo=$idcargo";
@@ -362,9 +354,7 @@ final class Version20191224165528 extends AbstractMigration
         } else {
             $sqlDependencia = "SELECT iddependencia FROM dependencia WHERE cod_padre=0 OR cod_padre IS NULL";
             $iddependencia = (int)$this->connection->fetchOne($sqlDependencia);
-            if (!$iddependencia) {
-                $this->abortIf(true, "No se encuentra la dependencia principal");
-            }
+            $this->abortIf(!$iddependencia, "No se encuentra la dependencia principal");
 
             $this->connection->insert('dependencia_cargo', [
                 'funcionario_idfuncionario' => $idfuncionario,
@@ -387,14 +377,10 @@ final class Version20191224165528 extends AbstractMigration
         $this->delOtherModules();
         $this->deleteFormat('pqr', $schema);
 
-        $sql = $this->connection->getDatabasePlatform()->getDropViewSQL('vpqr');
-        $this->connection->executeStatement($sql);
-
-        $sql = $this->connection->getDatabasePlatform()->getDropViewSQL('vpqr_respuesta');
-        $this->connection->executeStatement($sql);
-
-        $sql = $this->connection->getDatabasePlatform()->getDropViewSQL('vpqr_calificacion');
-        $this->connection->executeStatement($sql);
+        $OtherQueriesForPlatform = new OtherQueriesForPlatform($this->connection);
+        $OtherQueriesForPlatform->dropViewIfExist('vpqr');
+        $OtherQueriesForPlatform->dropViewIfExist('vpqr_respuesta');
+        $OtherQueriesForPlatform->dropViewIfExist('vpqr_calificacion');
     }
 
     protected function delOtherModules()
@@ -420,34 +406,37 @@ final class Version20191224165528 extends AbstractMigration
         }
     }
 
-    protected function delGraphic()
+    protected function delGraphic(): void
     {
         $screen = [
             PqrForm::NOMBRE_PANTALLA_GRAFICO
         ];
 
         foreach ($screen as $name) {
-            $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE nombre='$name'";
-            $data = $this->connection->fetchOne($sql);
+            $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE lower(nombre) LIKE lower('$name')";
+            $id = (int)$this->connection->fetchOne($sql);
 
-            if ($data['idpantalla_grafico']) {
-                $this->connection->delete('pantalla_grafico', [
-                    'idpantalla_grafico' => $data['idpantalla_grafico']
-                ]);
+            if ($id) {
+                return;
+            }
 
-                $sql = "SELECT idgrafico FROM grafico WHERE fk_pantalla_grafico='{$data['idpantalla_grafico']}'";
-                $records = $this->connection->fetchAllAssociative($sql);
+            $this->connection->delete('pantalla_grafico', [
+                'idpantalla_grafico' => $id
+            ]);
 
-                foreach ($records as $graphic) {
-                    $this->connection->delete('grafico_serie', [
-                        'fk_grafico' => $graphic['idgrafico']
-                    ]);
-                }
+            $sql = "SELECT idgrafico FROM grafico WHERE fk_pantalla_grafico=$id";
+            $records = $this->connection->fetchAllAssociative($sql);
 
-                $this->connection->delete('grafico', [
-                    'fk_pantalla_grafico' => $data['idpantalla_grafico']
+            foreach ($records as $graphic) {
+                $this->connection->delete('grafico_serie', [
+                    'fk_grafico' => $graphic['idgrafico']
                 ]);
             }
+
+            $this->connection->delete('grafico', [
+                'fk_pantalla_grafico' => $id
+            ]);
         }
+
     }
 }

@@ -19,7 +19,7 @@ final class Version20210411151159 extends AbstractMigration
 
     private function getFormatId(): int
     {
-        $sql = "select idformato from formato where nombre='pqr_respuesta'";
+        $sql = "select idformato from formato where nombre LIKE 'pqr_respuesta'";
         return (int)$this->connection->fetchOne($sql);
     }
 

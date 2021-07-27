@@ -15,6 +15,7 @@ use Saia\controllers\documento\Transfer;
 use Saia\controllers\SendMailController;
 use Saia\controllers\TerceroService;
 use Saia\models\BuzonSalida;
+use Saia\models\documento\Documento;
 use Saia\models\formatos\Formato;
 use Saia\controllers\DateController;
 use Saia\controllers\documento\SaveFt;
@@ -28,6 +29,7 @@ use Saia\models\Tercero;
 class FtPqrService extends ModelService
 {
     private PqrService $PqrService;
+    private ?Documento $Documento = null;
 
     public function __construct(FtPqr $Ft)
     {
@@ -45,6 +47,22 @@ class FtPqrService extends ModelService
     public function getModel(): FtPqr
     {
         return $this->Model;
+    }
+
+    /**
+     * Obtiene el documento del modelo
+     *
+     * @param bool $force
+     * @return Documento
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-07-26
+     */
+    public function getDocument(bool $force = false): Documento
+    {
+        if (!$this->Documento || $force) {
+            $this->Documento = $this->getModel()->getDocument();
+        }
+
+        return $this->Documento;
     }
 
     /**
@@ -94,8 +112,8 @@ class FtPqrService extends ModelService
     {
         $data = [
             'fk_documento' => $this->getModel()->documento_iddocumento,
-            'fk_pqr' => $this->getModel()->getPK(),
-            'data_json' => json_encode($this->getDataRow())
+            'fk_pqr'       => $this->getModel()->getPK(),
+            'data_json'    => json_encode($this->getDataRow())
         ];
         $PqrBackupService = (new PqrBackup)->getService();
         if (!$PqrBackupService->save($data)) {
@@ -185,7 +203,7 @@ class FtPqrService extends ModelService
     public function updateFechaVencimiento(): bool
     {
         $FtPqr = $this->getModel();
-        $Documento = $FtPqr->getDocument();
+        $Documento = $this->getDocument();
 
         $fecha = $this->getDateForType();
 
@@ -198,12 +216,12 @@ class FtPqrService extends ModelService
 
         if ($oldDate != $FtPqr->sys_fecha_vencimiento) {
             $history = [
-                'fecha' => date('Y-m-d H:i:s'),
-                'idft' => $this->getModel()->getPK(),
+                'fecha'          => date('Y-m-d H:i:s'),
+                'idft'           => $this->getModel()->getPK(),
                 'fk_funcionario' => $this->getFuncionario()->getPK(),
-                'tipo' => PqrHistory::TIPO_CAMBIO_VENCIMIENTO,
-                'idfk' => 0,
-                'descripcion' => "Se actualiza la fecha de vencimiento a " .
+                'tipo'           => PqrHistory::TIPO_CAMBIO_VENCIMIENTO,
+                'idfk'           => 0,
+                'descripcion'    => "Se actualiza la fecha de vencimiento a " .
                     DateController::convertDate(
                         $this->getModel()->sys_fecha_vencimiento,
                         DateController::PUBLIC_DATE_FORMAT
@@ -232,7 +250,7 @@ class FtPqrService extends ModelService
     public function getDateForType(): string
     {
         return (DateController::addBusinessDays(
-            new DateTime($this->getModel()->getDocument()->fecha),
+            new DateTime($this->getDocument()->fecha),
             $this->getDays()
         ))->format('Y-m-d H:i:s');
     }
@@ -247,7 +265,7 @@ class FtPqrService extends ModelService
     {
         if ($PqrResponseTime = PqrResponseTime::findByAttributes([
             'fk_campo_opciones' => $this->getIdFromResponseTimes(),
-            'fk_sys_tipo' => $this->getModel()->sys_tipo
+            'fk_sys_tipo'       => $this->getModel()->sys_tipo
         ])) {
             return $PqrResponseTime->number_days ?: 1;
         }
@@ -261,12 +279,12 @@ class FtPqrService extends ModelService
     private function registerErrorResponseTime(): void
     {
         $history = [
-            'fecha' => date('Y-m-d H:i:s'),
-            'idft' => $this->getModel()->getPK(),
+            'fecha'          => date('Y-m-d H:i:s'),
+            'idft'           => $this->getModel()->getPK(),
             'fk_funcionario' => $this->getFuncionario()->getPK(),
-            'tipo' => PqrHistory::TIPO_ERROR_DIAS_VENCIMIENTO,
-            'idfk' => 0,
-            'descripcion' => "No se configuro dias de vencimiento para los opciones seleccionadas por el cliente"
+            'tipo'           => PqrHistory::TIPO_ERROR_DIAS_VENCIMIENTO,
+            'idfk'           => 0,
+            'descripcion'    => "No se configuro dias de vencimiento para los opciones seleccionadas por el cliente"
         ];
 
         $PqrHistoryService = (new PqrHistory)->getService();
@@ -305,7 +323,7 @@ class FtPqrService extends ModelService
 
         if ($Tercero = $this->getModel()->getTercero()) {
             $destino = [
-                'id' => $Tercero->getPK(),
+                'id'   => $Tercero->getPK(),
                 'text' => "$Tercero->identificacion - $Tercero->nombre"
             ];
         }
@@ -333,11 +351,11 @@ class FtPqrService extends ModelService
         }
 
         return [
-            'iddocPqr' => $this->getModel()->getDocument()->getPK(),
-            'destino' => $destino ?? 0,
+            'iddocPqr'          => $this->getDocument()->getPK(),
+            'destino'           => $destino ?? 0,
             'tipo_distribucion' => $tipoDistribucion ?? 0,
-            'despedida' => $despedida ?? 0,
-            'asunto' => "Respondiendo a la {$this->getModel()->getFormat()->etiqueta} No {$this->getModel()->getDocument()->numero}"
+            'despedida'         => $despedida ?? 0,
+            'asunto'            => "Respondiendo a la {$this->getModel()->getFormat()->etiqueta} No {$this->getDocument()->numero}"
         ];
     }
 
@@ -442,11 +460,11 @@ class FtPqrService extends ModelService
     private function getInitialRequestData(): array
     {
         return [
-            'iconPoint' => 'fa fa-map-marker',
+            'iconPoint'      => 'fa fa-map-marker',
             'iconPointColor' => 'success',
-            'date' => DateController::convertDate($this->getModel()->getDocument()->fecha),
-            'description' => "Se registra la solicitud No # {$this->getModel()->getDocument()->numero}",
-            'url' => UtilitiesPqr::getRoutePdf($this->getModel()->getDocument())
+            'date'           => DateController::convertDate($this->getDocument()->fecha),
+            'description'    => "Se registra la solicitud No # {$this->getDocument()->numero}",
+            'url'            => UtilitiesPqr::getRoutePdf($this->getDocument())
         ];
     }
 
@@ -462,13 +480,13 @@ class FtPqrService extends ModelService
         $type = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
 
         return [
-            'iconPoint' => 'fa fa-flag-checkered',
+            'iconPoint'      => 'fa fa-flag-checkered',
             'iconPointColor' => 'success',
-            'date' => DateController::convertDate(
+            'date'           => DateController::convertDate(
                 $this->getModel()->sys_fecha_vencimiento,
                 DateController::PUBLIC_DATE_FORMAT
             ),
-            'description' => "Fecha maxima para dar respuesta a la solicitud de tipo $type"
+            'description'    => "Fecha maxima para dar respuesta a la solicitud de tipo $type"
         ];
     }
 
@@ -486,9 +504,9 @@ class FtPqrService extends ModelService
             return true;
         }
 
-        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {$this->getModel()->getDocument()->numero}, adjunto encontrará una copia de la {$this->getPqrForm()->label} diligenciada el día de hoy.<br/><br/>
+        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {$this->getDocument()->numero}, adjunto encontrará una copia de la {$this->getPqrForm()->label} diligenciada el día de hoy.<br/><br/>
         El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado";
-        $subject = "Solicitud de {$this->getPqrForm()->label} # {$this->getModel()->getDocument()->numero}";
+        $subject = "Solicitud de {$this->getPqrForm()->label} # {$this->getDocument()->numero}";
 
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
             'name' => 'f1_email_solicitante'
@@ -506,9 +524,13 @@ class FtPqrService extends ModelService
             SendMailController::DESTINATION_TYPE_EMAIL,
             [$this->getModel()->sys_email]
         );
-
-        $File = new FileJson($this->getModel()->getDocument()->getPdfJson());
-        $SendMailController->setAttachments([$File]);
+        $Documento = $this->getDocument();
+        $files[] = new FileJson($Documento->getPdfJson());
+        $records = $Documento->getService()->getAllFilesAnexos(true);
+        foreach ($records as $Anexos) {
+            $files[] = new FileJson($Anexos->ruta);
+        }
+        $SendMailController->setAttachments($files);
 
         $send = $SendMailController->send();
         if ($send !== true) {
@@ -516,7 +538,7 @@ class FtPqrService extends ModelService
                 'error' => $send
             ];
             UtilitiesPqr::notifyAdministrator(
-                "No fue posible notificar la PQR # {$this->getModel()->getDocument()->numero}",
+                "No fue posible notificar la PQR # {$this->getDocument()->numero}",
                 $log
             );
         }
@@ -569,22 +591,22 @@ HTML;
         $emails = $codes = [];
         $records = $this->getPqrForm()->getPqrNotifications();
         if ($records) {
-            foreach ($records as $PqrNotifications) {
-                if ($PqrNotifications->email) {
-                    $email = $PqrNotifications->getFuncionario()->email;
+            foreach ($records as $PqrNotification) {
+                if ($PqrNotification->email) {
+                    $email = $PqrNotification->getFuncionario()->email ?? '';
                     if (UtilitiesPqr::isEmailValid($email)) {
                         $emails[] = $email;
                     }
                 }
-                if ($PqrNotifications->notify) {
-                    $codes[] = $PqrNotifications->getFuncionario()->funcionario_codigo;
+                if ($PqrNotification->notify) {
+                    $codes[] = $PqrNotification->getFuncionario()->funcionario_codigo;
                 }
             }
         }
-
+        $Documento = $this->getDocument(true);
         if ($codes) {
             $Transfer = new Transfer(
-                $this->getModel()->getDocument(),
+                $Documento,
                 SessionController::getValue('funcionario_codigo'),
                 BuzonSalida::NOMBRE_TRANSFERIDO
             );
@@ -594,11 +616,11 @@ HTML;
         }
 
         if ($emails) {
-            $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->getPqrForm()->label} con radicado {$this->getModel()->getDocument()->numero}.<br/><br/>
+            $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->getPqrForm()->label} con radicado $Documento->numero.<br/><br/>
             El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado";
 
             $SendMailController = new SendMailController(
-                "Notificación de {$this->getPqrForm()->label} # {$this->getModel()->getDocument()->numero}",
+                "Notificación de {$this->getPqrForm()->label} # $Documento->numero",
                 $message
             );
 
@@ -607,13 +629,17 @@ HTML;
                 $emails
             );
 
+            $files[] = new FileJson($Documento->getPdfJson());
+            $SendMailController->setAttachments($files);
+
             $send = $SendMailController->send();
+
             if ($send !== true) {
                 $log = [
                     'error' => $send
                 ];
                 UtilitiesPqr::notifyAdministrator(
-                    "No fue posible notificar a los funcionarios # {$this->getModel()->getDocument()->numero}",
+                    "No fue posible notificar a los funcionarios # $Documento->numero",
                     $log
                 );
             }
@@ -635,11 +661,11 @@ HTML;
 
         if ($config['tercero']) {
             $data = [
-                'nombre' => '-',
-                'identificacion' => -1,
-                'tipo' => Tercero::TIPO_NATURAL,
+                'nombre'              => '-',
+                'identificacion'      => -1,
+                'tipo'                => Tercero::TIPO_NATURAL,
                 'tipo_identificacion' => Tercero::TIPO_IDENTIFICACION_CC,
-                'correo' => $this->getModel()->sys_email
+                'correo'              => $this->getModel()->sys_email
             ];
             foreach ($config['tercero'] as $row) {
                 $value = [];
@@ -657,7 +683,7 @@ HTML;
 
             $Tercero = Tercero::findByAttributes([
                 'identificacion' => $data['identificacion'],
-                'estado' => 1
+                'estado'         => 1
             ]);
 
             $Tercero ??= new Tercero();
@@ -729,8 +755,8 @@ HTML;
         if ($data['expirationDate'] != $expiration) {
 
             $newAttributes['sys_fecha_vencimiento'] = $data['expirationDate'];
-            $this->getModel()->getDocument()->fecha_limite = $data['expirationDate'];
-            $this->getModel()->getDocument()->save();
+            $this->getDocument()->fecha_limite = $data['expirationDate'];
+            $this->getDocument()->save();
 
             $oldDate = DateController::convertDate(
                 $expiration,
@@ -746,9 +772,9 @@ HTML;
             $textField[] = "fecha de vencimiento de $oldDate a $newDate";
         }
 
-        $SaveFt = new SaveFt($this->getModel()->getDocument());
+        $SaveFt = new SaveFt($this->getDocument());
         $SaveFt->edit($newAttributes);
-        $this->Model = $this->getModel()->getDocument()->getFt();
+        $this->Model = $this->getDocument()->getFt();
 
         $text = "Se actualiza: " . implode(', ', $textField);
         $newType = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
@@ -766,12 +792,12 @@ HTML;
         ], $text);
 
         $history = [
-            'fecha' => date('Y-m-d H:i:s'),
-            'idft' => $this->getModel()->getPK(),
+            'fecha'          => date('Y-m-d H:i:s'),
+            'idft'           => $this->getModel()->getPK(),
             'fk_funcionario' => $this->getFuncionario()->getPK(),
-            'tipo' => PqrHistory::TIPO_CAMBIO_ESTADO,
-            'idfk' => 0,
-            'descripcion' => $text
+            'tipo'           => PqrHistory::TIPO_CAMBIO_ESTADO,
+            'idfk'           => 0,
+            'descripcion'    => $text
         ];
 
         $PqrHistoryService = (new PqrHistory)->getService();
@@ -895,7 +921,7 @@ HTML;
         $now = !$this->getModel()->sys_fecha_terminado ? new DateTime()
             : new DateTime($this->getModel()->sys_fecha_terminado);
 
-        $diff = $now->diff(new DateTime($this->getModel()->getDocument()->fecha));
+        $diff = $now->diff(new DateTime($this->getDocument()->fecha));
 
         return $diff->days;
     }
@@ -941,8 +967,8 @@ HTML;
     public function getUrlQR(): string
     {
         $params = [
-            'id' => $this->getModel()->getPK(),
-            'documentId' => $this->getModel()->getDocument()->getPK()
+            'id'         => $this->getModel()->getPK(),
+            'documentId' => $this->getDocument()->getPK()
         ];
         $data = CryptController::encrypt(json_encode($params));
 
@@ -978,12 +1004,12 @@ HTML;
             $this->getModel()->save();
 
             $history = [
-                'fecha' => date('Y-m-d H:i:s'),
-                'idft' => $this->getModel()->getPK(),
+                'fecha'          => date('Y-m-d H:i:s'),
+                'idft'           => $this->getModel()->getPK(),
                 'fk_funcionario' => $this->getFuncionario()->getPK(),
-                'tipo' => PqrHistory::TIPO_CAMBIO_ESTADO,
-                'idfk' => 0,
-                'descripcion' => "Se actualiza el estado de la solicitud de $actualStatus a $newStatus. $observations"
+                'tipo'           => PqrHistory::TIPO_CAMBIO_ESTADO,
+                'idfk'           => 0,
+                'descripcion'    => "Se actualiza el estado de la solicitud de $actualStatus a $newStatus. $observations"
             ];
 
             $PqrHistoryService = (new PqrHistory)->getService();

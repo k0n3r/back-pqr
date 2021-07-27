@@ -10,17 +10,19 @@ class PqrNotification extends Model
 {
     use TModels;
 
+    private ?Funcionario $Funcionario = null;
+
     protected function defineAttributes(): void
     {
         $this->dbAttributes = (object)[
-            'safe' => [
+            'safe'    => [
                 'fk_funcionario',
                 'fk_pqr_form',
                 'email',
                 'notify'
             ],
             'primary' => 'id',
-            'table' => 'pqr_notifications'
+            'table'   => 'pqr_notifications'
         ];
     }
 
@@ -60,7 +62,7 @@ class PqrNotification extends Model
     {
         return [
             'text' => $this->getFuncionario()->getName(),
-            'id' => $this->getFuncionario()->getPK()
+            'id'   => $this->getFuncionario()->getPK()
         ];
     }
 }

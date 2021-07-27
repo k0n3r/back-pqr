@@ -18,16 +18,12 @@ trait TMigrations
     {
         $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like 'administrador'";
         $this->perfil = (int)$this->connection->fetchOne($sql);
-
-        if (!$this->perfil) {
-            $this->abortIf(true, "No se encontro el perfil del administador");
-        }
+        $this->abortIf(!$this->perfil, "No se encontro el perfil del administador");
 
         $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like 'administrador interno'";
         $this->idperfilInterno = (int)$this->connection->fetchOne($sql);
-        if (!$this->idperfilInterno) {
-            $this->abortIf(true, "No se encontro el perfil del administador interno");
-        }
+        $this->abortIf(!$this->idperfilInterno, "No se encontro el perfil del administador interno");
+
     }
 
     /**
@@ -42,30 +38,29 @@ trait TMigrations
     protected function createModulo(array $data, string $search): int
     {
         $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '$search'";
-        $modulo = $this->connection->fetchAllAssociative($sql);
+        $id = (int)$this->connection->fetchOne($sql);
 
-        if ($modulo) {
-            $id = $modulo[0]['idmodulo'];
+        if ($id) {
             $this->connection->update('modulo', $data, [
                 'idmodulo' => $id
             ]);
         } else {
             $this->connection->insert('modulo', $data);
-            $id = $this->connection->lastInsertId('modulo');
+            $id = (int)$this->connection->lastInsertId('modulo');
         }
 
-        $this->createPermiso((int)$id, $this->idperfil);
-        $this->createPermiso((int)$id, $this->idperfilInterno);
+        $this->createPermiso($id, $this->idperfil);
+        $this->createPermiso($id, $this->idperfilInterno);
 
-        return (int)$id;
+        return $id;
     }
 
     protected function createPermiso(int $idmodulo, int $idperfil): void
     {
         $sql = "SELECT idpermiso_perfil FROM permiso_perfil WHERE modulo_idmodulo=$idmodulo AND perfil_idperfil=$idperfil";
-        $permiso = $this->connection->fetchAllAssociative($sql);
+        $idpermiso = (int)$this->connection->fetchOne($sql);
 
-        if (!$permiso) {
+        if (!$idpermiso) {
             $this->connection->insert('permiso_perfil', [
                 'modulo_idmodulo' => $idmodulo,
                 'perfil_idperfil' => $idperfil
@@ -75,115 +70,110 @@ trait TMigrations
 
     protected function deleteModulo(string $search): void
     {
-        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '$search'";
-        $modulo = $this->connection->fetchAllAssociative($sql);
+        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like lower('$search')";
+        $id = (int)$this->connection->fetchOne($sql);
 
-        if ($modulo[0]['idmodulo']) {
-            $id = $modulo[0]['idmodulo'];
-            $this->connection->delete('modulo', [
-                'idmodulo' => $id
-            ]);
-
-            $this->connection->delete('permiso_perfil', [
-                'modulo_idmodulo' => $id
-            ]);
+        if (!$id) {
+            return;
         }
+
+        $this->connection->delete('modulo', [
+            'idmodulo' => $id
+        ]);
+
+        $this->connection->delete('permiso_perfil', [
+            'modulo_idmodulo' => $id
+        ]);
     }
 
     protected function createBusqueda(array $data, string $search): int
     {
-        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '$search'";
-        $record = $this->connection->fetchAllAssociative($sql);
+        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like lower('$search')";
+        $id = (int)$this->connection->fetchOne($sql);
 
-        if ($record) {
-            $id = $record[0]['idbusqueda'];
+        if ($id) {
             $this->connection->update('busqueda', $data, [
                 'idbusqueda' => $id
             ]);
         } else {
             $this->connection->insert('busqueda', $data);
-            $id = $this->connection->lastInsertId('busqueda');
+            $id = (int)$this->connection->lastInsertId('busqueda');
         }
 
-        return (int)$id;
+        return $id;
     }
 
     protected function createBusquedaComponente(int $idbusqueda, array $data, string $search): int
     {
         $sql = "SELECT idbusqueda_componente FROM busqueda_componente
-        WHERE busqueda_idbusqueda=$idbusqueda AND lower(nombre) like '$search'";
-        $record = $this->connection->fetchAllAssociative($sql);
+        WHERE busqueda_idbusqueda=$idbusqueda AND lower(nombre) like lower('$search')";
+        $id = (int)$this->connection->fetchOne($sql);
 
-        if ($record) {
-            $id = $record[0]['idbusqueda_componente'];
-
+        if ($id) {
             $this->connection->update('busqueda_componente', $data, [
                 'idbusqueda_componente' => $id
             ]);
         } else {
             $this->connection->insert('busqueda_componente', $data);
-            $id = $this->connection->lastInsertId('busqueda_componente');
+            $id = (int)$this->connection->lastInsertId('busqueda_componente');
         }
 
-        return (int)$id;
+        return $id;
     }
 
     protected function createBusquedaCondicion(int $idbusquedaComponente, array $data, string $search): int
     {
         $sql = "SELECT idbusqueda_condicion FROM busqueda_condicion
-        WHERE fk_busqueda_componente=$idbusquedaComponente AND lower(etiqueta_condicion) like '$search'";
-        $record = $this->connection->fetchAllAssociative($sql);
+        WHERE fk_busqueda_componente=$idbusquedaComponente AND lower(etiqueta_condicion) like lower('$search')";
+        $id = (int)$this->connection->fetchOne($sql);
 
-        if ($record) {
-            $id = $record[0]['idbusqueda_condicion'];
+        if ($id) {
             $this->connection->update('busqueda_condicion', $data, [
                 'idbusqueda_condicion' => $id
             ]);
         } else {
             $this->connection->insert('busqueda_condicion', $data);
-            $id = $this->connection->lastInsertId('busqueda_condicion');
+            $id = (int)$this->connection->lastInsertId('busqueda_condicion');
         }
 
-        return (int)$id;
+        return $id;
     }
 
     protected function deleteBusqueda(string $search): void
     {
         $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '$search'";
-        $busqueda = $this->connection->fetchAllAssociative($sql);
+        $idbusqueda = (int)$this->connection->fetchOne($sql);
 
-        if ($busqueda) {
-            $idbusqueda = $busqueda[0]['idbusqueda'];
-            $this->connection->delete('busqueda', [
-                'idbusqueda' => $idbusqueda
+        if (!$idbusqueda) {
+            return;
+        }
+
+        $this->connection->delete('busqueda', [
+            'idbusqueda' => $idbusqueda
+        ]);
+
+        $sql = "SELECT idbusqueda_componente FROM busqueda_componente WHERE busqueda_idbusqueda=$idbusqueda";
+        $records = $this->connection->fetchAllAssociative($sql);
+
+        foreach ($records as $busquedaComponente) {
+            $idbusquedaComponente = $busquedaComponente['idbusqueda_componente'];
+            $this->connection->delete('busqueda_componente', [
+                'idbusqueda_componente' => $idbusquedaComponente
             ]);
 
-            $sql = "SELECT idbusqueda_componente FROM busqueda_componente WHERE busqueda_idbusqueda=$idbusqueda";
-            $records = $this->connection->fetchAllAssociative($sql);
-
-            foreach ($records as $busquedaComponente) {
-                $idbusquedaComponente = $busquedaComponente['idbusqueda_componente'];
-                $this->connection->delete('busqueda_componente', [
-                    'idbusqueda_componente' => $idbusquedaComponente
-                ]);
-
-                $this->connection->delete('busqueda_condicion', [
-                    'fk_busqueda_componente' => $idbusquedaComponente
-                ]);
-            }
+            $this->connection->delete('busqueda_condicion', [
+                'fk_busqueda_componente' => $idbusquedaComponente
+            ]);
         }
+
     }
 
-    protected function deleteFormat(string $formatName, Schema $schema)
+    protected function deleteFormat(string $formatName, Schema $schema): void
     {
-
         $sql = "SELECT idformato FROM formato WHERE nombre like '$formatName'";
-        $data = $this->connection->executeQuery($sql)->fetchAllAssociative();
-        if (!$data[0]['idformato']) {
-            $this->abortIf(true, "No se encontro el formato $formatName");
-        }
+        $idformato = (int)$this->connection->fetchOne($sql);
+        $this->abortIf(!$idformato, "No se encontro el formato $formatName");
 
-        $idformato = $data[0]['idformato'];
         $this->connection->delete(
             'campos_formato',
             [

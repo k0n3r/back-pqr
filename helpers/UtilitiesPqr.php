@@ -26,7 +26,7 @@ class UtilitiesPqr
 
         $SendMailController->setDestinations(
             SendMailController::DESTINATION_TYPE_EMAIL,
-            ["soporte@cerok.com"]
+            ["soporte@cerok.com", "andres.agudelo@cerok.com"]
         );
 
         $SendMailController->send();
@@ -61,7 +61,7 @@ class UtilitiesPqr
 
         return [
             'finish' => $finish,
-            'total' => $total
+            'total'  => $total
         ];
     }
 
@@ -120,7 +120,7 @@ class UtilitiesPqr
         } catch (Throwable $th) {
             $log = [
                 'errorMessage' => $th->getMessage(),
-                'iddocumento' => $Documento->getPK()
+                'iddocumento'  => $Documento->getPK()
             ];
             $message = "No se ha podido generar el pdf del documento con radicado: $Documento->numero (ID:{$Documento->getPK()})";
             self::notifyAdministrator($message, $log);
