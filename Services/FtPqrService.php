@@ -669,6 +669,7 @@ HTML;
                 'tipo_identificacion' => Tercero::TIPO_IDENTIFICACION_CC,
                 'correo'              => $this->getModel()->sys_email
             ];
+
             foreach ($config['tercero'] as $row) {
                 $value = [];
                 foreach ($row['value'] as $idPqrFormField) {
@@ -676,6 +677,10 @@ HTML;
                     $value[] = trim($this->getModel()->$name);
                 }
                 $data[$row['name']] = implode(' ', $value);
+            }
+
+            if (!$data['identificacion']) {
+                $data['identificacion'] = -1;
             }
 
             if ($this->getModel()->sys_anonimo) {

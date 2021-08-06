@@ -103,12 +103,13 @@ class FtPqr extends FtPqrProperties
     {
         if (
             !$this->getService()->createBackup() ||
-            !$this->getService()->updateFechaVencimiento()
+            !$this->getService()->updateFechaVencimiento() ||
+            !$this->getService()->createTercero()
         ) {
             throw new SaiaException($this->getService()->getErrorManager()->getMessage(), 200);
         }
 
-        return $this->getService()->createTercero();
+        return true;
     }
 
     /**
