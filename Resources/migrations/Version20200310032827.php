@@ -192,7 +192,7 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta_html'     => 'ExternalUser',
                 'orden'             => '5',
                 'fila_visible'      => '1',
-                'opciones'          => '{"tipo_seleccion":"unico","tipo":true,"nombre":true,"correo":true,"tipo_identificacion":true,"identificacion":true,"ciudad":true,"titulo":true,"cargo":false,"direccion":true,"telefono":true,"sede":false,"empresa":false}',
+                'opciones'          => '{"tipo_seleccion":"multiple","tipo":true,"nombre":true,"correo":true,"tipo_identificacion":true,"identificacion":true,"ciudad":true,"titulo":true,"cargo":false,"direccion":true,"telefono":true,"sede":false,"empresa":false}',
                 'listable'          => '1'
             ],
             'asunto'            => [

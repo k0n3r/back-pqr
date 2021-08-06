@@ -36,7 +36,7 @@ final class Version20200103161511 extends AbstractMigration
             'pqr_forms',
             $this->getDataPqrForms()
         );
-        $idform = $this->connection->lastInsertId('pqr_forms');
+        $idform = (int)$this->connection->lastInsertId('pqr_forms');
 
 
         $fields = $this->getDataPqrFormFields($idform, $idsHtmlFields);
