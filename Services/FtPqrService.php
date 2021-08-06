@@ -682,9 +682,11 @@ HTML;
             if (!$data['identificacion']) {
                 $data['identificacion'] = -1;
             }
+            if (!$data['nombre']) {
+                $data['nombre'] = '-';
+            }
 
-            if ($this->getModel()->sys_anonimo) {
-                $data['identificacion'] = -1;
+            if ($this->getModel()->sys_anonimo && $data['nombre'] == '-') {
                 $data['nombre'] = 'Anónimo';
             }
 
