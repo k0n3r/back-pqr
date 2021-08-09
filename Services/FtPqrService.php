@@ -673,8 +673,16 @@ HTML;
             foreach ($config['tercero'] as $row) {
                 $value = [];
                 foreach ($row['value'] as $idPqrFormField) {
-                    $name = (new PqrFormField($idPqrFormField))->name;
-                    $value[] = trim($this->getModel()->$name);
+                    $PqrFormField = PqrFormField::findByAttributes([
+                        'id' => $idPqrFormField
+                    ], [
+                        'name'
+                    ]);
+
+                    if ($PqrFormField) {
+                        $name = $PqrFormField->name;
+                        $value[] = trim($this->getModel()->$name);
+                    }
                 }
                 $data[$row['name']] = implode(' ', $value);
             }
