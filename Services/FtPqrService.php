@@ -664,7 +664,7 @@ HTML;
         if ($config['tercero']) {
             $data = [
                 'nombre'              => '-',
-                'identificacion'      => -1,
+                'identificacion'      => Tercero::IDENTIFICACION_INDEFINIDA,
                 'tipo'                => Tercero::TIPO_NATURAL,
                 'tipo_identificacion' => Tercero::TIPO_IDENTIFICACION_CC,
                 'correo'              => $this->getModel()->sys_email
@@ -684,11 +684,11 @@ HTML;
                         $value[] = trim($this->getModel()->$name);
                     }
                 }
-                $data[$row['name']] = implode(' ', $value);
+                $data[$row['name']] = trim(implode(' ', $value));
             }
 
             if (!$data['identificacion']) {
-                $data['identificacion'] = -1;
+                $data['identificacion'] = Tercero::IDENTIFICACION_INDEFINIDA;
             }
             if (!$data['nombre']) {
                 $data['nombre'] = '-';
