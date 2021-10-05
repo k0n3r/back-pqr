@@ -388,7 +388,7 @@ class PqrFormFieldService extends ModelService
 
             if ($CampoOpciones = CampoOpciones::findByAttributes([
                 'valor' => $option->text,
-                'fk_campos_formato' => $CampoFormato->getPk()
+                'fk_campos_formato' => $CampoFormato->getPK()
             ])) {
                 $CampoOpcionesService = $CampoOpciones->getService();
                 $CampoOpcionesService->save([

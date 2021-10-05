@@ -174,8 +174,19 @@ class FtPqr extends FtPqrProperties
 
         $data = $this->getPqrBackup()->getDataJson();
 
+        $showEmpty = $this->getService()->getPqrForm()->show_empty ?? 1;
+
         $trs = '';
         foreach ($data as $key => $value) {
+
+            if (!$showEmpty && $value == '') {
+                continue;
+            }
+
+            $pos = strpos($key, '__');
+            if ($pos !== false) {
+                $key = substr($key, 0, $pos);
+            }
             $trs .= '<tr>
                 <td style="width:50%"><strong>' . mb_strtoupper($key, 'UTF-8') . '</strong></td>
                 <td style="width:50%">' . $value . '</td>

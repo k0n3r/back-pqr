@@ -144,7 +144,15 @@ class FtPqrService extends ModelService
         foreach ($Fields as $PqrFormField) {
             if ($PqrFormField->active) {
                 if ($value = $this->getValue($PqrFormField)) {
-                    $data = array_merge($data, $value);
+                    $key = $this->getKey($PqrFormField->label);
+                    if (array_key_exists($key, $data)) {
+                        $value[$key . "__" . uniqid()] = $value[$key];
+                        unset($value[$key]);
+
+                        $data = array_merge($data, $value);
+                    } else {
+                        $data = array_merge($data, $value);
+                    }
                 }
             }
         }
@@ -164,7 +172,7 @@ class FtPqrService extends ModelService
     {
         $PqrHtmlField = $PqrFormField->getPqrHtmlField();
         $fieldName = $PqrFormField->name;
-        $label = strtoupper($PqrFormField->label);
+        $label = $this->getKey($PqrFormField->label);
         $data = [];
 
         switch ($PqrHtmlField->type_saia) {
@@ -175,6 +183,7 @@ class FtPqrService extends ModelService
             case 'Radio':
             case 'Checkbox':
             case 'Select':
+            case 'Date':
                 $data[$label] = $this->getModel()->getFieldValue($fieldName);
                 break;
             case 'AutocompleteD';
@@ -191,6 +200,18 @@ class FtPqrService extends ModelService
         }
 
         return $data;
+    }
+
+    /**
+     * Obtiene el Key de las registros a guardar
+     *
+     * @param string $label
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-04
+     */
+    private function getKey(string $label)
+    {
+        return strtoupper($label);
     }
 
     /**
