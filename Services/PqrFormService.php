@@ -416,6 +416,9 @@ class PqrFormService extends ModelService
             'ft.sys_estado',
             'ft.sys_fecha_vencimiento',
             'ft.sys_fecha_terminado',
+            'ft.sys_frecuencia',
+            'ft.sys_impacto',
+            'ft.sys_severidad',
             'ft.idft_pqr as idft'
         ];
     }

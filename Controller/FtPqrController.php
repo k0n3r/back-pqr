@@ -2,10 +2,10 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\helpers\UtilitiesPqr;
 use Doctrine\DBAL\Connection;
 use Exception;
 use Saia\controllers\DateController;
-use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +34,7 @@ class FtPqrController extends AbstractController
     ): Response {
 
         try {
-            $data = (new FtPqr($idft))->getService()->getDataToLoadResponse();
+            $data = (UtilitiesPqr::getInstanceForFtId($idft))->getService()->getDataToLoadResponse();
             $saiaResponse->replaceData($data);
 
             $saiaResponse->setSuccess(1);
@@ -59,7 +59,7 @@ class FtPqrController extends AbstractController
     ): Response {
 
         try {
-            $FtPqr = new FtPqr($idft);
+            $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
             $FtPqr->sys_tipo = $request->get('type');
             $date = DateController::convertDate(
                 $FtPqr->getService()->getDateForType(),
@@ -91,7 +91,7 @@ class FtPqrController extends AbstractController
 
         try {
 
-            $FtPqr = new FtPqr($idft);
+            $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
             $date = DateController::convertDate(
                 $FtPqr->sys_fecha_vencimiento,
                 'Y-m-d'
@@ -101,17 +101,20 @@ class FtPqrController extends AbstractController
             $idDependencia = (int)$FtPqr->sys_dependencia;
             if ($idDependencia) {
                 $options = [
-                    'id' => $idDependencia,
+                    'id'   => $idDependencia,
                     'text' => $FtPqr->getService()->getValueForReport('sys_dependencia')
                 ];
             }
 
             $data = [
-                'sys_tipo' => (int)$FtPqr->sys_tipo,
-                'sys_subtipo' => (new PqrService())->subTypeExist() ? (int)$FtPqr->sys_subtipo : 0,
+                'sys_tipo'              => (int)$FtPqr->sys_tipo,
+                'sys_subtipo'           => (new PqrService())->subTypeExist() ? (int)$FtPqr->sys_subtipo : 0,
                 'sys_fecha_vencimiento' => $date,
-                'sys_dependencia' => $idDependencia,
-                'optionsDependency' => $options
+                'sys_dependencia'       => $idDependencia,
+                'optionsDependency'     => $options,
+                'sys_frecuencia'        => (int)$FtPqr->sys_frecuencia,
+                'sys_impacto'           => (int)$FtPqr->sys_impacto,
+                'sys_severidad'         => (int)$FtPqr->sys_severidad
             ];
 
             $saiaResponse->replaceData($data);
@@ -134,16 +137,16 @@ class FtPqrController extends AbstractController
 
         try {
 
-            $records = (new FtPqr($idft))->getService()->getRecordsHistory();
+            $records = (UtilitiesPqr::getInstanceForFtId($idft))->getService()->getRecordsHistory();
 
             $data = [
                 'total' => count($records),
-                'rows' => $records
+                'rows'  => $records
             ];
         } catch (Throwable $th) {
             $data = [
                 'total' => 0,
-                'rows' => []
+                'rows'  => []
             ];
         }
 
@@ -168,7 +171,7 @@ class FtPqrController extends AbstractController
         try {
             $Connection->beginTransaction();
 
-            $FtPqrService = (new FtPqr($idft))->getService();
+            $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
             if (!$FtPqrService->updateType($request->get('data'))) {
                 throw new Exception(
                     $FtPqrService->getErrorManager()->getMessage(),
@@ -204,7 +207,7 @@ class FtPqrController extends AbstractController
         try {
             $Connection->beginTransaction();
 
-            $FtPqrService = (new FtPqr($idft))->getService();
+            $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
             if (!$FtPqrService->finish($request->get('observaciones'))) {
                 throw new Exception(
                     $FtPqrService->getErrorManager()->getMessage(),

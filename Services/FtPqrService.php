@@ -148,11 +148,8 @@ class FtPqrService extends ModelService
                     if (array_key_exists($key, $data)) {
                         $value[$key . "__" . uniqid()] = $value[$key];
                         unset($value[$key]);
-
-                        $data = array_merge($data, $value);
-                    } else {
-                        $data = array_merge($data, $value);
                     }
+                    $data = array_merge($data, $value);
                 }
             }
         }
@@ -209,7 +206,7 @@ class FtPqrService extends ModelService
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-04
      */
-    private function getKey(string $label)
+    private function getKey(string $label): string
     {
         return strtoupper($label);
     }
@@ -749,7 +746,12 @@ HTML;
     public function updateType(array $data): bool
     {
 
-        if (!$data['type']) {
+        if (
+            !$data['type'] ||
+            !$data['sys_frecuencia'] ||
+            !$data['sys_impacto'] ||
+            !$data['sys_severidad']
+        ) {
             $this->getErrorManager()->setMessage("Error faltan parametros");
             return false;
         }
@@ -789,25 +791,33 @@ HTML;
             }
         }
 
-        $expiration = DateController::convertDate($this->getModel()->sys_fecha_vencimiento, 'Y-m-d');
-        if ($data['expirationDate'] != $expiration) {
 
+        $textExpirationDate = $this->updateExpirationDate($data['expirationDate']);
+        if ($textExpirationDate) {
             $newAttributes['sys_fecha_vencimiento'] = $data['expirationDate'];
-            $this->getDocument()->fecha_limite = $data['expirationDate'];
-            $this->getDocument()->save();
+            $textField[] = $textExpirationDate;
+        }
 
-            $oldDate = DateController::convertDate(
-                $expiration,
-                DateController::PUBLIC_DATE_FORMAT,
-                'Y-m-d'
-            );
+        $textFrecuencia = $this->updateEstadoFreImpSev('sys_frecuencia', $data['sys_frecuencia']);
+        if ($textFrecuencia) {
+            $newAttributes['sys_frecuencia'] = $data['sys_frecuencia'];
+            $textField[] = "Frecuencia $textFrecuencia";
+        }
 
-            $newDate = DateController::convertDate(
-                $data['expirationDate'],
-                DateController::PUBLIC_DATE_FORMAT,
-                'Y-m-d'
-            );
-            $textField[] = "fecha de vencimiento de $oldDate a $newDate";
+        $textImpacto = $this->updateEstadoFreImpSev('sys_impacto', $data['sys_impacto']);
+        if ($textImpacto) {
+            $newAttributes['sys_impacto'] = $data['sys_impacto'];
+            $textField[] = "Impacto $textImpacto";
+        }
+
+        $textSeveridad = $this->updateEstadoFreImpSev('sys_severidad', $data['sys_severidad']);
+        if ($textSeveridad) {
+            $newAttributes['sys_severidad'] = $data['sys_severidad'];
+            $textField[] = "Severidad $textSeveridad";
+        }
+
+        if (!$newAttributes) {
+            return true;
         }
 
         $SaveFt = new SaveFt($this->getDocument());
@@ -1057,6 +1067,59 @@ HTML;
             }
         }
         return true;
+    }
+
+    /**
+     * @param string $fieldName
+     * @param        $value
+     * @return string|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
+     */
+    private function updateEstadoFreImpSev(string $fieldName, $value): ?string
+    {
+        if ($value == $this->getModel()->$fieldName) {
+            return null;
+        }
+
+        $newValue = $this->getModel()->getValueLabel($fieldName, $value);
+        if (!$this->getModel()->$fieldName) {
+            $text = "a $newValue";
+        } else {
+            $oldType = $this->getModel()->getValueLabel($fieldName);
+            $text = "de $oldType a $newValue";
+        }
+
+        return $text;
+    }
+
+    /**
+     * @param string $expirationDate
+     * @return string|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
+     */
+    private function updateExpirationDate(string $expirationDate): ?string
+    {
+        $expiration = DateController::convertDate($this->getModel()->sys_fecha_vencimiento, 'Y-m-d');
+        if ($expirationDate == $expiration) {
+            return null;
+        }
+
+        $this->getDocument()->fecha_limite = $expirationDate;
+        $this->getDocument()->save();
+
+        $oldDate = DateController::convertDate(
+            $expiration,
+            DateController::PUBLIC_DATE_FORMAT,
+            'Y-m-d'
+        );
+
+        $newDate = DateController::convertDate(
+            $expirationDate,
+            DateController::PUBLIC_DATE_FORMAT,
+            'Y-m-d'
+        );
+
+        return "fecha de vencimiento de $oldDate a $newDate";
     }
 
 }

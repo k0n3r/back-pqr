@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\formatos\pqr_respuesta;
 
+use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
 use Exception;
 use Saia\controllers\localidad\MunicipioService;
@@ -35,7 +36,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     public function getFtPqr(): FtPqr
     {
         if (!$this->FtPqr) {
-            $this->FtPqr = new FtPqr($this->ft_pqr);
+            $this->FtPqr = UtilitiesPqr::getInstanceForFtId($this->ft_pqr);
         }
 
         return $this->FtPqr;
@@ -226,7 +227,7 @@ HTML;
         $Service = $this->getService();
 
         return <<<HTML
-            <table border="0" cellspacing="0" style="width: 100%;">
+            <table style="width: 100%;border: 0">
                 <tbody>
                     <tr>
                         <td colspan="2">{$Service->getFechaCiudad()}</td>

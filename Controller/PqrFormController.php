@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\services\exception\SaiaException;
 use Doctrine\DBAL\Connection;
 use Exception;
 use App\Bundles\pqr\Services\PqrService;
@@ -59,7 +60,7 @@ class PqrFormController extends AbstractController
             }
 
             $data = [
-                'pqrForm' => $PqrFormService->getDataPqrForm(),
+                'pqrForm'       => $PqrFormService->getDataPqrForm(),
                 'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
             ];
 
@@ -167,7 +168,7 @@ class PqrFormController extends AbstractController
             }
 
             $data = [
-                'pqrForm' => $PqrFormService->getDataPqrForm(),
+                'pqrForm'       => $PqrFormService->getDataPqrForm(),
                 'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
             ];
 
@@ -270,5 +271,43 @@ class PqrFormController extends AbstractController
             'isActive' => (int)$active
         ]);
 
+    }
+
+    /**
+     * Acutaliza el campo mostrar/ocultar campos vacios
+     * @Route("/showEmpty", name="updateShowEmpty", methods={"PUT"})
+     *
+     * @param Request       $Request
+     * @param ISaiaResponse $saiaResponse
+     * @param Connection    $Connection
+     * @return Response
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
+     */
+    public function updateShowEmpty(
+        Request $Request,
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
+
+        try {
+            $Connection->beginTransaction();
+
+            $PqrFormService = (PqrForm::getInstance())->getService();
+            $success = $PqrFormService->save([
+                'show_empty' => $Request->get('show_empty', 1)
+            ]);
+            if (!$success) {
+                throw new SaiaException($PqrFormService->getErrorManager()->getMessage());
+            }
+
+            $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
+            $saiaResponse->setSuccess(1);
+            $Connection->commit();
+        } catch (Throwable $th) {
+            $Connection->rollBack();
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
     }
 }

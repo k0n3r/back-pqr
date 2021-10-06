@@ -16,7 +16,7 @@ if (file_exists($fileAdditionalFunctions)) {
 
 function setFtPqr(int $idft)
 {
-    $GLOBALS['FtPqr'] = new FtPqr($idft);
+    $GLOBALS['FtPqr'] = UtilitiesPqr::getInstanceForFtId($idft);
 }
 
 function getFtPqr(): FtPqr
@@ -155,7 +155,7 @@ function options(int $iddocumento, string $estado, int $idft): string
                <i class="fa fa-eye"></i> Tareas
            </a>
            <a href="#" class="dropdown-item edit" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-edit"></i> Editar tipo
+                <i class="fa fa-edit"></i> Validar PQRSF
             </a>
             <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-history"></i> Historial
@@ -192,7 +192,7 @@ HTML;
                 <i class="fa fa-plus"></i> Asignar tarea
             </a>
            <a href="#" class="dropdown-item edit" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-edit"></i> Editar tipo
+                <i class="fa fa-edit"></i> Validar PQRSF
             </a>
             <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-history"></i> Historial

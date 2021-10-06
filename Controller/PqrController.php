@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Types;
 use Exception;
@@ -77,7 +78,7 @@ class PqrController extends AbstractController
 
         try {
             $data = json_decode(CryptController::decrypt($request->get('infoCryp')));
-            $FtPqr = FtPqr::findByDocumentId($data->documentId);
+            $FtPqr = UtilitiesPqr::getInstanceForDocumentId($data->documentId);
 
             if ($FtPqr->getPK() != $data->id) {
                 throw new Exception("La URL ingresada NO existe o ha sido eliminada", 1);

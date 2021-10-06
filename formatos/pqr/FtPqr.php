@@ -20,8 +20,43 @@ class FtPqr extends FtPqrProperties
     const VENCIMIENTO_ROJO = 1; //DIAS
     const VENCIMIENTO_AMARILLO = 5; //DIAS
 
+    const ESTADO_FRE_IMP_SEV_BAJO = 1;
+    const ESTADO_FRE_IMP_SEV_MEDIO = 2;
+    const ESTADO_FRE_IMP_SEV_ALTO = 3;
+
     private ?FtPqrService $FtPqrService = null;
 
+    protected function defineMoreAttributes(): array
+    {
+        return [
+            'labels' => [
+                'sys_frecuencia' => [
+                    'label'  => 'Frecuencia',
+                    'values' => [
+                        self::ESTADO_FRE_IMP_SEV_BAJO  => 'Bajo',
+                        self::ESTADO_FRE_IMP_SEV_MEDIO => 'Medio',
+                        self::ESTADO_FRE_IMP_SEV_ALTO  => 'Alto',
+                    ]
+                ],
+                'sys_impacto'    => [
+                    'label'  => 'Impacto',
+                    'values' => [
+                        self::ESTADO_FRE_IMP_SEV_BAJO  => 'Bajo',
+                        self::ESTADO_FRE_IMP_SEV_MEDIO => 'Medio',
+                        self::ESTADO_FRE_IMP_SEV_ALTO  => 'Alto',
+                    ]
+                ],
+                'sys_severidad'  => [
+                    'label'  => 'Severidad',
+                    'values' => [
+                        self::ESTADO_FRE_IMP_SEV_BAJO  => 'Bajo',
+                        self::ESTADO_FRE_IMP_SEV_MEDIO => 'Medio',
+                        self::ESTADO_FRE_IMP_SEV_ALTO  => 'Alto',
+                    ]
+                ]
+            ]
+        ];
+    }
 
     /**
      * @return PqrBackup

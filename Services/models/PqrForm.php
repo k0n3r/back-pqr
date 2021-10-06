@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Services\models;
 
-use Exception;
+use App\services\exception\SaiaException;
 use Saia\core\model\Model;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
@@ -23,7 +23,7 @@ class PqrForm extends Model
     protected function defineAttributes(): void
     {
         $this->dbAttributes = (object)[
-            'safe' => [
+            'safe'    => [
                 'fk_formato',
                 'fk_contador',
                 'label',
@@ -31,12 +31,13 @@ class PqrForm extends Model
                 'show_anonymous',
                 'show_label',
                 'rad_email',
+                'show_empty',
                 'active',
                 'response_configuration',
                 'fk_field_time'
             ],
             'primary' => 'id',
-            'table' => 'pqr_forms'
+            'table'   => 'pqr_forms'
         ];
     }
 
@@ -106,7 +107,6 @@ class PqrForm extends Model
      * Obtiene la instancia del formulario activo
      *
      * @return PqrForm
-     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-13
      */
     public static function getInstance(): PqrForm
@@ -114,7 +114,7 @@ class PqrForm extends Model
         if (!self::$PqrForm) {
             $rows = PqrForm::findAllByAttributes(['active' => 1]);
             if (count($rows) != 1) {
-                throw new Exception("No se encontro un formulario activo");
+                throw new SaiaException("No se encontro un formulario activo");
             }
             self::$PqrForm = $rows[0];
         }

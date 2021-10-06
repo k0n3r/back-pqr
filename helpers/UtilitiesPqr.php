@@ -5,6 +5,7 @@ namespace App\Bundles\pqr\helpers;
 use App\services\GlobalContainer;
 use Saia\controllers\anexos\FileJson;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
+use Saia\models\formatos\Formato;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\documento\Documento;
 use Saia\controllers\SendMailController;
@@ -13,6 +14,39 @@ use Throwable;
 
 class UtilitiesPqr
 {
+
+    private static function getFormatPqr(): Formato
+    {
+        return Formato::findByAttributes([
+            'nombre' => 'pqr'
+        ]);
+    }
+
+    /**
+     * Obtiene la instancia de la FtPqr o clase que la extienda
+     *
+     * @param int $documentId
+     * @return FtPqr
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
+     */
+    public static function getInstanceForDocumentId(int $documentId): FtPqr
+    {
+        $Documento = new Documento($documentId);
+        return $Documento->getFt();
+    }
+
+    /**
+     * Obtiene la instancia de la FtPqr o clase que la extienda
+     *
+     * @param int $documentId
+     * @return FtPqr
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
+     */
+    public static function getInstanceForFtId(int $idft): FtPqr
+    {
+        $className = self::getFormatPqr()->getFtClass();
+        return new $className($idft);
+    }
 
     public static function notifyAdministrator(string $message, array $log = []): void
     {
