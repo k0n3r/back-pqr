@@ -46,7 +46,7 @@ class Tratamiento implements IWsFields
             <div class="checkbox check-danger input-group">
                 <input type="checkbox" name="{$this->PqrFormField->name}" id="{$this->PqrFormField->name}_0" value="1" aria-required="true" class="required">
                 <label for="{$this->PqrFormField->name}_0" class="mr-3">
-                    ACEPTO LOS TERMINOS Y CONDICIONES
+                    ACEPTO LOS TÉRMINOS Y CONDICIONES
                 </label>
             </div>
             <label id="{$this->PqrFormField->name}-error" class="error" for="{$this->PqrFormField->name}" style="display: none;"></label>
