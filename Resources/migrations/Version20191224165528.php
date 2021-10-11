@@ -193,7 +193,7 @@ final class Version20191224165528 extends AbstractMigration
             [
                 'fk_busqueda_componente' => null,
                 'fk_pantalla_grafico'    => $id,
-                'nombre'                 => 'Dependencia',
+                'nombre'                 => 'pqr_dependencia',
                 'tipo'                   => '1',
                 'configuracion'          => null,
                 'estado'                 => 0,
@@ -230,7 +230,7 @@ final class Version20191224165528 extends AbstractMigration
             [
                 'fk_busqueda_componente' => null,
                 'fk_pantalla_grafico'    => $id,
-                'nombre'                 => 'Tipo',
+                'nombre'                 => 'pqr_tipo',
                 'tipo'                   => '2',
                 'configuracion'          => null,
                 'estado'                 => 0,
@@ -252,7 +252,7 @@ final class Version20191224165528 extends AbstractMigration
             [
                 'fk_busqueda_componente' => null,
                 'fk_pantalla_grafico'    => $id,
-                'nombre'                 => 'Estado',
+                'nombre'                 => 'pqr_estado',
                 'tipo'                   => '2',
                 'configuracion'          => null,
                 'estado'                 => 0,
