@@ -400,7 +400,7 @@ final class Version20191224165528 extends AbstractMigration
         foreach ($data as $name => $dataModule) {
             $this->deleteModulo($name);
 
-            if ($dataModule['children']) {
+            if (isset($dataModule['children'])) {
                 $this->delModules($dataModule['children']);
             }
         }
@@ -416,7 +416,7 @@ final class Version20191224165528 extends AbstractMigration
             $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE lower(nombre) LIKE lower('$name')";
             $id = (int)$this->connection->fetchOne($sql);
 
-            if ($id) {
+            if (!$id) {
                 return;
             }
 
