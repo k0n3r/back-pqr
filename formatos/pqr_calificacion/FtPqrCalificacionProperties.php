@@ -5,14 +5,15 @@ namespace App\Bundles\pqr\formatos\pqr_calificacion;
 
 use Saia\core\model\ModelFormat;
 
-
-
-
 class FtPqrCalificacionProperties extends ModelFormat
 {
     
+    
     public bool $isPDF = false;
 
+    /**
+    * @inheritDoc
+    */
     protected function defaultDbAttributes(): array
     {
         return [
@@ -32,7 +33,18 @@ class FtPqrCalificacionProperties extends ModelFormat
         ];
     }
 
+    /**
+    * @inheritDoc
+    */
     protected function defineMoreAttributes(): array
+    {
+        return [];
+    }
+    
+    /**
+    * @inheritDoc
+    */
+    public static function getParamsToAddEdit(int $action, int $idft): array
     {
         return [];
     }
