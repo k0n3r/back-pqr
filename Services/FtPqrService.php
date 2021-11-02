@@ -1048,6 +1048,7 @@ HTML;
                 $this->getModel()->sys_fecha_terminado = date('Y-m-d H:i:s');
             } else {
                 $this->getModel()->sys_fecha_terminado = null;
+                $this->getModel()->setSaveNullAttributes(true);
             }
             $this->getModel()->save();
 
