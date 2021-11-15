@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\formatos\pqr;
 
+use App\Bundles\pqr\Services\models\PqrForm;
 use App\services\exception\SaiaException;
 use Saia\models\Tercero;
 use Saia\controllers\DateController;
@@ -56,6 +57,20 @@ class FtPqr extends FtPqrProperties
                 ]
             ]
         ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getParamsToAddEdit(int $action, int $idft): array
+    {
+        $data = [];
+        if (!$action) {
+            $PqrFormField = (PqrForm::getInstance())->getRow('sys_subtipo');
+
+            $data['isActive'] = (int)($PqrFormField ? $PqrFormField->isActive() : false);
+        }
+        return $data;
     }
 
     /**

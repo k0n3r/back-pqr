@@ -212,6 +212,21 @@ final class Version20200103161511 extends AbstractMigration
                 'fk_pqr_form'       => $idform,
                 'is_system'         => 1,
                 'orden'             => 3
+            ],
+            [
+                'label'             => 'Anexos',
+                'name'              => 'sys_anexos',
+                'required'          => 0,
+                'anonymous'         => 0,
+                'show_report'       => 0,
+                'setting'           => json_encode([
+                    'numberFiles' => 5,
+                    'typeFiles'   => '.pdf,.doc,.docx,.jpg,.jpeg,.png,.bmp,.xls,.xlsx,.ppt,.zip,.xml'
+                ]),
+                'fk_pqr_html_field' => $idsHtmlFields['file'],
+                'fk_pqr_form'       => $idform,
+                'is_system'         => 1,
+                'orden'             => 4
             ]
         ];
     }

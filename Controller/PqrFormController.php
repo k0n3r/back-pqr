@@ -8,7 +8,8 @@ use Exception;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Saia\models\formatos\CategoriaFormato;
+use Saia\models\formatos\Formato;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -256,24 +257,6 @@ class PqrFormController extends AbstractController
     }
 
     /**
-     * @Route("/isActiveSubtype", name="isActiveSubtype", methods={"GET"})
-     */
-    public function isActiveSubtype(): JsonResponse
-    {
-        try {
-            $PqrFormField = (PqrForm::getInstance())->getRow('sys_subtipo');
-            $active = $PqrFormField->isActive();
-        } catch (Throwable $th) {
-            $active = false;
-        }
-
-        return new JsonResponse([
-            'isActive' => (int)$active
-        ]);
-
-    }
-
-    /**
      * Acutaliza el campo mostrar/ocultar campos vacios
      * @Route("/showEmpty", name="updateShowEmpty", methods={"PUT"})
      *
@@ -296,6 +279,74 @@ class PqrFormController extends AbstractController
             $success = $PqrFormService->save([
                 'show_empty' => $Request->get('show_empty', 1)
             ]);
+            if (!$success) {
+                throw new SaiaException($PqrFormService->getErrorManager()->getMessage());
+            }
+
+            $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
+            $saiaResponse->setSuccess(1);
+            $Connection->commit();
+        } catch (Throwable $th) {
+            $Connection->rollBack();
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * Habilita la radicacion por correo
+     * @Route("/radEmail", name="updateRadEmail", methods={"PUT"})
+     *
+     * @param Request       $Request
+     * @param ISaiaResponse $saiaResponse
+     * @param Connection    $Connection
+     * @return Response
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-11-15
+     */
+    public function updateRadEmail(
+        Request $Request,
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
+
+        try {
+            $Connection->beginTransaction();
+            $enable = $Request->get('rad_email', 0);
+            $PqrFormService = (PqrForm::getInstance())->getService();
+
+            if ($enable) {
+                $FormatoRound = Formato::findByAttributes([
+                    'module' => 'roundcube'
+                ]);
+                if (!$FormatoRound) {
+                    throw new SaiaException('El modulo de Roudcube/Factura no esta instalado!');
+                }
+
+                $Formato = Formato::findByAttributes([
+                    'nombre' => 'pqr'
+                ]);
+                if ($Formato) {
+                    $Formato->getService()->save(array_merge($Formato->getAttributes(), [
+                        'fk_categoria_formato' => CategoriaFormato::RADICACION
+                    ]));
+                }
+                $PqrFormField = PqrFormField::findByAttributes([
+                    'name' => 'sys_anexos'
+                ]);
+
+                if ($PqrFormField) {
+                    $PqrFormField->getService()->save([
+                        'active' => 1
+                    ]);
+                }
+                $PqrFormService->publish();
+            }
+
+            $success = $PqrFormService->save([
+                'rad_email' => $enable
+            ]);
+
             if (!$success) {
                 throw new SaiaException($PqrFormService->getErrorManager()->getMessage());
             }

@@ -32,7 +32,8 @@ class FtPqrProperties extends ModelFormat
 				'sys_severidad',
 				'dependencia',
 				'sys_tipo',
-				'sys_email' 
+				'sys_email',
+				'sys_anexos' 
             ],
             'date' => ['sys_fecha_vencimiento',
 				'sys_fecha_terminado'],
