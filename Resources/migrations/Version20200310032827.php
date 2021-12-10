@@ -83,7 +83,7 @@ final class Version20200310032827 extends AbstractMigration
             'tipo_edicion'              => 0,
             'item'                      => 0,
             'font_size'                 => 11,
-            'banderas'                  => 'e',
+            'banderas'                  => 'asunto_padre',
             'mostrar_pdf'               => 1,
             'orden'                     => null,
             'fk_categoria_formato'      => null,
