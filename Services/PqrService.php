@@ -2,11 +2,10 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\services\exception\SaiaException;
 use App\services\GlobalContainer;
-use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
-use Exception;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\grafico\PantallaGrafico;
 use App\Bundles\pqr\Services\models\PqrForm;
@@ -307,7 +306,7 @@ class PqrService
      * Activa los indicadores preestablecidos
      *
      * @return void
-     * @throws Exception
+     * @throws SaiaException
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -316,18 +315,27 @@ class PqrService
         if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
         ])) {
-            throw new Exception("No se encuentra la pantalla de los grafico", 200);
+            throw new SaiaException("No se encuentra la pantalla de los grafico");
         }
 
-        GlobalContainer::getConnection()
+        $PqrFormField = PqrFormField::findByAttributes([
+            'name' => 'sys_dependencia'
+        ]);
+
+        $Qb = GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->update('grafico')
             ->set('estado', 1)
             ->where('fk_pantalla_grafico=:idpantalla')
-            ->setParameter(':idpantalla', $PantallaGrafico->getPK(), Types::INTEGER)
-            ->andWhere("nombre<>:graficoDependencia")
-            ->setParameter(':graficoDependencia', self::NAME_DEPENDENCY_GRAPH, Types::STRING)
-            ->execute();
+            ->setParameter(':idpantalla', $PantallaGrafico->getPK(), Types::INTEGER);
+        $Qb->execute();
+
+        if (!$PqrFormField) {
+            $Qb->set('estado', 0)
+                ->andWhere("nombre LIKE :graficoDependencia")
+                ->setParameter(':graficoDependencia', self::NAME_DEPENDENCY_GRAPH, Types::STRING)
+                ->execute();
+        }
     }
 
 }

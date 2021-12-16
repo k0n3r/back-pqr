@@ -6,9 +6,7 @@ use App\services\exception\SaiaException;
 use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
-use Saia\models\grafico\Grafico;
 use Saia\models\formatos\Formato;
-use Saia\models\grafico\PantallaGrafico;
 use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
@@ -181,9 +179,7 @@ class PqrFormService extends ModelService
      */
     public function publish(): bool
     {
-        if (!$this->getModel()->fk_formato) {
-            PqrService::activeGraphics();
-        }
+        PqrService::activeGraphics();
 
         if (!$this->addEditFormat(
             new AddEditFtPqr($this->getModel())
@@ -537,18 +533,7 @@ class PqrFormService extends ModelService
             }
         }
         if ($sysDependencia) {
-            if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
-                'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
-            ])) {
-                throw new SaiaException("No se encuentra la pantalla de los grafico");
-            }
-
-            $Grafico = Grafico::findByAttributes([
-                'fk_pantalla_grafico' => $PantallaGrafico->getPK(),
-                'nombre'              => PqrService::NAME_DEPENDENCY_GRAPH
-            ]);
-            $Grafico->estado = 1;
-            $Grafico->save();
+            PqrService::activeGraphics();
         }
 
         //REPORTE PENDIENTE
