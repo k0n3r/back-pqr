@@ -2,9 +2,9 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\services\exception\SaiaException;
 use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
-use Exception;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\grafico\Grafico;
 use Saia\models\formatos\Formato;
@@ -503,7 +503,7 @@ class PqrFormService extends ModelService
         $codeFunction = "<?php \n\n" . implode("\n", $fieldCode) . "\n ?>";
 
         if (!file_put_contents($file, $codeFunction)) {
-            throw new Exception("No fue posible crear las funciones del formulario", 200);
+            throw new SaiaException("No fue posible crear las funciones del formulario");
         }
 
     }
@@ -540,12 +540,12 @@ class PqrFormService extends ModelService
             if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
                 'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
             ])) {
-                throw new Exception("No se encuentra la pantalla de los grafico", 200);
+                throw new SaiaException("No se encuentra la pantalla de los grafico");
             }
 
             $Grafico = Grafico::findByAttributes([
                 'fk_pantalla_grafico' => $PantallaGrafico->getPK(),
-                'nombre'              => 'Dependencia'
+                'nombre'              => PqrService::NAME_DEPENDENCY_GRAPH
             ]);
             $Grafico->estado = 1;
             $Grafico->save();

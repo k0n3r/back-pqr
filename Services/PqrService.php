@@ -3,7 +3,9 @@
 namespace App\Bundles\pqr\Services;
 
 use App\services\GlobalContainer;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Exception;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\grafico\PantallaGrafico;
@@ -13,6 +15,8 @@ use App\Bundles\pqr\Services\models\PqrHtmlField;
 
 class PqrService
 {
+    const NAME_DEPENDENCY_GRAPH = 'pqr_dependencia';
+
     private ?bool $subTypeExist = null;
     private ?bool $dependencyExist = null;
     private PqrForm $PqrForm;
@@ -54,7 +58,7 @@ class PqrService
 
         foreach ($records as $row) {
             $list[] = [
-                'id' => $row['id'],
+                'id'   => $row['id'],
                 'text' => $row['nombre']
             ];
         }
@@ -161,7 +165,7 @@ class PqrService
         $subType = $this->getSubTypes();
 
         $records = (CamposFormato::findByAttributes([
-            'nombre' => PqrFormField::FIELD_NAME_SYS_TIPO,
+            'nombre'            => PqrFormField::FIELD_NAME_SYS_TIPO,
             'formato_idformato' => $this->getPqrForm()->fk_formato
         ]))->CampoOpciones;
 
@@ -169,15 +173,15 @@ class PqrService
         foreach ($records as $CampoOpciones) {
             if ($CampoOpciones->estado) {
                 $data[] = [
-                    'id' => $CampoOpciones->getPK(),
+                    'id'   => $CampoOpciones->getPK(),
                     'text' => $CampoOpciones->valor
                 ];
             }
         }
 
         return [
-            'dataType' => $data,
-            'dataSubType' => $subType ?? [],
+            'dataType'         => $data,
+            'dataSubType'      => $subType ?? [],
             'activeDependency' => (int)$this->dependencyExist()
         ];
     }
@@ -202,7 +206,7 @@ class PqrService
         foreach ($records as $CampoOpciones) {
             if ($CampoOpciones->estado) {
                 $data[] = [
-                    'id' => $CampoOpciones->getPK(),
+                    'id'   => $CampoOpciones->getPK(),
                     'text' => $CampoOpciones->valor
                 ];
             }
@@ -269,7 +273,7 @@ class PqrService
         if ($records = PqrFormField::findByQueryBuilder($Qb)) {
             foreach ($records as $PqrFormField) {
                 $data[] = [
-                    'id' => $PqrFormField->getPK(),
+                    'id'   => $PqrFormField->getPK(),
                     'text' => $PqrFormField->label
                 ];
             }
@@ -320,8 +324,9 @@ class PqrService
             ->update('grafico')
             ->set('estado', 1)
             ->where('fk_pantalla_grafico=:idpantalla')
-            ->setParameter(':idpantalla', $PantallaGrafico->getPK(), Type::getType('integer'))
-            ->andWhere("nombre<>'Dependencia'")
+            ->setParameter(':idpantalla', $PantallaGrafico->getPK(), Types::INTEGER)
+            ->andWhere("nombre<>:graficoDependencia")
+            ->setParameter(':graficoDependencia', self::NAME_DEPENDENCY_GRAPH, Types::STRING)
             ->execute();
     }
 

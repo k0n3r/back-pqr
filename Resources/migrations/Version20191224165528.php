@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\Resources\migrations;
 
+use App\Bundles\pqr\Services\PqrService;
 use DateTime;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\Perfil;
@@ -187,13 +188,17 @@ final class Version20191224165528 extends AbstractMigration
         $this->createGraphic($id);
     }
 
+    /**
+     * @param $id
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-12-16
+     */
     protected function createGraphic($id)
     {
         $graphics = [
             [
                 'fk_busqueda_componente' => null,
                 'fk_pantalla_grafico'    => $id,
-                'nombre'                 => 'pqr_dependencia',
+                'nombre'                 => PqrService::NAME_DEPENDENCY_GRAPH,
                 'tipo'                   => '1',
                 'configuracion'          => null,
                 'estado'                 => 0,
