@@ -331,6 +331,7 @@ class PqrService
         $Qb->execute();
 
         if (!$PqrFormField) {
+            $Qb->resetQueryPart('set');
             $Qb->set('estado', 0)
                 ->andWhere("nombre LIKE :graficoDependencia")
                 ->setParameter(':graficoDependencia', self::NAME_DEPENDENCY_GRAPH, Types::STRING)
