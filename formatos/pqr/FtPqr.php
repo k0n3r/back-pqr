@@ -68,7 +68,7 @@ class FtPqr extends FtPqrProperties
         if (!$action) {
             $PqrFormField = (PqrForm::getInstance())->getRow('sys_subtipo');
 
-            $data['isActive'] = (int)($PqrFormField ? $PqrFormField->isActive() : false);
+            $data['isActive'] = (int)($PqrFormField && $PqrFormField->isActive());
         }
         return $data;
     }

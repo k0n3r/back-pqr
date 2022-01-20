@@ -81,13 +81,13 @@ class PqrNotyMessageService extends ModelService
      *
      * @see resolveVariables
      * @param FtPqr $FtPqr
-     * @return integer
+     * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2021
      */
-    public static function n_numeroPqr(FtPqr $FtPqr): int
+    public static function n_numeroPqr(FtPqr $FtPqr): string
     {
-        return (int) $FtPqr->getDocument()->numero;
+        return $FtPqr->getDocument()->getService()->getFilingReferenceNumber();
     }
 
     /**

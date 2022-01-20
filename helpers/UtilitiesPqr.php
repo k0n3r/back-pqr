@@ -38,7 +38,7 @@ class UtilitiesPqr
     /**
      * Obtiene la instancia de la FtPqr o clase que la extienda
      *
-     * @param int $documentId
+     * @param int $idft
      * @return FtPqr
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */

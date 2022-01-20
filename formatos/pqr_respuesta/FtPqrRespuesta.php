@@ -43,12 +43,12 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     }
 
     /**
-     * @return Tercero
+     * @return null|Tercero
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
      */
-    public function getTercero(): Tercero
+    public function getTercero(): ?Tercero
     {
-        if (!$this->Tercero) {
+        if (!$this->Tercero && $this->destino) {
             $this->Tercero = new Tercero($this->destino);
         }
 

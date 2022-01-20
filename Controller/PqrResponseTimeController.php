@@ -42,10 +42,10 @@ class PqrResponseTimeController extends AbstractController
                 $CampoOpcion = $PqrResponseTime->getCampoOpcionForSysTipo();
 
                 $key = (int)$CampoOpcion->orden;
-                $mayor = $key > $mayor ? $key : $mayor;
+                $mayor = max($key, $mayor);
 
                 if (!in_array($key, $keys)) {
-                    array_push($keys, $key);
+                    $keys[] = $key;
                     $orden = $key;
                 } else {
                     $mayor++;

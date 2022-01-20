@@ -101,17 +101,17 @@ class WebservicePqr extends WsFt
 
     private function setFieldsAnonymous(PqrFormField $PqrFormField): void
     {
-        array_push($this->objectFields, [
-            'name' => $PqrFormField->name,
+        $this->objectFields[] = [
+            'name'     => $PqrFormField->name,
             'required' => (int)$PqrFormField->required,
-            'type' => $PqrFormField->getPqrHtmlField()->type_saia
-        ]);
-        array_push($this->objectFieldsForAnonymous, [
-            'name' => $PqrFormField->name,
-            'show' => (int)$PqrFormField->anonymous,
+            'type'     => $PqrFormField->getPqrHtmlField()->type_saia
+        ];
+        $this->objectFieldsForAnonymous[] = [
+            'name'     => $PqrFormField->name,
+            'show'     => (int)$PqrFormField->anonymous,
             'required' => (int)($PqrFormField->anonymous ? $PqrFormField->required_anonymous : 0),
-            'type' => $PqrFormField->getPqrHtmlField()->type_saia
-        ]);
+            'type'     => $PqrFormField->getPqrHtmlField()->type_saia
+        ];
     }
 
 

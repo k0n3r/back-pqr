@@ -17,7 +17,7 @@ trait TModels
     public function getDataAttributes(): array
     {
         $attributes = $this->getSafeAttributes();
-        array_push($attributes, $this->getPkName());
+        $attributes[] = $this->getPkName();
 
         $data = [];
         foreach ($attributes as $value) {
