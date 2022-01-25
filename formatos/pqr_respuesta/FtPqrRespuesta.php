@@ -6,7 +6,6 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
 use Exception;
 use Saia\controllers\localidad\MunicipioService;
-use Saia\models\formatos\CampoOpciones;
 use Saia\models\Tercero;
 use Saia\models\localidades\Municipio;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
@@ -189,26 +188,18 @@ HTML;
      */
     public function fieldSatisfactionSurvey(int $idCamposFormato): string
     {
-
         $CamposFormato = new CamposFormato($idCamposFormato);
 
-        $none = 'd-none';
         $check = (int)$this->sol_encuesta;
         $checked = $check ? 'checked' : '';
 
-        if ($this->tipo_distribucion) {
-            $none = (new CampoOpciones($this->tipo_distribucion))->llave != self::DISTRIBUCION_ENVIAR_EMAIL ? 'd-none' : '';
-        }
-
-        return "<div class='form-group form-group-default $none' id='group_sol_encuesta'>
-            <input type='hidden' name='sol_encuesta' id='sol_encuesta' value='$check'>
+        return "<input type='hidden' name='sol_encuesta' id='sol_encuesta' value='$check'>
             <div class='checkbox check-success input-group'>
                 <input type='checkbox' id='sol_encuesta1' $checked>
                 <label for='sol_encuesta1' class='mr-3'>
                     $CamposFormato->etiqueta
                 </label>
-            </div>
-        </div>";
+            </div>";
     }
 
 
