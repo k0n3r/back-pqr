@@ -17,8 +17,8 @@ trait TMigrations
     protected function init()
     {
         $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like 'administrador'";
-        $this->perfil = (int)$this->connection->fetchOne($sql);
-        $this->abortIf(!$this->perfil, "No se encontro el perfil del administador");
+        $this->idperfil = (int)$this->connection->fetchOne($sql);
+        $this->abortIf(!$this->idperfil, "No se encontro el perfil del administador");
 
         $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like 'administrador interno'";
         $this->idperfilInterno = (int)$this->connection->fetchOne($sql);

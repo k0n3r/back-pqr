@@ -11,6 +11,9 @@ use App\Bundles\pqr\Services\models\PqrHistory;
 
 class PqrHistoryService extends ModelService
 {
+    private ?string $logo = null;
+    private ?string $customerName = null;
+
 
     /**
      * @inheritDoc
@@ -30,11 +33,11 @@ class PqrHistoryService extends ModelService
     public function getHistoryForTimeline(): ?array
     {
         $data = [
-            'header' => true,
-            'imgRoute' => $this->getLogo(),
-            'userName' => $this->getModel()->getFuncionario()->getName(),
-            'business' => $this->getCustomerName(),
-            'date' => $this->getModel()->getFecha(),
+            'header'      => true,
+            'imgRoute'    => $this->getLogo(),
+            'userName'    => $this->getModel()->getFuncionario()->getName(),
+            'business'    => $this->getCustomerName(),
+            'date'        => $this->getModel()->getFecha(),
             'description' => $this->getModel()->descripcion
         ];
 
@@ -42,18 +45,18 @@ class PqrHistoryService extends ModelService
             case PqrHistory::TIPO_RESPUESTA:
                 $FtPqrRespuesta = $this->getModel()->getRespuestaPqr();
                 $data = array_merge($data, [
-                    'iconPoint' => 'fa fa-envelope-o',
+                    'iconPoint'      => 'fa fa-envelope-o',
                     'iconPointColor' => 'warning',
-                    'url' => UtilitiesPqr::getRoutePdf($FtPqrRespuesta->getDocument())
+                    'url'            => UtilitiesPqr::getRoutePdf($FtPqrRespuesta->getDocument())
                 ]);
                 break;
 
             case PqrHistory::TIPO_CALIFICACION:
                 $FtPqrRespuesta = $this->getModel()->getRespuestaPqr();
                 $data = array_merge($data, [
-                    'iconPoint' => 'fa fa-comment',
+                    'iconPoint'      => 'fa fa-comment',
                     'iconPointColor' => 'danger',
-                    'description' => "Se solicita la calificación del servicio prestado a la respuesta # {$FtPqrRespuesta->getDocument()->numero}"
+                    'description'    => "Se solicita la calificación del servicio prestado a la respuesta # {$FtPqrRespuesta->getDocument()->numero}"
                 ]);
                 break;
 
