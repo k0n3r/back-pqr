@@ -59,5 +59,13 @@ class FtPqrRespuestaProperties extends ModelFormat
         return [];
     }
     
+    /**
+    * @inheritDoc
+    */
+    public function getNumberFolios(): int
+    {
+        return 0;
+    }
+    
     
 }

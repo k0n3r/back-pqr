@@ -27,6 +27,9 @@ class FtPqr extends FtPqrProperties
 
     private ?FtPqrService $FtPqrService = null;
 
+    /**
+     * @inheritDoc
+     */
     protected function defineMoreAttributes(): array
     {
         return [
@@ -71,6 +74,14 @@ class FtPqr extends FtPqrProperties
             $data['isActive'] = (int)($PqrFormField && $PqrFormField->isActive());
         }
         return $data;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getNumberFolios(): int
+    {
+        return $this->sys_folios ?: 0;
     }
 
     /**
@@ -294,5 +305,4 @@ HTML;
 
         return $this->getService()->generateField($PqrFormField);
     }
-
 }

@@ -214,6 +214,20 @@ final class Version20200103161511 extends AbstractMigration
                 'orden'             => 3
             ],
             [
+                'label'             => 'Número de folios',
+                'name'              => 'sys_folios',
+                'required'          => 0,
+                'anonymous'         => 0,
+                'show_report'       => 0,
+                'setting'           => json_encode([
+                    'placeholder' => 'Ingrese el número de folios recibidos'
+                ]),
+                'fk_pqr_html_field' => $idsHtmlFields['number'],
+                'fk_pqr_form'       => $idform,
+                'is_system'         => 1,
+                'orden'             => 3
+            ],
+            [
                 'label'             => 'Anexos',
                 'name'              => 'sys_anexos',
                 'required'          => 0,
