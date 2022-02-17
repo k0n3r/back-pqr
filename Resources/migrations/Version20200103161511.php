@@ -140,6 +140,13 @@ final class Version20200103161511 extends AbstractMigration
                 'active'    => 1,
                 'uniq'      => 1
             ],
+            [
+                'label'     => 'Fecha',
+                'type'      => 'date',
+                'type_saia' => 'Date',
+                'active'    => 1,
+                'uniq'      => 0
+            ]
         ];
     }
 

@@ -41,6 +41,9 @@ final class Version20200103155146 extends AbstractMigration
 
         $table8 = $schema->createTable('pqr_noty_messages');
         $this->tablePqrNotyMessages($table8);
+
+        $table9 = $schema->createTable('pqr_response_times');
+        $this->tablePqrResponseTime($table9);
     }
 
     public function tablePqrFormFields(Table $table)
@@ -164,6 +167,11 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('active', 'boolean', [
             'default' => 1
         ]);
+
+        $table->addColumn('fk_field_time', 'integer', [
+            'default' => 0,
+            'comment' => 'idcampos_formato'
+        ]);
     }
 
     public function tablePqrBackup(Table $table)
@@ -257,6 +265,23 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
+    private function tablePqrResponseTime(Table $table)
+    {
+        $table->addColumn('id', 'integer', [
+            'autoincrement' => true
+        ]);
+        $table->setPrimaryKey(['id']);
+
+        $table->addColumn('fk_campo_opciones', 'integer');
+        $table->addColumn('fk_sys_tipo', 'integer', [
+            'comment' => 'idcampo_opciones'
+        ]);
+        $table->addColumn('number_days', 'integer');
+        $table->addColumn('active', 'boolean', [
+            'default' => 1
+        ]);
+    }
+
     public function down(Schema $schema): void
     {
         $data = [
@@ -266,7 +291,8 @@ final class Version20200103155146 extends AbstractMigration
             'pqr_backups',
             'pqr_notifications',
             'pqr_history',
-            'pqr_noty_messages'
+            'pqr_noty_messages',
+            'pqr_response_times'
         ];
 
         foreach ($data as $table) {

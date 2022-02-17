@@ -21,14 +21,17 @@ final class Version20210605164743 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $table = $schema->getTable('pqr_forms');
-        $table->addColumn('fk_field_time', 'integer', [
-            'default' => 0,
-            'comment' => 'idcampos_formato'
-        ]);
+        if (!$table->hasColumn('fk_field_time')) {
+            $table->addColumn('fk_field_time', 'integer', [
+                'default' => 0,
+                'comment' => 'idcampos_formato'
+            ]);
+        }
 
-        $table2 = $schema->createTable('pqr_response_times');
-        $this->tablePqrResponseTime($table2);
-
+        if (!$schema->hasTable('pqr_response_times')) {
+            $table2 = $schema->createTable('pqr_response_times');
+            $this->tablePqrResponseTime($table2);
+        }
     }
 
     public function down(Schema $schema): void
