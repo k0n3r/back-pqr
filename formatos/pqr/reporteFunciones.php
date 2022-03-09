@@ -31,9 +31,8 @@ function viewFtPqr(int $idft, $numero): string
 
     return <<<HTML
     <div class='kenlace_saia'
-    enlace='views/documento/index_acordeon.php?documentId=$FtPqr->documento_iddocumento' 
-    conector='iframe'
-    titulo='No Registro $numero'>
+    data-enlace='views/documento/index_acordeon.php?documentId=$FtPqr->documento_iddocumento' 
+    title='No Registro $numero'>
         <button class='btn btn-complete' style='margin:auto'>$numero</button>
     </div>
 HTML;
@@ -115,7 +114,7 @@ function totalAnswers(int $idft): string
     $answers = [];
     foreach ($records as $FtPqrRespuesta) {
         $fecha = DateController::convertDate($FtPqrRespuesta->getDocument()->fecha, DateController::PUBLIC_DATE_FORMAT);
-        $answers[] = "<a class='kenlace_saia' enlace='$url' title='Ver las respuestas' conector='iframe' titulo='Respuestas a PQR No $numero' href='#'>{$FtPqrRespuesta->getDocument()->numero} - $fecha</a>";
+        $answers[] = "<a class='kenlace_saia' data-enlace='$url' title='Respuestas a PQR No $numero' href='#'>{$FtPqrRespuesta->getDocument()->numero} - $fecha</a>";
     }
 
     return implode('<br/>', $answers);

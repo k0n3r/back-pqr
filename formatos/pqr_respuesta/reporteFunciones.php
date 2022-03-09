@@ -97,9 +97,8 @@ function viewCalificacion(int $idft): string
 
     return <<<HTML
     <div class='kenlace_saia'
-    enlace='$url' 
-    conector='iframe'
-    titulo='Calificación a $nombreFormato No $numero'>
+    data-enlace='$url' 
+    title='Calificación a $nombreFormato No $numero'>
         <button class='btn btn-complete' style='margin:auto'>$cant</button>
     </div>
 HTML;

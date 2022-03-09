@@ -6,9 +6,8 @@ function view(int $iddocumento, $numero): String
 {
     return <<<HTML
     <div class='kenlace_saia'
-    enlace='views/documento/index_acordeon.php?documentId=$iddocumento' 
-    conector='iframe'
-    titulo='No Registro $numero'>
+    data-enlace='views/documento/index_acordeon.php?documentId=$iddocumento' 
+    title='No Registro $numero'>
         <button class='btn btn-complete' style='margin:auto'>$numero</button>
     </div>
 HTML;
