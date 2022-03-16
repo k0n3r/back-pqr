@@ -328,8 +328,10 @@ function getResueltas($dependencia){
         ->join('vp', 'vpqr_respuesta', 'vr', 'vp.idft = vr.ft_pqr')
         ->where("vp.sys_dependencia = :dependencia")
         ->setParameter(":dependencia", $dependencia, Types::INTEGER)
+        ->groupBy('vr.ft_pqr')
         ->execute()
         ->fetchAllAssociative();
+        
     $cantidadTerminado = count($PqrTerminadoRecords);
     $documentoList = [];
     foreach ($PqrTerminadoRecords as $PqrTerminado) {
