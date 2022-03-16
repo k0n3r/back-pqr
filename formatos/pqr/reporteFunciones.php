@@ -262,21 +262,46 @@ HTML;
 }
 
 function getPendientes($dependencia){
-    $PqrPendientesRecords = GlobalContainer::getConnection()->createQueryBuilder()
-        ->select("iddocumento")
-        ->from('vpqr')
-        ->where("sys_dependencia = :dependencia")
-        ->andWhere("sys_estado = 'PENDIENTE'")
+    $PqrRespuestaRecords = GlobalContainer::getConnection()->createQueryBuilder()
+        ->select("vr.ft_pqr")
+        ->from('vpqr', 'vp')
+        ->join('vp', 'vpqr_respuesta', 'vr', 'vp.idft = vr.ft_pqr')
+        ->where("vp.sys_dependencia = :dependencia")
         ->setParameter(":dependencia", $dependencia, Types::INTEGER)
         ->execute()
         ->fetchAllAssociative();
+        
+    $respuestaList = [];
     
-    $documentoList = [];
+    foreach ($PqrRespuestaRecords as $PqrRespuesta) {
+        $respuestaList[] = $PqrRespuesta['ft_pqr'];
+    }
+    $respuesta = implode(',', $respuestaList);
+    if($respuesta){
+        $PqrPendientesRecords = GlobalContainer::getConnection()->createQueryBuilder()
+            ->select("vp.iddocumento")
+            ->from('vpqr', 'vp')
+            ->where("vp.idft NOT IN(" . $respuesta .")")
+            ->andWhere("vp.sys_dependencia = :dependencia")
+            ->setParameter(":dependencia", $dependencia, Types::INTEGER)
+            ->execute()
+            ->fetchAllAssociative();
+    }else{
+        $PqrPendientesRecords = GlobalContainer::getConnection()->createQueryBuilder()
+        ->select("vp.iddocumento")
+        ->from('vpqr', 'vp')
+        ->where("vp.sys_dependencia = :dependencia")
+        ->setParameter(":dependencia", $dependencia, Types::INTEGER)
+        ->execute()
+        ->fetchAllAssociative();
+    }
+    
     $cantidadPendientes = count($PqrPendientesRecords);
-    
+    $documentoList = [];
     foreach ($PqrPendientesRecords as $PqrPendientes) {
         $documentoList[] = $PqrPendientes['iddocumento'];
     }
+
     global $idbusquedaComponenteRespuesta;
     if (!$idbusquedaComponenteRespuesta) {
         $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
@@ -298,10 +323,10 @@ HTML;
 
 function getResueltas($dependencia){
     $PqrTerminadoRecords = GlobalContainer::getConnection()->createQueryBuilder()
-        ->select("iddocumento")
-        ->from('vpqr')
-        ->where("sys_dependencia = :dependencia")
-        ->andWhere("sys_estado = 'TERMINADO'")
+        ->select("vp.iddocumento")
+        ->from('vpqr', 'vp')
+        ->join('vp', 'vpqr_respuesta', 'vr', 'vp.idft = vr.ft_pqr')
+        ->where("vp.sys_dependencia = :dependencia")
         ->setParameter(":dependencia", $dependencia, Types::INTEGER)
         ->execute()
         ->fetchAllAssociative();
