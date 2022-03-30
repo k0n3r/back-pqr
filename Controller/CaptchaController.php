@@ -33,10 +33,9 @@ class CaptchaController extends AbstractController implements IHasCaptcha
         Request $Request,
         ISaiaResponse $saiaResponse,
         Connection $Connection
-    ): Response
-    {
+    ): Response {
+        $Connection->beginTransaction();
         try {
-            $Connection->beginTransaction();
 
             if (empty($Request->get('formatId'))) {
                 throw new Exception("Se debe indicar el formato", 1);
@@ -68,7 +67,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
 
             $attributes = [
                 'messageBody' => $message,
-                'number' => $Documento->numero,
+                'number'      => $Documento->numero,
             ];
 
             $saiaResponse->replaceData($attributes);

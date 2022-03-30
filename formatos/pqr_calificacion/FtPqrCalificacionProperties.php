@@ -54,7 +54,7 @@ class FtPqrCalificacionProperties extends ModelFormat
     */
     public function getNumberFolios(): int
     {
-        return $this->numero_folios ?? 1;
+        return $this->numero_folios ?? 0;
     }
     
     
