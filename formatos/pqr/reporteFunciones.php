@@ -8,6 +8,9 @@ use Saia\controllers\DateController;
 use Saia\models\documento\Documento;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CampoSeleccionados;
+use Saia\models\Dependencia;
+use App\services\GlobalContainer;
+use Doctrine\DBAL\Types\Types;
 
 $fileAdditionalFunctions = $_SERVER['ROOT_PATH'] . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
 if (file_exists($fileAdditionalFunctions)) {
@@ -221,3 +224,158 @@ HTML;
 HTML;
 
 }
+
+function getDependencia($dependencia){
+    if($dependencia != ""){
+        $Dependencia = new Dependencia($dependencia);
+    }
+    return $Dependencia->nombre;
+}
+
+function getCantidad($dependencia){
+    $FtPqrRecord = FtPqr::findAllByAttributes([
+        'sys_dependencia' => $dependencia
+    ]);
+    $documentoList = [];
+    $cantidadDependencias = count($FtPqrRecord);
+    foreach ($FtPqrRecord as $FtPqr) {
+        $documentoList[] = $FtPqr->documento_iddocumento;
+    }
+    global $idbusquedaComponenteRespuesta;
+    if (!$idbusquedaComponenteRespuesta) {
+        $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
+            'nombre' => 'rep_total_pqr_depen'
+        ])[0];
+    }
+    $documentList = implode(",", $documentoList);
+    $url = 'views/buzones/grilla.php?';
+    $url .= http_build_query([
+        'variable_busqueda' => json_encode(['documentoList' => $documentList]),
+        'idbusqueda_componente' => $idbusquedaComponenteRespuesta
+    ]);
+    return <<<HTML
+    <a class='kenlace_saia' enlace='$url' title='PQRS' conector='iframe' titulo='PQRS' href='#'>
+            <button class='btn btn-complete' style='margin:auto'>$cantidadDependencias</button>
+    </a>
+HTML;
+}
+
+function getPendientes($dependencia){
+    $PqrRespuestaRecords = GlobalContainer::getConnection()->createQueryBuilder()
+        ->select("vr.ft_pqr")
+        ->from('vpqr', 'vp')
+        ->join('vp', 'vpqr_respuesta', 'vr', 'vp.idft = vr.ft_pqr')
+        ->where("vp.sys_dependencia = :dependencia")
+        ->setParameter(":dependencia", $dependencia, Types::INTEGER)
+        ->execute()
+        ->fetchAllAssociative();
+        
+    $respuestaList = [];
+    
+    foreach ($PqrRespuestaRecords as $PqrRespuesta) {
+        $respuestaList[] = $PqrRespuesta['ft_pqr'];
+    }
+    $respuesta = implode(',', $respuestaList);
+    if($respuesta){
+        $PqrPendientesRecords = GlobalContainer::getConnection()->createQueryBuilder()
+            ->select("vp.iddocumento")
+            ->from('vpqr', 'vp')
+            ->where("vp.idft NOT IN(" . $respuesta .")")
+            ->andWhere("vp.sys_dependencia = :dependencia")
+            ->setParameter(":dependencia", $dependencia, Types::INTEGER)
+            ->execute()
+            ->fetchAllAssociative();
+    }else{
+        $PqrPendientesRecords = GlobalContainer::getConnection()->createQueryBuilder()
+        ->select("vp.iddocumento")
+        ->from('vpqr', 'vp')
+        ->where("vp.sys_dependencia = :dependencia")
+        ->setParameter(":dependencia", $dependencia, Types::INTEGER)
+        ->execute()
+        ->fetchAllAssociative();
+    }
+    
+    $cantidadPendientes = count($PqrPendientesRecords);
+    $documentoList = [];
+    foreach ($PqrPendientesRecords as $PqrPendientes) {
+        $documentoList[] = $PqrPendientes['iddocumento'];
+    }
+
+    global $idbusquedaComponenteRespuesta;
+    if (!$idbusquedaComponenteRespuesta) {
+        $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
+            'nombre' => 'rep_total_pqr_depen'
+        ])[0];
+    }
+    $documentList = implode(",", $documentoList);
+    $url = 'views/buzones/grilla.php?';
+    $url .= http_build_query([
+        'variable_busqueda' => json_encode(['documentoList' => $documentList]),
+        'idbusqueda_componente' => $idbusquedaComponenteRespuesta
+    ]);
+    return <<<HTML
+    <a class='kenlace_saia' enlace='$url' title='PQRS' conector='iframe' titulo='PQRS' href='#'>
+            <button class='btn btn-complete' style='margin:auto'>$cantidadPendientes</button>
+    </a>
+HTML;
+}
+
+function getResueltas($dependencia){
+    $PqrTerminadoRecords = GlobalContainer::getConnection()->createQueryBuilder()
+        ->select("vp.iddocumento")
+        ->from('vpqr', 'vp')
+        ->join('vp', 'vpqr_respuesta', 'vr', 'vp.idft = vr.ft_pqr')
+        ->where("vp.sys_dependencia = :dependencia")
+        ->setParameter(":dependencia", $dependencia, Types::INTEGER)
+        ->groupBy('vr.ft_pqr')
+        ->execute()
+        ->fetchAllAssociative();
+        
+    $cantidadTerminado = count($PqrTerminadoRecords);
+    $documentoList = [];
+    foreach ($PqrTerminadoRecords as $PqrTerminado) {
+        $documentoList[] = $PqrTerminado['iddocumento'];
+    }
+    global $idbusquedaComponenteRespuesta;
+    if (!$idbusquedaComponenteRespuesta) {
+        $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
+            'nombre' => 'rep_total_pqr_depen'
+        ])[0];
+    }
+    $documentList = implode(",", $documentoList);
+    $url = 'views/buzones/grilla.php?';
+    $url .= http_build_query([
+        'variable_busqueda' => json_encode(['documentoList' => $documentList]),
+        'idbusqueda_componente' => $idbusquedaComponenteRespuesta
+    ]);
+    return <<<HTML
+    <a class='kenlace_saia' enlace='$url' title='PQRS' conector='iframe' titulo='PQRS' href='#'>
+            <button class='btn btn-complete' style='margin:auto'>$cantidadTerminado</button>
+    </a>
+HTML;
+
+}
+
+function filter_pqr(){
+    
+    if ($_REQUEST['variable_busqueda']) {
+        $params = json_decode($_REQUEST['variable_busqueda'], true);
+        $idft = $params['documentoList'];
+        
+        if ($idft) {
+            return "v.iddocumento in($idft)";
+        }
+    }
+
+    return 'v.iddocumento=""';
+}
+
+function verDocumento(int $iddocumento, int $numero){
+        return <<<HTML
+        <div class='kenlace_saia'
+        enlace='views/documento/index_acordeon.php?documentId=$iddocumento'
+        conector='iframe' titulo='No Registro $numero'>
+        <button class='btn btn-complete' style='margin:auto'>$numero</button>
+        </div>
+HTML;
+    }
