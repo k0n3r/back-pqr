@@ -129,6 +129,7 @@ class AddEditFtPqr implements IAddEditFormat
             unset($data['papel']);
             unset($data['funcionario_idfuncionario']);
             unset($data['fk_categoria_formato']);
+            unset($data['formato_fecha_radicado']);
         }
 
         return $data;
