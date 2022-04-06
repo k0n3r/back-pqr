@@ -116,7 +116,8 @@ class AddEditFtPqr implements IAddEditFormat
             'descripcion_formato'       => 'Modulo de PQR',
             'version'                   => 1,
             'module'                    => 'pqr',
-            'publicar'                  => 1
+            'publicar'                  => 1,
+            'formato_fecha_radicado'    => 'Ymd'
         ];
 
         if ($edit) {

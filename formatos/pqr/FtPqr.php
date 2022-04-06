@@ -5,7 +5,6 @@ namespace App\Bundles\pqr\formatos\pqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\services\exception\SaiaException;
 use Saia\models\Tercero;
-use Saia\controllers\DateController;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrService;
 use App\Bundles\pqr\Services\models\PqrBackup;
@@ -223,12 +222,10 @@ class FtPqr extends FtPqrProperties
     {
         $Qr = UtilitiesPqr::showQr($this);
 
-        $fecha = DateController::convertDate($this->getDocument()->fecha, 'Ymd');
         $text = sprintf(
-            '%s %s-%s',
+            '%s %s',
             'Radicado:',
-            $fecha,
-            $this->getDocument()->numero
+            $this->getDocument()->getService()->getFilingReferenceNumber()
         );
 
         $labelPQR = mb_strtoupper($this->getService()->getPqrForm()->label, 'UTF-8');

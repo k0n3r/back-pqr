@@ -54,7 +54,7 @@ class PqrFormController extends AbstractController
 
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->publish()) {
-                throw new Exception(
+                throw new SaiaException(
                     $PqrFormService->getErrorManager()->getMessage(),
                     $PqrFormService->getErrorManager()->getCode(),
                 );
