@@ -19,6 +19,7 @@ final class Version20220214144616 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        return;
         // this up() migration is auto-generated, please modify it to your needs
         $this->reporteDependencia();
         $this->reporteEstadosPqrDependencia();
