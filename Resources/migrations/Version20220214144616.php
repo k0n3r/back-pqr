@@ -32,7 +32,7 @@ final class Version20220214144616 extends AbstractMigration
         }
 
         $sql = "SELECT idbusqueda FROM busqueda WHERE nombre LIKE 'reporte_pqr'";
-        $idbusqueda = $this->connection->fetchOne($sql);
+        $idbusqueda = (int)$this->connection->fetchOne($sql);
 
         $this->createComponentePorDependencia($idbusqueda);
         $this->createGraphicCalificacion();
