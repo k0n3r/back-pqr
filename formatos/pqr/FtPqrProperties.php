@@ -34,7 +34,8 @@ class FtPqrProperties extends ModelFormat
 				'sys_tipo',
 				'sys_email',
 				'sys_folios',
-				'sys_anexos' 
+				'sys_anexos',
+				'sys_dependencia' 
             ],
             'date' => ['sys_fecha_vencimiento',
 				'sys_fecha_terminado'],
@@ -64,7 +65,7 @@ class FtPqrProperties extends ModelFormat
     */
     public function getNumberFolios(): int
     {
-        return 0;
+        return $this->numero_folios ?? 0;
     }
     
     

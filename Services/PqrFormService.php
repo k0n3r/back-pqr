@@ -16,6 +16,7 @@ use App\Bundles\pqr\Services\controllers\WebservicePqr;
 use App\Bundles\pqr\Services\controllers\WebserviceCalificacion;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\IAddEditFormat;
+use Saia\models\Modulo;
 
 class PqrFormService extends ModelService
 {
@@ -179,8 +180,6 @@ class PqrFormService extends ModelService
      */
     public function publish(): bool
     {
-        PqrService::activeGraphics();
-
         if (!$this->addEditFormat(
             new AddEditFtPqr($this->getModel())
         )) {
@@ -232,6 +231,9 @@ class PqrFormService extends ModelService
         $this->viewRespuestaPqr();
         $this->viewCalificacionPqr();
 
+        PqrService::activeGraphics();
+        $this->activeInfoForDependency();
+
         if (!$this->generatePqrWs()) {
             $this->getErrorManager()->setMessage("No fue posible generar el Ws");
             return false;
@@ -243,6 +245,62 @@ class PqrFormService extends ModelService
         }
 
         return true;
+    }
+
+    /**
+     * Activa el reporte de Dependencia  o PQR por dependencia
+     * cuando se activa el compoenten de sys_dependencia
+     *
+     * @throws SaiaException
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-08
+     */
+    private function activeInfoForDependency()
+    {
+        $PqrFormField = PqrFormField::findByAttributes([
+            'name' => 'sys_dependencia'
+        ]);
+
+        if (!$PqrFormField) {
+            return;
+        }
+
+        if (Modulo::findByAttributes([
+            'nombre' => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
+        ])) {
+            return;
+        }
+
+        $ModuloPadre = Modulo::findByAttributes([
+            'nombre' => 'reporte_pqr'
+        ]);
+
+        if (!$ModuloPadre) {
+            throw new SaiaException("No se encontro el modulo del Reporte");
+        }
+
+        $BusquedaComponente = BusquedaComponente::findByAttributes([
+            'nombre' => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
+        ]);
+
+        $enlace = 'views/dashboard/kaiten_dashboard.php?panels=[{"url": "views/buzones/grilla.php?idbusqueda_componente=' . $BusquedaComponente->getPK() . '"}]';
+        $data = [
+            'pertenece_nucleo' => 0,
+            'nombre'           => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
+            'tipo'             => Modulo::TIPO_HIJO,
+            'imagen'           => 'fa fa-bar-chart-o',
+            'etiqueta'         => 'Por Dependencia',
+            'enlace'           => $enlace,
+            'cod_padre'        => $ModuloPadre->getPK(),
+            'orden'            => 4,
+            'asignable'        => 1,
+            'tiene_hijos'      => 0
+        ];
+
+        $ModuloService = (new Modulo())->getService();
+        if (!$ModuloService->save($data)) {
+            throw new SaiaException("No fue posible registrar el reporte de PQR por Dependencia");
+        }
+
     }
 
 
@@ -515,12 +573,8 @@ class PqrFormService extends ModelService
     private function updateReport(array $fields): void
     {
         $code = $nameFields = [];
-        $sysDependencia = false;
         foreach ($fields as $PqrFormField) {
             $nameFields[] = $PqrFormField->name;
-            if ($PqrFormField->name == 'sys_dependencia') {
-                $sysDependencia = true;
-            }
             $type = $PqrFormField->getPqrHtmlField()->type_saia;
             switch ($type) {
                 case 'Text':
@@ -531,9 +585,6 @@ class PqrFormService extends ModelService
                     $code[] = '{"title":"' . strtoupper($PqrFormField->label) . '","field":"{*get_' . $PqrFormField->name . '@idft,' . $PqrFormField->name . '*}","align":"center"}';
                     break;
             }
-        }
-        if ($sysDependencia) {
-            PqrService::activeGraphics();
         }
 
         //REPORTE PENDIENTE

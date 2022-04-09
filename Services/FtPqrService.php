@@ -868,7 +868,8 @@ HTML;
     {
         $data = [];
         foreach ($this->getModel()->getPqrRespuestas() as $FtPqrRespuesta) {
-            if (!$FtPqrRespuesta->getDocument()->isActive()) {
+            $Documento=$FtPqrRespuesta->getDocument();
+            if (!$Documento->isActive() && !$Documento->isDeleted()) {
                 $data[] = $FtPqrRespuesta;
             }
         }

@@ -36,13 +36,13 @@ final class Version20191224165528 extends AbstractMigration
         $this->createIndicators();
     }
 
-    protected function convertDate(string $date): string
+    private function convertDate(string $date): string
     {
         $DateTime = DateTime::createFromFormat('Y-m-d H:i:s', $date);
         return $DateTime->format($this->connection->getDatabasePlatform()->getDateTimeFormatString());
     }
 
-    protected function modulesDefaultData(): array
+    private function modulesDefaultData(): array
     {
         return [
             'agrupador_pqr' => [
@@ -156,7 +156,7 @@ final class Version20191224165528 extends AbstractMigration
         ];
     }
 
-    protected function generateModules(array $data, int $id = 0): void
+    private function generateModules(array $data, int $id = 0): void
     {
         if ($data) {
             foreach ($data as $name => $dataModule) {
@@ -176,23 +176,17 @@ final class Version20191224165528 extends AbstractMigration
         }
     }
 
-    protected function createIndicators()
+    private function createIndicators()
     {
-
         $this->connection->insert('pantalla_grafico', [
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
         ]);
-
         $id = $this->connection->lastInsertId('pantalla_grafico');
 
         $this->createGraphic($id);
     }
 
-    /**
-     * @param $id
-     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-12-16
-     */
-    protected function createGraphic($id)
+    private function createGraphic($id)
     {
         $graphics = [
             [
@@ -270,37 +264,62 @@ final class Version20191224165528 extends AbstractMigration
                 'titulo'                 => 'Estados',
                 'children'               => [
                     [
-                        'fk_grafico' => '6',
+                        'fk_grafico' => 0,
                         'query'      => 'SELECT sys_estado,count(sys_estado) AS cantidad FROM vpqr GROUP BY sys_estado',
-                        'etiqueta'   => 'Estados'
+                        'etiqueta'   => 'Estado'
+                    ]
+                ]
+            ],
+            [
+                'fk_busqueda_componente' => null,
+                'fk_pantalla_grafico'    => $id,
+                'nombre'                 => 'pqr_calificacion_gestion',
+                'tipo'                   => '2',
+                'configuracion'          => null,
+                'estado'                 => 1,
+                'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
+                'columna'                => '-',
+                'titulo_x'               => 'Calificación',
+                'titulo_y'               => 'Cantidad',
+                'busqueda'               => null,
+                'librerias'              => null,
+                'titulo'                 => 'Calificación en Gestión',
+                'children'               => [
+                    [
+                        'fk_grafico' => 0,
+                        'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr_calificacion v,campo_opciones c WHERE v.experiencia_servicio=c.idcampo_opciones GROUP BY c.valor',
+                        'etiqueta'   => 'Calificación',
+                    ]
+                ]
+            ],
+            [
+                'fk_busqueda_componente' => null,
+                'fk_pantalla_grafico'    => $id,
+                'nombre'                 => 'pqr_calificacion_servicio',
+                'tipo'                   => '2',
+                'configuracion'          => null,
+                'estado'                 => 1,
+                'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
+                'columna'                => '-',
+                'titulo_x'               => 'Calificación',
+                'titulo_y'               => 'Cantidad',
+                'busqueda'               => null,
+                'librerias'              => null,
+                'titulo'                 => 'Calificación en Servicio',
+                'children'               => [
+                    [
+                        'fk_grafico' => 0,
+                        'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr_calificacion v,campo_opciones c WHERE v.experiencia_gestion=c.idcampo_opciones GROUP BY c.valor',
+                        'etiqueta'   => 'Calificación',
                     ]
                 ]
             ]
         ];
 
-        foreach ($graphics as $graphic) {
-
-            $graphicSerie = $graphic['children'];
-            unset($graphic['children']);
-
-            $this->connection->insert('grafico', $graphic);
-
-            if ($graphicSerie) {
-                $id = $this->connection->lastInsertId('grafico');
-                $this->createGraphicSerie($graphicSerie, $id);
-            }
-        }
+        $this->insertGraphics($graphics);
     }
 
-    protected function createGraphicSerie($data, $id)
-    {
-        foreach ($data as $serie) {
-            $serie['fk_grafico'] = $id;
-            $this->connection->insert('grafico_serie', $serie);
-        }
-    }
-
-    protected function validateCreation(): void
+    private function validateCreation(): void
     {
         $sql = "SELECT idformato FROM formato WHERE nombre LIKE 'pqr' OR nombre_tabla LIKE 'ft_pqr'";
         $exist = (bool)$this->connection->fetchOne($sql);
@@ -311,7 +330,7 @@ final class Version20191224165528 extends AbstractMigration
         $this->abortIf($exist, "Ya existe un reporte de PQR");
     }
 
-    protected function createRadicadorWeb(): void
+    private function createRadicadorWeb(): void
     {
         $sqlCargo = "SELECT idcargo FROM cargo WHERE lower(nombre) like 'radicador web'";
         $idcargo = (int)$this->connection->fetchOne($sqlCargo);
@@ -388,7 +407,7 @@ final class Version20191224165528 extends AbstractMigration
         $OtherQueriesForPlatform->dropViewIfExist('vpqr_calificacion');
     }
 
-    protected function delOtherModules()
+    private function delOtherModules()
     {
         $nameModules = [
             'crear_pqr',
@@ -400,7 +419,7 @@ final class Version20191224165528 extends AbstractMigration
         }
     }
 
-    protected function delModules(array $data): void
+    private function delModules(array $data): void
     {
         foreach ($data as $name => $dataModule) {
             $this->deleteModulo($name);
@@ -411,7 +430,7 @@ final class Version20191224165528 extends AbstractMigration
         }
     }
 
-    protected function delGraphic(): void
+    private function delGraphic(): void
     {
         $screen = [
             PqrForm::NOMBRE_PANTALLA_GRAFICO

@@ -64,7 +64,7 @@ class FtPqrRespuestaProperties extends ModelFormat
     */
     public function getNumberFolios(): int
     {
-        return 0;
+        return $this->numero_folios ?? 0;
     }
     
     
