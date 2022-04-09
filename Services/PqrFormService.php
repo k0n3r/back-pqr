@@ -282,7 +282,7 @@ class PqrFormService extends ModelService
             'nombre' => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
         ]);
 
-        $enlace = 'views/dashboard/kaiten_dashboard.php?panels=[{"url": "views/buzones/grilla.php?idbusqueda_componente=' . $BusquedaComponente->getPK() . '"}]';
+        $enlace = 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector":"iframe","url": "views/buzones/grilla.php?idbusqueda_componente=' . $BusquedaComponente->getPK() . '"}]';
         $data = [
             'pertenece_nucleo' => 0,
             'nombre'           => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
