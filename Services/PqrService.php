@@ -318,10 +318,6 @@ class PqrService
             throw new SaiaException("No se encuentra la pantalla de los grafico");
         }
 
-        $PqrFormField = PqrFormField::findByAttributes([
-            'name' => 'sys_dependencia'
-        ]);
-
         $Qb = GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->update('grafico')
@@ -329,6 +325,10 @@ class PqrService
             ->where('fk_pantalla_grafico=:idpantalla')
             ->setParameter(':idpantalla', $PantallaGrafico->getPK(), Types::INTEGER);
         $Qb->execute();
+
+        $PqrFormField = PqrFormField::findByAttributes([
+            'name' => 'sys_dependencia'
+        ]);
 
         if (!$PqrFormField) {
             $Qb->resetQueryPart('set');

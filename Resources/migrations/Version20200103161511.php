@@ -53,7 +53,7 @@ final class Version20200103161511 extends AbstractMigration
         }
     }
 
-    protected function getDataPqrHtmlFields(): array
+    private function getDataPqrHtmlFields(): array
     {
         return [
             [
@@ -150,7 +150,7 @@ final class Version20200103161511 extends AbstractMigration
         ];
     }
 
-    protected function getDataPqrForms(): array
+    private function getDataPqrForms(): array
     {
         $sql = "SELECT idcontador FROM contador WHERE nombre='radicacion_entrada'";
         $idcontador = (int)$this->connection->fetchOne($sql);
@@ -166,7 +166,7 @@ final class Version20200103161511 extends AbstractMigration
         ];
     }
 
-    protected function getDataPqrFormFields(int $idform, array $idsHtmlFields): array
+    private function getDataPqrFormFields(int $idform, array $idsHtmlFields): array
     {
 
         return [
@@ -252,7 +252,7 @@ final class Version20200103161511 extends AbstractMigration
         ];
     }
 
-    protected function getDataPqrNotyMessages(): array
+    private function getDataPqrNotyMessages(): array
     {
         return [
             [

@@ -46,7 +46,7 @@ $(function () {
                     });
 
                     $.ajax({
-                        method: 'post',
+                        method: 'POST',
                         url: baseUrl + '$urlSaveFt',
                         data,
                     }).done((response) => {

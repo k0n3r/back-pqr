@@ -16,11 +16,11 @@ trait TMigrations
 
     protected function init()
     {
-        $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like 'administrador'";
+        $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) LIKE 'administrador'";
         $this->idperfil = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$this->idperfil, "No se encontro el perfil del administador");
 
-        $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) like 'administrador interno'";
+        $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) LIKE 'administrador interno'";
         $this->idperfilInterno = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$this->idperfilInterno, "No se encontro el perfil del administador interno");
 
@@ -37,7 +37,7 @@ trait TMigrations
      */
     protected function createModulo(array $data, string $search): int
     {
-        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like '$search'";
+        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) LIKE '$search'";
         $id = (int)$this->connection->fetchOne($sql);
 
         if ($id) {
@@ -70,7 +70,7 @@ trait TMigrations
 
     protected function deleteModulo(string $search): void
     {
-        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) like lower('$search')";
+        $sql = "SELECT idmodulo FROM modulo WHERE lower(nombre) LIKE lower('$search')";
         $id = (int)$this->connection->fetchOne($sql);
 
         if (!$id) {
@@ -88,7 +88,7 @@ trait TMigrations
 
     protected function createBusqueda(array $data, string $search): int
     {
-        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like lower('$search')";
+        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) LIKE lower('$search')";
         $id = (int)$this->connection->fetchOne($sql);
 
         if ($id) {
@@ -106,7 +106,7 @@ trait TMigrations
     protected function createBusquedaComponente(int $idbusqueda, array $data, string $search): int
     {
         $sql = "SELECT idbusqueda_componente FROM busqueda_componente
-        WHERE busqueda_idbusqueda=$idbusqueda AND lower(nombre) like lower('$search')";
+        WHERE busqueda_idbusqueda=$idbusqueda AND lower(nombre) LIKE lower('$search')";
         $id = (int)$this->connection->fetchOne($sql);
 
         if ($id) {
@@ -124,7 +124,7 @@ trait TMigrations
     protected function createBusquedaCondicion(int $idbusquedaComponente, array $data, string $search): int
     {
         $sql = "SELECT idbusqueda_condicion FROM busqueda_condicion
-        WHERE fk_busqueda_componente=$idbusquedaComponente AND lower(etiqueta_condicion) like lower('$search')";
+        WHERE fk_busqueda_componente=$idbusquedaComponente AND lower(etiqueta_condicion) LIKE lower('$search')";
         $id = (int)$this->connection->fetchOne($sql);
 
         if ($id) {
@@ -139,9 +139,32 @@ trait TMigrations
         return $id;
     }
 
+    protected function insertGraphics($graphics)
+    {
+        foreach ($graphics as $graphic) {
+            $graphicSerie = $graphic['children'];
+            unset($graphic['children']);
+
+            $this->connection->insert('grafico', $graphic);
+
+            if ($graphicSerie) {
+                $id = $this->connection->lastInsertId('grafico');
+                $this->createGraphicSerie($graphicSerie, $id);
+            }
+        }
+    }
+
+    protected function createGraphicSerie($data, $id)
+    {
+        foreach ($data as $serie) {
+            $serie['fk_grafico'] = $id;
+            $this->connection->insert('grafico_serie', $serie);
+        }
+    }
+
     protected function deleteBusqueda(string $search): void
     {
-        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) like '$search'";
+        $sql = "SELECT idbusqueda FROM busqueda WHERE lower(nombre) LIKE '$search'";
         $idbusqueda = (int)$this->connection->fetchOne($sql);
 
         if (!$idbusqueda) {
@@ -170,7 +193,7 @@ trait TMigrations
 
     protected function deleteFormat(string $formatName, Schema $schema): void
     {
-        $sql = "SELECT idformato FROM formato WHERE nombre like '$formatName'";
+        $sql = "SELECT idformato FROM formato WHERE nombre LIKE '$formatName'";
         $idformato = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$idformato, "No se encontro el formato $formatName");
 
@@ -193,4 +216,5 @@ trait TMigrations
             $schema->dropTable($table);
         }
     }
+
 }

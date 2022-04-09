@@ -17,6 +17,8 @@ class PqrForm extends Model
     const NOMBRE_REPORTE_TERMINADO = 'rep_terminados_pqr';
     const NOMBRE_REPORTE_TODOS = 'rep_todos_pqr';
     const NOMBRE_PANTALLA_GRAFICO = 'PQRSF';
+    const NOMBRE_REPORTE_POR_DEPENDENCIA = 'rep_dependencia_pqr';
+    const NOMBRE_REPORTE_REGISTROS_POR_DEPENDENCIA = 'rep_reg_dependencia_pqr';
 
     private static ?PqrForm $PqrForm = null;
 

@@ -74,7 +74,7 @@ function getValueSysTipo(int $iddocumento, $fkCampoOpciones): string
     $tipo = '';
     if ($valor = CampoSeleccionados::findColumn('valor', [
         'fk_campo_opciones' => $fkCampoOpciones,
-        'fk_documento' => $iddocumento
+        'fk_documento'      => $iddocumento
     ])) {
         $tipo = $valor[0];
     }
@@ -109,7 +109,7 @@ function totalAnswers(int $idft): string
 
     $url = 'views/buzones/grilla.php?';
     $url .= http_build_query([
-        'variable_busqueda' => json_encode(['idft_pqr' => $idft]),
+        'variable_busqueda'     => json_encode(['idft_pqr' => $idft]),
         'idbusqueda_componente' => $idbusquedaComponenteRespuesta
     ]);
 
@@ -225,14 +225,19 @@ HTML;
 
 }
 
-function getDependencia($dependencia){
-    if($dependencia != ""){
-        $Dependencia = new Dependencia($dependencia);
+//------------------------
+
+function getDependencia(int $dependenciaId): string
+{
+    if ($dependenciaId) {
+        $Dependencia = new Dependencia($dependenciaId);
+        return $Dependencia->nombre;
     }
-    return $Dependencia->nombre;
+    return '';
 }
 
-function getCantidad($dependencia){
+function getCantidad(int $dependencia): string
+{
     $FtPqrRecord = FtPqr::findAllByAttributes([
         'sys_dependencia' => $dependencia
     ]);
@@ -241,66 +246,56 @@ function getCantidad($dependencia){
     foreach ($FtPqrRecord as $FtPqr) {
         $documentoList[] = $FtPqr->documento_iddocumento;
     }
-    global $idbusquedaComponenteRespuesta;
-    if (!$idbusquedaComponenteRespuesta) {
-        $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
-            'nombre' => 'rep_total_pqr_depen'
-        ])[0];
-    }
-    $documentList = implode(",", $documentoList);
-    $url = 'views/buzones/grilla.php?';
-    $url .= http_build_query([
-        'variable_busqueda' => json_encode(['documentoList' => $documentList]),
-        'idbusqueda_componente' => $idbusquedaComponenteRespuesta
-    ]);
-    return <<<HTML
-    <a class='kenlace_saia' enlace='$url' title='PQRS' conector='iframe' titulo='PQRS' href='#'>
-            <button class='btn btn-complete' style='margin:auto'>$cantidadDependencias</button>
-    </a>
-HTML;
+
+    return getInfo($documentoList, $cantidadDependencias);
 }
 
-function getPendientes($dependencia){
+function getPendientes($dependencia): string
+{
     $PqrRespuestaRecords = GlobalContainer::getConnection()->createQueryBuilder()
         ->select("vr.ft_pqr")
         ->from('vpqr', 'vp')
         ->join('vp', 'vpqr_respuesta', 'vr', 'vp.idft = vr.ft_pqr')
         ->where("vp.sys_dependencia = :dependencia")
         ->setParameter(":dependencia", $dependencia, Types::INTEGER)
-        ->execute()
-        ->fetchAllAssociative();
-        
+        ->execute()->fetchAllAssociative();
+
     $respuestaList = [];
-    
+
     foreach ($PqrRespuestaRecords as $PqrRespuesta) {
         $respuestaList[] = $PqrRespuesta['ft_pqr'];
     }
     $respuesta = implode(',', $respuestaList);
-    if($respuesta){
+    if ($respuesta) {
         $PqrPendientesRecords = GlobalContainer::getConnection()->createQueryBuilder()
             ->select("vp.iddocumento")
             ->from('vpqr', 'vp')
-            ->where("vp.idft NOT IN(" . $respuesta .")")
+            ->where("vp.idft NOT IN(" . $respuesta . ")")
             ->andWhere("vp.sys_dependencia = :dependencia")
             ->setParameter(":dependencia", $dependencia, Types::INTEGER)
             ->execute()
             ->fetchAllAssociative();
-    }else{
+    } else {
         $PqrPendientesRecords = GlobalContainer::getConnection()->createQueryBuilder()
-        ->select("vp.iddocumento")
-        ->from('vpqr', 'vp')
-        ->where("vp.sys_dependencia = :dependencia")
-        ->setParameter(":dependencia", $dependencia, Types::INTEGER)
-        ->execute()
-        ->fetchAllAssociative();
+            ->select("vp.iddocumento")
+            ->from('vpqr', 'vp')
+            ->where("vp.sys_dependencia = :dependencia")
+            ->setParameter(":dependencia", $dependencia, Types::INTEGER)
+            ->execute()
+            ->fetchAllAssociative();
     }
-    
+
     $cantidadPendientes = count($PqrPendientesRecords);
     $documentoList = [];
     foreach ($PqrPendientesRecords as $PqrPendientes) {
         $documentoList[] = $PqrPendientes['iddocumento'];
     }
 
+    return getInfo($documentoList, $cantidadPendientes);
+}
+
+function getInfo($documentoList, $cantidadDependencias): string
+{
     global $idbusquedaComponenteRespuesta;
     if (!$idbusquedaComponenteRespuesta) {
         $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
@@ -310,17 +305,18 @@ function getPendientes($dependencia){
     $documentList = implode(",", $documentoList);
     $url = 'views/buzones/grilla.php?';
     $url .= http_build_query([
-        'variable_busqueda' => json_encode(['documentoList' => $documentList]),
+        'variable_busqueda'     => json_encode(['documentoList' => $documentList]),
         'idbusqueda_componente' => $idbusquedaComponenteRespuesta
     ]);
     return <<<HTML
-    <a class='kenlace_saia' enlace='$url' title='PQRS' conector='iframe' titulo='PQRS' href='#'>
-            <button class='btn btn-complete' style='margin:auto'>$cantidadPendientes</button>
+    <a class='kenlace_saia' data-enlace='$url' title='PQRS' href='#'>
+            <button class='btn btn-complete' style='margin:auto'>$cantidadDependencias</button>
     </a>
 HTML;
 }
 
-function getResueltas($dependencia){
+function getResueltas($dependencia): string
+{
     $PqrTerminadoRecords = GlobalContainer::getConnection()->createQueryBuilder()
         ->select("vp.iddocumento")
         ->from('vpqr', 'vp')
@@ -330,52 +326,36 @@ function getResueltas($dependencia){
         ->groupBy('vr.ft_pqr')
         ->execute()
         ->fetchAllAssociative();
-        
+
     $cantidadTerminado = count($PqrTerminadoRecords);
     $documentoList = [];
     foreach ($PqrTerminadoRecords as $PqrTerminado) {
         $documentoList[] = $PqrTerminado['iddocumento'];
     }
-    global $idbusquedaComponenteRespuesta;
-    if (!$idbusquedaComponenteRespuesta) {
-        $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
-            'nombre' => 'rep_total_pqr_depen'
-        ])[0];
-    }
-    $documentList = implode(",", $documentoList);
-    $url = 'views/buzones/grilla.php?';
-    $url .= http_build_query([
-        'variable_busqueda' => json_encode(['documentoList' => $documentList]),
-        'idbusqueda_componente' => $idbusquedaComponenteRespuesta
-    ]);
-    return <<<HTML
-    <a class='kenlace_saia' enlace='$url' title='PQRS' conector='iframe' titulo='PQRS' href='#'>
-            <button class='btn btn-complete' style='margin:auto'>$cantidadTerminado</button>
-    </a>
-HTML;
 
+    return getInfo($documentoList, $cantidadTerminado);
 }
 
-function filter_pqr(){
-    
+function filter_pqr(): string
+{
     if ($_REQUEST['variable_busqueda']) {
         $params = json_decode($_REQUEST['variable_busqueda'], true);
         $idft = $params['documentoList'];
-        
+
         if ($idft) {
             return "v.iddocumento in($idft)";
         }
     }
-
     return 'v.iddocumento=""';
 }
 
-function verDocumento(int $iddocumento, int $numero){
-        return <<<HTML
+function verDocumento(int $iddocumento, int $numero): string
+{
+    return <<<HTML
         <div class='kenlace_saia'
-        enlace='views/documento/index_acordeon.php?documentId=$iddocumento'
-        conector='iframe' titulo='No Registro $numero'>
+        data-enlace='views/documento/index_acordeon.php?documentId=$iddocumento'
+        title='No Registro $numero'>
         <button class='btn btn-complete' style='margin:auto'>$numero</button>
         </div>
 HTML;
-    }
+}

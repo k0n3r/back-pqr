@@ -36,12 +36,13 @@ $code = <<<JAVASCRIPT
                     let data = Object.assign(dataForm, {
                         formatId: $formatId,
                         dependencia:window.credential.WsRol,
-                        tokenRecaptcha: tokenRecaptcha,
+                        tokenRecaptcha,
                         ft_pqr_respuesta: localStorage.getItem('WsFtPqr'),
                         anterior: localStorage.getItem('WsIddocPqr')
                     });
 
                     $.ajax({
+                        method: 'POST',
                         url: baseUrl + '$urlSaveFt',
                         data,
                     }).done((response) => {

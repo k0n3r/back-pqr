@@ -15,11 +15,11 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20200226192642 extends AbstractMigration
 {
-    use TMigrations;
+    use TDependencyReport;
 
     public function getDescription(): string
     {
-        return 'Creación de los reportes pendiente, proceso y terminado';
+        return 'Creación de los reportes';
     }
 
     public function up(Schema $schema): void
@@ -41,9 +41,10 @@ final class Version20200226192642 extends AbstractMigration
         $this->createComponenteProcesos($idbusqueda);
         $this->createComponenteTerminados($idbusqueda);
         $this->createComponenteTodos($idbusqueda);
+        $this->createComponentePorDependencia($idbusqueda);
     }
 
-    protected function getDefaultData(string $nameReport): array
+    private function getDefaultData(string $nameReport): array
     {
         switch ($nameReport) {
             case PqrForm::NOMBRE_REPORTE_TODOS:
@@ -76,7 +77,7 @@ final class Version20200226192642 extends AbstractMigration
         ];
     }
 
-    protected function createComponentePendientes(int $idbusqueda)
+    private function createComponentePendientes(int $idbusqueda)
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_PENDIENTE;
         $estado = FtPqr::ESTADO_PENDIENTE;
@@ -91,7 +92,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado);
     }
 
-    protected function createComponenteProcesos(int $idbusqueda)
+    private function createComponenteProcesos(int $idbusqueda)
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_PROCESO;
 
@@ -123,7 +124,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->createModulo($data, $nombreComponente);
     }
 
-    protected function createComponenteTerminados(int $idbusqueda)
+    private function createComponenteTerminados(int $idbusqueda)
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_TERMINADO;
         $estado = FtPqr::ESTADO_TERMINADO;
@@ -159,7 +160,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->createModulo($data, $nombreComponente);
     }
 
-    protected function createComponenteTodos(int $idbusqueda)
+    private function createComponenteTodos(int $idbusqueda)
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_TODOS;
         $dataComponente = [
@@ -194,7 +195,6 @@ final class Version20200226192642 extends AbstractMigration
         ];
         $this->createModulo($data, 'indicadores_pqr');
     }
-
 
     public function down(Schema $schema): void
     {

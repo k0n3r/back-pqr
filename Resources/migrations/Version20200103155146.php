@@ -46,7 +46,7 @@ final class Version20200103155146 extends AbstractMigration
         $this->tablePqrResponseTime($table9);
     }
 
-    public function tablePqrFormFields(Table $table)
+    private function tablePqrFormFields(Table $table)
     {
 
         $table->addColumn('id', 'integer', [
@@ -113,7 +113,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    public function tablePqrHtmlFields(Table $table)
+    private function tablePqrHtmlFields(Table $table)
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -141,7 +141,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    public function tablePqrForm(Table $table)
+    private function tablePqrForm(Table $table)
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -174,7 +174,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    public function tablePqrBackup(Table $table)
+    private function tablePqrBackup(Table $table)
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -190,7 +190,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('data_json', 'text');
     }
 
-    public function tablePqrNotify(Table $table)
+    private function tablePqrNotify(Table $table)
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -211,7 +211,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    public function tablePqrHistory(Table $table)
+    private function tablePqrHistory(Table $table)
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -228,7 +228,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('descripcion', 'text');
     }
 
-    public function tablePqrNotyMessages(Table $table)
+    private function tablePqrNotyMessages(Table $table)
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
