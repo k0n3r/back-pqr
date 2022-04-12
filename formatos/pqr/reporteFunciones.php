@@ -360,7 +360,7 @@ function getResueltas(): string
         ->setParameter(':estado', FtPqr::ESTADO_TERMINADO, Types::STRING)
         ->execute()->fetchOne();
 
-    return createView(PqrForm::FILTER_PENDIENTES, (int)$cant);
+    return createView(PqrForm::FILTER_RESUELTAS, (int)$cant);
 }
 
 /**
