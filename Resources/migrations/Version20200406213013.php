@@ -91,7 +91,7 @@ final class Version20200406213013 extends AbstractMigration
             'busqueda_avanzada'      => null,
             'enlace_adicionar'       => null,
             'llave'                  => 'v.iddocumento',
-            'ruta_libreria'          => 'src/Bundles/pqr/formatos/pqr_calificacion/reporteFunciones.php,src/Bundles/pqr/formatos/reporteFuncionesGenerales.php',
+            'ruta_libreria'          => 'src/Bundles/pqr/formatos/pqr_calificacion/reporteFunciones.php',
             'ruta_libreria_pantalla' => null,
         ];
         $idbusquedaComponente = $this->createBusquedaComponente($idbusqueda, $busquedaComponente, $nombreComponente);

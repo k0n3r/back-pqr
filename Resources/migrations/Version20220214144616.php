@@ -36,6 +36,7 @@ final class Version20220214144616 extends AbstractMigration
 
         $this->createComponentePorDependencia($idbusqueda);
         $this->createGraphicCalificacion();
+        $this->updateReportPqr();
     }
 
     private function createGraphicCalificacion()
@@ -94,11 +95,47 @@ final class Version20220214144616 extends AbstractMigration
         $this->insertGraphics($graphics);
     }
 
+    private function updateReportPqr()
+    {
+
+        $this->connection->update('busqueda_componente', [
+            'ruta_libreria' => "src/Bundles/pqr/formatos/pqr/reporteFunciones.php",
+        ], [
+            'nombre' => PqrForm::NOMBRE_REPORTE_PENDIENTE
+        ]);
+
+        $this->connection->update('busqueda_componente', [
+            'ruta_libreria' => "src/Bundles/pqr/formatos/pqr/reporteFunciones.php",
+        ], [
+            'nombre' => PqrForm::NOMBRE_REPORTE_PROCESO
+        ]);
+
+        $this->connection->update('busqueda_componente', [
+            'ruta_libreria' => "src/Bundles/pqr/formatos/pqr/reporteFunciones.php",
+        ], [
+            'nombre' => PqrForm::NOMBRE_REPORTE_TERMINADO
+        ]);
+
+        $this->connection->update('busqueda_componente', [
+            'ruta_libreria' => "src/Bundles/pqr/formatos/pqr/reporteFunciones.php",
+        ], [
+            'nombre' => PqrForm::NOMBRE_REPORTE_TODOS
+        ]);
+
+        //--------------
+
+        $this->connection->update('busqueda_condicion', [
+            'codigo_where' => "{*filter_pqr*}",
+        ], [
+            'etiqueta_condicion' => PqrForm::NOMBRE_REPORTE_TODOS
+        ]);
+
+    }
+
     public function down(Schema $schema): void
     {
         $names = [
-            PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
-            PqrForm::NOMBRE_REPORTE_REGISTROS_POR_DEPENDENCIA
+            PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA
         ];
 
         foreach ($names as $nombreComponente) {
