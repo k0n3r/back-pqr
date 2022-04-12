@@ -60,13 +60,5 @@ class FtPqrProperties extends ModelFormat
         return [];
     }
     
-    /**
-    * @inheritDoc
-    */
-    public function getNumberFolios(): int
-    {
-        return $this->numero_folios ?? 0;
-    }
-    
     
 }

@@ -48,6 +48,8 @@ final class Version20200226192642 extends AbstractMigration
     {
         switch ($nameReport) {
             case PqrForm::NOMBRE_REPORTE_TODOS:
+                $NewField = '{"title":"ESTADO","field":"{*sys_estado*}","align":"center"},{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
+                break;
             case PqrForm::NOMBRE_REPORTE_PROCESO:
                 $NewField = '{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
                 break;
@@ -72,7 +74,7 @@ final class Version20200226192642 extends AbstractMigration
             'busqueda_avanzada'      => 'views/modules/pqr/formatos/pqr/busqueda.php',
             'enlace_adicionar'       => null,
             'llave'                  => 'v.iddocumento',
-            'ruta_libreria'          => 'src/Bundles/pqr/formatos/pqr/reporteFunciones.php,src/Bundles/pqr/formatos/reporteFuncionesGenerales.php',
+            'ruta_libreria'          => 'src/Bundles/pqr/formatos/pqr/reporteFunciones.php',
             'ruta_libreria_pantalla' => 'views/modules/pqr/formatos/pqr/reporteAcciones.js',
         ];
     }
@@ -179,7 +181,7 @@ final class Version20200226192642 extends AbstractMigration
 
         $busquedaCondicion = [
             'fk_busqueda_componente' => $idbusquedaComponente,
-            'codigo_where'           => "1=1",
+            'codigo_where'           => "{*filter_pqr*}",
             'etiqueta_condicion'     => $nombreComponente
         ];
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);

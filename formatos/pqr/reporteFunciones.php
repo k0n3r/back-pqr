@@ -1,7 +1,10 @@
 <?php
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
+use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Saia\models\tarea\TareaEstado;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use Saia\controllers\DateController;
@@ -12,60 +15,90 @@ use Saia\models\Dependencia;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Types;
 
+include_once $_SERVER['ROOT_PATH'] . 'src/Bundles/pqr/formatos/reporteFuncionesGenerales.php';
 $fileAdditionalFunctions = $_SERVER['ROOT_PATH'] . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
 if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
 }
 
+/**
+ * @param int $idft
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function setFtPqr(int $idft)
 {
     $GLOBALS['FtPqr'] = UtilitiesPqr::getInstanceForFtId($idft);
 }
 
+/**
+ * @return FtPqr
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function getFtPqr(): FtPqr
 {
     return $GLOBALS['FtPqr'];
 }
 
+/**
+ * @param int $idft
+ * @param     $numero
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function viewFtPqr(int $idft, $numero): string
 {
     setFtPqr($idft);
     $FtPqr = getFtPqr();
 
-    return <<<HTML
-    <div class='kenlace_saia'
-    enlace='views/documento/index_acordeon.php?documentId=$FtPqr->documento_iddocumento' 
-    conector='iframe'
-    titulo='No Registro $numero'>
-        <button class='btn btn-complete' style='margin:auto'>$numero</button>
-    </div>
-HTML;
+    return view((int)$FtPqr->documento_iddocumento, $numero);
 }
 
+/**
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function getExpiration(): string
 {
     $FtPqr = getFtPqr();
     return $FtPqr->getService()->getColorExpiration();
 }
 
+/**
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function getEndDate(): string
 {
     $FtPqr = getFtPqr();
     return $FtPqr->getService()->getEndDate();
 }
 
+/**
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function getDaysLate(): string
 {
     $FtPqr = getFtPqr();
     return $FtPqr->getService()->getDaysLate();
 }
 
+/**
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function getDaysWait(): string
 {
     $FtPqr = getFtPqr();
     return $FtPqr->getService()->getDaysWait();
 }
 
+/**
+ * @param int $iddocumento
+ * @param     $fkCampoOpciones
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function getValueSysTipo(int $iddocumento, $fkCampoOpciones): string
 {
     if ($fkCampoOpciones == PqrFormField::FIELD_NAME_SYS_TIPO) {
@@ -83,6 +116,11 @@ function getValueSysTipo(int $iddocumento, $fkCampoOpciones): string
     return $tipo;
 }
 
+/**
+ * @param int $iddocumento
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function totalTask(int $iddocumento): string
 {
     $data = UtilitiesPqr::getFinishTotalTask(new Documento($iddocumento));
@@ -90,6 +128,11 @@ function totalTask(int $iddocumento): string
     return "{$data['finish']}/{$data['total']}";
 }
 
+/**
+ * @param int $idft
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function totalAnswers(int $idft): string
 {
     global $idbusquedaComponenteRespuesta;
@@ -124,6 +167,11 @@ function totalAnswers(int $idft): string
     return implode('<br/>', $answers);
 }
 
+/**
+ * @param int $iddocumento
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function getResponsible(int $iddocumento): string
 {
     $tareas = (new Documento($iddocumento))->getService()->getTasks();
@@ -146,6 +194,13 @@ function getResponsible(int $iddocumento): string
     return implode('<br/>', $responsible);
 }
 
+/**
+ * @param int    $iddocumento
+ * @param string $estado
+ * @param int    $idft
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function options(int $iddocumento, string $estado, int $idft): string
 {
     switch ($estado) {
@@ -226,137 +281,155 @@ HTML;
 
 }
 
-//------------------------
-
-function getDependencia(int $dependenciaId): string
+/**
+ * @param int $dependenciaId
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
+function setDependencia(int $dependenciaId)
 {
-    if ($dependenciaId) {
-        $Dependencia = new Dependencia($dependenciaId);
-        return $Dependencia->nombre;
-    }
-    return '';
+    $GLOBALS['Dependencia'] = new Dependencia($dependenciaId);
 }
 
-function getCantidad(int $dependencia): string
+/**
+ * @return Dependencia
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
+function getDependencia(): Dependencia
 {
-    $FtPqrRecord = FtPqr::findAllByAttributes([
-        'sys_dependencia' => $dependencia
-    ]);
-    $documentoList = [];
-    $cantidadDependencias = count($FtPqrRecord);
-    foreach ($FtPqrRecord as $FtPqr) {
-        $documentoList[] = $FtPqr->documento_iddocumento;
-    }
-
-    return getInfo($documentoList, $cantidadDependencias);
+    return $GLOBALS['Dependencia'];
 }
 
-function getPendientes($dependencia): string
+/**
+ * @param int $dependenciaId
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
+function getNombreDependencia(int $dependenciaId): string
 {
-    $PqrRespuestaRecords = GlobalContainer::getConnection()->createQueryBuilder()
-        ->select("vr.ft_pqr")
-        ->from('vpqr', 'vp')
-        ->join('vp', 'vpqr_respuesta', 'vr', 'vp.idft = vr.ft_pqr')
-        ->where("vp.sys_dependencia = :dependencia")
-        ->setParameter(":dependencia", $dependencia, Types::INTEGER)
-        ->execute()->fetchAllAssociative();
+    setDependencia($dependenciaId);
+    $Dependencia = getDependencia();
 
-    $respuestaList = [];
-
-    foreach ($PqrRespuestaRecords as $PqrRespuesta) {
-        $respuestaList[] = $PqrRespuesta['ft_pqr'];
-    }
-    $respuesta = implode(',', $respuestaList);
-    if ($respuesta) {
-        $PqrPendientesRecords = GlobalContainer::getConnection()->createQueryBuilder()
-            ->select("vp.iddocumento")
-            ->from('vpqr', 'vp')
-            ->where("vp.idft NOT IN(" . $respuesta . ")")
-            ->andWhere("vp.sys_dependencia = :dependencia")
-            ->setParameter(":dependencia", $dependencia, Types::INTEGER)
-            ->execute()
-            ->fetchAllAssociative();
-    } else {
-        $PqrPendientesRecords = GlobalContainer::getConnection()->createQueryBuilder()
-            ->select("vp.iddocumento")
-            ->from('vpqr', 'vp')
-            ->where("vp.sys_dependencia = :dependencia")
-            ->setParameter(":dependencia", $dependencia, Types::INTEGER)
-            ->execute()
-            ->fetchAllAssociative();
-    }
-
-    $cantidadPendientes = count($PqrPendientesRecords);
-    $documentoList = [];
-    foreach ($PqrPendientesRecords as $PqrPendientes) {
-        $documentoList[] = $PqrPendientes['iddocumento'];
-    }
-
-    return getInfo($documentoList, $cantidadPendientes);
+    return $Dependencia->nombre;
 }
 
-function getInfo($documentoList, $cantidadDependencias): string
+/**
+ * @return QueryBuilder
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
+function QbDependencia(): QueryBuilder
 {
-    global $idbusquedaComponenteRespuesta;
-    if (!$idbusquedaComponenteRespuesta) {
-        $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
-            'nombre' => 'rep_total_pqr_depen'
+    $Dependencia = getDependencia();
+
+    return GlobalContainer::getConnection()->createQueryBuilder()
+        ->select('count(sys_dependencia) as cant')
+        ->from('vpqr', 'v')
+        ->where('sys_dependencia = :dependencyId')
+        ->setParameter(':dependencyId', $Dependencia->getPK(), Types::INTEGER);
+}
+
+/**
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
+function getCantidad(): string
+{
+    $cant = QbDependencia()->execute()->fetchOne();
+    return createView(PqrForm::FILTER_TODOS, (int)$cant);
+}
+
+/**
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
+function getPendientes(): string
+{
+    $cant = QbDependencia()->andWhere('sys_estado IN (:estado)')
+        ->setParameter(':estado', [FtPqr::ESTADO_PROCESO, FtPqr::ESTADO_PENDIENTE], Connection::PARAM_STR_ARRAY)
+        ->execute()->fetchOne();
+
+    return createView(PqrForm::FILTER_PENDIENTES, (int)$cant);
+}
+
+/**
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
+function getResueltas(): string
+{
+    $cant = QbDependencia()->andWhere('sys_estado LIKE :estado')
+        ->setParameter(':estado', FtPqr::ESTADO_TERMINADO, Types::STRING)
+        ->execute()->fetchOne();
+
+    return createView(PqrForm::FILTER_PENDIENTES, (int)$cant);
+}
+
+/**
+ * @return int
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
+function getComponenteRepTodos(): int
+{
+    if (!$GLOBALS['idbusquedaComponenteRepTodos']) {
+        $GLOBALS['idbusquedaComponenteRepTodos'] = BusquedaComponente::findColumn('idbusqueda_componente', [
+            'nombre' => PqrForm::NOMBRE_REPORTE_TODOS
         ])[0];
     }
-    $documentList = implode(",", $documentoList);
+    return (int)$GLOBALS['idbusquedaComponenteRepTodos'];
+}
+
+/**
+ * @param string $filterName
+ * @param int    $cant
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
+function createView(string $filterName, int $cant): string
+{
+    $Dependencia = getDependencia();
     $url = 'views/buzones/grilla.php?';
     $url .= http_build_query([
-        'variable_busqueda'     => json_encode(['documentoList' => $documentList]),
-        'idbusqueda_componente' => $idbusquedaComponenteRespuesta
+        'variable_busqueda'     => json_encode([
+            'sys_dependencia' => $Dependencia->getPK(),
+            'filterName'      => $filterName
+        ]),
+        'idbusqueda_componente' => getComponenteRepTodos()
     ]);
+
     return <<<HTML
-    <a class='kenlace_saia' data-enlace='$url' title='PQRS' href='#'>
-            <button class='btn btn-complete' style='margin:auto'>$cantidadDependencias</button>
+    <a class='kenlace_saia' conector='iframe' enlace='$url' title='PQRS' titulo="PQRS" href='#'>
+            <button class='btn btn-complete'>$cant</button>
     </a>
 HTML;
 }
 
-function getResueltas($dependencia): string
-{
-    $PqrTerminadoRecords = GlobalContainer::getConnection()->createQueryBuilder()
-        ->select("vp.iddocumento")
-        ->from('vpqr', 'vp')
-        ->join('vp', 'vpqr_respuesta', 'vr', 'vp.idft = vr.ft_pqr')
-        ->where("vp.sys_dependencia = :dependencia")
-        ->setParameter(":dependencia", $dependencia, Types::INTEGER)
-        ->groupBy('vr.ft_pqr')
-        ->execute()
-        ->fetchAllAssociative();
-
-    $cantidadTerminado = count($PqrTerminadoRecords);
-    $documentoList = [];
-    foreach ($PqrTerminadoRecords as $PqrTerminado) {
-        $documentoList[] = $PqrTerminado['iddocumento'];
-    }
-
-    return getInfo($documentoList, $cantidadTerminado);
-}
-
+/**
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
+ */
 function filter_pqr(): string
 {
-    if ($_REQUEST['variable_busqueda']) {
-        $params = json_decode($_REQUEST['variable_busqueda'], true);
-        $idft = $params['documentoList'];
-
-        if ($idft) {
-            return "v.iddocumento in($idft)";
-        }
+    $response = "1=1";
+    if (!$_REQUEST['variable_busqueda']) {
+        return $response;
     }
-    return 'v.iddocumento=""';
-}
 
-function verDocumento(int $iddocumento, int $numero): string
-{
-    return <<<HTML
-        <div class='kenlace_saia'
-        data-enlace='views/documento/index_acordeon.php?documentId=$iddocumento'
-        title='No Registro $numero'>
-        <button class='btn btn-complete' style='margin:auto'>$numero</button>
-        </div>
-HTML;
+    $params = json_decode($_REQUEST['variable_busqueda'], true);
+    $sysDependencia = (int)$params['sys_dependencia'];
+    if (!$sysDependencia) {
+        return $response;
+    }
+
+    switch ($params['filterName']) {
+        case PqrForm::FILTER_PENDIENTES:
+            $response = "sys_dependencia=$sysDependencia AND sys_estado IN ('" . FtPqr::ESTADO_PENDIENTE . "','" . FtPqr::ESTADO_PROCESO . "')";
+            break;
+        case PqrForm::FILTER_RESUELTAS:
+            $response = "sys_dependencia=$sysDependencia AND sys_estado LIKE '" . FtPqr::ESTADO_TERMINADO . "'";
+            break;
+        case PqrForm::FILTER_TODOS:
+        default:
+            $response = "sys_dependencia=$sysDependencia";
+            break;
+    }
+    return $response;
 }
