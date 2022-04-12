@@ -20,7 +20,7 @@ class PqrForm extends Model
     const NOMBRE_PANTALLA_GRAFICO = 'PQRSF';
     const FILTER_TODOS = 'dep_todos';
     const FILTER_PENDIENTES = 'dep_pendientes';
-    const FILTER_RESUELTAS = 'dep_pendientes';
+    const FILTER_RESUELTAS = 'dep_resueltas';
 
 
     private static ?PqrForm $PqrForm = null;
