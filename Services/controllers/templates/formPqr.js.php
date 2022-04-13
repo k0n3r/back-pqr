@@ -103,7 +103,7 @@ $(function () {
             let data = window.getFormObject($('#formSearch').serializeArray());
 
             $.ajax({
-                method: "get",
+                method: "GET",
                 url: baseUrl + `api/pqr/searchByNumber`,
                 data
             }).done((response) => {

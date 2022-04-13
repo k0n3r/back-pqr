@@ -42,7 +42,7 @@ class PqrFormController extends AbstractController
     }
 
     /**
-     * @Route("/publish", name="publish", methods={"GET"})
+     * @Route("/publish", name="publish", methods={"PUT"})
      */
     public function publish(
         ISaiaResponse $saiaResponse,
