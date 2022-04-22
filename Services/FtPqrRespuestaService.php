@@ -14,6 +14,7 @@ use Saia\controllers\CryptController;
 use Saia\controllers\DateController;
 use Saia\controllers\DistributionService;
 use Saia\controllers\documento\Transfer;
+use Saia\controllers\functions\CoreFunctions;
 use Saia\controllers\SendMailController;
 use Saia\models\anexos\Anexos;
 use Saia\models\BuzonSalida;
@@ -193,7 +194,7 @@ class FtPqrRespuestaService extends ModelService
             return false;
         }
 
-        if (!UtilitiesPqr::isEmailValid($email)) {
+        if (!CoreFunctions::isEmailValid($email)) {
             $this->getErrorManager()->setMessage("El email ($email) NO es valido");
             return false;
         }
@@ -205,7 +206,7 @@ class FtPqrRespuestaService extends ModelService
                     return false;
                 }
 
-                if (!UtilitiesPqr::isEmailValid($copia)) {
+                if (!CoreFunctions::isEmailValid($copia)) {
                     $this->getErrorManager()->setMessage("El email en copia externa ($copia) NO es valido");
                     return false;
                 }
@@ -313,7 +314,7 @@ class FtPqrRespuestaService extends ModelService
         if ($this->getModel()->copia_interna) {
             $Transfer = new Transfer(
                 $this->getModel()->getDocument(),
-                $this->getFuncionario()->funcionario_codigo,
+                $this->getFuncionario()->getCode(),
                 BuzonSalida::NOMBRE_COPIA
             );
             $destinations = explode(',', $this->getModel()->copia_interna);
@@ -457,7 +458,7 @@ class FtPqrRespuestaService extends ModelService
     public function requestSurvey(): bool
     {
         $email = $this->getModel()->getTercero()->correo;
-        if (!UtilitiesPqr::isEmailValid($email)) {
+        if (!CoreFunctions::isEmailValid($email)) {
             $this->getErrorManager()->setMessage("El email ($email) NO es valido");
             return false;
         }

@@ -12,6 +12,7 @@ use DateTime;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
 use Saia\controllers\documento\Transfer;
+use Saia\controllers\functions\CoreFunctions;
 use Saia\controllers\SendMailController;
 use Saia\controllers\TerceroService;
 use Saia\models\BuzonSalida;
@@ -93,7 +94,7 @@ class FtPqrService extends ModelService
     public function validSysEmail(): bool
     {
         if ($this->getModel()->sys_email) {
-            if (!UtilitiesPqr::isEmailValid($this->getModel()->sys_email)) {
+            if (!CoreFunctions::isEmailValid($this->getModel()->sys_email)) {
                 $this->getErrorManager()->setMessage("Esta dirección de correo ({$this->getModel()->sys_email}) no es válida.");
                 return false;
             }
@@ -613,12 +614,12 @@ HTML;
             foreach ($records as $PqrNotification) {
                 if ($PqrNotification->email) {
                     $email = $PqrNotification->getFuncionario()->email ?? '';
-                    if (UtilitiesPqr::isEmailValid($email)) {
+                    if (CoreFunctions::isEmailValid($email)) {
                         $emails[] = $email;
                     }
                 }
                 if ($PqrNotification->notify) {
-                    $codes[] = $PqrNotification->getFuncionario()->funcionario_codigo;
+                    $codes[] = $PqrNotification->getFuncionario()->getCode();
                 }
             }
         }
