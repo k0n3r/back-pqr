@@ -63,28 +63,6 @@ class FtPqrRespuestaService extends ModelService
     }
 
     /**
-     * Obtiene los datos del remitente
-     *
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    public function getInfoDestino(): string
-    {
-        $code = '';
-        $Tercero = $this->getModel()->getTercero();
-        if ($Tercero) {
-            $code .= $Tercero->titulo ? $Tercero->titulo . "<br/>" : '';
-            $code .= $Tercero->nombre . "<br/>";
-            $code .= $Tercero->cargo ? $Tercero->cargo . "<br/>" : '';
-            $code .= $Tercero->direccion ? $Tercero->direccion . "<br/>" : '';
-            $code .= $Tercero->telefono ? $Tercero->telefono . "<br/>" : '';
-        }
-
-        return $code;
-    }
-
-    /**
      * Obtiene el texto de despedida
      *
      * @return string

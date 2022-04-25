@@ -235,7 +235,7 @@ HTML;
                     </tr>
 
                     <tr>
-                        <td>{$Service->getInfoDestino()}</td>
+                        <td>{$Service->getModel()->getFieldValue('destino')}</td>
                         <td style="text-align:center">$Qr<br/>No.{$Service->getRadicado()}</td>
                     </tr>
 
