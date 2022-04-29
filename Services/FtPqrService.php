@@ -892,7 +892,12 @@ HTML;
         }
 
         $now = $this->getModel()->sys_fecha_terminado ? new DateTime($this->getModel()->sys_fecha_terminado) : new DateTime();
-        $diff = $now->diff(new DateTime($this->getModel()->sys_fecha_vencimiento));
+        $now->setTime(0, 0);
+
+        $expirationDate = new DateTime($this->getModel()->sys_fecha_vencimiento);
+        $now->setTime(0, 0);
+
+        $diff = $now->diff($expirationDate);
 
         $color = "success";
         if ($diff->invert || $diff->days <= FtPqr::VENCIMIENTO_ROJO) {
