@@ -302,4 +302,13 @@ HTML;
 
         return $this->getService()->generateField($PqrFormField);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public static function isEnableRadEmail(bool $isRadFormat = false): bool
+    {
+        $PqrForm = PqrForm::getInstance();
+        return (bool)$PqrForm->rad_email;
+    }
 }

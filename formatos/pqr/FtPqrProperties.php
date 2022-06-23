@@ -67,5 +67,13 @@ class FtPqrProperties extends ModelFormat
         return $this->numero_folios ?? 0;
     }
     
+    /**
+    * @inheritDoc
+    */
+    public static function isEnableRadEmail(bool $isRadFormat = false): bool
+    {
+        return $isRadFormat;
+    }
+    
     
 }

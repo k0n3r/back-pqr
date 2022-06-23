@@ -93,6 +93,10 @@ class FtPqrRespuestaService extends ModelService
             $data .= "Anexos digitales: $anexosDigitales<br/>";
         }
 
+        if ($copia = $this->getModel()->getFieldValue('copia_interna')) {
+            $data .= "Copia: $copia<br/>";
+        }
+
         if ($copiaExterna = $this->getNameCopiaExterna()) {
             $data .= "Copia externa: $copiaExterna<br/>";
         }

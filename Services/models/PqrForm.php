@@ -169,16 +169,4 @@ class PqrForm extends Model
     {
         return new CamposFormato($this->fk_field_time);
     }
-
-    /**
-     * Verifica si debe aparecer el formato PQR como radicacion
-     *
-     * @return bool
-     * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-01-18
-     */
-    public static function isEnableRadEmail(): bool
-    {
-        $PqrForm = self::getInstance();
-        return (bool)$PqrForm->rad_email;
-    }
 }

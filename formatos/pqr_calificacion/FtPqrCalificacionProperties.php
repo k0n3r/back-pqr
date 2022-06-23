@@ -22,8 +22,8 @@ class FtPqrCalificacionProperties extends ModelFormat
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
-				'ft_pqr_respuesta',
 				'dependencia',
+				'ft_pqr_respuesta',
 				'experiencia_gestion',
 				'experiencia_servicio' 
             ],
@@ -55,6 +55,14 @@ class FtPqrCalificacionProperties extends ModelFormat
     public function getNumberFolios(): int
     {
         return $this->numero_folios ?? 0;
+    }
+    
+    /**
+    * @inheritDoc
+    */
+    public static function isEnableRadEmail(bool $isRadFormat = false): bool
+    {
+        return $isRadFormat;
     }
     
     

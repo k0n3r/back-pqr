@@ -22,8 +22,8 @@ class FtPqrRespuestaProperties extends ModelFormat
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
-				'ft_pqr',
 				'dependencia',
+				'ft_pqr',
 				'ciudad_origen',
 				'destino',
 				'tipo_distribucion',
@@ -65,6 +65,14 @@ class FtPqrRespuestaProperties extends ModelFormat
     public function getNumberFolios(): int
     {
         return $this->numero_folios ?? 0;
+    }
+    
+    /**
+    * @inheritDoc
+    */
+    public static function isEnableRadEmail(bool $isRadFormat = false): bool
+    {
+        return $isRadFormat;
     }
     
     
