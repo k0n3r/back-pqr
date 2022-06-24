@@ -782,7 +782,7 @@ class PqrFormService extends ModelService
                     $fieldOptions = [];
 
                     if ($PqrFormField->name != PqrFormField::FIELD_NAME_SYS_TIPO) {
-                        $options = $PqrFormField->getCamposFormato()->getCampoOpciones();
+                        $options = $PqrFormField->getCamposFormato()->getCampoOpciones(1);
                         foreach ($options as $CampoOpcion) {
                             if ($CampoOpcion->estado) {
                                 $fieldOptions[] = [
