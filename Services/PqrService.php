@@ -166,7 +166,7 @@ class PqrService
         $records = (CamposFormato::findByAttributes([
             'nombre'            => PqrFormField::FIELD_NAME_SYS_TIPO,
             'formato_idformato' => $this->getPqrForm()->fk_formato
-        ]))->CampoOpciones;
+        ]))->getCampoOpciones();
 
         $data = [];
         foreach ($records as $CampoOpciones) {
@@ -199,7 +199,7 @@ class PqrService
         }
 
         $PqrFormField = $this->getPqrForm()->getRow('sys_subtipo');
-        $records = $PqrFormField->getCamposFormato()->CampoOpciones;
+        $records = $PqrFormField->getCamposFormato()->getCampoOpciones();
 
         $data = [];
         foreach ($records as $CampoOpciones) {

@@ -370,7 +370,7 @@ class PqrFormFieldService extends ModelService
         $PqrFormField = $this->getModel();
         $CampoFormato = $PqrFormField->getCamposFormato();
         $llave = 0;
-        foreach ($CampoFormato->CampoOpciones as $CampoOpciones) {
+        foreach ($CampoFormato->getCampoOpciones() as $CampoOpciones) {
 
             if ((int)$CampoOpciones->llave > $llave) {
                 $llave = (int)$CampoOpciones->llave;

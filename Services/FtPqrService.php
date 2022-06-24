@@ -351,7 +351,7 @@ class FtPqrService extends ModelService
             'nombre' => 'pqr_respuesta'
         ]);
 
-        if ($records = $Formato->getField('tipo_distribucion')->CampoOpciones) {
+        if ($records = $Formato->getField('tipo_distribucion')->getCampoOpciones()) {
             foreach ($records as $CampoOpciones) {
                 if ($CampoOpciones->llave == FtPqrRespuesta::DISTRIBUCION_ENVIAR_EMAIL) {
                     $tipoDistribucion = $CampoOpciones->getPK();
@@ -360,7 +360,7 @@ class FtPqrService extends ModelService
             }
         }
 
-        if ($records = $Formato->getField('despedida')->CampoOpciones) {
+        if ($records = $Formato->getField('despedida')->getCampoOpciones()) {
             foreach ($records as $CampoOpciones) {
                 if ($CampoOpciones->llave == FtPqrRespuesta::ATENTAMENTE_DESPEDIDA) {
                     $despedida = $CampoOpciones->getPK();
