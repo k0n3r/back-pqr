@@ -20,10 +20,10 @@ class FtPqrRespuestaProperties extends ModelFormat
             'safe' => [
                 'idft_pqr_respuesta',
 				'documento_iddocumento',
-				'encabezado',
-				'firma',
 				'dependencia',
 				'ft_pqr',
+				'encabezado',
+				'firma',
 				'ciudad_origen',
 				'destino',
 				'tipo_distribucion',
@@ -34,6 +34,7 @@ class FtPqrRespuestaProperties extends ModelFormat
 				'otra_despedida',
 				'anexos_digitales',
 				'anexos_fisicos',
+				'ver_copia',
 				'copia_interna',
 				'sol_encuesta' 
             ],

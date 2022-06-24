@@ -93,12 +93,20 @@ class FtPqrRespuestaService extends ModelService
             $data .= "Anexos digitales: $anexosDigitales<br/>";
         }
 
-        if ($copia = $this->getModel()->getFieldValue('copia_interna')) {
-            $data .= "Copia: $copia<br/>";
+        $dataCopy = [];
+        if ((int)$this->getModel()->ver_copia) {
+            if ($copia = $this->getModel()->getFieldValue('copia_interna')) {
+                $dataCopy[] = $copia;
+            }
         }
 
         if ($copiaExterna = $this->getNameCopiaExterna()) {
-            $data .= "Copia externa: $copiaExterna<br/>";
+            $dataCopy[] = $copiaExterna;
+        }
+
+        if ($dataCopy) {
+            $infoCopy = implode(', ', $dataCopy);
+            $data .= "Con copia: $infoCopy<br/>";
         }
 
         $data .= "Proyectó: {$this->getCreador()}";

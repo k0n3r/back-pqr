@@ -286,6 +286,22 @@ final class Version20200310032827 extends AbstractMigration
                 'fila_visible'      => '1',
                 'listable'          => '1'
             ],
+            'ver_copia'         =>
+                [
+                    'formato_idformato' => $idformato,
+                    'nombre'            => 'ver_copia',
+                    'etiqueta'          => 'Mostrar Copia Interna',
+                    'valor'             => '{*showCopia@SI,NO*}',
+                    'tipo_dato'         => 'integer',
+                    'longitud'          => '1',
+                    'obligatoriedad'    => 1,
+                    'acciones'          => 'a,e',
+                    'etiqueta_html'     => 'Method',
+                    'orden'             => '12',
+                    'fila_visible'      => '1',
+                    'listable'          => '1',
+                    'predeterminado'    => 0
+                ],
             'copia_interna'     => [
                 'formato_idformato' => $idformato,
                 'nombre'            => 'copia_interna',
@@ -295,7 +311,7 @@ final class Version20200310032827 extends AbstractMigration
                 'obligatoriedad'    => '0',
                 'acciones'          => 'a,e',
                 'etiqueta_html'     => 'UserAutocomplete',
-                'orden'             => '12',
+                'orden'             => '13',
                 'fila_visible'      => '1',
                 'opciones'          => '{"dependenciaCargo":true}',
                 'listable'          => '1'
@@ -310,7 +326,7 @@ final class Version20200310032827 extends AbstractMigration
                 'valor'             => '{*fieldSatisfactionSurvey*}',
                 'acciones'          => 'a,e',
                 'etiqueta_html'     => 'Method',
-                'orden'             => '13',
+                'orden'             => '14',
                 'fila_visible'      => '1',
                 'listable'          => '1'
             ]
