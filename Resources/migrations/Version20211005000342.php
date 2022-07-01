@@ -14,6 +14,7 @@ final class Version20211005000342 extends AbstractMigration
 {
     public function getDescription(): string
     {
+        //TODO: Se puede borrar
         return 'Se crea el campo anexos del sistema';
     }
 

@@ -92,10 +92,7 @@ class FtPqrController extends AbstractController
         try {
 
             $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
-            $date = DateController::convertDate(
-                $FtPqr->sys_fecha_vencimiento,
-                'Y-m-d'
-            );
+            $DateTime = DateController::getDateTimeFromDataBase($FtPqr->sys_fecha_vencimiento);
 
             $options = null;
             $idDependencia = (int)$FtPqr->sys_dependencia;
@@ -109,7 +106,7 @@ class FtPqrController extends AbstractController
             $data = [
                 'sys_tipo'              => (int)$FtPqr->sys_tipo,
                 'sys_subtipo'           => (new PqrService())->subTypeExist() ? (int)$FtPqr->sys_subtipo : 0,
-                'sys_fecha_vencimiento' => $date,
+                'sys_fecha_vencimiento' => $DateTime->format('Y-m-d'),
                 'sys_dependencia'       => $idDependencia,
                 'optionsDependency'     => $options,
                 'sys_frecuencia'        => (int)$FtPqr->sys_frecuencia,

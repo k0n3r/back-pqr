@@ -14,6 +14,7 @@ final class Version20210411151159 extends AbstractMigration
 {
     public function getDescription(): string
     {
+        //TODO: Se puede borrar
         return 'Se quita tipo descripcion en campo contenido de respuesta pqr';
     }
 

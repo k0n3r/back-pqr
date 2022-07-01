@@ -32,6 +32,9 @@ class FtPqrService extends ModelService
     private PqrService $PqrService;
     private ?Documento $Documento = null;
 
+    const FUNCTION_ADMIN_PQR = 'Administrador PQRS';
+    const FUNCTION_ADMIN_DEP_PQR = 'Administrador Dependencia PQRS';
+
     public function __construct(FtPqr $Ft)
     {
         parent::__construct($Ft);
@@ -226,7 +229,10 @@ class FtPqrService extends ModelService
 
         $fecha = $this->getDateForType();
 
-        $oldDate = $FtPqr->sys_fecha_vencimiento;
+        $oldDate = $FtPqr->sys_fecha_vencimiento ?
+            DateController::getDateTimeFromDataBase($FtPqr->sys_fecha_vencimiento)->format('Y-m-d H:i:s')
+            : null;
+
         $FtPqr->sys_fecha_vencimiento = $fecha;
         $FtPqr->save();
 
@@ -269,7 +275,7 @@ class FtPqrService extends ModelService
     public function getDateForType(): string
     {
         return (DateController::addBusinessDays(
-            new DateTime($this->getDocument()->fecha),
+            DateController::getDateTimeFromDataBase($this->getDocument()->fecha),
             $this->getDays()
         ))->format('Y-m-d H:i:s');
     }
@@ -869,7 +875,7 @@ HTML;
     {
         $data = [];
         foreach ($this->getModel()->getPqrRespuestas() as $FtPqrRespuesta) {
-            $Documento=$FtPqrRespuesta->getDocument();
+            $Documento = $FtPqrRespuesta->getDocument();
             if (!$Documento->isActive() && !$Documento->isDeleted()) {
                 $data[] = $FtPqrRespuesta;
             }
@@ -891,10 +897,10 @@ HTML;
             return 'Fecha vencimiento no configurada';
         }
 
-        $now = $this->getModel()->sys_fecha_terminado ? new DateTime($this->getModel()->sys_fecha_terminado) : new DateTime();
+        $now = $this->getModel()->sys_fecha_terminado ? DateController::getDateTimeFromDataBase($this->getModel()->sys_fecha_terminado) : new DateTime();
         $now->setTime(0, 0);
 
-        $expirationDate = new DateTime($this->getModel()->sys_fecha_vencimiento);
+        $expirationDate = DateController::getDateTimeFromDataBase($this->getModel()->sys_fecha_vencimiento);
         $now->setTime(0, 0);
 
         $diff = $now->diff($expirationDate);
@@ -954,7 +960,12 @@ HTML;
         }
 
         $now = new DateTime($this->getModel()->sys_fecha_terminado);
-        $diff = $now->diff(new DateTime($this->getModel()->sys_fecha_vencimiento));
+        $now->setTime(0, 0);
+
+        $expirationDate = new DateTime($this->getModel()->sys_fecha_vencimiento);
+        $expirationDate->setTime(0, 0);
+
+        $diff = $now->diff($expirationDate);
 
         $dias = 0;
         if ($diff->invert) {
@@ -974,9 +985,13 @@ HTML;
     public function getDaysWait(): string
     {
         $now = !$this->getModel()->sys_fecha_terminado ? new DateTime()
-            : new DateTime($this->getModel()->sys_fecha_terminado);
+            : DateController::getDateTimeFromDataBase($this->getModel()->sys_fecha_terminado);
+        $now->setTime(0, 0);
 
-        $diff = $now->diff(new DateTime($this->getDocument()->fecha));
+        $DateTime = DateController::getDateTimeFromDataBase($this->getDocument()->fecha);
+        $DateTime->setTime(0, 0);
+
+        $diff = $now->diff($DateTime);
 
         return $diff->days;
     }

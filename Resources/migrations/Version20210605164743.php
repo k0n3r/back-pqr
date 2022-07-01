@@ -15,6 +15,7 @@ final class Version20210605164743 extends AbstractMigration
 {
     public function getDescription(): string
     {
+        //TODO: Se puede borrar
         return 'Se crea campo que define el tiempo de respuesta';
     }
 

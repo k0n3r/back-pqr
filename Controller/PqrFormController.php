@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\Services\FtPqrService;
 use App\services\exception\SaiaException;
 use Doctrine\DBAL\Connection;
 use Exception;
@@ -10,6 +11,7 @@ use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\models\formatos\CategoriaFormato;
 use Saia\models\formatos\Formato;
+use Saia\models\funcion\Funcion;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -49,8 +51,8 @@ class PqrFormController extends AbstractController
         Connection $Connection
     ): Response {
 
+        $Connection->beginTransaction();
         try {
-            $Connection->beginTransaction();
 
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->publish()) {
@@ -124,8 +126,8 @@ class PqrFormController extends AbstractController
         Connection $Connection
     ): Response {
 
+        $Connection->beginTransaction();
         try {
-            $Connection->beginTransaction();
 
             foreach ($request->get('fieldOrder') as $record) {
                 $PqrFormFieldService = (new PqrFormField($record['id']))->getService();
@@ -157,8 +159,8 @@ class PqrFormController extends AbstractController
         Connection $Connection
     ): Response {
 
+        $Connection->beginTransaction();
         try {
-            $Connection->beginTransaction();
 
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateSetting($request->get('data'))) {
@@ -193,8 +195,8 @@ class PqrFormController extends AbstractController
         Connection $Connection
     ): Response {
 
+        $Connection->beginTransaction();
         try {
-            $Connection->beginTransaction();
 
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateResponseSetting($request->get('data'))) {
@@ -223,8 +225,8 @@ class PqrFormController extends AbstractController
         Connection $Connection
     ): Response {
 
+        $Connection->beginTransaction();
         try {
-            $Connection->beginTransaction();
 
             $Connection->createQueryBuilder()
                 ->update('pqr_form_fields')
@@ -272,8 +274,8 @@ class PqrFormController extends AbstractController
         Connection $Connection
     ): Response {
 
+        $Connection->beginTransaction();
         try {
-            $Connection->beginTransaction();
 
             $PqrFormService = (PqrForm::getInstance())->getService();
             $success = $PqrFormService->save([
@@ -310,8 +312,8 @@ class PqrFormController extends AbstractController
         Connection $Connection
     ): Response {
 
+        $Connection->beginTransaction();
         try {
-            $Connection->beginTransaction();
             $enable = $Request->get('rad_email', 0);
             $PqrFormService = (PqrForm::getInstance())->getService();
 
@@ -360,5 +362,84 @@ class PqrFormController extends AbstractController
         }
 
         return $saiaResponse->getResponse();
+    }
+
+
+    /**
+     * Habilita y aplica el filtro por dependencia a los reportes
+     * @Route("/filterReport", name="updateEnableFilterDep", methods={"PUT"})
+     *
+     * @param Request       $Request
+     * @param ISaiaResponse $saiaResponse
+     * @param Connection    $Connection
+     * @return Response
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
+     */
+    public function updateEnableFilterDep(
+        Request $Request,
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
+
+        $Connection->beginTransaction();
+        try {
+
+            $status = $Request->get('enable_filter_dep', 0);
+
+            $PqrForm = PqrForm::getInstance();
+            $PqrFormService = $PqrForm->getService();
+
+            if ($status && !$PqrForm->getRow('sys_dependencia')) {
+                throw new SaiaException("Debe agregar al formulario el componente de Dependencia");
+            }
+
+            $this->editOrCreateFunction(FtPqrService::FUNCTION_ADMIN_PQR, $status);
+            $this->editOrCreateFunction(FtPqrService::FUNCTION_ADMIN_DEP_PQR, $status);
+
+
+            $success = $PqrFormService->save([
+                'enable_filter_dep' => $status
+            ]);
+
+            if (!$success) {
+                throw new SaiaException($PqrFormService->getErrorManager()->getMessage());
+            }
+
+            $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
+            $saiaResponse->setSuccess(1);
+            $Connection->commit();
+        } catch (Throwable $th) {
+            $Connection->rollBack();
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * Crea o edita la funciones utilizadas para filtros sobre los reportes de PQR
+     *
+     * @param string $functionName
+     * @param int    $status
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
+     */
+    private function editOrCreateFunction(string $functionName, int $status): void
+    {
+        $Funcion = Funcion::findByAttributes([
+            'nombre' => $functionName
+        ]);
+
+        if ($Funcion) {
+            $Funcion->getService()->save([
+                'estado' => $status
+            ]);
+        } elseif ($status) {
+            $FuncionService = (new Funcion())->getService();
+            $FuncionService->save([
+                'nombre' => $functionName,
+                'estado' => $status,
+                'fecha'  => date('Y-m-d H:i:s')
+            ]);
+        }
     }
 }

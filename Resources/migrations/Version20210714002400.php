@@ -14,6 +14,7 @@ final class Version20210714002400 extends AbstractMigration
 {
     public function getDescription(): string
     {
+        //TODO: Se puede borrar
         return 'Se crea campo tipo fecha';
     }
 

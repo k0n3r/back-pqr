@@ -39,7 +39,8 @@ class PqrForm extends Model
                 'show_empty',
                 'active',
                 'response_configuration',
-                'fk_field_time'
+                'fk_field_time',
+                'enable_filter_dep'
             ],
             'primary' => 'id',
             'table'   => 'pqr_forms'

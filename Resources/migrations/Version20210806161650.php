@@ -14,6 +14,7 @@ final class Version20210806161650 extends AbstractMigration
 {
     public function getDescription(): string
     {
+        //TODO: Se puede borrar
         return 'Se actualiza el campo (con copia) de la ft_pqr_respuesta a multiple';
     }
 

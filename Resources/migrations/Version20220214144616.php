@@ -17,6 +17,7 @@ final class Version20220214144616 extends AbstractMigration
 
     public function getDescription(): string
     {
+        //TODO: Se puede borrar
         return 'Crea reportes y graficos de Dependencias';
     }
 

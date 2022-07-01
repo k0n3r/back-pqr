@@ -97,6 +97,7 @@ final class Version20200226192642 extends AbstractMigration
     private function createComponenteProcesos(int $idbusqueda)
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_PROCESO;
+        $estado = FtPqr::ESTADO_PROCESO;
 
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
@@ -104,26 +105,8 @@ final class Version20200226192642 extends AbstractMigration
             'nombre'              => $nombreComponente,
             'orden'               => 2
         ];
-        $busquedaComponente = array_merge($dataComponente, $this->getDefaultData($nombreComponente));
 
-        $idbusquedaComponente = $this->createBusquedaComponente(
-            $idbusqueda,
-            $busquedaComponente,
-            $nombreComponente
-        );
-
-        $estado = FtPqr::ESTADO_PROCESO;
-        $busquedaCondicion = [
-            'fk_busqueda_componente' => $idbusquedaComponente,
-            'codigo_where'           => "sys_estado='$estado'",
-            'etiqueta_condicion'     => $nombreComponente
-        ];
-        $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
-
-        $data = [
-            'enlace' => 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector": "iframe","url": "views/buzones/grilla.php?idbusqueda_componente=' . $idbusquedaComponente . '"}]',
-        ];
-        $this->createModulo($data, $nombreComponente);
+        $this->createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado);
     }
 
     private function createComponenteTerminados(int $idbusqueda)
@@ -151,7 +134,7 @@ final class Version20200226192642 extends AbstractMigration
 
         $busquedaCondicion = [
             'fk_busqueda_componente' => $idbusquedaComponente,
-            'codigo_where'           => "sys_estado='$estado'",
+            'codigo_where'           => "sys_estado='$estado' {*filter_pqr_admin@$estado*}",
             'etiqueta_condicion'     => $nombreComponente
         ];
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);

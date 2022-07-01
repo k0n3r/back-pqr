@@ -1,10 +1,12 @@
 <?php
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
+use App\Bundles\pqr\Services\FtPqrService;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Saia\controllers\SessionController;
 use Saia\models\tarea\TareaEstado;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use Saia\controllers\DateController;
@@ -14,6 +16,7 @@ use Saia\models\formatos\CampoSeleccionados;
 use Saia\models\Dependencia;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Types;
+use Saia\models\vistas\VfuncionarioDc;
 
 include_once $_SERVER['ROOT_PATH'] . 'src/Bundles/pqr/formatos/reporteFuncionesGenerales.php';
 $fileAdditionalFunctions = $_SERVER['ROOT_PATH'] . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
@@ -432,4 +435,65 @@ function filter_pqr(): string
             break;
     }
     return $response;
+}
+
+/**
+ * Si esta activo, filtra de la siguiente manera:
+ * 1. El funcionario logado si tiene la funcion "FUNCTION_ADMIN_PQR" podra ver todas las pqr
+ * 2. El funcionario logado si tiene la funcion "FUNCTION_ADMIN_DEP_PQR" podra ver todas las pqr que pertenezca
+ * a la dependencia a las cuales tiene asignada bajo el rol como las dependencias hijas de dichos roles
+ * 3. Si no tiene ninguna funcion vinculada solo padre ver las pqr a las cuales se le hayan asignado
+ * por tarea
+ *
+ * @param string $nameReport
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
+ */
+function filter_pqr_admin(string $nameReport): string
+{
+    $nameReport = strtoupper($nameReport);
+
+    $PqrForm = PqrForm::getInstance();
+    $PqrFormField = $PqrForm->getRow('sys_dependencia');
+
+    if (!$PqrFormField || !$PqrForm->enable_filter_dep) {
+        return '';
+    }
+
+    $Funcionario = SessionController::getUser();
+
+    $isAdmin = $Funcionario->getService()->hasFunction(FtPqrService::FUNCTION_ADMIN_PQR);
+    if ($isAdmin) {
+        return '';
+    }
+
+    $isAdminDep = $Funcionario->getService()->hasFunction(FtPqrService::FUNCTION_ADMIN_DEP_PQR);
+    if (!$isAdminDep) {
+        $subconsulta = "SELECT DISTINCT iddocumento FROM vpqr v JOIN tarea t ON v.iddocumento = t.relacion_id JOIN tarea_funcionario tf on tf.fk_tarea=t.idtarea WHERE v.sys_estado='$nameReport' AND t.relacion=1 AND tf.tipo=1 AND tf.estado=1 AND tf.externo=0 AND tf.usuario = {$Funcionario->getPK()}";
+
+        return " AND v.iddocumento IN ($subconsulta)";
+    }
+
+    $records = VfuncionarioDc::getBasicQb()
+        ->select('iddependencia')
+        ->distinct()
+        ->andWhere('idfuncionario =:idfuncionario')
+        ->setParameter(':idfuncionario', $Funcionario->getPK(), Types::INTEGER)
+        ->execute()->fetchAllAssociative();
+
+    if (!$records) {
+        return '1=0';
+    }
+
+    $ids = [];
+    foreach ($records as $id) {
+        $ids[] = $id['iddependencia'];
+        $children = (new Dependencia($id['iddependencia']))->getChildren();
+        foreach ($children as $DependenciaChild) {
+            $ids[] = $DependenciaChild->getPK();
+        }
+    }
+
+    return " AND sys_dependencia IN (" . implode(',', array_unique($ids)) . ")";
+
 }

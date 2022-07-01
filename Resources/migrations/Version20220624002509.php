@@ -14,6 +14,7 @@ final class Version20220624002509 extends AbstractMigration
 {
     public function getDescription(): string
     {
+        //TODO: Se puede borrar
         return 'Se agrega el campo ver_copia a la respuesta pqr';
     }
 

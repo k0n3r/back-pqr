@@ -172,6 +172,8 @@ final class Version20200103155146 extends AbstractMigration
             'default' => 0,
             'comment' => 'idcampos_formato'
         ]);
+
+        $table->addColumn('enable_filter_dep', 'boolean', ['default' => 0]);
     }
 
     private function tablePqrBackup(Table $table)

@@ -14,6 +14,7 @@ final class Version20220406164056 extends AbstractMigration
 {
     public function getDescription(): string
     {
+        //TODO: Se puede borrar
         return 'Se actualiza el campo fecha formato_fecha_radicado';
     }
 

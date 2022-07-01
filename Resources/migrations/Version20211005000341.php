@@ -14,6 +14,7 @@ final class Version20211005000341 extends AbstractMigration
 {
     public function getDescription(): string
     {
+        //TODO: Se puede borrar
         return 'Se crea campo para mostrar u ocultar campo vacios';
     }
 

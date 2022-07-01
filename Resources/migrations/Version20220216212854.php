@@ -15,6 +15,7 @@ final class Version20220216212854 extends AbstractMigration
 
     public function getDescription(): string
     {
+        //TODO: Se puede borrar
         return 'Se crea el campo folios del sistema';
     }
 
