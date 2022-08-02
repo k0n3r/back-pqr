@@ -15,13 +15,11 @@ use Saia\controllers\documento\Transfer;
 use Saia\controllers\functions\CoreFunctions;
 use Saia\controllers\SendMailController;
 use Saia\controllers\TerceroService;
-use Saia\models\BuzonSalida;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\Formato;
 use Saia\controllers\DateController;
 use Saia\controllers\documento\SaveFt;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
-use Saia\controllers\SessionController;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
@@ -30,7 +28,6 @@ use Saia\models\Tercero;
 class FtPqrService extends ModelService
 {
     private PqrService $PqrService;
-    private ?Documento $Documento = null;
 
     const FUNCTION_ADMIN_PQR = 'Administrador PQRS';
     const FUNCTION_ADMIN_DEP_PQR = 'Administrador Dependencia PQRS';
@@ -56,17 +53,12 @@ class FtPqrService extends ModelService
     /**
      * Obtiene el documento del modelo
      *
-     * @param bool $force
      * @return Documento
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-07-26
      */
-    public function getDocument(bool $force = false): Documento
+    public function getDocument(): Documento
     {
-        if (!$this->Documento || $force) {
-            $this->Documento = $this->getModel()->getDocument();
-        }
-
-        return $this->Documento;
+        return $this->getModel()->getDocument();
     }
 
     /**
@@ -629,13 +621,10 @@ HTML;
                 }
             }
         }
-        $Documento = $this->getDocument(true);
+
+        $Documento = $this->getModel()->getDocument();
         if ($codes) {
-            $Transfer = new Transfer(
-                $Documento,
-                SessionController::getValue('funcionario_codigo'),
-                BuzonSalida::NOMBRE_TRANSFERIDO
-            );
+            $Transfer = $this->getModel()->getTransferInstance();
             $Transfer->setDestination($codes);
             $Transfer->setDestinationType(Transfer::DESTINATION_TYPE_CODE);
             $Transfer->execute();
