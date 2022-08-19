@@ -24,7 +24,7 @@ class FtPqr extends FtPqrProperties
     const ESTADO_FRE_IMP_SEV_MEDIO = 2;
     const ESTADO_FRE_IMP_SEV_ALTO = 3;
 
-    private ?FtPqrService $FtPqrService = null;
+    protected ?FtPqrService $FtPqrService = null;
 
     /**
      * @inheritDoc
@@ -202,7 +202,7 @@ class FtPqr extends FtPqrProperties
      *
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-23
      */
-    private function setDefaultValues(): void
+    protected function setDefaultValues(): void
     {
         $this->sys_estado = self::ESTADO_PENDIENTE;
         $this->sys_fecha_vencimiento = null;
@@ -229,27 +229,7 @@ class FtPqr extends FtPqrProperties
         );
 
         $labelPQR = mb_strtoupper($this->getService()->getPqrForm()->label, 'UTF-8');
-
-        $data = $this->getPqrBackup()->getDataJson();
-
-        $showEmpty = $this->getService()->getPqrForm()->show_empty ?? 1;
-
-        $trs = '';
-        foreach ($data as $key => $value) {
-
-            if (!$showEmpty && $value == '') {
-                continue;
-            }
-
-            $pos = strpos($key, '__');
-            if ($pos !== false) {
-                $key = substr($key, 0, $pos);
-            }
-            $trs .= '<tr>
-                <td style="width:50%"><strong>' . mb_strtoupper($key, 'UTF-8') . '</strong></td>
-                <td style="width:50%">' . $value . '</td>
-            </tr>';
-        }
+        $tr = implode('', $this->getTableRows());
 
         return <<<HTML
         <table class="table table-borderless" style="width:100%">';
@@ -262,10 +242,41 @@ class FtPqr extends FtPqrProperties
                 <td style="width:50%;text-align:center">$Qr<br/>$text</td>
             </tr>
             <tr><td colspan="2">&nbsp;</td></tr>
-            $trs
+            $tr
         </table>
 HTML;
 
+    }
+
+    /**
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-08-19
+     */
+    protected function getTableRows(): array
+    {
+        $data = $this->getPqrBackup()->getDataJson();
+
+        $showEmpty = $this->getService()->getPqrForm()->show_empty ?? 1;
+
+        $tr = [];
+        foreach ($data as $key => $value) {
+
+            if (!$showEmpty && $value == '') {
+                continue;
+            }
+
+            $pos = strpos($key, '__');
+            if ($pos !== false) {
+                $key = substr($key, 0, $pos);
+            }
+
+            $tr[$key] = '<tr>
+                <td style="width:50%"><strong>' . mb_strtoupper($key, 'UTF-8') . '</strong></td>
+                <td style="width:50%">' . $value . '</td>
+            </tr>';
+        }
+
+        return $tr;
     }
 
     /**

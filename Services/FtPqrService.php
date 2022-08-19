@@ -675,59 +675,60 @@ HTML;
     {
         $config = $this->getPqrForm()->getResponseConfiguration(true);
 
-        if ($config['tercero']) {
-            $data = [
-                'nombre'              => '-',
-                'identificacion'      => Tercero::IDENTIFICACION_INDEFINIDA,
-                'tipo'                => Tercero::TIPO_NATURAL,
-                'tipo_identificacion' => Tercero::TIPO_IDENTIFICACION_CC,
-                'correo'              => $this->getModel()->sys_email
-            ];
-
-            foreach ($config['tercero'] as $row) {
-                $value = [];
-                foreach ($row['value'] as $idPqrFormField) {
-                    $PqrFormField = PqrFormField::findByAttributes([
-                        'id' => $idPqrFormField
-                    ], [
-                        'name'
-                    ]);
-
-                    if ($PqrFormField) {
-                        $name = $PqrFormField->name;
-                        $value[] = trim($this->getModel()->$name);
-                    }
-                }
-                $data[$row['name']] = trim(implode(' ', $value));
-            }
-
-            if (!$data['identificacion']) {
-                $data['identificacion'] = Tercero::IDENTIFICACION_INDEFINIDA;
-            }
-            if (!$data['nombre']) {
-                $data['nombre'] = '-';
-            }
-
-            if ($this->getModel()->sys_anonimo && $data['nombre'] == '-') {
-                $data['nombre'] = 'Anónimo';
-            }
-
-            $Tercero = Tercero::findByAttributes([
-                'identificacion' => $data['identificacion'],
-                'estado'         => 1
-            ]);
-
-            $Tercero ??= new Tercero();
-            $TerceroService = new TerceroService($Tercero);
-            if (!$TerceroService->save($data)) {
-                $this->getErrorManager()->setMessage($TerceroService->getErrorManager()->getMessage());
-                return false;
-            }
-            $this->getModel()->sys_tercero = $TerceroService->getModel()->getPK();
-            $this->getModel()->save();
+        if (!$config['tercero']) {
+            return true;
         }
 
-        return true;
+        $data = [
+            'nombre'              => '-',
+            'identificacion'      => Tercero::IDENTIFICACION_INDEFINIDA,
+            'tipo'                => Tercero::TIPO_NATURAL,
+            'tipo_identificacion' => Tercero::TIPO_IDENTIFICACION_CC,
+            'correo'              => $this->getModel()->sys_email
+        ];
+
+        foreach ($config['tercero'] as $row) {
+            $value = [];
+            foreach ($row['value'] as $idPqrFormField) {
+                $PqrFormField = PqrFormField::findByAttributes([
+                    'id' => $idPqrFormField
+                ], [
+                    'name'
+                ]);
+
+                if ($PqrFormField) {
+                    $name = $PqrFormField->name;
+                    $value[] = trim($this->getModel()->$name);
+                }
+            }
+            $data[$row['name']] = trim(implode(' ', $value));
+        }
+
+        if (!$data['identificacion']) {
+            $data['identificacion'] = Tercero::IDENTIFICACION_INDEFINIDA;
+        }
+        if (!$data['nombre']) {
+            $data['nombre'] = '-';
+        }
+
+        if ($this->getModel()->sys_anonimo && $data['nombre'] == '-') {
+            $data['nombre'] = 'Anónimo';
+        }
+
+        $Tercero = Tercero::findByAttributes([
+            'identificacion' => $data['identificacion'],
+            'estado'         => 1
+        ]);
+
+        $Tercero ??= new Tercero();
+        $TerceroService = new TerceroService($Tercero);
+        if (!$TerceroService->save($data)) {
+            $this->getErrorManager()->setMessage($TerceroService->getErrorManager()->getMessage());
+            return false;
+        }
+        $this->getModel()->sys_tercero = $TerceroService->getModel()->getPK();
+
+        return $this->getModel()->save() > 0;
     }
 
 
