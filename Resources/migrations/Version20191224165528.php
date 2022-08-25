@@ -206,22 +206,22 @@ final class Version20191224165528 extends AbstractMigration
                 'children'               => [
                     [
                         'fk_grafico' => 0,
-                        'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia GROUP BY sys_dependencia',
+                        'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia GROUP BY d.nombre,sys_dependencia',
                         'etiqueta'   => 'Total'
                     ],
                     [
                         'fk_grafico' => 0,
-                        'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'PENDIENTE\' GROUP BY sys_dependencia',
+                        'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'PENDIENTE\' GROUP BY d.nombre,sys_dependencia',
                         'etiqueta'   => 'Pendiente'
                     ],
                     [
                         'fk_grafico' => 0,
-                        'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'PROCESO\' GROUP BY sys_dependencia',
+                        'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'PROCESO\' GROUP BY d.nombre,sys_dependencia',
                         'etiqueta'   => 'Proceso'
                     ],
                     [
                         'fk_grafico' => 0,
-                        'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'TERMINADO\' GROUP BY sys_dependencia',
+                        'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'TERMINADO\' GROUP BY d.nombre,sys_dependencia',
                         'etiqueta'   => 'Terminado'
                     ]
                 ]
