@@ -216,7 +216,7 @@ HTML;
         $Qr = CoreFunctions::mostrar_qr($this);
         $firmas = CoreFunctions::mostrar_estado_proceso($this);
         $Service = $this->getService();
-
+        $contenido = $this->getFieldValue('contenido');
         return <<<HTML
             <table style="width: 100%;border: 0">
                 <tbody>
@@ -266,7 +266,7 @@ HTML;
                     </tr>
                 </tbody>
             </table>
-            $this->contenido
+            $contenido
             <p>{$Service->getDespedida()}<br/><br/></p>
             $firmas
             <p>{$Service->getOtherData()}</p>
