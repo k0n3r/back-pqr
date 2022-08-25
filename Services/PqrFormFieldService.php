@@ -494,7 +494,7 @@ class PqrFormFieldService extends ModelService
     private function addEditPqrResponseTimesForOtherFields(): void
     {
         $sysTipoOptions = $this->getSysTipoOptions();
-        $records = $this->getModel()->getCamposFormato()->getCampoOpciones(1);
+        $records = $this->getModel()->getCamposFormato()->getCampoOpciones(['estado'=>1]);
 
         foreach ($records as $CampoOpciones) {
             PqrResponseTime::executeUpdate([
@@ -561,6 +561,6 @@ class PqrFormFieldService extends ModelService
      */
     private function getSysTipoOptions(): array
     {
-        return $this->getModel()::getSysTipoField()->getCamposFormato()->getCampoOpciones(1);
+        return $this->getModel()::getSysTipoField()->getCamposFormato()->getCampoOpciones(['estado'=>1]);
     }
 }
