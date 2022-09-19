@@ -981,9 +981,7 @@ HTML;
         $DateTime = DateController::getDateTimeFromDataBase($this->getDocument()->fecha);
         $DateTime->setTime(0, 0);
 
-        $diff = $now->diff($DateTime);
-
-        return $diff->days;
+        return DateController::diasHabilesEntreFechas($DateTime,$now);
     }
 
     /**
