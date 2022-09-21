@@ -4,10 +4,11 @@ namespace App\Bundles\pqr\Services;
 
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
-use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
+use App\services\correo\EmailSaia;
+use App\services\correo\SendEmailSaia;
 use App\services\models\ModelService\ModelService;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
@@ -15,7 +16,6 @@ use Saia\controllers\DateController;
 use Saia\controllers\DistributionService;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\functions\CoreFunctions;
-use Saia\controllers\SendMailController;
 use Saia\models\anexos\Anexos;
 use Saia\models\BuzonSalida;
 use Saia\models\Tercero;
@@ -348,23 +348,6 @@ class FtPqrRespuestaService extends ModelService
             $message .= "Califica nuestro servicio haciendo clic en el siguiente enlace: <a href='$url'>Calificar el servicio</a> .<br/><br/>";
         }
 
-        $SendMailController = new SendMailController(
-            $subject,
-            $message
-        );
-
-        $SendMailController->setDestinations(
-            SendMailController::DESTINATION_TYPE_EMAIL,
-            [$FtPqrRespuesta->getTercero()->correo]
-        );
-
-        if ($emailCopy = $this->getCopyEmail()) {
-            $SendMailController->setCopyDestinations(
-                SendMailController::DESTINATION_TYPE_EMAIL,
-                $emailCopy
-            );
-        }
-
         $DocumentoRespuesta = $FtPqrRespuesta->getDocument();
         $anexos[] = new FileJson($DocumentoRespuesta->getPdfJson());
 
@@ -374,25 +357,23 @@ class FtPqrRespuestaService extends ModelService
                 $anexos[] = new FileJson($Anexos->ruta);
             }
         }
-        $SendMailController->setAttachments($anexos);
-        $SendMailController->saveShipmentTraceability($DocumentoRespuesta);
 
-        $send = $SendMailController->send();
-        if ($send !== true) {
-            $log = [
-                'error' => $send
-            ];
-            UtilitiesPqr::notifyAdministrator(
-                "No fue posible notificar la Respuesta a la PQR # $DocumentoPqr->numero",
-                $log
-            );
+        $EmailSaia = (new EmailSaia())
+            ->subject($subject)
+            ->htmlWithTemplate($message)
+            ->to($FtPqrRespuesta->getTercero()->correo)
+            ->addAttachments($anexos)
+            ->saveShipmentTraceability($DocumentoRespuesta->getPK());
 
-            $this->getErrorManager()->setMessage("No fue posible notificar la respuesta");
-            return false;
+        if ($emailCopy = $this->getCopyEmail()) {
+            $EmailSaia->cc(...$emailCopy);
         }
 
-        $description = "Se le notificó a: (" . implode(", ", $SendMailController->getDestinations()) . ")";
-        if ($copia = $SendMailController->getCopyDestinations()) {
+        (new SendEmailSaia($EmailSaia))->send();
+
+        //TODO: VALIDAR FUNCIONAMIENTO
+        $description = "Se le notificó a: (" . implode(", ", $EmailSaia->getTo()) . ")";
+        if ($copia = $EmailSaia->getCc()) {
             $texCopia = implode(", ", $copia);
             $description .= " con copia a: ($texCopia)";
         }
@@ -460,33 +441,15 @@ class FtPqrRespuestaService extends ModelService
         $message = "Cordial Saludo,<br/><br/>
         Nos gustaría recibir tus comentarios sobre el servicio que has recibido por parte de nuestro equipo.<br/><a href='$url'>Calificar el servicio</a>";
 
-        $SendMailController = new SendMailController(
-            "Queremos conocer tu opinión! (Solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero)",
-            $message
-        );
+        $EmailSaia = (new EmailSaia())
+            ->subject("Queremos conocer tu opinión! (Solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero)")
+            ->htmlWithTemplate($message)
+            ->to($email)
+            ->saveShipmentTraceability($this->getModel()->getDocument()->getPK());
 
-        $SendMailController->setDestinations(
-            SendMailController::DESTINATION_TYPE_EMAIL,
-            [$email]
-        );
-        $SendMailController->saveShipmentTraceability($this->getModel()->getDocument());
+        (new SendEmailSaia($EmailSaia))->send();
 
-        $send = $SendMailController->send();
-        if ($send !== true) {
-            $message = "No fue posible solicitar la calificacion de la ($nameFormat) # {$this->getModel()->getDocument()->numero}";
-            $log = [
-                'error' => $send
-            ];
-
-            UtilitiesPqr::notifyAdministrator(
-                $message,
-                $log
-            );
-
-            $this->getErrorManager()->setMessage($message);
-            return false;
-        }
-
+        //TODO: VALIDAR FUNCIONAMIENTO
         $description = "Se solicita la calificación de la ($nameFormat) # {$this->getModel()->getDocument()->numero} al e-mail: ($email)";
         $tipo = PqrHistory::TIPO_CALIFICACION;
 

@@ -48,7 +48,7 @@ class TimeLine {
             download = `<div class="card-footer clearfix">
                 <ul class="reactions">
                     <li>
-                        <a href="\${this.activeItem.url}" targe="_blank">Descargar <i class="fa fa-cloud-download"></i></a>
+                        <a href="\${this.activeItem.url}" target="_blank">Descargar <i class="fa fa-cloud-download"></i></a>
                     </li>
                 </ul>
             </div>`;

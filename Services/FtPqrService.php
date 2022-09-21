@@ -7,13 +7,14 @@ use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
+use App\services\correo\EmailSaia;
+use App\services\correo\SendEmailSaia;
 use App\services\models\ModelService\ModelService;
 use DateTime;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\functions\CoreFunctions;
-use Saia\controllers\SendMailController;
 use Saia\controllers\TerceroService;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\Formato;
@@ -532,34 +533,21 @@ class FtPqrService extends ModelService
             $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $this->getModel());
         }
 
-        $SendMailController = new SendMailController(
-            $subject,
-            $message
-        );
-
-        $SendMailController->setDestinations(
-            SendMailController::DESTINATION_TYPE_EMAIL,
-            [$this->getModel()->sys_email]
-        );
         $Documento = $this->getDocument();
         $files[] = new FileJson($Documento->getPdfJson());
         $records = $Documento->getService()->getAllFilesAnexos(true);
         foreach ($records as $Anexos) {
             $files[] = new FileJson($Anexos->ruta);
         }
-        $SendMailController->setAttachments($files);
-        $SendMailController->saveShipmentTraceability($Documento);
 
-        $send = $SendMailController->send();
-        if ($send !== true) {
-            $log = [
-                'error' => $send
-            ];
-            UtilitiesPqr::notifyAdministrator(
-                "No fue posible notificar la PQR # {$this->getDocument()->numero}",
-                $log
-            );
-        }
+        $EmailSaia = (new EmailSaia())
+            ->subject($subject)
+            ->htmlWithTemplate($message)
+            ->to($this->getModel()->sys_email)
+            ->addAttachments($files)
+            ->saveShipmentTraceability($Documento->getPK());
+
+        (new SendEmailSaia($EmailSaia))->send();
 
         return true;
     }
@@ -634,31 +622,17 @@ HTML;
             $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->getPqrForm()->label} con radicado $Documento->numero.<br/><br/>
             El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado";
 
-            $SendMailController = new SendMailController(
-                "Notificación de {$this->getPqrForm()->label} # $Documento->numero",
-                $message
-            );
-
-            $SendMailController->setDestinations(
-                SendMailController::DESTINATION_TYPE_EMAIL,
-                $emails
-            );
-
             $files[] = new FileJson($Documento->getPdfJson());
-            $SendMailController->setAttachments($files);
-            $SendMailController->saveShipmentTraceability($Documento);
 
-            $send = $SendMailController->send();
+            $EmailSaia = (new EmailSaia())
+                ->subject("Notificación de {$this->getPqrForm()->label} # $Documento->numero")
+                ->htmlWithTemplate($message)
+                ->to(...$emails)
+                ->addAttachments($files)
+                ->saveShipmentTraceability($Documento->getPK());
 
-            if ($send !== true) {
-                $log = [
-                    'error' => $send
-                ];
-                UtilitiesPqr::notifyAdministrator(
-                    "No fue posible notificar a los funcionarios # $Documento->numero",
-                    $log
-                );
-            }
+            (new SendEmailSaia($EmailSaia))->send();
+
         }
 
         return true;
@@ -966,7 +940,7 @@ HTML;
     }
 
     /**
-     * Muestra los dias transcurridos desde la radicacion hasta la fecha actual
+     * Muestra los dias transcurridos desde la radicacion hasta la fecha terminada/actual
      *
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -981,7 +955,8 @@ HTML;
         $DateTime = DateController::getDateTimeFromDataBase($this->getDocument()->fecha);
         $DateTime->setTime(0, 0);
 
-        return DateController::diasHabilesEntreFechas($DateTime,$now);
+        return DateController::diasHabilesEntreFechas($DateTime, $now);
+
     }
 
     /**

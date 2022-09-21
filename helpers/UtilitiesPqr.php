@@ -2,13 +2,14 @@
 
 namespace App\Bundles\pqr\helpers;
 
+use App\services\correo\EmailSaia;
+use App\services\correo\SendEmailSaia;
 use App\services\GlobalContainer;
 use Saia\controllers\anexos\FileJson;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Saia\models\formatos\Formato;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\documento\Documento;
-use Saia\controllers\SendMailController;
 
 use Throwable;
 
@@ -53,17 +54,12 @@ class UtilitiesPqr
         $Logger = GlobalContainer::getLogger();
         $Logger->error($message, $log);
 
-        $SendMailController = new SendMailController(
-            "Error en el modulo de PQR",
-            $message
-        );
+        $EmailSaia = (new EmailSaia())
+            ->subject("Error en el modulo de PQR")
+            ->htmlWithTemplate($message)
+            ->to("soporte@cerok.com", "andres.agudelo@cerok.com");
 
-        $SendMailController->setDestinations(
-            SendMailController::DESTINATION_TYPE_EMAIL,
-            ["soporte@cerok.com", "andres.agudelo@cerok.com"]
-        );
-
-        $SendMailController->send();
+        (new SendEmailSaia($EmailSaia))->send();
     }
 
     /**
