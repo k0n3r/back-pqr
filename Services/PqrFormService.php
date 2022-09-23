@@ -545,6 +545,11 @@ class PqrFormService extends ModelService
                         return \$FtPqr->getService()->getValueForReport('$PqrFormField->name');
                     }";
                     break;
+                case 'Date':
+                    $code = "function get_$PqrFormField->name(int \$idft,\$value){
+                          return \$value ? dateRadication(\$value) : '';
+                    }";
+                    break;
             }
             if ($code) {
                 $fieldCode[] = $code;
@@ -782,7 +787,7 @@ class PqrFormService extends ModelService
                     $fieldOptions = [];
 
                     if ($PqrFormField->name != PqrFormField::FIELD_NAME_SYS_TIPO) {
-                        $options = $PqrFormField->getCamposFormato()->getCampoOpciones(['estado'=>1]);
+                        $options = $PqrFormField->getCamposFormato()->getCampoOpciones(['estado' => 1]);
                         foreach ($options as $CampoOpcion) {
                             if ($CampoOpcion->estado) {
                                 $fieldOptions[] = [
