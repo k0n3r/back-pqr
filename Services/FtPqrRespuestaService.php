@@ -7,6 +7,7 @@ use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
+use App\services\correo\DefaultMailService;
 use App\services\correo\EmailSaia;
 use App\services\correo\SendEmailSaia;
 use App\services\models\ModelService\ModelService;
@@ -372,8 +373,8 @@ class FtPqrRespuestaService extends ModelService
         (new SendEmailSaia($EmailSaia))->send();
 
         //TODO: VALIDAR FUNCIONAMIENTO
-        $description = "Se le notificó a: (" . implode(", ", $EmailSaia->getTo()) . ")";
-        if ($copia = $EmailSaia->getCc()) {
+        $description = "Se le notificó a: (" . implode(", ", DefaultMailService::getInfoAdress($EmailSaia->getTo())) . ")";
+        if ($copia = DefaultMailService::getInfoAdress($EmailSaia->getCc())) {
             $texCopia = implode(", ", $copia);
             $description .= " con copia a: ($texCopia)";
         }
