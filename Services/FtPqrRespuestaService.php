@@ -179,7 +179,7 @@ class FtPqrRespuestaService extends ModelService
      */
     public function validEmails(): bool
     {
-        $email = $this->getModel()->getTercero()->correo;
+        $email = $this->getModel()->getTercero()->getEmail();
         if (!$email) {
             $this->getErrorManager()->setMessage("Debe ingresar el email (Destino)");
             return false;
@@ -362,20 +362,21 @@ class FtPqrRespuestaService extends ModelService
         $EmailSaia = (new EmailSaia())
             ->subject($subject)
             ->htmlWithTemplate($message)
-            ->to($FtPqrRespuesta->getTercero()->correo)
+            ->to($FtPqrRespuesta->getTercero()->getEmail())
             ->addAttachments($anexos)
             ->saveShipmentTraceability($DocumentoRespuesta->getPK());
 
-        if ($emailCopy = $this->getCopyEmail()) {
+        $emailCopy = $this->getCopyEmail();
+        if ($emailCopy) {
             $EmailSaia->cc(...$emailCopy);
         }
 
         (new SendEmailSaia($EmailSaia))->send();
 
         //TODO: VALIDAR FUNCIONAMIENTO
-        $description = "Se le notificó a: (" . implode(", ", DefaultMailService::getInfoAdress($EmailSaia->getTo())) . ")";
-        if ($copia = DefaultMailService::getInfoAdress($EmailSaia->getCc())) {
-            $texCopia = implode(", ", $copia);
+        $description = "Se le notificó a: {$FtPqrRespuesta->getTercero()->getEmail()}";
+        if ($emailCopy) {
+            $texCopia = implode(", ", $emailCopy);
             $description .= " con copia a: ($texCopia)";
         }
         $tipo = PqrHistory::TIPO_NOTIFICACION;
@@ -396,7 +397,7 @@ class FtPqrRespuestaService extends ModelService
         if ($this->getModel()->copia) {
             $records = explode(',', $this->getModel()->copia);
             foreach ($records as $destino) {
-                $emails[] = (new Tercero($destino))->correo;
+                $emails[] = (new Tercero($destino))->getEmail();
             }
         }
 
@@ -429,7 +430,7 @@ class FtPqrRespuestaService extends ModelService
      */
     public function requestSurvey(): bool
     {
-        $email = $this->getModel()->getTercero()->correo;
+        $email = $this->getModel()->getTercero()->getEmail();
         if (!CoreFunctions::isEmailValid($email)) {
             $this->getErrorManager()->setMessage("El email ($email) NO es valido");
             return false;
