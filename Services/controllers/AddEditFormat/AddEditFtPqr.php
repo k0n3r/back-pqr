@@ -5,6 +5,8 @@ namespace App\Bundles\pqr\Services\controllers\AddEditFormat;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Exception;
+use Saia\controllers\generator\component\Distribution;
+use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\controllers\SessionController;
@@ -272,7 +274,7 @@ class AddEditFtPqr implements IAddEditFormat
 
     /**
      * Adiciona campos adicionales predeterminados
-     * al formulario (sys_estado)
+     * al formulario
      *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -281,7 +283,7 @@ class AddEditFtPqr implements IAddEditFormat
     private function addOtherFields(): void
     {
         $fields = [
-            'sys_estado'            => [
+            'sys_estado'                    => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
@@ -299,7 +301,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => null,
                 'longitud_vis'      => null
             ],
-            'sys_tercero'           => [
+            'sys_tercero'                   => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
@@ -317,7 +319,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => null,
                 'longitud_vis'      => null
             ],
-            'sys_fecha_vencimiento' => [
+            'sys_fecha_vencimiento'         => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
@@ -335,7 +337,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => null,
                 'longitud_vis'      => null
             ],
-            'sys_fecha_terminado'   => [
+            'sys_fecha_terminado'           => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
@@ -353,7 +355,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => null,
                 'longitud_vis'      => null
             ],
-            'sys_anonimo'           => [
+            'sys_anonimo'                   => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
@@ -371,7 +373,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => null,
                 'longitud_vis'      => null
             ],
-            'sys_frecuencia'        => [
+            'sys_frecuencia'                => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
@@ -389,7 +391,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => '1,Bajo 2,Medio 3,Alto',
                 'longitud_vis'      => null
             ],
-            'sys_impacto'           => [
+            'sys_impacto'                   => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
@@ -407,7 +409,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => '1,Bajo 2,Medio 3,Alto',
                 'longitud_vis'      => null
             ],
-            'sys_severidad'         => [
+            'sys_severidad'                 => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
@@ -425,21 +427,63 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => '1,Bajo 2,Medio 3,Alto',
                 'longitud_vis'      => null
             ],
+            Distribution::DESTINO_INTERNO   => array_merge(Distribution::getAttributesMoreFields($this->PqrForm->fk_formato,
+                Distribution::DESTINO_INTERNO), [
+                'opciones'          => '{"tipo_seleccion":"unico","multiple_destino":false,"dependenciaCargo":true}',
+                'listable' => 1
+            ]),
+            Distribution::SELECT_MENSAJERIA => array_merge(Distribution::getAttributesMoreFields($this->PqrForm->fk_formato,
+                Distribution::SELECT_MENSAJERIA), [
+                'campoOpciones' => Distribution::getAttributesMoreFieldsOptions(0, Distribution::SELECT_MENSAJERIA)
+            ])
         ];
 
         foreach ($fields as $name => $data) {
+            $options = $data['campoOpciones'] ?? ($data['campoOpciones'] = []);
+            unset($data['campoOpciones']);
+
             if ($CamposFormato = CamposFormato::findByAttributes([
                 'nombre'            => $name,
                 'formato_idformato' => $this->PqrForm->fk_formato
             ])) {
                 $CamposFormato->setAttributes($data);
                 $CamposFormato->save();
+
+                if ($options) {
+                    $this->createOrUpdateOptions($options, $CamposFormato->getPK());
+                }
             } else {
                 $CamposFormatoService = (new CamposFormato())->getService();
                 $CamposFormatoService->save($data);
+                if ($options) {
+                    $this->createOrUpdateOptions($options, $CamposFormatoService->getModel()->getPK());
+                }
             }
         }
+    }
 
+    /**
+     * @param array $options
+     * @param int   $fieldId
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-10-19
+     */
+    public function createOrUpdateOptions(array $options, int $fieldId)
+    {
+        foreach ($options as $option) {
+            $option['fk_campos_formato'] = $fieldId;
+            $CampoOpciones = CampoOpciones::findByAttributes([
+                'llave'             => $option['llave'],
+                'fk_campos_formato' => $fieldId
+            ]);
+
+            if ($CampoOpciones) {
+                $CampoOpciones->setAttributes($option);
+                $CampoOpciones->save();
+            } else {
+                $CampoOpcionesService = (new CampoOpciones())->getService();
+                $CampoOpcionesService->save($option);
+            }
+        }
     }
 
     /**

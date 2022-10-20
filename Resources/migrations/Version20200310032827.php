@@ -6,6 +6,7 @@ namespace App\Bundles\pqr\Resources\migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Saia\controllers\generator\component\Distribution;
 use Saia\models\Modulo;
 
 /**
@@ -159,27 +160,7 @@ final class Version20200310032827 extends AbstractMigration
                 'fila_visible'      => '1',
                 'placeholder'       => 'seleccionar..',
                 'listable'          => '1',
-                'campoOpciones'     => [
-                    ['llave' => '4', 'valor' => 'Enviar por E-mail', 'estado' => '1', 'orden' => '0'],
-                    [
-                        'llave'  => '1',
-                        'valor'  => 'Requiero recogida de documento y entrega al destinatario',
-                        'estado' => '1',
-                        'orden'  => '1'
-                    ],
-                    [
-                        'llave'  => '2',
-                        'valor'  => 'Requiero sólo entrega al destinatario',
-                        'estado' => '1',
-                        'orden'  => '2'
-                    ],
-                    [
-                        'llave'  => '3',
-                        'valor'  => 'No requiero servicio de mensajería, lo entregaré yo mismo',
-                        'estado' => '1',
-                        'orden'  => '3'
-                    ],
-                ]
+                'campoOpciones'     => Distribution::getAttributesMoreFieldsOptions(0, Distribution::SELECT_MENSAJERIA)
             ],
             'copia'             => [
                 'formato_idformato' => $idformato,

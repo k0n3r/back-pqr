@@ -7,7 +7,6 @@ use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
-use App\services\correo\DefaultMailService;
 use App\services\correo\EmailSaia;
 use App\services\correo\SendEmailSaia;
 use App\services\models\ModelService\ModelService;

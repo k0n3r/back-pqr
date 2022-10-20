@@ -127,6 +127,7 @@ class FtPqr extends FtPqrProperties
      */
     public function afterAdd(): bool
     {
+
         $this->setDefaultValues();
         if (!$this->getService()->validSysEmail()) {
             throw new SaiaException($this->getService()->getErrorManager()->getMessage(), 200);
@@ -177,7 +178,8 @@ class FtPqr extends FtPqrProperties
      */
     public function afterRad(): bool
     {
-        return $this->getService()->sendNotifications() &&
+        return $this->getService()->saveDistribution() &&
+            $this->getService()->sendNotifications() &&
             $this->getService()->notifyEmail();
     }
 

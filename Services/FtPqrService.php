@@ -13,8 +13,10 @@ use App\services\models\ModelService\ModelService;
 use DateTime;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
+use Saia\controllers\DistributionService;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\functions\CoreFunctions;
+use Saia\controllers\generator\component\Distribution;
 use Saia\controllers\TerceroService;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\Formato;
@@ -594,6 +596,8 @@ HTML;
      */
     public function sendNotifications(): bool
     {
+        $this->sendNotificationToInternalDestination();
+
         $emails = $codes = [];
         $records = $this->getPqrForm()->getPqrNotifications();
         if ($records) {
@@ -650,7 +654,8 @@ HTML;
         $config = $this->getPqrForm()->getResponseConfiguration(true);
 
         if (!$config['tercero']) {
-            return true;
+            $this->getErrorManager()->setMessage("Contacte al administrador!, Se debe definir la configuración de la respuesta");
+            return false;
         }
 
         $data = [
@@ -1108,4 +1113,70 @@ HTML;
         return "fecha de vencimiento de $oldDate a $newDate";
     }
 
+    /**
+     * Registra la distribucion
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date   2020
+     */
+    public function saveDistribution(): bool
+    {
+        if ($this->getDocument()->fromWebservice()) {
+            return true;
+        }
+
+        $option = (int)$this->getModel()->getKeyField(Distribution::SELECT_MENSAJERIA);
+
+        switch ($option) {
+            case FtPqrRespuesta::DISTRIBUCION_RECOGIDA_ENTREGA:
+                $recogida = DistributionService::ESTADO_RECOGIDA;
+                $estado = DistributionService::DISTRIBUCION_POR_RECEPCIONAR;
+                break;
+
+            case FtPqrRespuesta::DISTRIBUCION_SOLO_ENTREGA:
+                $recogida = DistributionService::ESTADO_ENTREGA;
+                $estado = DistributionService::DISTRIBUCION_PENDIENTE;
+                break;
+
+            case FtPqrRespuesta::DISTRIBUCION_NO_REQUIERE_MENSAJERIA:
+            case FtPqrRespuesta::DISTRIBUCION_ENVIAR_EMAIL:
+                $recogida = DistributionService::ESTADO_ENTREGA;
+                $estado = DistributionService::DISTRIBUCION_FINALIZADA;
+                break;
+
+            default:
+                $this->getErrorManager()->setMessage("Tipo de distribucion no definida");
+                return false;
+        }
+        $DistributionService = new DistributionService($this->getModel()->getDocument());
+        $fieldName = Distribution::DESTINO_INTERNO;
+
+        $DistributionService->start(
+            $this->getModel()->sys_tercero,
+            DistributionService::TIPO_EXTERNO,
+            $this->getModel()->$fieldName,
+            DistributionService::TIPO_INTERNO,
+            $estado,
+            $recogida
+        );
+
+        return true;
+    }
+
+    private function sendNotificationToInternalDestination(): void
+    {
+        if ($this->getDocument()->fromWebservice()) {
+            return;
+        }
+
+        $fieldName = Distribution::DESTINO_INTERNO;
+
+        if ($this->getModel()->$fieldName) {
+            $Transfer = $this->getModel()->getTransferInstance();
+            $Transfer->setDestination([$this->getModel()->$fieldName]);
+            $Transfer->setDestinationType(Transfer::DESTINATION_TYPE_ROLE);
+            $Transfer->execute();
+        }
+    }
 }

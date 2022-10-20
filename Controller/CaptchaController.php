@@ -45,11 +45,13 @@ class CaptchaController extends AbstractController implements IHasCaptcha
                 throw new Exception("Debe indicar el rol del creador", 1);
             }
 
+
             $VfuncionarioDc = VfuncionarioDc::findByRole($Request->get('dependencia'));
             if (!$VfuncionarioDc) {
                 throw new Exception("Rol del creador incorrecto", 1);
             }
 
+            $Request->request->set('webservice', 1);
             $Formato = new Formato($Request->get('formatId'));
             $SaveDocument = new SaveDocument($Formato, $VfuncionarioDc);
             if (!$SaveDocument->create($Request->request->all())) {
