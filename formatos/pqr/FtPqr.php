@@ -4,6 +4,7 @@ namespace App\Bundles\pqr\formatos\pqr;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\services\exception\SaiaException;
+use Saia\models\documento\Documento;
 use Saia\models\Tercero;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrService;
@@ -14,6 +15,7 @@ use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 class FtPqr extends FtPqrProperties
 {
     const ESTADO_PENDIENTE = 'PENDIENTE';
+    const ESTADO_INICIADO = 'INICIADO';
     const ESTADO_PROCESO = 'PROCESO';
     const ESTADO_TERMINADO = 'TERMINADO';
 
@@ -70,7 +72,9 @@ class FtPqr extends FtPqrProperties
         if (!$action) {
             $PqrFormField = (PqrForm::getInstance())->getRow('sys_subtipo');
 
-            $data['isActive'] = (int)($PqrFormField && $PqrFormField->isActive());
+            $data['isActiveSubType'] = (int)($PqrFormField && $PqrFormField->isActive());
+        } else {
+            $data['isStarted'] = (int)(new self($idft))->getDocument()->isStarted();
         }
         return $data;
     }
@@ -84,10 +88,10 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
-     * @return PqrBackup
+     * @return PqrBackup|null
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
      */
-    public function getPqrBackup(): PqrBackup
+    public function getPqrBackup(): ?PqrBackup
     {
         if (!$this->PqrBackup) {
             $this->PqrBackup = PqrBackup::findByAttributes([
@@ -127,7 +131,6 @@ class FtPqr extends FtPqrProperties
      */
     public function afterAdd(): bool
     {
-
         $this->setDefaultValues();
         if (!$this->getService()->validSysEmail()) {
             throw new SaiaException($this->getService()->getErrorManager()->getMessage(), 200);
@@ -143,6 +146,14 @@ class FtPqr extends FtPqrProperties
         if (!$this->getService()->validSysEmail()) {
             throw new SaiaException($this->getService()->getErrorManager()->getMessage(), 200);
         }
+
+        if ($this->getDocument()->isStarted()) {
+            $this->sys_estado = self::ESTADO_PENDIENTE;
+            $this->getDocument()->estado = Documento::APROBADO;
+
+            return $this->beforeRad() && $this->afterRad();
+        }
+
         return true;
     }
 
@@ -162,6 +173,10 @@ class FtPqr extends FtPqrProperties
      */
     public function beforeRad(): bool
     {
+        if ($this->getRequest()['radicacion_rapida']) {
+            return true;
+        }
+
         if (
             !$this->getService()->createBackup() ||
             !$this->getService()->updateFechaVencimiento() ||
@@ -178,6 +193,10 @@ class FtPqr extends FtPqrProperties
      */
     public function afterRad(): bool
     {
+        if ($this->getRequest()['radicacion_rapida']) {
+            return true;
+        }
+
         return $this->getService()->saveDistribution() &&
             $this->getService()->sendNotifications() &&
             $this->getService()->notifyEmail();
@@ -206,7 +225,7 @@ class FtPqr extends FtPqrProperties
      */
     protected function setDefaultValues(): void
     {
-        $this->sys_estado = self::ESTADO_PENDIENTE;
+        $this->sys_estado = ((int)$this->getRequest()['radicacion_rapida']) ? self::ESTADO_INICIADO : self::ESTADO_PENDIENTE;
         $this->sys_fecha_vencimiento = null;
         $this->sys_fecha_terminado = null;
         $this->save();
@@ -256,7 +275,11 @@ HTML;
      */
     protected function getTableRows(): array
     {
-        $data = $this->getPqrBackup()->getDataJson();
+        $PqrBackup = $this->getPqrBackup();
+        if (!$PqrBackup) {
+            return [];
+        }
+        $data = $PqrBackup->getDataJson();
 
         $showEmpty = $this->getService()->getPqrForm()->show_empty ?? 1;
 

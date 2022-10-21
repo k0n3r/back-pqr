@@ -114,7 +114,13 @@ class FtPqrService extends ModelService
             'fk_pqr'       => $this->getModel()->getPK(),
             'data_json'    => json_encode($this->getDataRow())
         ];
-        $PqrBackupService = (new PqrBackup)->getService();
+
+        $PqrBackup = PqrBackup::findByAttributes([
+            'fk_documento' => $this->getModel()->documento_iddocumento,
+            'fk_pqr'       => $this->getModel()->getPK(),
+        ]);
+
+        $PqrBackupService = $PqrBackup ? $PqrBackup->getService() : (new PqrBackup)->getService();
         if (!$PqrBackupService->save($data)) {
             $this->getErrorManager()->setMessage("No fue posible registrar el backup");
             return false;
