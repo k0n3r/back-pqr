@@ -10,6 +10,8 @@ use Doctrine\DBAL\Types\Type;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrHtmlField;
+use Saia\controllers\generator\component\Distribution;
+use Saia\controllers\generator\component\Rad;
 use Saia\models\formatos\CampoOpciones;
 
 class PqrFormFieldService extends ModelService
@@ -51,14 +53,14 @@ class PqrFormFieldService extends ModelService
         $PqrForm = new PqrForm($attributes['fk_pqr_form']);
 
         $defaultFields = [
-            'name' => $this->generateName(trim(strtolower($attributes['label']))),
-            'required' => 0,
-            'anonymous' => 0,
-            'fk_pqr_form' => $PqrForm->getPK(),
+            'name'              => $this->generateName(trim(strtolower($attributes['label']))),
+            'required'          => 0,
+            'anonymous'         => 0,
+            'fk_pqr_form'       => $PqrForm->getPK(),
             'fk_campos_formato' => 0,
-            'is_system' => 0,
-            'orden' => ($PqrForm->countFields()) + self::INITIAL_ORDER,
-            'active' => 1
+            'is_system'         => 0,
+            'orden'             => ($PqrForm->countFields()) + self::INITIAL_ORDER,
+            'active'            => 1
         ];
         $attributes = array_merge($defaultFields, $attributes);
 
@@ -119,8 +121,8 @@ class PqrFormFieldService extends ModelService
     public function updateActive(int $status): bool
     {
         $attributes = [
-            'active' => $status,
-            'required' => 0,
+            'active'             => $status,
+            'required'           => 0,
             'required_anonymous' => 0
         ];
 
@@ -213,7 +215,14 @@ class PqrFormFieldService extends ModelService
             'uniq',
             'numero',
             'fecha',
-            'idft'
+            'idft',
+
+            'radicacion',
+            Rad::DISTRIBUCION,
+            Distribution::DESTINO_INTERNO,
+            Distribution::SELECT_MENSAJERIA,
+            Rad::COLILLA,
+            Rad::DIGITALIZACION
         ];
 
         return in_array($label, $reservedWords);
@@ -387,7 +396,7 @@ class PqrFormFieldService extends ModelService
         foreach ($PqrFormField->getSetting()->options as $option) {
 
             if ($CampoOpciones = CampoOpciones::findByAttributes([
-                'valor' => $option->text,
+                'valor'             => $option->text,
                 'fk_campos_formato' => $CampoFormato->getPK()
             ])) {
                 $CampoOpcionesService = $CampoOpciones->getService();
@@ -401,23 +410,23 @@ class PqrFormFieldService extends ModelService
 
                 $CampoOpcionesService = (new CampoOpciones())->getService();
                 $CampoOpcionesService->save([
-                    'llave' => $id,
-                    'valor' => $option->text,
+                    'llave'             => $id,
+                    'valor'             => $option->text,
                     'fk_campos_formato' => $CampoFormato->getPK(),
-                    'estado' => 1
+                    'estado'            => 1
                 ]);
             }
 
             $data[] = [
                 'llave' => $id,
-                'item' => $option->text
+                'item'  => $option->text
             ];
             $values[] = "$id,$option->text";
         }
 
         $CampoFormato->setAttributes([
             'opciones' => json_encode($data),
-            'valor' => implode(';', $values)
+            'valor'    => implode(';', $values)
         ]);
         $CampoFormato->save();
 
@@ -462,7 +471,7 @@ class PqrFormFieldService extends ModelService
 
             $PqrResponseTime = PqrResponseTime::findByAttributes([
                 'fk_campo_opciones' => -1,
-                'fk_sys_tipo' => $Option->getPK(),
+                'fk_sys_tipo'       => $Option->getPK(),
             ]);
 
             if ($PqrResponseTime) {
@@ -475,9 +484,9 @@ class PqrFormFieldService extends ModelService
                 $PqrResponseTimeService = (new PqrResponseTime)->getService();
                 $PqrResponseTimeService->save([
                     'fk_campo_opciones' => -1,
-                    'fk_sys_tipo' => $Option->getPK(),
-                    'number_days' => $this->getDaysForSystipo($Option->valor),
-                    'active' => 1
+                    'fk_sys_tipo'       => $Option->getPK(),
+                    'number_days'       => $this->getDaysForSystipo($Option->valor),
+                    'active'            => 1
                 ]);
             }
         }
@@ -494,7 +503,7 @@ class PqrFormFieldService extends ModelService
     private function addEditPqrResponseTimesForOtherFields(): void
     {
         $sysTipoOptions = $this->getSysTipoOptions();
-        $records = $this->getModel()->getCamposFormato()->getCampoOpciones(['estado'=>1]);
+        $records = $this->getModel()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
 
         foreach ($records as $CampoOpciones) {
             PqrResponseTime::executeUpdate([
@@ -514,7 +523,7 @@ class PqrFormFieldService extends ModelService
 
                 $PqrResponseTime = PqrResponseTime::findByAttributes([
                     'fk_campo_opciones' => $CampoOpciones->getPK(),
-                    'fk_sys_tipo' => $Option->getPK(),
+                    'fk_sys_tipo'       => $Option->getPK(),
                 ]);
 
                 if ($PqrResponseTime) {
@@ -527,9 +536,9 @@ class PqrFormFieldService extends ModelService
                     $PqrResponseTimeService = (new PqrResponseTime)->getService();
                     $PqrResponseTimeService->save([
                         'fk_campo_opciones' => $CampoOpciones->getPK(),
-                        'fk_sys_tipo' => $Option->getPK(),
-                        'number_days' => $this->getDaysForSystipo($Option->valor),
-                        'active' => 1
+                        'fk_sys_tipo'       => $Option->getPK(),
+                        'number_days'       => $this->getDaysForSystipo($Option->valor),
+                        'active'            => 1
                     ]);
                 }
             }
@@ -561,6 +570,6 @@ class PqrFormFieldService extends ModelService
      */
     private function getSysTipoOptions(): array
     {
-        return $this->getModel()::getSysTipoField()->getCamposFormato()->getCampoOpciones(['estado'=>1]);
+        return $this->getModel()::getSysTipoField()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
     }
 }

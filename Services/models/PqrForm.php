@@ -35,7 +35,6 @@ class PqrForm extends Model
                 'name',
                 'show_anonymous',
                 'show_label',
-                'rad_email',
                 'show_empty',
                 'active',
                 'response_configuration',

@@ -6,6 +6,8 @@ use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Exception;
 use Saia\controllers\generator\component\Distribution;
+use Saia\controllers\generator\component\Hidden;
+use Saia\controllers\generator\component\Rad;
 use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrFormField;
@@ -293,7 +295,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'tipo_dato'         => 'string',
                 'longitud'          => '30',
                 'predeterminado'    => FtPqr::ESTADO_PENDIENTE,
-                'etiqueta_html'     => 'Hidden',
+                'etiqueta_html'     => Hidden::getIdentification(),
                 'acciones'          => null,
                 'placeholder'       => 'Estado de la PQR',
                 'listable'          => 1,
@@ -311,7 +313,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'tipo_dato'         => 'integer',
                 'longitud'          => '11',
                 'predeterminado'    => 0,
-                'etiqueta_html'     => 'Hidden',
+                'etiqueta_html'     => Hidden::getIdentification(),
                 'acciones'          => null,
                 'placeholder'       => 'Destinatario de la respuesta',
                 'listable'          => 1,
@@ -329,7 +331,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'tipo_dato'         => 'datetime',
                 'longitud'          => null,
                 'predeterminado'    => null,
-                'etiqueta_html'     => 'Hidden',
+                'etiqueta_html'     => Hidden::getIdentification(),
                 'acciones'          => null,
                 'placeholder'       => null,
                 'listable'          => 1,
@@ -347,7 +349,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'tipo_dato'         => 'datetime',
                 'longitud'          => null,
                 'predeterminado'    => null,
-                'etiqueta_html'     => 'Hidden',
+                'etiqueta_html'     => Hidden::getIdentification(),
                 'acciones'          => null,
                 'placeholder'       => null,
                 'listable'          => 1,
@@ -365,7 +367,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'tipo_dato'         => 'integer',
                 'longitud'          => 1,
                 'predeterminado'    => 0,
-                'etiqueta_html'     => 'Hidden',
+                'etiqueta_html'     => Hidden::getIdentification(),
                 'acciones'          => null,
                 'placeholder'       => null,
                 'listable'          => 1,
@@ -383,7 +385,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'tipo_dato'         => 'integer',
                 'longitud'          => 1,
                 'predeterminado'    => 0,
-                'etiqueta_html'     => 'Hidden',
+                'etiqueta_html'     => Hidden::getIdentification(),
                 'acciones'          => null,
                 'placeholder'       => 'Frecuencia de la PQR',
                 'listable'          => 1,
@@ -401,7 +403,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'tipo_dato'         => 'integer',
                 'longitud'          => 1,
                 'predeterminado'    => 0,
-                'etiqueta_html'     => 'Hidden',
+                'etiqueta_html'     => Hidden::getIdentification(),
                 'acciones'          => null,
                 'placeholder'       => 'Frecuencia de la PQR',
                 'listable'          => 1,
@@ -419,7 +421,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'tipo_dato'         => 'integer',
                 'longitud'          => 1,
                 'predeterminado'    => 0,
-                'etiqueta_html'     => 'Hidden',
+                'etiqueta_html'     => Hidden::getIdentification(),
                 'acciones'          => null,
                 'placeholder'       => 'Frecuencia de la PQR',
                 'listable'          => 1,
@@ -427,15 +429,40 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => '1,Bajo 2,Medio 3,Alto',
                 'longitud_vis'      => null
             ],
+            'radicacion'                    => [
+                'formato_idformato' => $this->PqrForm->fk_formato,
+                'fila_visible'      => 1,
+                'obligatoriedad'    => 0,
+                'orden'             => 0,
+                'nombre'            => 'radicacion',
+                'etiqueta'          => 'Radiación',
+                'tipo_dato'         => 'string',
+                'longitud'          => 255,
+                'predeterminado'    => null,
+                'etiqueta_html'     => Rad::getIdentification(),
+                'acciones'          => 'a,e,b',
+                'placeholder'       => null,
+                'listable'          => 0,
+                'opciones'          => null,
+                'ayuda'             => null,
+                'longitud_vis'      => null
+            ],
+            Rad::DISTRIBUCION               => Rad::getAttributesMoreFields($this->PqrForm->fk_formato,
+                Rad::DISTRIBUCION),
             Distribution::DESTINO_INTERNO   => array_merge(Distribution::getAttributesMoreFields($this->PqrForm->fk_formato,
                 Distribution::DESTINO_INTERNO), [
-                'opciones'          => '{"tipo_seleccion":"unico","multiple_destino":false,"dependenciaCargo":true}',
-                'listable' => 1
+                'opciones' => '{"tipo_seleccion":"unico","multiple_destino":false,"dependenciaCargo":true}'
             ]),
             Distribution::SELECT_MENSAJERIA => array_merge(Distribution::getAttributesMoreFields($this->PqrForm->fk_formato,
                 Distribution::SELECT_MENSAJERIA), [
                 'campoOpciones' => Distribution::getAttributesMoreFieldsOptions(0, Distribution::SELECT_MENSAJERIA)
-            ])
+            ]),
+            Rad::COLILLA                    => array_merge(Rad::getAttributesMoreFields($this->PqrForm->fk_formato,
+                Rad::COLILLA), [
+                'campoOpciones' => Rad::getAttributesMoreFieldsOptions(0, Rad::COLILLA)
+            ]),
+            Rad::DIGITALIZACION               => Rad::getAttributesMoreFields($this->PqrForm->fk_formato,
+                Rad::DIGITALIZACION),
         ];
 
         foreach ($fields as $name => $data) {
