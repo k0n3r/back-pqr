@@ -24,6 +24,9 @@ class FtPqrRespuestaService extends ModelService
 {
     private PqrForm $PqrForm;
 
+    const OPTION_EMAIL_RESPUESTA = 1;
+    const OPTION_EMAIL_CALIFICACION = 2;
+
     public function __construct(FtPqrRespuesta $Ft)
     {
         parent::__construct($Ft);
@@ -363,24 +366,30 @@ class FtPqrRespuestaService extends ModelService
             ->htmlWithTemplate($message)
             ->to($FtPqrRespuesta->getTercero()->getEmail())
             ->addAttachments($anexos)
-            ->saveShipmentTraceability($DocumentoRespuesta->getPK());
+            ->saveShipmentTraceability($DocumentoRespuesta->getPK())
+            ->defineCallbackClassName(FtPqrRespuestaEmailCallback::class);
 
         $emailCopy = $this->getCopyEmail();
         if ($emailCopy) {
             $EmailSaia->cc(...$emailCopy);
         }
 
-        (new SendEmailSaia($EmailSaia))->send();
-
-        //TODO: VALIDAR FUNCIONAMIENTO
         $description = "Se le notificó a: {$FtPqrRespuesta->getTercero()->getEmail()}";
         if ($emailCopy) {
             $texCopia = implode(", ", $emailCopy);
             $description .= " con copia a: ($texCopia)";
         }
-        $tipo = PqrHistory::TIPO_NOTIFICACION;
 
-        return $this->saveHistory($description, $tipo);
+        $EmailSaia->defineParamsCallbackClassName([
+            'option'      => self::OPTION_EMAIL_RESPUESTA,
+            'idft'        => $this->getModel()->getPK(),
+            'descripcion' => $description,
+            'tipo'        => PqrHistory::TIPO_NOTIFICACION
+        ]);
+
+        (new SendEmailSaia($EmailSaia))->send();
+
+        return true;
     }
 
     /**
@@ -435,26 +444,32 @@ class FtPqrRespuestaService extends ModelService
             return false;
         }
 
-        $nameFormat = $this->getModel()->getFormat()->etiqueta;
+
         $DocumentoPqr = $this->getModel()->getFtPqr()->getDocument();
 
         $url = $this->getUrlEncuesta();
         $message = "Cordial Saludo,<br/><br/>
         Nos gustaría recibir tus comentarios sobre el servicio que has recibido por parte de nuestro equipo.<br/><a href='$url'>Calificar el servicio</a>";
 
+        $nameFormat = $this->getModel()->getFormat()->etiqueta;
+        $description = "Se solicita la calificación de la ($nameFormat) # {$this->getModel()->getDocument()->numero} al e-mail: ($email)";
+
         $EmailSaia = (new EmailSaia())
             ->subject("Queremos conocer tu opinión! (Solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero)")
             ->htmlWithTemplate($message)
             ->to($email)
-            ->saveShipmentTraceability($this->getModel()->getDocument()->getPK());
+            ->saveShipmentTraceability($this->getModel()->getDocument()->getPK())
+            ->defineCallbackClassName(FtPqrRespuestaEmailCallback::class)
+            ->defineParamsCallbackClassName([
+                'option'      => self::OPTION_EMAIL_CALIFICACION,
+                'idft'        => $this->getModel()->getPK(),
+                'descripcion' => $description,
+                'tipo'        => PqrHistory::TIPO_CALIFICACION
+            ]);
 
         (new SendEmailSaia($EmailSaia))->send();
 
-        //TODO: VALIDAR FUNCIONAMIENTO
-        $description = "Se solicita la calificación de la ($nameFormat) # {$this->getModel()->getDocument()->numero} al e-mail: ($email)";
-        $tipo = PqrHistory::TIPO_CALIFICACION;
-
-        return $this->saveHistory($description, $tipo);
+        return true;
     }
 
     /**
