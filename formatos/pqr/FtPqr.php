@@ -2,8 +2,11 @@
 
 namespace App\Bundles\pqr\formatos\pqr;
 
+use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\services\exception\SaiaException;
+use App\services\GlobalContainer;
+use Doctrine\DBAL\Types\Types;
 use Saia\models\documento\Documento;
 use Saia\models\Tercero;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
@@ -27,6 +30,7 @@ class FtPqr extends FtPqrProperties
     const ESTADO_FRE_IMP_SEV_ALTO = 3;
 
     protected ?FtPqrService $FtPqrService = null;
+    private ?FtPqrCalificacion $lastFtPqrCalificacion = null;
 
     /**
      * @inheritDoc
@@ -111,6 +115,34 @@ class FtPqr extends FtPqrProperties
         return FtPqrRespuesta::findAllByAttributes([
             'ft_pqr' => $this->getPK()
         ]);
+    }
+
+    /**
+     * Obtiene la ultima calificacion realizada sobre la PQR
+     * NO se tiene encuenta la respuesta
+     *
+     * @return null|FtPqrCalificacion
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-11-10
+     */
+    public function getLastCalificacion(): ?FtPqrCalificacion
+    {
+        if (!$this->lastFtPqrCalificacion) {
+            $Qb = GlobalContainer::getConnection()
+                ->createQueryBuilder()
+                ->select('ft.*')
+                ->from('vpqr_calificacion', 'v')
+                ->join('v', 'ft_pqr_calificacion', 'ft', 'v.idft=ft.idft_pqr_calificacion')
+                ->where('idft_pqr = :id')
+                ->setParameter(':id', $this->getPK(), Types::INTEGER)
+                ->orderBy('v.idft', 'desc')
+                ->setMaxResults(1);
+
+            $records = FtPqrCalificacion::findByQueryBuilder($Qb);
+
+            $this->lastFtPqrCalificacion = $records ? $records[0] : null;
+        }
+
+        return $this->lastFtPqrCalificacion;
     }
 
     /**
@@ -230,7 +262,6 @@ class FtPqr extends FtPqrProperties
         $this->sys_fecha_terminado = null;
         $this->save();
     }
-
 
     /**
      * Carga todo el mostrar del formulario

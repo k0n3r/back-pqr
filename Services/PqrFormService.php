@@ -664,13 +664,13 @@ class PqrFormService extends ModelService
 
         switch ($nameReport) {
             case PqrForm::NOMBRE_REPORTE_TODOS:
-                $NewField = '{"title":"ESTADO","field":"{*sys_estado*}","align":"center"},{"title":"DIAS DE ESPERA","field":"{*getDaysWait@idft*}","align":"center"},{"title":"FECHA VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPONSABLES","field":"{*getResponsible@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
+                $NewField = '{"title":"ESTADO","field":"{*sys_estado*}","align":"center"},{"title":"DIAS DE ESPERA","field":"{*getDaysWait@idft*}","align":"center"},{"title":"FECHA VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPONSABLES","field":"{*getResponsible@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},{"title":"CALIFICACIÓN GESTIÓN","field":"{*qualificationGest@idft*}","align":"center"},{"title":"CALIFICACIÓN SERVICIO","field":"{*qualificationServ@idft*}","align":"center"},';
                 break;
             case PqrForm::NOMBRE_REPORTE_PROCESO:
-                $NewField = '{"title":"DIAS DE ESPERA","field":"{*getDaysWait@idft*}","align":"center"},{"title":"FECHA VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPONSABLES","field":"{*getResponsible@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
+                $NewField = '{"title":"DIAS DE ESPERA","field":"{*getDaysWait@idft*}","align":"center"},{"title":"FECHA VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPONSABLES","field":"{*getResponsible@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},{"title":"CALIFICACIÓN GESTIÓN","field":"{*qualificationGest@idft*}","align":"center"},{"title":"CALIFICACIÓN SERVICIO","field":"{*qualificationServ@idft*}","align":"center"},';
                 break;
             case PqrForm::NOMBRE_REPORTE_TERMINADO:
-                $NewField = '{"title":"FECHA FINALIZACIÓN","field":"{*getEndDate@idft*}","align":"center"},{"title":"DÍAS RETRASO","field":"{*getDaysLate@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPONSABLES","field":"{*getResponsible@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
+                $NewField = '{"title":"FECHA FINALIZACIÓN","field":"{*getEndDate@idft*}","align":"center"},{"title":"DÍAS RETRASO","field":"{*getDaysLate@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPONSABLES","field":"{*getResponsible@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},{"title":"CALIFICACIÓN GESTIÓN","field":"{*qualificationGest@idft*}","align":"center"},{"title":"CALIFICACIÓN SERVICIO","field":"{*qualificationServ@idft*}","align":"center"},';
                 break;
             case PqrForm::NOMBRE_REPORTE_PENDIENTE:
             default:
@@ -709,10 +709,11 @@ class PqrFormService extends ModelService
      */
     private function viewCalificacionPqr(): void
     {
-        $sql = "SELECT d.iddocumento,d.numero,d.fecha,ft.idft_pqr_calificacion as idft,ft.ft_pqr_respuesta,ft.experiencia_gestion,ft.experiencia_servicio
-        FROM ft_pqr_calificacion ft,documento d
-        WHERE ft.documento_iddocumento=d.iddocumento AND d.estado NOT IN ('ELIMINADO')";
-
+        $sql = <<<SQL
+SELECT d.iddocumento AS iddocumento, d.numero AS numero, d.fecha AS fecha, ft.idft_pqr_calificacion AS idft, ft.ft_pqr_respuesta AS ft_pqr_respuesta, ft.experiencia_gestion AS experiencia_gestion, ft.experiencia_servicio AS experiencia_servicio, ftr.ft_pqr as idft_pqr
+FROM ft_pqr_calificacion ft, documento d, ft_pqr_respuesta ftr
+WHERE ft.documento_iddocumento = d.iddocumento AND ftr.idft_pqr_respuesta = ft.ft_pqr_respuesta AND d.estado <> 'ELIMINADO';";
+SQL;
         $this->createView('vpqr_calificacion', $sql);
     }
 

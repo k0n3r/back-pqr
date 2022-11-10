@@ -198,6 +198,36 @@ function getResponsible(int $iddocumento): string
 }
 
 /**
+ * Obtiene la experiencia en gestion de la ultima
+ * calificacion realizada
+ *
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-11-10
+ */
+function qualificationGest(): string
+{
+    $FtPqr = getFtPqr();
+    $FtPqrCalificacion = $FtPqr->getLastCalificacion();
+
+    return $FtPqrCalificacion ? $FtPqrCalificacion->getFieldValue('experiencia_gestion') : '-';
+}
+
+/**
+ * Obtiene la experiencia en servicio de la ultima
+ * calificacion realizada
+ *
+ * @return string
+ * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-11-10
+ */
+function qualificationServ(): string
+{
+    $FtPqr = getFtPqr();
+    $FtPqrCalificacion = $FtPqr->getLastCalificacion();
+
+    return $FtPqrCalificacion ? $FtPqrCalificacion->getFieldValue('experiencia_servicio') : '-';
+}
+
+/**
  * @param int    $iddocumento
  * @param string $estado
  * @param int    $idft
