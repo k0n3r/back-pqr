@@ -712,7 +712,7 @@ class PqrFormService extends ModelService
         $sql = <<<SQL
 SELECT d.iddocumento AS iddocumento, d.numero AS numero, d.fecha AS fecha, ft.idft_pqr_calificacion AS idft, ft.ft_pqr_respuesta AS ft_pqr_respuesta, ft.experiencia_gestion AS experiencia_gestion, ft.experiencia_servicio AS experiencia_servicio, ftr.ft_pqr as idft_pqr
 FROM ft_pqr_calificacion ft, documento d, ft_pqr_respuesta ftr
-WHERE ft.documento_iddocumento = d.iddocumento AND ftr.idft_pqr_respuesta = ft.ft_pqr_respuesta AND d.estado <> 'ELIMINADO';";
+WHERE ft.documento_iddocumento = d.iddocumento AND ftr.idft_pqr_respuesta = ft.ft_pqr_respuesta AND d.estado <> 'ELIMINADO'
 SQL;
         $this->createView('vpqr_calificacion', $sql);
     }
