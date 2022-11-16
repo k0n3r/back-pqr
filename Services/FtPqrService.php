@@ -1136,9 +1136,9 @@ HTML;
 
         switch ($option) {
             case FtPqrRespuesta::DISTRIBUCION_RECOGIDA_ENTREGA:
-                $recogida = DistributionService::ESTADO_RECOGIDA;
-                $estado = DistributionService::DISTRIBUCION_POR_RECEPCIONAR;
-                break;
+//                $recogida = DistributionService::ESTADO_RECOGIDA;
+//                $estado = DistributionService::DISTRIBUCION_POR_RECEPCIONAR;
+//                break;
 
             case FtPqrRespuesta::DISTRIBUCION_SOLO_ENTREGA:
                 $recogida = DistributionService::ESTADO_ENTREGA;
