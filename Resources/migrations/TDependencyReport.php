@@ -41,7 +41,7 @@ trait TDependencyReport
 
         $busquedaCondicion = [
             'fk_busqueda_componente' => $idbusquedaComponente,
-            'codigo_where'           => "(sys_dependencia <> '' AND sys_dependencia IS NOT NULL)",
+            'codigo_where'           => "sys_dependencia IS NOT NULL",
             'etiqueta_condicion'     => $nombreComponente
         ];
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
