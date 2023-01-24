@@ -9,7 +9,9 @@ use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
 use App\services\correo\EmailSaia;
 use App\services\correo\SendEmailSaia;
+use App\services\exception\SaiaException;
 use App\services\models\ModelService\ModelService;
+use DateInterval;
 use DateTime;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
@@ -26,6 +28,7 @@ use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+use Saia\models\tarea\Tarea;
 use Saia\models\Tercero;
 
 class FtPqrService extends ModelService
@@ -1172,17 +1175,53 @@ HTML;
 
     private function sendNotificationToInternalDestination(): void
     {
-        if ($this->getDocument()->fromWebservice()) {
+        $FuncionarioDesInt = $this->getModel()->getFuncionarioDestinoInterno();
+        if (!$FuncionarioDesInt) {
             return;
         }
 
-        $fieldName = Distribution::DESTINO_INTERNO;
-
-        if ($this->getModel()->$fieldName) {
-            $Transfer = $this->getModel()->getTransferInstance();
-            $Transfer->setDestination([$this->getModel()->$fieldName]);
-            $Transfer->setDestinationType(Transfer::DESTINATION_TYPE_ROLE);
-            $Transfer->execute();
+        $TareaService = (new Tarea())->getService();
+        if (!$TareaService->createOrUpdate($this->getTaskDefaultData())) {
+            throw new SaiaException($TareaService->getErrorManager()->getMessage());
         }
+
+        $Transfer = $this->getModel()->getTransferInstance();
+        $Transfer->setDestination([$FuncionarioDesInt->getCode()]);
+        $Transfer->setDestinationType(Transfer::DESTINATION_TYPE_CODE);
+        $Transfer->execute();
     }
+
+    /**
+     * Obtiene los datos por defecto para generar la Tarea
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-01-23
+     */
+    private function getTaskDefaultData(): array
+    {
+        $FuncionarioDesInt = $this->getModel()->getFuncionarioDestinoInterno();
+        $DateTime = new DateTime();
+        $start = $DateTime->format('Y-m-d H:i:s');
+
+        $DateTime->add(new DateInterval('PT30M'));
+        $end = $DateTime->format('Y-m-d H:i:s');
+
+        return [
+            'tarea'         => 0,
+            'nombre'        => 'Resolver PQR # ' . $this->getDocument()->numero,
+            'managers'      => [
+                [
+                    'id'       => $FuncionarioDesInt->getPK(),
+                    'external' => 0
+                ]
+            ],
+            'notification'  => 0,
+            'fecha_inicial' => $start,
+            'fecha_final'   => $end,
+            'descripcion'   => '',
+            'relacion'      => Tarea::RELACION_DOCUMENTO,
+            'relacion_id'   => $this->getDocument()->getPK()
+        ];
+    }
+
 }

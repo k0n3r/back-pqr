@@ -7,13 +7,16 @@ use App\Bundles\pqr\Services\models\PqrForm;
 use App\services\exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Types;
+use Saia\controllers\generator\component\Distribution;
 use Saia\models\documento\Documento;
+use Saia\models\Funcionario;
 use Saia\models\Tercero;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrService;
 use App\Bundles\pqr\Services\models\PqrBackup;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+use Saia\models\vistas\VfuncionarioDc;
 
 class FtPqr extends FtPqrProperties
 {
@@ -31,6 +34,7 @@ class FtPqr extends FtPqrProperties
 
     protected ?FtPqrService $FtPqrService = null;
     private ?FtPqrCalificacion $lastFtPqrCalificacion = null;
+    private ?Funcionario $FuncionarioDestinoInterno = null;
 
     /**
      * @inheritDoc
@@ -368,5 +372,25 @@ HTML;
         ]);
 
         return $this->getService()->generateField($PqrFormField);
+    }
+
+    /**
+     * Obtiene el funcionario ingresado en el campo Destino Interno
+     *
+     * @return VfuncionarioDc|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-01-23
+     */
+    public function getFuncionarioDestinoInterno(): ?VfuncionarioDc
+    {
+        if ($this->getDocument()->fromWebservice()) {
+            return null;
+        }
+
+        if (!$this->FuncionarioDestinoInterno) {
+            $fieldName = Distribution::DESTINO_INTERNO;
+            $this->FuncionarioDestinoInterno = VfuncionarioDc::findByRole($this->$fieldName);
+        }
+
+        return $this->FuncionarioDestinoInterno;
     }
 }
