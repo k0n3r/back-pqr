@@ -56,6 +56,14 @@ HTML;
 
     public function jsContent(): ?string
     {
-        return NULL;
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEditionJS(): ?string
+    {
+        return null;
     }
 }

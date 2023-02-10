@@ -30,10 +30,10 @@ class WebservicePqr extends WsFt
         $html = $urlSearch ? "<a href='$urlSearch'>Consultar</a>" : '';
 
         $values = array_merge($this->getDefaultValuesForHtmlContent(), [
-            'emailLabel' => $this->PqrForm->getRow('sys_email')->label,
+            'emailLabel'    => $this->PqrForm->getRow('sys_email')->label,
             'showAnonymous' => (int)$this->PqrForm->show_anonymous,
-            'showLabel' => (int)$this->PqrForm->show_label,
-            'hrefSearch' => $html
+            'showLabel'     => (int)$this->PqrForm->show_label,
+            'hrefSearch'    => $html
         ]);
 
         return static::getContent(
@@ -49,8 +49,8 @@ class WebservicePqr extends WsFt
     {
         $values = array_merge($this->getDefaultValuesForJsContent(), [
             'fieldsWithoutAnonymous' => json_encode($this->objectFields),
-            'fieldsWithAnonymous' => json_encode($this->objectFieldsForAnonymous),
-            'urlSaveFt' => 'api/pqr/captcha/saveDocument'
+            'fieldsWithAnonymous'    => json_encode($this->objectFieldsForAnonymous),
+            'urlSaveFt'              => 'api/pqr/captcha/saveDocument'
         ]);
 
         return static::getContent(
@@ -154,5 +154,21 @@ class WebservicePqr extends WsFt
     public function getMoreFilesToCopy(): array
     {
         return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getHtmlContentFormExposed(array $filesToInclude, bool $adicionar): string
+    {
+        return '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getJsContentFormExpose(bool $adicionar): string
+    {
+        return '';
     }
 }
