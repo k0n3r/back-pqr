@@ -1215,7 +1215,7 @@ HTML;
                     'external' => 0
                 ]
             ],
-            'notification'  => 0,
+            'notification'  => 1,// Notificar por Email
             'fecha_inicial' => $start,
             'fecha_final'   => $end,
             'descripcion'   => '',
