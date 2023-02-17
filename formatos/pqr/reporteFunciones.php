@@ -497,10 +497,10 @@ function filter_pqr_admin(string $nameReport): string
         return '';
     }
 
+    $subconsulta = "SELECT DISTINCT iddocumento FROM vpqr v JOIN tarea t ON v.iddocumento = t.relacion_id JOIN tarea_funcionario tf on tf.fk_tarea=t.idtarea WHERE v.sys_estado='$nameReport' AND t.relacion=1 AND tf.tipo=1 AND tf.estado=1 AND tf.externo=0 AND tf.usuario = {$Funcionario->getPK()}";
+
     $isAdminDep = $Funcionario->getService()->hasFunction(FtPqrService::FUNCTION_ADMIN_DEP_PQR);
     if (!$isAdminDep) {
-        $subconsulta = "SELECT DISTINCT iddocumento FROM vpqr v JOIN tarea t ON v.iddocumento = t.relacion_id JOIN tarea_funcionario tf on tf.fk_tarea=t.idtarea WHERE v.sys_estado='$nameReport' AND t.relacion=1 AND tf.tipo=1 AND tf.estado=1 AND tf.externo=0 AND tf.usuario = {$Funcionario->getPK()}";
-
         return " AND v.iddocumento IN ($subconsulta)";
     }
 
@@ -524,6 +524,5 @@ function filter_pqr_admin(string $nameReport): string
         }
     }
 
-    return " AND sys_dependencia IN (" . implode(',', array_unique($ids)) . ")";
-
+    return " AND (sys_dependencia IN (" . implode(',', array_unique($ids)) . ") OR v.iddocumento IN ($subconsulta))";
 }
