@@ -272,16 +272,18 @@ class FtPqrService extends ModelService
      * Retonar la fecha de vencimiento basado en la fecha de aprobacion
      * y el tipo
      *
-     * @return string
+     * @return string|DateTime
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function getDateForType(): string
+    public function getDateForType(bool $instance = false)
     {
-        return (DateController::addBusinessDays(
+        $DateTime = (DateController::addBusinessDays(
             DateController::getDateTimeFromDataBase($this->getDocument()->fecha),
             $this->getDays()
-        ))->format('Y-m-d H:i:s');
+        ));
+
+        return $instance ? $DateTime : $DateTime->format('Y-m-d H:i:s');
     }
 
     /**
@@ -1184,11 +1186,6 @@ HTML;
         if (!$TareaService->createOrUpdate($this->getTaskDefaultData())) {
             throw new SaiaException($TareaService->getErrorManager()->getMessage());
         }
-
-        $Transfer = $this->getModel()->getTransferInstance();
-        $Transfer->setDestination([$FuncionarioDesInt->getCode()]);
-        $Transfer->setDestinationType(Transfer::DESTINATION_TYPE_CODE);
-        $Transfer->execute();
     }
 
     /**
@@ -1200,7 +1197,8 @@ HTML;
     private function getTaskDefaultData(): array
     {
         $FuncionarioDesInt = $this->getModel()->getFuncionarioDestinoInterno();
-        $DateTime = new DateTime();
+
+        $DateTime = $this->getDateForType(true);
         $start = $DateTime->format('Y-m-d H:i:s');
 
         $DateTime->add(new DateInterval('PT30M'));
