@@ -2,18 +2,32 @@
 $code = <<<JAVASCRIPT
 $(function () {
     var baseUrl = window.baseUrl;
-    var key= window.credential.key; //Componente dropzone   
-    var token= window.credential.token; //Componente dropzone    
-    
+    var key = window.credential.key; //Componente dropzone   
+    var token = window.credential.token; //Componente dropzone    
+
     loadjsComponent();
 
+    const fieldsWithAnonymous = $fieldsWithAnonymous;
+    const fieldsWithoutAnonymous = $fieldsWithoutAnonymous;
     $("#sys_anonimo").change(function () {
         if ($(this).is(':checked')) {
-            showAnonymousFields();
+            $.each(fieldsWithAnonymous, function (i, field) {
+                processField(field);
+                const sGroup = $("#group_" + field.name);
+                if (field.show) {
+                    sGroup.show();
+                } else {
+                    sGroup.hide();
+                }
+            });
+
         } else {
-            hideAnonymousFields();
+            $.each(fieldsWithoutAnonymous, function (i, field) {
+                processField(field, true);
+            });
         }
     });
+
 
     $("#save_document").click(function () {
         $("#form_buttons").find('button,#spiner').toggleClass('d-none');
@@ -183,53 +197,26 @@ $(function () {
         $content
     }
 
-    function showAnonymousFields() {
-        let fields = $fieldsWithAnonymous;
-        $.each(fields, function (i, field) {
-            if (field.required) {
-                if (field.type == "Radio" || field.type == "Checkbox") {
-                    $("[name^='" + field.name + "']").rules("add", {required: true});
-                } else {
-                    $("#" + field.name).rules("add", {required: true});
-                }
-                $("#group_" + field.name).addClass("required");
-            } else {
-                if (field.type == "Radio" || field.type == "Checkbox") {
-                    $("[name^='" + field.name + "']").rules("add", {required: false});
-                } else {
-                    $("#" + field.name).rules("add", {required: false});
-                }
-                $("#group_" + field.name).removeClass("required");
-            }
-            if (field.show) {
-                $("#group_" + field.name).show();
-            } else {
-                $("#group_" + field.name).hide();
-            }
-        });
-    }
+    function processField(field, applyShow = false) {
+        const sGroup = $("#group_" + field.name);
+        if (applyShow) {
+            sGroup.show();
+        }
 
-    function hideAnonymousFields() {
-        let fields = $fieldsWithoutAnonymous;
-        $.each(fields, function (i, field) {
-            $("#group_" + field.name).show();
+        let selector;
+        if (field.type === "Radio" || field.type === "Checkbox") {
+            selector = $("[name^='" + field.name + "']");
+        } else {
+            selector = $("#" + field.name);
+        }
 
-            if (field.required) {
-                $("#group_" + field.name).addClass("required");
-                 if (field.type == "Radio" || field.type == "Checkbox") {
-                    $("[name^='" + field.name + "']").rules("add", {required: true});
-                } else {
-                    $("#" + field.name).rules("add", {required: true});
-                }
-            } else {
-                $("#group_" + field.name).removeClass("required");
-                if (field.type == "Radio" || field.type == "Checkbox") {
-                    $("[name^='" + field.name + "']").rules("add", {required: false});
-                } else {
-                    $("#" + field.name).rules("add", {required: false});
-                }
-            }
-        });
+        if (field.required) {
+            selector.rules("add", { required: true });
+            sGroup.addClass("required");
+        } else {
+            selector.rules("add", { required: false });
+            sGroup.removeClass("required");
+        }
     }
 });
 JAVASCRIPT;

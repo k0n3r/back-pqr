@@ -278,10 +278,16 @@ class FtPqrService extends ModelService
      */
     public function getDateForType(bool $instance = false)
     {
+        $Created = DateController::getDateTimeFromDataBase($this->getDocument()->fecha);
         $DateTime = (DateController::addBusinessDays(
-            DateController::getDateTimeFromDataBase($this->getDocument()->fecha),
+            $Created,
             $this->getDays()
         ));
+        $DateTime->setTime(
+            $Created->format('H'),
+            $Created->format('i'),
+            $Created->format('s')
+        );
 
         return $instance ? $DateTime : $DateTime->format('Y-m-d H:i:s');
     }

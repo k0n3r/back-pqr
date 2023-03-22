@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Services\models;
 
+use App\Bundles\pqr\Services\controllers\WebservicePqr;
 use App\services\exception\SaiaException;
 use Saia\core\model\Model;
 use Saia\models\formatos\CamposFormato;
@@ -10,6 +11,7 @@ use App\Bundles\pqr\Services\PqrFormService;
 
 class PqrForm extends Model
 {
+    private ?Formato $Formato = null;
     use TModels;
 
     const NOMBRE_REPORTE_PENDIENTE = 'rep_pendientes_pqr';
@@ -52,7 +54,10 @@ class PqrForm extends Model
      */
     public function getFormatoFk(): Formato
     {
-        return new Formato($this->fk_formato);
+        if (!$this->Formato) {
+            $this->Formato = new Formato($this->fk_formato);
+        }
+        return $this->Formato;
     }
 
     /**
@@ -125,6 +130,15 @@ class PqrForm extends Model
         }
 
         return self::$PqrForm;
+    }
+
+    /**
+     * @return WebservicePqr
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-03-22
+     */
+    public function getWebservicePqr(): WebservicePqr
+    {
+        return new WebservicePqr($this->getFormatoFk());
     }
 
     /**

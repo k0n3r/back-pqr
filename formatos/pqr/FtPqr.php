@@ -78,12 +78,22 @@ class FtPqr extends FtPqrProperties
     {
         $data = [];
         if (!$action) {
-            $PqrFormField = (PqrForm::getInstance())->getRow('sys_subtipo');
+            $PqrForm = PqrForm::getInstance();
 
-            $data['isActiveSubType'] = (int)($PqrFormField && $PqrFormField->isActive());
+            $PqrFormField = $PqrForm->getRow('sys_subtipo');
+
+            $IWsHtml = $PqrForm->getWebservicePqr();
+            $data = [
+                'isActiveSubType'        => (int)($PqrFormField && $PqrFormField->isActive()),
+                'isEnabledAnonymous'           => (int)$PqrForm->show_anonymous,
+                'fieldsWithoutAnonymous' => $IWsHtml->getFieldsWithoutAnonymous(),
+                'fieldsWithAnonymous'    => $IWsHtml->getFieldsWithAnonymous(),
+            ];
+
         } else {
             $data['isStarted'] = (int)(new self($idft))->getDocument()->isStarted();
         }
+
         return $data;
     }
 

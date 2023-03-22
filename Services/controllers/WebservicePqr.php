@@ -14,6 +14,8 @@ class WebservicePqr extends WsFt
     private PqrForm $PqrForm;
     private array $objectFieldsForAnonymous = [];
     private array $objectFields = [];
+    private bool $isProcessFields = false;
+    private array $fields = [];
 
     public function __construct(Formato $Formato)
     {
@@ -48,8 +50,8 @@ class WebservicePqr extends WsFt
     public function getJsContentForm(): string
     {
         $values = array_merge($this->getDefaultValuesForJsContent(), [
-            'fieldsWithoutAnonymous' => json_encode($this->objectFields),
-            'fieldsWithAnonymous'    => json_encode($this->objectFieldsForAnonymous),
+            'fieldsWithoutAnonymous' => json_encode($this->getFieldsWithoutAnonymous()),
+            'fieldsWithAnonymous'    => json_encode($this->getFieldsWithAnonymous()),
             'urlSaveFt'              => 'api/pqr/captcha/saveDocument'
         ]);
 
@@ -69,34 +71,35 @@ class WebservicePqr extends WsFt
      */
     protected function getFormatFields(): array
     {
-        $fields = [];
+        $this->processFields();
 
-        $records = $this->PqrForm->getPqrFormFields();
-        $specialFields = [
-            'tratamiento',
-            'localidad',
-            'dependencia'
-        ];
+        return $this->fields;
+    }
 
-        foreach ($records as $PqrFormField) {
-            if (!$PqrFormField->active || !$PqrFormField->fk_campos_formato) {
-                continue;
-            }
+    /**
+     * Obtiene los campos sin anonimo
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-03-22
+     */
+    public function getFieldsWithoutAnonymous(): array
+    {
+        $this->processFields();
 
-            if (in_array($PqrFormField->getPqrHtmlField()->type, $specialFields)) {
-                if ($class = $this->resolveCustomClass(ucfirst($PqrFormField->getPqrHtmlField()->type))) {
-                    $fields[] = new $class($PqrFormField);
-                    $this->setFieldsAnonymous($PqrFormField);
-                }
-            } else {
-                if ($class = $this->resolveClass($PqrFormField->getCamposFormato()->etiqueta_html)) {
-                    $fields[] = new $class($PqrFormField->getCamposFormato());
-                    $this->setFieldsAnonymous($PqrFormField);
-                }
-            }
-        }
+        return $this->objectFields;
+    }
 
-        return $fields;
+    /**
+     * Obtiene los campos anonimos
+     *
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-03-22
+     */
+    public function getFieldsWithAnonymous(): array
+    {
+        $this->processFields();
+
+        return $this->objectFieldsForAnonymous;
     }
 
     private function setFieldsAnonymous(PqrFormField $PqrFormField): void
@@ -170,5 +173,38 @@ class WebservicePqr extends WsFt
     public function getJsContentFormExpose(bool $adicionar): string
     {
         return '';
+    }
+
+    private function processFields(): void
+    {
+        if ($this->isProcessFields) {
+            return;
+        }
+
+        $records = $this->PqrForm->getPqrFormFields();
+        $specialFields = [
+            'tratamiento',
+            'localidad',
+            'dependencia'
+        ];
+
+        foreach ($records as $PqrFormField) {
+            if (!$PqrFormField->active || !$PqrFormField->fk_campos_formato) {
+                continue;
+            }
+
+            if (in_array($PqrFormField->getPqrHtmlField()->type, $specialFields)) {
+                if ($class = $this->resolveCustomClass(ucfirst($PqrFormField->getPqrHtmlField()->type))) {
+                    $this->fields[] = new $class($PqrFormField);
+                    $this->setFieldsAnonymous($PqrFormField);
+                }
+            } else {
+                if ($class = $this->resolveClass($PqrFormField->getCamposFormato()->etiqueta_html)) {
+                    $this->fields[] = new $class($PqrFormField->getCamposFormato());
+                    $this->setFieldsAnonymous($PqrFormField);
+                }
+            }
+        }
+        $this->isProcessFields = true;
     }
 }

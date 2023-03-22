@@ -12,7 +12,6 @@ use Saia\models\busqueda\BusquedaComponente;
 use Saia\controllers\generator\FormatGenerator;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\controllers\generator\webservice\WsGenerator;
-use App\Bundles\pqr\Services\controllers\WebservicePqr;
 use App\Bundles\pqr\Services\controllers\WebserviceCalificacion;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\IAddEditFormat;
@@ -732,7 +731,7 @@ SQL;
         $infoQRJsFile = WsGenerator::generateFileForWs($folder . 'infoQR.js');
         $timelineFile = WsGenerator::generateFileForWs($folder . 'TimeLine.js');
 
-        $IWsHtml = new WebservicePqr($this->getModel()->getFormatoFk());
+        $IWsHtml=$this->getModel()->getWebservicePqr();
         $WsGenerator = new WsGenerator(
             $IWsHtml,
             $this->getModel()->getFormatoFk()->nombre,
