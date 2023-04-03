@@ -2,12 +2,15 @@
 
 namespace App\Bundles\pqr\formatos\pqr;
 
-
+use App\services\exception\SaiaException;
+use Saia\controllers\distribucion\DistributionExecutor;
+use Saia\models\documento\Documento;
 use Saia\core\model\ModelFormat;
+use Saia\models\ruta\RutaFormato;
 
 class FtPqrProperties extends ModelFormat
 {
-    
+    use DistributionExecutor;
     
     public bool $isPDF = false;
 
@@ -30,11 +33,17 @@ class FtPqrProperties extends ModelFormat
 				'sys_frecuencia',
 				'sys_impacto',
 				'sys_severidad',
+				'radicacion',
 				'dependencia',
 				'sys_tipo',
 				'sys_email',
 				'sys_folios',
-				'sys_anexos' 
+				'sys_anexos',
+				'distribucion',
+				'destino_interno',
+				'select_mensajeria',
+				'colilla',
+				'digitalizacion' 
             ],
             'date' => ['sys_fecha_vencimiento',
 				'sys_fecha_terminado'],
@@ -58,22 +67,73 @@ class FtPqrProperties extends ModelFormat
     {
         return [];
     }
+
+    public function defaultDocumentRoute(): bool
+    {
+        $RutaFormato = new RutaFormato();
+        $RutaFormato->addDefaultRouteFormat(
+            $this->getFormat()->getPk(), 
+            $this->getDocument()->getPk()
+        );
+
+        return true;
+    }
     
     /**
     * @inheritDoc
     */
     public function getNumberFolios(): int
     {
-        return $this->numero_folios ?? 0;
+        $Documento = $this->getDocument();
+
+        if ($Documento->numero_folios) {
+            $total = $Documento->numero_folios;
+        } else {
+            $total = ($this->numero_folios ?? 0);
+        }
+
+        return (int)$total;
     }
-    
+        
+        /**
+    * @inheritDoc
+    */
+    public function afterRad(): bool
+    {
+        if (!$this->radicacion_rapida) {
+            $this->postDocumentRad();
+            
+            if (!$this->sendDocumentsByEmail()) {
+                throw new SaiaException('No fue posible enviar la notificacion por correo');
+            }
+        }
+
+        return true;
+    }
+
     /**
     * @inheritDoc
     */
-    public static function isEnableRadEmail(bool $isRadFormat = false): bool
+    public function afterEdit(): bool
     {
-        return $isRadFormat;
+         $Documento = $this->getDocument();
+         
+        if (!$this->editDistribution()){
+              throw new SaiaException('No fue posible editar la distribución');
+        }
+        
+        if (
+            $Documento->estado === Documento::INICIADO &&
+            $this->getFormat()->isAutoApprove()
+        ) {
+            $Documento->estado = Documento::APROBADO;
+            $Documento->save();
+            
+            if (!$this->sendDocumentsByEmail()) {
+                throw new SaiaException('No fue posible enviar la notificacion por correo');
+            }
+        }
+
+        return true;
     }
-    
-    
 }

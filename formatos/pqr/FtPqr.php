@@ -85,7 +85,7 @@ class FtPqr extends FtPqrProperties
             $IWsHtml = $PqrForm->getWebservicePqr();
             $data = [
                 'isActiveSubType'        => (int)($PqrFormField && $PqrFormField->isActive()),
-                'isEnabledAnonymous'           => (int)$PqrForm->show_anonymous,
+                'isEnabledAnonymous'     => (int)$PqrForm->show_anonymous,
                 'fieldsWithoutAnonymous' => $IWsHtml->getFieldsWithoutAnonymous(),
                 'fieldsWithAnonymous'    => $IWsHtml->getFieldsWithAnonymous(),
             ];
