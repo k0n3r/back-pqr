@@ -15,7 +15,7 @@ class Attached extends Field implements IField
 
         $data = array_merge($this->getDefaultValues(), [
             'valor' => $setting->typeFiles,
-            'opciones' => '{"tipos":"' . $setting->typeFiles . '","longitud":"' . $this->getSize() . '","cantidad":"' . $setting->numberFiles . '","ruta_consulta":"app/anexos/consultar_anexos_campo.php"}'
+            'opciones' => '{"tipos":"' . $setting->typeFiles . '","longitud":"' . $this->getSize() . '","cantidad":"' . $setting->numberFiles . '","ruta_consulta":"api/documentFile/info"}'
         ]);
 
         if (!$this->getPqrFormField()->active) {

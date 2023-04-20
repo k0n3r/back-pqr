@@ -251,7 +251,7 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta_html'     => 'Attached',
                 'orden'             => '10',
                 'fila_visible'      => '1',
-                'opciones'          => '{"tipos":".pdf,.doc,.docx,.jpg,.jpeg,.gif,.png,.bmp,.xls,.xlsx,.ppt","longitud":"3","cantidad":"10","ruta_consulta":"app\\/anexos\\/consultar_anexos_campo.php"}',
+                'opciones'          => '{"tipos":".pdf,.doc,.docx,.jpg,.jpeg,.gif,.png,.bmp,.xls,.xlsx,.ppt","longitud":"3","cantidad":"10","ruta_consulta":"api\\/documentFile\\/info"}',
                 'listable'          => '1'
             ],
             'anexos_fisicos'    => [
