@@ -164,7 +164,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         $options = '';
         if ($this->ciudad_origen) {
             $data = MunicipioService::getCityByIdForAutocomplete($this->ciudad_origen);
-            $options = "<option value='{$data[0]['id']}'>{$data[0]['text']}</option>";
+            $options = "<option value='{$data['id']}'>{$data['text']}</option>";
         }
 
         return <<<HTML
