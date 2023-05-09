@@ -41,7 +41,7 @@
 
                         <div class='form-group text-right' id='form_buttons_search'>
                             <button class='btn btn-complete' id='btn-search' type='button'>Consultar</button>
-                            <div class='progress-circle-indeterminate d-none' id='spiner'></div>
+                            <div class='progress-circle-indeterminate d-none' id='spinerSearch'></div>
                         </div>
 
                     </form>

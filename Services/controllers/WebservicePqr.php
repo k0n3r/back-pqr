@@ -52,7 +52,7 @@ class WebservicePqr extends WsFt
         $values = array_merge($this->getDefaultValuesForJsContent(), [
             'fieldsWithoutAnonymous' => json_encode($this->getFieldsWithoutAnonymous()),
             'fieldsWithAnonymous'    => json_encode($this->getFieldsWithAnonymous()),
-            'urlSaveFt'              => 'api/pqr/captcha/saveDocument'
+            'urlSaveFt'              => '/api/pqr/captcha/saveDocument'
         ]);
 
         return static::getContent(

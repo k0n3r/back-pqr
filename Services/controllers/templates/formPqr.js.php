@@ -1,14 +1,43 @@
 <?php
 $code = <<<JAVASCRIPT
 $(function () {
-    var baseUrl = window.baseUrl;
-    var key = window.credential.key; //Componente dropzone   
-    var token = window.credential.token; //Componente dropzone    
-
-    loadjsComponent();
-
+    const key = window.credential.key; //Componente dropzone   
+    const token = window.credential.token; //Componente dropzone    
     const fieldsWithAnonymous = $fieldsWithAnonymous;
     const fieldsWithoutAnonymous = $fieldsWithoutAnonymous;
+    
+    function clearForm(form) {
+        form.reset();
+        $("select").val("");
+        $('select').select2().trigger('change');
+    }
+
+    function loadjsComponent() {
+        $content
+    }
+
+    function processField(field, applyShow = false) {
+        const sGroup = $("#group_" + field.name);
+        if (applyShow) {
+            sGroup.show();
+        }
+
+        let selector;
+        if (field.type === "Radio" || field.type === "Checkbox") {
+            selector = $("[name^='" + field.name + "']");
+        } else {
+            selector = $("#" + field.name);
+        }
+
+        if (field.required) {
+            selector.rules("add", { required: true });
+            sGroup.addClass("required");
+        } else {
+            selector.rules("add", { required: false });
+            sGroup.removeClass("required");
+        }
+    }
+    
     $("#sys_anonimo").change(function () {
         if ($(this).is(':checked')) {
             $.each(fieldsWithAnonymous, function (i, field) {
@@ -28,7 +57,6 @@ $(function () {
         }
     });
 
-
     $("#save_document").click(function () {
         $("#form_buttons").find('button,#spiner').toggleClass('d-none');
         $("#formulario").trigger('submit');
@@ -39,7 +67,7 @@ $(function () {
         errorPlacement: function (error, element) {
             let node = element[0];
             if (
-                node.tagName == "SELECT" &&
+                node.tagName === "SELECT" &&
                 node.className.indexOf("select2") !== false
             ) {
                 error.addClass("pl-2");
@@ -61,7 +89,7 @@ $(function () {
 
                     $.ajax({
                         method: 'POST',
-                        url: baseUrl + '$urlSaveFt',
+                        url: '$urlSaveFt',
                         data,
                     }).done((response) => {
                         if (response.success) {
@@ -92,7 +120,7 @@ $(function () {
                     }).fail(function () {
                         console.error(...arguments)
                     }).always(function () {
-                        toggleButton();
+                        window.toggleButton('form_buttons');
                     });
 
 
@@ -102,13 +130,13 @@ $(function () {
             return false;
         },
         invalidHandler: function () {
-            toggleButton();
+            window.toggleButton('form_buttons');
         }
     });
 
     //Search
     $("#btn-search").click(function () {
-        $("#form_buttons_search").find('button,#spiner').toggleClass('d-none');
+        $("#form_buttons_search").find('button,#spinerSearch').toggleClass('d-none');
         $("#formSearch").trigger('submit');
     });
 
@@ -117,8 +145,7 @@ $(function () {
             let data = window.getFormObject($('#formSearch').serializeArray());
 
             $.ajax({
-                method: "GET",
-                url: baseUrl + `api/pqr/searchByNumber`,
+                url: `/api/pqr/searchByNumber`,
                 data
             }).done((response) => {
                 $("#result").removeClass('d-none');
@@ -171,53 +198,19 @@ $(function () {
             }).fail(function () {
                 console.error(...arguments)
             }).always(function () {
-                toggleButton('form_buttons_search');
+                window.toggleButton('form_buttons_search');
             });
 
             return false;
         },
         invalidHandler: function () {
-            toggleButton('form_buttons_search');
+            window.toggleButton('form_buttons_search');
         }
     });
 
     //TERMINA Search
 
-    function toggleButton(div = 'form_buttons') {
-        $("#" + div).find('button,#spiner').toggleClass('d-none');
-    }
-
-    function clearForm(form) {
-        form.reset();
-        $("select").val("");
-        $('select').select2().trigger('change');
-    }
-
-    function loadjsComponent() {
-        $content
-    }
-
-    function processField(field, applyShow = false) {
-        const sGroup = $("#group_" + field.name);
-        if (applyShow) {
-            sGroup.show();
-        }
-
-        let selector;
-        if (field.type === "Radio" || field.type === "Checkbox") {
-            selector = $("[name^='" + field.name + "']");
-        } else {
-            selector = $("#" + field.name);
-        }
-
-        if (field.required) {
-            selector.rules("add", { required: true });
-            sGroup.addClass("required");
-        } else {
-            selector.rules("add", { required: false });
-            sGroup.removeClass("required");
-        }
-    }
+    loadjsComponent();
 });
 JAVASCRIPT;
 echo $code;

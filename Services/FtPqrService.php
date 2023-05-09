@@ -1028,7 +1028,7 @@ HTML;
         $data = CryptController::encrypt(json_encode($params));
 
         return sprintf(
-            "%s/ws/%s/infoQR.html?data=%s",
+            "%sws/%s/infoQR.html?data=%s",
             $_SERVER['APP_DOMAIN'],
             $this->getModel()->getFormat()->nombre,
             $data

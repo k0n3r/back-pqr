@@ -57,7 +57,7 @@ class Autocomplete extends Field implements IWsFields
           multiple: false,
           ajax: {
             delay: 400,
-            url: baseUrl+`api/pqr/components/autocomplete/list`,
+            url: `/api/pqr/components/autocomplete/list`,
             dataType: "json",
             data: function(p) {
               return {

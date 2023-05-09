@@ -2,7 +2,6 @@
 <?php
 $code = <<<JAVASCRIPT
     $(function () {
-        var baseUrl = window.baseUrl;
 
         (function init(){
             loadjsComponent();
@@ -20,7 +19,7 @@ $code = <<<JAVASCRIPT
                 let node = element[0];
 
                 if (
-                    node.tagName == "SELECT" &&
+                    node.tagName === "SELECT" &&
                     node.className.indexOf("select2") !== false
                 ) {
                     error.addClass("pl-2");
@@ -43,7 +42,7 @@ $code = <<<JAVASCRIPT
 
                     $.ajax({
                         method: 'POST',
-                        url: baseUrl + '$urlSaveFt',
+                        url: '$urlSaveFt',
                         data,
                     }).done((response) => {
                         if (response.success) {
@@ -118,9 +117,8 @@ $code = <<<JAVASCRIPT
         }
 
         function decrypt(d){
-            $.ajax({
-                method:'get',
-                url: baseUrl + `api/pqr/decrypt`,
+            top.$.ajax({
+                url: `/api/pqr/decrypt`,
                 async: false,
                 data:{
                     dataCrypt: d

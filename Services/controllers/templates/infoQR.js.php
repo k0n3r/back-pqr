@@ -1,7 +1,7 @@
 <?php
 $code = <<<JAVASCRIPT
 $(function () {
-    var d = getVariableFromUrl('data');
+    const d = getVariableFromUrl('data');
     if (!d) {
         window.notification({
             title: 'Error!',
@@ -19,8 +19,7 @@ $(function () {
             source: function () {
                 let data = new Array();
                 $.ajax({
-                    method:'get',
-                    url: window.baseUrl + `api/pqr/historyForTimeline`,
+                    url: `/api/pqr/historyForTimeline`,
                     async: false,
                     data: {
                         infoCryp: d
