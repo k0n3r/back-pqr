@@ -4,6 +4,8 @@ namespace App\Bundles\pqr\formatos\pqr_calificacion;
 
 
 use Saia\core\model\ModelFormat;
+use Saia\models\ruta\RutaFormato;
+
 
 class FtPqrCalificacionProperties extends ModelFormat
 {
@@ -22,8 +24,8 @@ class FtPqrCalificacionProperties extends ModelFormat
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
-				'dependencia',
 				'ft_pqr_respuesta',
+				'dependencia',
 				'experiencia_gestion',
 				'experiencia_servicio' 
             ],
@@ -48,22 +50,33 @@ class FtPqrCalificacionProperties extends ModelFormat
     {
         return [];
     }
+
+    public function defaultDocumentRoute(): bool
+    {
+        $RutaFormato = new RutaFormato();
+        $RutaFormato->addDefaultRouteFormat(
+            $this->getFormat()->getPk(), 
+            $this->getDocument()->getPk()
+        );
+
+        return true;
+    }
     
     /**
     * @inheritDoc
     */
     public function getNumberFolios(): int
     {
-        return $this->numero_folios ?? 0;
+        $Documento = $this->getDocument();
+
+        if ($Documento->numero_folios) {
+            $total = $Documento->numero_folios;
+        } else {
+            $total = ($this->numero_folios ?? 0);
+        }
+
+        return (int)$total;
     }
-    
-    /**
-    * @inheritDoc
-    */
-    public static function isEnableRadEmail(bool $isRadFormat = false): bool
-    {
-        return $isRadFormat;
-    }
-    
+        
     
 }

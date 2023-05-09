@@ -5,8 +5,11 @@ namespace App\Bundles\pqr\formatos\pqr;
 use App\services\exception\SaiaException;
 use Saia\controllers\distribucion\DistributionExecutor;
 use Saia\models\documento\Documento;
+use Saia\models\radicacion_masiva\PaqueteDocumento;
+
 use Saia\core\model\ModelFormat;
 use Saia\models\ruta\RutaFormato;
+
 
 class FtPqrProperties extends ModelFormat
 {
@@ -100,11 +103,13 @@ class FtPqrProperties extends ModelFormat
     */
     public function afterRad(): bool
     {
+        $existInPack = PaqueteDocumento::fromPackage($this->getDocument()->getPK());
         if (!$this->radicacion_rapida) {
             $this->postDocumentRad();
-            
-            if (!$this->sendDocumentsByEmail()) {
-                throw new SaiaException('No fue posible enviar la notificacion por correo');
+            if ($existInPack == 0) {
+                if (!$this->sendDocumentsByEmail()) {
+                    throw new SaiaException('No fue posible enviar la notificacion por correo');
+                }
             }
         }
 

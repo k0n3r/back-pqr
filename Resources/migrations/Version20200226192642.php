@@ -29,7 +29,6 @@ final class Version20200226192642 extends AbstractMigration
         $busqueda = [
             'nombre'             => 'reporte_pqr',
             'etiqueta'           => 'Reporte de PQRSF',
-            'estado'             => 1,
             'campos'             => null,
             'tablas'             => 'vpqr v',
             'cantidad_registros' => 20,
@@ -87,7 +86,6 @@ final class Version20200226192642 extends AbstractMigration
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta'            => 'Pendientes',
             'nombre'              => $nombreComponente,
-            'orden'               => 1
         ];
 
         $this->createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado);
@@ -101,8 +99,7 @@ final class Version20200226192642 extends AbstractMigration
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta'            => 'En proceso',
-            'nombre'              => $nombreComponente,
-            'orden'               => 2
+            'nombre'              => $nombreComponente
         ];
 
         $this->createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado);
@@ -116,8 +113,7 @@ final class Version20200226192642 extends AbstractMigration
         $dataComponente = [
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta'            => 'Terminados',
-            'nombre'              => $nombreComponente,
-            'orden'               => 3
+            'nombre'              => $nombreComponente
         ];
 
         $this->createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado);
@@ -151,7 +147,6 @@ final class Version20200226192642 extends AbstractMigration
             'busqueda_idbusqueda' => $idbusqueda,
             'etiqueta'            => 'Todas',
             'nombre'              => $nombreComponente,
-            'orden'               => 4
         ];
         $busquedaComponente = array_merge($dataComponente, $this->getDefaultData($nombreComponente));
 

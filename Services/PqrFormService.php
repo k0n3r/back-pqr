@@ -558,7 +558,7 @@ class PqrFormService extends ModelService
         if (file_exists($file)) {
             unlink($file);
         }
-        $codeFunction = "<?php \n\n" . implode("\n", $fieldCode) . "\n ?>";
+        $codeFunction = "<?php \n\n" . implode("\n", $fieldCode);
 
         if (!file_put_contents($file, $codeFunction)) {
             throw new SaiaException("No fue posible crear las funciones del formulario");

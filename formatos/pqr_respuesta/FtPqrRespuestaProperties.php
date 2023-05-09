@@ -4,6 +4,8 @@ namespace App\Bundles\pqr\formatos\pqr_respuesta;
 
 
 use Saia\core\model\ModelFormat;
+use Saia\models\ruta\RutaFormato;
+
 
 class FtPqrRespuestaProperties extends ModelFormat
 {
@@ -20,10 +22,10 @@ class FtPqrRespuestaProperties extends ModelFormat
             'safe' => [
                 'idft_pqr_respuesta',
 				'documento_iddocumento',
-				'dependencia',
-				'ft_pqr',
 				'encabezado',
 				'firma',
+				'ft_pqr',
+				'dependencia',
 				'ciudad_origen',
 				'destino',
 				'tipo_distribucion',
@@ -59,22 +61,33 @@ class FtPqrRespuestaProperties extends ModelFormat
     {
         return [];
     }
+
+    public function defaultDocumentRoute(): bool
+    {
+        $RutaFormato = new RutaFormato();
+        $RutaFormato->addDefaultRouteFormat(
+            $this->getFormat()->getPk(), 
+            $this->getDocument()->getPk()
+        );
+
+        return true;
+    }
     
     /**
     * @inheritDoc
     */
     public function getNumberFolios(): int
     {
-        return $this->numero_folios ?? 0;
+        $Documento = $this->getDocument();
+
+        if ($Documento->numero_folios) {
+            $total = $Documento->numero_folios;
+        } else {
+            $total = ($this->numero_folios ?? 0);
+        }
+
+        return (int)$total;
     }
-    
-    /**
-    * @inheritDoc
-    */
-    public static function isEnableRadEmail(bool $isRadFormat = false): bool
-    {
-        return $isRadFormat;
-    }
-    
+        
     
 }
