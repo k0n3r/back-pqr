@@ -1200,15 +1200,11 @@ HTML;
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-01-23
      */
-    private function getTaskDefaultData(): array
+    protected function getTaskDefaultData(): array
     {
         $FuncionarioDesInt = $this->getModel()->getFuncionarioDestinoInterno();
 
         $DateTime = $this->getDateForType(true);
-        $start = $DateTime->format('Y-m-d H:i:s');
-
-        $DateTime->add(new DateInterval('PT30M'));
-        $end = $DateTime->format('Y-m-d H:i:s');
 
         return [
             'tarea'         => 0,
@@ -1220,12 +1216,34 @@ HTML;
                 ]
             ],
             'notification'  => 1,// Notificar por Email
-            'fecha_inicial' => $start,
-            'fecha_final'   => $end,
+            'fecha_inicial' => $this->getTaskDefaultStartDate($DateTime),
+            'fecha_final'   => $this->getTaskDefaultEndDate($DateTime),
             'descripcion'   => '',
             'relacion'      => Tarea::RELACION_DOCUMENTO,
             'relacion_id'   => $this->getDocument()->getPK()
         ];
+    }
+
+    /**
+     * @param DateTime $DateTime
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-05-15
+     */
+    protected function getTaskDefaultStartDate(DateTime $DateTime): string
+    {
+        return $DateTime->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * @param DateTime $DateTime
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-05-15
+     */
+    protected function getTaskDefaultEndDate(DateTime $DateTime): string
+    {
+        $DateTime->add(new DateInterval('PT30M'));
+
+        return $DateTime->format('Y-m-d H:i:s');
     }
 
 }
