@@ -3,12 +3,15 @@
 namespace App\Bundles\pqr\formatos\pqr;
 
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
+use App\Bundles\pqr\Services\controllers\WebservicePqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\services\exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Types;
 use Saia\controllers\generator\component\Distribution;
+use Saia\controllers\generator\webservice\IWsHtml;
 use Saia\models\documento\Documento;
+use Saia\models\formatos\Formato;
 use Saia\models\Funcionario;
 use Saia\models\Tercero;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
@@ -72,6 +75,16 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
+     * @param Formato $Formato
+     * @return WebservicePqr
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-05-16
+     */
+    public static function getClassWebservicePqr(Formato $Formato): IWsHtml
+    {
+        return new WebservicePqr($Formato);
+    }
+
+    /**
      * @inheritDoc
      */
     public static function getParamsToAddEdit(int $action, int $idft): array
@@ -85,7 +98,7 @@ class FtPqr extends FtPqrProperties
             $IWsHtml = $PqrForm->getWebservicePqr();
             $data = [
                 'isActiveSubType'        => (int)($PqrFormField && $PqrFormField->isActive()),
-                'isEnabledAnonymous'           => (int)$PqrForm->show_anonymous,
+                'isEnabledAnonymous'     => (int)$PqrForm->show_anonymous,
                 'fieldsWithoutAnonymous' => $IWsHtml->getFieldsWithoutAnonymous(),
                 'fieldsWithAnonymous'    => $IWsHtml->getFieldsWithAnonymous(),
             ];
