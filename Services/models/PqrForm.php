@@ -2,8 +2,10 @@
 
 namespace App\Bundles\pqr\Services\models;
 
+use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\controllers\WebservicePqr;
 use App\services\exception\SaiaException;
+use Saia\controllers\generator\webservice\IWsHtml;
 use Saia\core\model\Model;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
@@ -133,12 +135,12 @@ class PqrForm extends Model
     }
 
     /**
-     * @return WebservicePqr
+     * @return IWsHtml|WebservicePqr
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-03-22
      */
-    public function getWebservicePqr(): WebservicePqr
+    public function getWebservicePqr(): IWsHtml
     {
-        return new WebservicePqr($this->getFormatoFk());
+        return UtilitiesPqr::getWebservicePqr($this->getFormatoFk());
     }
 
     /**
