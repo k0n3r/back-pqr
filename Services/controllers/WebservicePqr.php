@@ -11,7 +11,7 @@ use App\Bundles\pqr\Services\models\PqrFormField;
 class WebservicePqr extends WsFt
 {
 
-    private PqrForm $PqrForm;
+    protected PqrForm $PqrForm;
     private array $objectFieldsForAnonymous = [];
     private array $objectFields = [];
     private bool $isProcessFields = false;
@@ -39,7 +39,7 @@ class WebservicePqr extends WsFt
         ]);
 
         return static::getContent(
-            'src/Bundles/pqr/Services/controllers/templates/formPqr.html.php',
+            $this->htmlTemplateUrl ?? 'src/Bundles/pqr/Services/controllers/templates/formPqr.html.php',
             $values
         );
     }
@@ -56,7 +56,7 @@ class WebservicePqr extends WsFt
         ]);
 
         return static::getContent(
-            'src/Bundles/pqr/Services/controllers/templates/formPqr.js.php',
+            $this->jsTemplateUrl ?? 'src/Bundles/pqr/Services/controllers/templates/formPqr.js.php',
             $values
         );
     }
