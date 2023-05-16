@@ -2,7 +2,6 @@
 
 namespace App\Bundles\pqr\Services\models;
 
-use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\controllers\WebservicePqr;
 use App\services\exception\SaiaException;
