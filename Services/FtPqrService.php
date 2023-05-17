@@ -276,12 +276,12 @@ class FtPqrService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function getDateForType(bool $instance = false)
+    public function getDateForType(bool $instance = false, ?int $days = null)
     {
         $Created = DateController::getDateTimeFromDataBase($this->getDocument()->fecha);
         $DateTime = (DateController::addBusinessDays(
             $Created,
-            $this->getDays()
+            is_null($days) ? $this->getDays() : $days
         ));
         $DateTime->setTime(
             $Created->format('H'),
