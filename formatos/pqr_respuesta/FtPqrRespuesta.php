@@ -152,15 +152,13 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     /**
      * Genera el HTML para seleccionar la ciudad de origen
      *
-     * @param integer $idCamposFormato
+     * @param CamposFormato $CamposFormato
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function selectCity(int $idCamposFormato): string
+    public function selectCity(CamposFormato $CamposFormato): string
     {
-        $CamposFormato = new CamposFormato($idCamposFormato);
-
         $options = '';
         if ($this->ciudad_origen) {
             $data = MunicipioService::getCityByIdForAutocomplete($this->ciudad_origen);
@@ -181,15 +179,13 @@ HTML;
     /**
      * Genera el HTML para checkear la solicitud de encuesta
      *
-     * @param integer $idCamposFormato
+     * @param CamposFormato $CamposFormato
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function fieldSatisfactionSurvey(int $idCamposFormato): string
+    public function fieldSatisfactionSurvey(CamposFormato $CamposFormato): string
     {
-        $CamposFormato = new CamposFormato($idCamposFormato);
-
         $check = (int)$this->sol_encuesta;
         $checked = $check ? 'checked' : '';
 

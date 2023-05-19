@@ -40,7 +40,7 @@ $code = <<<JAVASCRIPT
                         anterior: localStorage.getItem('WsIddocPqr')
                     });
 
-                    $.ajax({
+                    top.$.ajax({
                         method: 'POST',
                         url: '$urlSaveFt',
                         data,

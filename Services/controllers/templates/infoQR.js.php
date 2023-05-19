@@ -18,7 +18,7 @@ $(function () {
             selector: '#timeline-container',
             source: function () {
                 let data = new Array();
-                $.ajax({
+                top.$.ajax({
                     url: `/api/pqr/historyForTimeline`,
                     async: false,
                     data: {

@@ -87,7 +87,7 @@ $(function () {
                         tokenRecaptcha
                     });
 
-                    $.ajax({
+                    top.$.ajax({
                         method: 'POST',
                         url: '$urlSaveFt',
                         data,
@@ -144,7 +144,7 @@ $(function () {
         submitHandler: function (form) {
             let data = window.getFormObject($('#formSearch').serializeArray());
 
-            $.ajax({
+            top.$.ajax({
                 url: `/api/pqr/searchByNumber`,
                 data
             }).done((response) => {
