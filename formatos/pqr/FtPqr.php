@@ -11,6 +11,7 @@ use Doctrine\DBAL\Types\Types;
 use Saia\controllers\generator\component\Distribution;
 use Saia\controllers\generator\webservice\IWsHtml;
 use Saia\models\documento\Documento;
+use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
 use Saia\models\Funcionario;
 use Saia\models\Tercero;
@@ -366,15 +367,15 @@ HTML;
      * Carga el HTML del adicionar/editar para los campos
      *  AutompleteD
      *
-     * @param integer $idCamposFormato
+     * @param CamposFormato $CamposFormato
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function autocompleteD(int $idCamposFormato): string
+    public function autocompleteD(CamposFormato $CamposFormato): string
     {
         $PqrFormField = PqrFormField::findByAttributes([
-            'fk_campos_formato' => $idCamposFormato
+            'fk_campos_formato' => $CamposFormato->getPK()
         ]);
         return $this->getService()->generateField($PqrFormField);
     }
@@ -383,15 +384,15 @@ HTML;
      * Carga el HTML del adicionar/editar para los campos
      *  Automplete
      *
-     * @param integer $idCamposFormato
+     * @param CamposFormato $CamposFormato
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function autocompleteM(int $idCamposFormato): string
+    public function autocompleteM(CamposFormato $CamposFormato): string
     {
         $PqrFormField = PqrFormField::findByAttributes([
-            'fk_campos_formato' => $idCamposFormato
+            'fk_campos_formato' => $CamposFormato->getPK()
         ]);
 
         return $this->getService()->generateField($PqrFormField);
