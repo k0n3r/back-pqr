@@ -69,7 +69,7 @@ final class Version20200226192642 extends AbstractMigration
             'tablas_adicionales'     => null,
             'ordenado_por'           => 'v.fecha ASC',
             'agrupado_por'           => null,
-            'busqueda_avanzada'      => 'views/modules/pqr/formatos/pqr/busqueda.php',
+            'busqueda_avanzada'      => 'views/modules/pqr/formatos/pqr/busqueda.html',
             'enlace_adicionar'       => null,
             'llave'                  => 'v.iddocumento',
             'ruta_libreria'          => 'src/Bundles/pqr/formatos/pqr/reporteFunciones.php',
