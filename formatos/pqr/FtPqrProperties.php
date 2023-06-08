@@ -128,7 +128,7 @@ class FtPqrProperties extends ModelFormat
         }
         
         if (
-            $Documento->estado === Documento::INICIADO &&
+            $Documento->isStarted() &&
             $this->getFormat()->isAutoApprove()
         ) {
             $Documento->estado = Documento::APROBADO;
