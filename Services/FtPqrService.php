@@ -392,7 +392,7 @@ class FtPqrService extends ModelService
             'destino'           => $destino ?? 0,
             'tipo_distribucion' => $tipoDistribucion ?? 0,
             'despedida'         => $despedida ?? 0,
-            'asunto'            => "Respondiendo a la {$this->getModel()->getFormat()->etiqueta} No {$this->getDocument()->numero}"
+            'asunto'            => $this->getModel()->getDefaultSubjectForPqrRespuesta()
         ];
     }
 
