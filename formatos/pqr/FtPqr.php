@@ -416,4 +416,16 @@ HTML;
 
         return $this->FuncionarioDestinoInterno;
     }
+
+    /**
+     * Obtiene el asunto por defecto que se cargara en el adicionar de la repsuesta pqr
+     *
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-06-09
+     */
+    public function getDefaultSubjectForPqrRespuesta(): string
+    {
+        return "Respondiendo a la {$this->getFormat()->etiqueta} No {$this->getDocument()->numero}";
+    }
+
 }
