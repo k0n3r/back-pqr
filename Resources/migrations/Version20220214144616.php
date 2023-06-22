@@ -64,7 +64,7 @@ final class Version20220214144616 extends AbstractMigration
                 'children'               => [
                     [
                         'fk_grafico' => 0,
-                        'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr_calificacion v,campo_opciones c WHERE v.experiencia_servicio=c.idcampo_opciones GROUP BY c.valor',
+                        'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr_calificacion v,campo_opciones c WHERE v.experiencia_gestion=c.idcampo_opciones GROUP BY c.valor',
                         'etiqueta'   => 'Calificación',
                     ]
                 ]
@@ -86,7 +86,7 @@ final class Version20220214144616 extends AbstractMigration
                 'children'               => [
                     [
                         'fk_grafico' => 0,
-                        'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr_calificacion v,campo_opciones c WHERE v.experiencia_gestion=c.idcampo_opciones GROUP BY c.valor',
+                        'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr_calificacion v,campo_opciones c WHERE v.experiencia_servicio=c.idcampo_opciones GROUP BY c.valor',
                         'etiqueta'   => 'Calificación',
                     ]
                 ]
