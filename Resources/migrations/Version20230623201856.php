@@ -24,7 +24,7 @@ final class Version20230623201856 extends AbstractMigration
         $sql = "SELECT idbusqueda_componente FROM busqueda_componente WHERE nombre LIKE 'rep_todos_pqr'";
         $id = $this->connection->fetchOne($sql);
 
-        $sql = "UPDATE grafico SET fk_busqueda_componente=$id WHERE nombre IN ('pqr_tipo','pqr_estado','" . PqrService::NAME_DEPENDENCY_GRAPH . "')";
+        $sql = "UPDATE grafico SET fk_busqueda_componente=$id,busqueda='views/modules/pqr/formatos/pqr/busqueda_grafico.html' WHERE nombre IN ('pqr_tipo','pqr_estado','" . PqrService::NAME_DEPENDENCY_GRAPH . "')";
         $this->connection->executeStatement($sql);
 
         $sql = "SELECT idgrafico FROM grafico WHERE nombre like 'pqr_estado'";
