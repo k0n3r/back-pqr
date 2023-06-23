@@ -86,30 +86,34 @@ class UtilitiesPqr
      * del documento
      *
      * @param Documento $Documento
-     * @return array
+     * @return int[]
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
     public static function getFinishTotalTask(Documento $Documento): array
     {
-        $finish = $total = 0;
+        $finish = $cancel = $total = 0;
 
         if ($Tareas = $Documento->getService()->getTasks()) {
             $total = count($Tareas);
 
             foreach ($Tareas as $Tarea) {
                 $TareaService = $Tarea->getService();
-                if (
-                    $TareaService->getState()->valor == TareaEstado::REALIZADA ||
-                    $TareaService->getState()->valor == TareaEstado::CANCELADA
-                ) {
-                    $finish = $finish + 1;
+                switch ($TareaService->getState()->valor) {
+                    case TareaEstado::REALIZADA:
+                        $finish++;
+                        break;
+
+                    case TareaEstado::CANCELADA:
+                        $cancel++;
+                        break;
                 }
             }
         }
 
         return [
             'finish' => $finish,
+            'cancel' => $cancel,
             'total'  => $total
         ];
     }

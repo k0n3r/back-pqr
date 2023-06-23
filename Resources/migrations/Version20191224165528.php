@@ -7,6 +7,7 @@ namespace App\Bundles\pqr\Resources\migrations;
 use App\Bundles\pqr\Services\PqrService;
 use DateTime;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
+use Saia\models\grafico\Grafico;
 use Saia\models\Perfil;
 use App\Bundles\pqr\Services\models\PqrForm;
 use Doctrine\DBAL\Schema\Schema;
@@ -193,14 +194,14 @@ final class Version20191224165528 extends AbstractMigration
                 'fk_busqueda_componente' => null,
                 'fk_pantalla_grafico'    => $id,
                 'nombre'                 => PqrService::NAME_DEPENDENCY_GRAPH,
-                'tipo'                   => '1',
+                'tipo'                   => Grafico::BARS,
                 'configuracion'          => null,
                 'estado'                 => 0,
                 'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
                 'columna'                => '-',
                 'titulo_x'               => 'Dependencia',
                 'titulo_y'               => 'Cantidad',
-                'busqueda'               => null,
+                'busqueda'               => 'views/modules/pqr/formatos/pqr/busqueda_grafico.html',
                 'librerias'              => null,
                 'titulo'                 => 'Estados por dependencia',
                 'children'               => [
@@ -230,14 +231,14 @@ final class Version20191224165528 extends AbstractMigration
                 'fk_busqueda_componente' => null,
                 'fk_pantalla_grafico'    => $id,
                 'nombre'                 => 'pqr_tipo',
-                'tipo'                   => '2',
+                'tipo'                   => Grafico::PIE,
                 'configuracion'          => null,
                 'estado'                 => 0,
                 'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
                 'columna'                => '-',
                 'titulo_x'               => 'Tipo',
                 'titulo_y'               => 'Cantidad',
-                'busqueda'               => null,
+                'busqueda'               => 'views/modules/pqr/formatos/pqr/busqueda_grafico.html',
                 'librerias'              => null,
                 'titulo'                 => 'Tipos',
                 'children'               => [
@@ -252,20 +253,20 @@ final class Version20191224165528 extends AbstractMigration
                 'fk_busqueda_componente' => null,
                 'fk_pantalla_grafico'    => $id,
                 'nombre'                 => 'pqr_estado',
-                'tipo'                   => '2',
+                'tipo'                   => Grafico::PIE,
                 'configuracion'          => null,
                 'estado'                 => 0,
                 'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
                 'columna'                => '-',
                 'titulo_x'               => 'Estado',
                 'titulo_y'               => 'Cantidad',
-                'busqueda'               => null,
+                'busqueda'               => 'views/modules/pqr/formatos/pqr/busqueda_grafico.html',
                 'librerias'              => null,
                 'titulo'                 => 'Estados',
                 'children'               => [
                     [
                         'fk_grafico' => 0,
-                        'query'      => 'SELECT sys_estado,count(sys_estado) AS cantidad FROM vpqr GROUP BY sys_estado',
+                        'query'      => 'SELECT sys_estado,count(sys_estado) AS cantidad FROM vpqr v GROUP BY sys_estado',
                         'etiqueta'   => 'Estado'
                     ]
                 ]
@@ -274,7 +275,7 @@ final class Version20191224165528 extends AbstractMigration
                 'fk_busqueda_componente' => null,
                 'fk_pantalla_grafico'    => $id,
                 'nombre'                 => 'pqr_calificacion_gestion',
-                'tipo'                   => '2',
+                'tipo'                   => Grafico::PIE,
                 'configuracion'          => null,
                 'estado'                 => 1,
                 'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
@@ -296,7 +297,7 @@ final class Version20191224165528 extends AbstractMigration
                 'fk_busqueda_componente' => null,
                 'fk_pantalla_grafico'    => $id,
                 'nombre'                 => 'pqr_calificacion_servicio',
-                'tipo'                   => '2',
+                'tipo'                   => Grafico::PIE,
                 'configuracion'          => null,
                 'estado'                 => 1,
                 'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',

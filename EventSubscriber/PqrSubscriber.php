@@ -22,10 +22,10 @@ class PqrSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            TaskCreatedEvent::class => [
+            TaskCreatedEvent::class       => [
                 ['onTaskCreated', -1]
             ],
-            TaskDeletedEvent::class => [
+            TaskDeletedEvent::class       => [
                 ['onTaskDeletedEvent', -1]
             ],
             TaskStatusCreatedEvent::class => [
@@ -99,12 +99,12 @@ class PqrSubscriber implements EventSubscriberInterface
             $Documento = new Documento($TareaService->getModel()->relacion_id);
             if ($Documento->formato_idformato == PqrForm::getInstance()->fk_formato) {
                 $history = [
-                    'fecha' => date('Y-m-d H:i:s'),
-                    'idft' => $Documento->getFt()->getPK(),
+                    'fecha'          => date('Y-m-d H:i:s'),
+                    'idft'           => $Documento->getFt()->getPK(),
                     'fk_funcionario' => $TareaService->getFuncionario()->getPK(),
-                    'tipo' => PqrHistory::TIPO_TAREA,
-                    'idfk' => $TareaService->getModel()->getPK(),
-                    'descripcion' => $description
+                    'tipo'           => PqrHistory::TIPO_TAREA,
+                    'idfk'           => $TareaService->getModel()->getPK(),
+                    'descripcion'    => $description
                 ];
 
                 $PqrHistoryService = (new PqrHistory)->getService();
@@ -134,10 +134,11 @@ class PqrSubscriber implements EventSubscriberInterface
     private function updateEstado(Documento $Documento): bool
     {
         $estado = FtPqr::ESTADO_PENDIENTE;
-
         $data = UtilitiesPqr::getFinishTotalTask($Documento);
-        if ($data['total']) {
-            $estado = $data['total'] == $data['finish'] ?
+
+        $total = $data['total'] - $data['cancel'];
+        if ($total) {
+            $estado = $total == $data['finish'] ?
                 FtPqr::ESTADO_TERMINADO : FtPqr::ESTADO_PROCESO;
         }
 

@@ -36,6 +36,11 @@ class FtPqr extends FtPqrProperties
     const ESTADO_FRE_IMP_SEV_MEDIO = 2;
     const ESTADO_FRE_IMP_SEV_ALTO = 3;
 
+    const OPORTUNO_PENDIENTES_SIN_VENCER = 'PENDIENTES SIN VENCER';
+    const OPORTUNO_VENCIDAS_SIN_CERRAR = 'VENCIDAS SIN CERRAR';
+    const OPORTUNO_CERRADAS_A_TERMINO = 'CERRADAS A TERMINO';
+    const OPORTUNO_CERRADAS_FUERA_DE_TERMINO = 'CERRADAS FUERA DE TERMINO';
+
     protected ?FtPqrService $FtPqrService = null;
     private ?FtPqrCalificacion $lastFtPqrCalificacion = null;
     private ?Funcionario $FuncionarioDestinoInterno = null;

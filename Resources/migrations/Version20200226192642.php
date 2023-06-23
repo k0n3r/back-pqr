@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\Resources\migrations;
 
 use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\PqrService;
 use Doctrine\DBAL\Schema\Schema;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Doctrine\Migrations\AbstractMigration;
@@ -163,6 +164,9 @@ final class Version20200226192642 extends AbstractMigration
         ];
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
 
+        $sql = "UPDATE grafico SET fk_busqueda_componente=$idbusquedaComponente WHERE nombre IN ('pqr_tipo','pqr_estado','".PqrService::NAME_DEPENDENCY_GRAPH."')";
+        $this->connection->executeStatement($sql);
+
         $nombre = PqrForm::NOMBRE_PANTALLA_GRAFICO;
         $sql = "SELECT idpantalla_grafico FROM pantalla_grafico WHERE lower(nombre) like lower('$nombre')";
         $idPantallaGrafico = (int)$this->connection->fetchOne($sql);
@@ -170,7 +174,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->abortIf(!$idPantallaGrafico, "No se encuentra la pantalla del grafico");
 
         $data = [
-            'enlace' => 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector": "iframe","url": "views/buzones/listado_componentes.php?searchId=' . $idbusqueda . '"},{"kConnector": "iframe","url": "views/graficos/dashboard.php?screen=' . $idPantallaGrafico . '","kTitle": "Indicadores"}]',
+            'enlace' => 'views/dashboard/kaiten_dashboard.php?panels=[{"url": "views/buzones/listado_componentes.php?searchId=' . $idbusqueda . '"},{"url": "views/graficos/dashboard.php?screen=' . $idPantallaGrafico . '","kTitle": "Indicadores"}]',
         ];
         $this->createModulo($data, 'indicadores_pqr');
     }
