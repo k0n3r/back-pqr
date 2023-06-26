@@ -60,7 +60,7 @@ final class Version20200321234633 extends AbstractMigration
         $idfuncionario = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$idfuncionario, "El funcionario ceork NO existe");
 
-        $sqlCodPadre = "SELECT idformato FROM formato WHERE nombre='pqr_respuesta'";
+        $sqlCodPadre = "SELECT idformato FROM formato WHERE nombre like 'pqr_respuesta'";
         $codPadre = (int)$this->connection->fetchOne($sqlCodPadre);
         $this->abortIf(!$codPadre, "No se encontro el formato padre Respuesta PQRSF");
 

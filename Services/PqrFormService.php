@@ -448,7 +448,7 @@ class PqrFormService extends ModelService
         $sql = "SELECT $fields
         FROM ft_pqr ft,documento d
         WHERE ft.documento_iddocumento=d.iddocumento
-        AND d.estado NOT IN ('ELIMINADO','ANULADO')";
+        AND d.estado = 'APROBADO'";
 
         $this->createView('vpqr', $sql);
     }

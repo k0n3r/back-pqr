@@ -24,8 +24,8 @@ class FtPqrCalificacionProperties extends ModelFormat
 				'documento_iddocumento',
 				'encabezado',
 				'firma',
-				'ft_pqr_respuesta',
 				'dependencia',
+				'ft_pqr_respuesta',
 				'experiencia_gestion',
 				'experiencia_servicio' 
             ],
