@@ -164,9 +164,8 @@ class FtPqrController extends AbstractController
         ISaiaResponse $saiaResponse,
         Connection $Connection
     ): Response {
-
+        $Connection->beginTransaction();
         try {
-            $Connection->beginTransaction();
 
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
             if (!$FtPqrService->updateType($request->get('data'))) {

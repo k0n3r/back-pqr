@@ -35,6 +35,7 @@ final class Version20191224165528 extends AbstractMigration
         $this->generateModules($this->modulesDefaultData());
 
         $this->createIndicators();
+        $this->createScheduledTask();
     }
 
     private function convertDate(string $date): string
@@ -177,7 +178,7 @@ final class Version20191224165528 extends AbstractMigration
         }
     }
 
-    private function createIndicators()
+    private function createIndicators(): void
     {
         $this->connection->insert('pantalla_grafico', [
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
@@ -185,6 +186,17 @@ final class Version20191224165528 extends AbstractMigration
         $id = $this->connection->lastInsertId('pantalla_grafico');
 
         $this->createGraphic($id);
+    }
+
+    private function createScheduledTask(): void
+    {
+        $this->connection->insert('crontab', [
+            'clase'            => 'App\\Bundles\\pqr\\Services\\crontab\\ChangeStatusOfOportunoField',
+            'descripcion'      => 'Actualiza el campo sys_oportuno de las PQRS',
+            'email_notifica'   => 'soporte@cerok.com',
+            'estado'           => 1,
+            'pertenece_nucleo' => 0,
+        ]);
     }
 
     private function createGraphic($id)
@@ -233,7 +245,7 @@ final class Version20191224165528 extends AbstractMigration
                 'nombre'                 => 'pqr_tipo',
                 'tipo'                   => Grafico::PIE,
                 'configuracion'          => null,
-                'estado'                 => 0,
+                'estado'                 => 1,
                 'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
                 'columna'                => '-',
                 'titulo_x'               => 'Tipo',
@@ -255,7 +267,7 @@ final class Version20191224165528 extends AbstractMigration
                 'nombre'                 => 'pqr_estado',
                 'tipo'                   => Grafico::PIE,
                 'configuracion'          => null,
-                'estado'                 => 0,
+                'estado'                 => 1,
                 'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
                 'columna'                => '-',
                 'titulo_x'               => 'Estado',
@@ -312,6 +324,28 @@ final class Version20191224165528 extends AbstractMigration
                         'fk_grafico' => 0,
                         'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr_calificacion v,campo_opciones c WHERE v.experiencia_servicio=c.idcampo_opciones GROUP BY c.valor',
                         'etiqueta'   => 'Calificación',
+                    ]
+                ]
+            ],
+            [
+                'fk_busqueda_componente' => null,
+                'fk_pantalla_grafico'    => $id,
+                'nombre'                 => 'pqr_oportunidad_resp',
+                'tipo'                   => Grafico::PIE,
+                'configuracion'          => null,
+                'estado'                 => 1,
+                'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
+                'columna'                => '-',
+                'titulo_x'               => 'Estado',
+                'titulo_y'               => 'Cantidad',
+                'busqueda'               => 'views/modules/pqr/formatos/pqr/busqueda_grafico.html',
+                'librerias'              => null,
+                'titulo'                 => 'Oportunidad en las respuestas',
+                'children'               => [
+                    [
+                        'fk_grafico' => 0,
+                        'query'      => 'SELECT sys_oportuno,count(sys_oportuno) AS cantidad FROM vpqr v GROUP BY sys_oportuno',
+                        'etiqueta'   => 'Estado'
                     ]
                 ]
             ]

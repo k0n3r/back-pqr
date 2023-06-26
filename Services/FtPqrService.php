@@ -220,55 +220,6 @@ class FtPqrService extends ModelService
     }
 
     /**
-     * Actualiza la fecha de vencimiento
-     *
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    public function updateFechaVencimiento(): bool
-    {
-        $FtPqr = $this->getModel();
-        $Documento = $this->getDocument();
-
-        $fecha = $this->getDateForType();
-
-        $oldDate = $FtPqr->sys_fecha_vencimiento ?
-            DateController::getDateTimeFromDataBase($FtPqr->sys_fecha_vencimiento)->format('Y-m-d H:i:s')
-            : null;
-
-        $FtPqr->sys_fecha_vencimiento = $fecha;
-        $FtPqr->save();
-
-        $Documento->fecha_limite = $fecha;
-        $Documento->save();
-
-        if ($oldDate != $FtPqr->sys_fecha_vencimiento) {
-            $history = [
-                'fecha'          => date('Y-m-d H:i:s'),
-                'idft'           => $this->getModel()->getPK(),
-                'fk_funcionario' => $this->getFuncionario()->getPK(),
-                'tipo'           => PqrHistory::TIPO_CAMBIO_VENCIMIENTO,
-                'idfk'           => 0,
-                'descripcion'    => "Se actualiza la fecha de vencimiento a " .
-                    DateController::convertDate(
-                        $this->getModel()->sys_fecha_vencimiento,
-                        DateController::PUBLIC_DATE_FORMAT
-                    )
-            ];
-
-            $PqrHistoryService = (new PqrHistory)->getService();
-            if (!$PqrHistoryService->save($history)) {
-                $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
-                return false;
-            }
-
-        }
-
-        return true;
-    }
-
-    /**
      * Retonar la fecha de vencimiento basado en la fecha de aprobacion
      * y el tipo
      *
@@ -307,25 +258,15 @@ class FtPqrService extends ModelService
             return $PqrResponseTime->number_days ?: 1;
         }
 
-        $this->registerErrorResponseTime();
+        $history = [
+            'tipo'        => PqrHistory::TIPO_ERROR_DIAS_VENCIMIENTO,
+            'descripcion' => "No se configuro dias de vencimiento para las opciones seleccionadas por el cliente"
+        ];
+
+        $this->saveHistory($history);
 
         return 1;
 
-    }
-
-    private function registerErrorResponseTime(): void
-    {
-        $history = [
-            'fecha'          => date('Y-m-d H:i:s'),
-            'idft'           => $this->getModel()->getPK(),
-            'fk_funcionario' => $this->getFuncionario()->getPK(),
-            'tipo'           => PqrHistory::TIPO_ERROR_DIAS_VENCIMIENTO,
-            'idfk'           => 0,
-            'descripcion'    => "No se configuro dias de vencimiento para los opciones seleccionadas por el cliente"
-        ];
-
-        $PqrHistoryService = (new PqrHistory)->getService();
-        $PqrHistoryService->save($history);
     }
 
     /**
@@ -345,7 +286,6 @@ class FtPqrService extends ModelService
         return (int)$this->getModel()->$nameField;
 
     }
-
 
     /**
      * Obtiene los campos a cargar en el adicionar
@@ -475,9 +415,9 @@ class FtPqrService extends ModelService
     }
 
     /**
-     * Obtiene la fecha de expiracion
+     * Obtiene la fecha de expiracion/vencimiento
      *
-     * @return DateTime
+     * @return DateTime|string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -506,7 +446,7 @@ class FtPqrService extends ModelService
     }
 
     /**
-     * Obtiene los datoss de finalizacion de timeline
+     * Obtiene los datos de finalizacion de timeline
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -519,14 +459,10 @@ class FtPqrService extends ModelService
         return [
             'iconPoint'      => 'fa fa-flag-checkered',
             'iconPointColor' => 'success',
-            'date'           => DateController::convertDate(
-                $this->getModel()->sys_fecha_vencimiento,
-                DateController::PUBLIC_DATE_FORMAT
-            ),
+            'date'           => $this->getExpirationDate()->format(DateController::PUBLIC_DATE_FORMAT),
             'description'    => "Fecha maxima para dar respuesta a la solicitud de tipo $type"
         ];
     }
-
 
     /**
      * Notifica al email registrado
@@ -727,7 +663,6 @@ HTML;
         return $this->getModel()->save() > 0;
     }
 
-
     /**
      * Actualiza el tipo de PQR y guarda en el historial
      *
@@ -784,26 +719,29 @@ HTML;
             }
         }
 
-
-        $textExpirationDate = $this->updateExpirationDate($data['expirationDate']);
+        $textExpirationDate = $this->getTextForUpdateExpirationDate($data['expirationDate']);
         if ($textExpirationDate) {
             $newAttributes['sys_fecha_vencimiento'] = $data['expirationDate'];
             $textField[] = $textExpirationDate;
+
+            $newAttributes['sys_oportuno'] = $this->getRespuestaOportuna($data['expirationDate']);
+            $this->getDocument()->fecha_limite = $data['expirationDate'];
+            $this->getDocument()->save();
         }
 
-        $textFrecuencia = $this->updateEstadoFreImpSev('sys_frecuencia', $data['sys_frecuencia']);
+        $textFrecuencia = $this->getTextForUpdateEstadoFreImpSev('sys_frecuencia', $data['sys_frecuencia']);
         if ($textFrecuencia) {
             $newAttributes['sys_frecuencia'] = $data['sys_frecuencia'];
             $textField[] = "Frecuencia $textFrecuencia";
         }
 
-        $textImpacto = $this->updateEstadoFreImpSev('sys_impacto', $data['sys_impacto']);
+        $textImpacto = $this->getTextForUpdateEstadoFreImpSev('sys_impacto', $data['sys_impacto']);
         if ($textImpacto) {
             $newAttributes['sys_impacto'] = $data['sys_impacto'];
             $textField[] = "Impacto $textImpacto";
         }
 
-        $textSeveridad = $this->updateEstadoFreImpSev('sys_severidad', $data['sys_severidad']);
+        $textSeveridad = $this->getTextForUpdateEstadoFreImpSev('sys_severidad', $data['sys_severidad']);
         if ($textSeveridad) {
             $newAttributes['sys_severidad'] = $data['sys_severidad'];
             $textField[] = "Severidad $textSeveridad";
@@ -833,21 +771,31 @@ HTML;
         ], $text);
 
         $history = [
-            'fecha'          => date('Y-m-d H:i:s'),
-            'idft'           => $this->getModel()->getPK(),
-            'fk_funcionario' => $this->getFuncionario()->getPK(),
-            'tipo'           => PqrHistory::TIPO_CAMBIO_ESTADO,
-            'idfk'           => 0,
-            'descripcion'    => $text
+            'tipo'        => PqrHistory::TIPO_CAMBIO_ESTADO,
+            'descripcion' => $text
         ];
+        return $this->saveHistory($history);
+    }
 
-        $PqrHistoryService = (new PqrHistory)->getService();
-        if (!$PqrHistoryService->save($history)) {
-            $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
+    public function updateSysOportuno(): bool
+    {
+        $oldOportuno = $this->getModel()->sys_oportuno;
+        $newOportuno = $this->getRespuestaOportuna();
+
+        if ($newOportuno == $oldOportuno) {
+            return true;
+        }
+
+        if (!$this->save(['sys_oportuno' => $newOportuno])) {
             return false;
         }
 
-        return true;
+        $history = [
+            'tipo'        => PqrHistory::TIPO_CAMBIO_ESTADO,
+            'descripcion' => "Se actualiza la oportunidad en la respuesta de : $oldOportuno a $newOportuno"
+        ];
+
+        return $this->saveHistory($history);
     }
 
     /**
@@ -886,7 +834,7 @@ HTML;
         $now = $this->getModel()->sys_fecha_terminado ? DateController::getDateTimeFromDataBase($this->getModel()->sys_fecha_terminado) : new DateTime();
         $now->setTime(0, 0);
 
-        $expirationDate = DateController::getDateTimeFromDataBase($this->getModel()->sys_fecha_vencimiento);
+        $expirationDate = $this->getExpirationDate();
         $now->setTime(0, 0);
 
         $diff = $now->diff($expirationDate);
@@ -900,14 +848,10 @@ HTML;
             }
         }
 
-        $date = DateController::convertDate(
-            $this->getModel()->sys_fecha_vencimiento,
-            DateController::PUBLIC_DATE_FORMAT
-        );
+        $date = $this->getExpirationDate()->format(DateController::PUBLIC_DATE_FORMAT);
 
         return "<span class='badge badge-$color'>$date</span>";
     }
-
 
     /**
      * Muestra la fecha finalizacion
@@ -948,7 +892,7 @@ HTML;
         $now = new DateTime($this->getModel()->sys_fecha_terminado);
         $now->setTime(0, 0);
 
-        $expirationDate = new DateTime($this->getModel()->sys_fecha_vencimiento);
+        $expirationDate = $this->getExpirationDate();
         $expirationDate->setTime(0, 0);
 
         $diff = $now->diff($expirationDate);
@@ -1011,7 +955,6 @@ HTML;
         ], [], $order);
     }
 
-
     /**
      * Retorna la URL de QR
      *
@@ -1035,7 +978,6 @@ HTML;
         );
     }
 
-
     /**
      * Cambia el estado de la PQR
      *
@@ -1051,10 +993,13 @@ HTML;
 
         if ($actualStatus != $newStatus) {
             $this->getModel()->sys_estado = $newStatus;
+
             if ($newStatus == FtPqr::ESTADO_TERMINADO) {
                 $this->getModel()->sys_fecha_terminado = date('Y-m-d H:i:s');
+                $this->getModel()->sys_oportuno = $this->getRespuestaOportuna();
             } else {
                 $this->getModel()->sys_fecha_terminado = null;
+                $this->getModel()->sys_oportuno = $this->getRespuestaOportuna();
                 $this->getModel()->setSaveNullAttributes(true);
             }
             $this->getModel()->save();
@@ -1083,7 +1028,7 @@ HTML;
      * @return string|null
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
-    private function updateEstadoFreImpSev(string $fieldName, $value): ?string
+    private function getTextForUpdateEstadoFreImpSev(string $fieldName, $value): ?string
     {
         if ($value == $this->getModel()->$fieldName) {
             return null;
@@ -1105,21 +1050,14 @@ HTML;
      * @return string|null
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
-    private function updateExpirationDate(string $expirationDate): ?string
+    private function getTextForUpdateExpirationDate(string $expirationDate): ?string
     {
-        $expiration = DateController::convertDate($this->getModel()->sys_fecha_vencimiento, 'Y-m-d');
-        if ($expirationDate == $expiration) {
+        $expiration = $this->getExpirationDate();
+        if ($expirationDate == $expiration->format('Y-m-d')) {
             return null;
         }
 
-        $this->getDocument()->fecha_limite = $expirationDate;
-        $this->getDocument()->save();
-
-        $oldDate = DateController::convertDate(
-            $expiration,
-            DateController::PUBLIC_DATE_FORMAT,
-            'Y-m-d'
-        );
+        $oldDate = $expiration->format(DateController::PUBLIC_DATE_FORMAT);
 
         $newDate = DateController::convertDate(
             $expirationDate,
@@ -1128,6 +1066,50 @@ HTML;
         );
 
         return "fecha de vencimiento de $oldDate a $newDate";
+    }
+
+    /**
+     * Actualiza la fecha de vencimiento
+     *
+     * @return boolean
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date   2020
+     */
+    public function updateFechaVencimiento(): bool
+    {
+        $DateTimeForType = $this->getDateForType(true);
+
+        $oldDate = $this->getModel()->sys_fecha_vencimiento ?
+            $this->getExpirationDate()->format('Y-m-d')
+            : null;
+
+        if ($oldDate != $DateTimeForType->format('Y-m-d')) {
+
+            $this->getModel()->sys_fecha_vencimiento = $DateTimeForType->format('Y-m-d H:i:s');
+            $this->getModel()->save();
+
+            $this->getDocument()->fecha_limite = $DateTimeForType->format('Y-m-d H:i:s');
+            $this->getDocument()->save();
+
+            $history = [
+                'fecha'          => date('Y-m-d H:i:s'),
+                'idft'           => $this->getModel()->getPK(),
+                'fk_funcionario' => $this->getFuncionario()->getPK(),
+                'tipo'           => PqrHistory::TIPO_CAMBIO_VENCIMIENTO,
+                'idfk'           => 0,
+                'descripcion'    => "Se actualiza la fecha de vencimiento a " .
+                    $DateTimeForType->format(DateController::PUBLIC_DATE_FORMAT)
+            ];
+
+            $PqrHistoryService = (new PqrHistory)->getService();
+            if (!$PqrHistoryService->save($history)) {
+                $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
+                return false;
+            }
+
+        }
+
+        return true;
     }
 
     /**
@@ -1244,6 +1226,56 @@ HTML;
         $DateTime->add(new DateInterval('PT30M'));
 
         return $DateTime->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * @param string|null $date
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-06-23
+     */
+    private function getRespuestaOportuna(?string $date = null): string
+    {
+        $fExpiration = $date ?? $this->getExpirationDate()->format('Y-m-d');
+
+        $isFinish = $this->getModel()->sys_estado == FtPqr::ESTADO_TERMINADO;
+
+        $fTerminado = new DateTime();
+        if ($isFinish) {
+            if ($fTerminado->format('Y-m-d') <= $fExpiration) {
+                return FtPqr::OPORTUNO_CERRADAS_A_TERMINO;
+            }
+            return FtPqr::OPORTUNO_CERRADAS_FUERA_DE_TERMINO;
+        }
+
+        if ($fTerminado->format('Y-m-d') <= $fExpiration) {
+            return FtPqr::OPORTUNO_PENDIENTES_SIN_VENCER;
+        }
+        return FtPqr::OPORTUNO_VENCIDAS_SIN_CERRAR;
+    }
+
+    /**
+     * Guarda rastro del cambio en el historial
+     *
+     * @param array $data
+     * @return bool
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-06-26
+     */
+    private function saveHistory(array $data): bool
+    {
+        $history = array_merge([
+            'fecha'          => date('Y-m-d H:i:s'),
+            'idft'           => $this->getModel()->getPK(),
+            'fk_funcionario' => $this->getFuncionario()->getPK(),
+            'idfk'           => 0,
+        ], $data);
+
+        $PqrHistoryService = (new PqrHistory())->getService();
+        if (!$PqrHistoryService->save($history)) {
+            $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
+            return false;
+        }
+
+        return true;
     }
 
 }

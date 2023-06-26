@@ -472,7 +472,8 @@ class PqrFormService extends ModelService
             'ft.sys_frecuencia',
             'ft.sys_impacto',
             'ft.sys_severidad',
-            'ft.idft_pqr as idft'
+            'ft.idft_pqr as idft',
+            'ft.sys_oportuno'
         ];
     }
 
@@ -678,8 +679,8 @@ class PqrFormService extends ModelService
         }
 
         return [
-            'info'               => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
-            'campos_adicionales' => 'v.numero,v.fecha,v.sys_tipo,v.sys_estado,v.idft' . $otherFields
+            'info'               => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},{"title":"OPORTUNIDAD EN LAS RESPUESTAS","field":"{*sys_oportuno*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
+            'campos_adicionales' => 'v.numero,v.fecha,v.sys_tipo,v.sys_estado,v.idft,v.sys_oportuno' . $otherFields
         ];
     }
 
@@ -731,7 +732,7 @@ SQL;
         $infoQRJsFile = WsGenerator::generateFileForWs($folder . 'infoQR.js');
         $timelineFile = WsGenerator::generateFileForWs($folder . 'TimeLine.js');
 
-        $IWsHtml=$this->getModel()->getWebservicePqr();
+        $IWsHtml = $this->getModel()->getWebservicePqr();
         $WsGenerator = new WsGenerator(
             $IWsHtml,
             $this->getModel()->getFormatoFk()->nombre,
