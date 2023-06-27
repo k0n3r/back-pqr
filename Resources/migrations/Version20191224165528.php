@@ -216,6 +216,7 @@ final class Version20191224165528 extends AbstractMigration
                 'busqueda'               => 'views/modules/pqr/formatos/pqr/busqueda_grafico.html',
                 'librerias'              => null,
                 'titulo'                 => 'Estados por dependencia',
+                'mostrar_etiqueta'       => 1,
                 'children'               => [
                     [
                         'fk_grafico' => 0,
@@ -253,6 +254,7 @@ final class Version20191224165528 extends AbstractMigration
                 'busqueda'               => 'views/modules/pqr/formatos/pqr/busqueda_grafico.html',
                 'librerias'              => null,
                 'titulo'                 => 'Tipos',
+                'mostrar_etiqueta'       => 1,
                 'children'               => [
                     [
                         'fk_grafico' => 0,
@@ -275,11 +277,58 @@ final class Version20191224165528 extends AbstractMigration
                 'busqueda'               => 'views/modules/pqr/formatos/pqr/busqueda_grafico.html',
                 'librerias'              => null,
                 'titulo'                 => 'Estados',
+                'mostrar_etiqueta'       => 1,
                 'children'               => [
                     [
                         'fk_grafico' => 0,
                         'query'      => 'SELECT sys_estado,count(sys_estado) AS cantidad FROM vpqr v GROUP BY sys_estado',
                         'etiqueta'   => 'Estado'
+                    ]
+                ]
+            ],
+            [
+                'fk_busqueda_componente' => null,
+                'fk_pantalla_grafico'    => $id,
+                'nombre'                 => 'pqr_oportunidad_resp',
+                'tipo'                   => Grafico::PIE,
+                'configuracion'          => null,
+                'estado'                 => 1,
+                'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
+                'columna'                => '-',
+                'titulo_x'               => 'Estado',
+                'titulo_y'               => 'Cantidad',
+                'busqueda'               => 'views/modules/pqr/formatos/pqr/busqueda_grafico.html',
+                'librerias'              => null,
+                'titulo'                 => 'Oportunidad en las respuestas',
+                'mostrar_etiqueta'       => 0,
+                'children'               => [
+                    [
+                        'fk_grafico' => 0,
+                        'query'      => 'SELECT sys_oportuno,count(sys_oportuno) AS cantidad FROM vpqr v GROUP BY sys_oportuno',
+                        'etiqueta'   => 'Estado'
+                    ]
+                ]
+            ],
+            [
+                'fk_busqueda_componente' => null,
+                'fk_pantalla_grafico'    => $id,
+                'nombre'                 => 'pqr_canal_recepcion',
+                'tipo'                   => Grafico::PIE,
+                'configuracion'          => null,
+                'estado'                 => 1,
+                'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
+                'columna'                => '-',
+                'titulo_x'               => 'Canal',
+                'titulo_y'               => 'Cantidad',
+                'busqueda'               => 'views/modules/pqr/formatos/pqr/busqueda_grafico.html',
+                'librerias'              => null,
+                'titulo'                 => 'Canal de recepción',
+                'mostrar_etiqueta'       => 1,
+                'children'               => [
+                    [
+                        'fk_grafico' => 0,
+                        'query'      => 'SELECT canal_recepcion,count(canal_recepcion) AS cantidad FROM vpqr v GROUP BY canal_recepcion',
+                        'etiqueta'   => 'Canal recepción',
                     ]
                 ]
             ],
@@ -297,6 +346,7 @@ final class Version20191224165528 extends AbstractMigration
                 'busqueda'               => null,
                 'librerias'              => null,
                 'titulo'                 => 'Calificación en Gestión',
+                'mostrar_etiqueta'       => 0,
                 'children'               => [
                     [
                         'fk_grafico' => 0,
@@ -319,33 +369,12 @@ final class Version20191224165528 extends AbstractMigration
                 'busqueda'               => null,
                 'librerias'              => null,
                 'titulo'                 => 'Calificación en Servicio',
+                'mostrar_etiqueta'       => 0,
                 'children'               => [
                     [
                         'fk_grafico' => 0,
                         'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr_calificacion v,campo_opciones c WHERE v.experiencia_servicio=c.idcampo_opciones GROUP BY c.valor',
                         'etiqueta'   => 'Calificación',
-                    ]
-                ]
-            ],
-            [
-                'fk_busqueda_componente' => null,
-                'fk_pantalla_grafico'    => $id,
-                'nombre'                 => 'pqr_oportunidad_resp',
-                'tipo'                   => Grafico::PIE,
-                'configuracion'          => null,
-                'estado'                 => 1,
-                'modelo'                 => 'App\\Bundles\\pqr\\formatos\\pqr\\FtPqr',
-                'columna'                => '-',
-                'titulo_x'               => 'Estado',
-                'titulo_y'               => 'Cantidad',
-                'busqueda'               => 'views/modules/pqr/formatos/pqr/busqueda_grafico.html',
-                'librerias'              => null,
-                'titulo'                 => 'Oportunidad en las respuestas',
-                'children'               => [
-                    [
-                        'fk_grafico' => 0,
-                        'query'      => 'SELECT sys_oportuno,count(sys_oportuno) AS cantidad FROM vpqr v GROUP BY sys_oportuno',
-                        'etiqueta'   => 'Estado'
                     ]
                 ]
             ]

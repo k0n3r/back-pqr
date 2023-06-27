@@ -216,8 +216,8 @@ class PqrFormFieldService extends ModelService
             'numero',
             'fecha',
             'idft',
-
             'radicacion',
+            'canal_recepcion',
             Rad::DISTRIBUCION,
             Distribution::DESTINO_INTERNO,
             Distribution::SELECT_MENSAJERIA,

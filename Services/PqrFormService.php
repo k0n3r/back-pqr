@@ -466,14 +466,15 @@ class PqrFormService extends ModelService
             'd.iddocumento',
             'd.numero',
             'd.fecha',
+            'd.canal_recepcion',
             'ft.sys_estado',
             'ft.sys_fecha_vencimiento',
             'ft.sys_fecha_terminado',
             'ft.sys_frecuencia',
             'ft.sys_impacto',
             'ft.sys_severidad',
-            'ft.idft_pqr as idft',
-            'ft.sys_oportuno'
+            'ft.sys_oportuno',
+            'ft.idft_pqr as idft'
         ];
     }
 
@@ -679,8 +680,8 @@ class PqrFormService extends ModelService
         }
 
         return [
-            'info'               => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},{"title":"OPORTUNIDAD EN LAS RESPUESTAS","field":"{*sys_oportuno*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
-            'campos_adicionales' => 'v.numero,v.fecha,v.sys_tipo,v.sys_estado,v.idft,v.sys_oportuno' . $otherFields
+            'info'               => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},{"title":"OPORTUNIDAD EN LAS RESPUESTAS","field":"{*sys_oportuno*}","align":"center"},{"title":"CANAL DE RECEPCIÓN","field":"{*canal_recepcion*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
+            'campos_adicionales' => 'v.numero,v.fecha,v.sys_tipo,v.sys_estado,v.idft,v.sys_oportuno,v.canal_recepcion' . $otherFields
         ];
     }
 

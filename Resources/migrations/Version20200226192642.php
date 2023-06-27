@@ -164,7 +164,7 @@ final class Version20200226192642 extends AbstractMigration
         ];
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
 
-        $sql = "UPDATE grafico SET fk_busqueda_componente=$idbusquedaComponente WHERE nombre IN ('pqr_tipo','pqr_estado','pqr_oportunidad_resp','".PqrService::NAME_DEPENDENCY_GRAPH."')";
+        $sql = "UPDATE grafico SET fk_busqueda_componente=$idbusquedaComponente WHERE nombre IN ('pqr_tipo','pqr_estado','pqr_oportunidad_resp','pqr_canal_recepcion','".PqrService::NAME_DEPENDENCY_GRAPH."')";
         $this->connection->executeStatement($sql);
 
         $nombre = PqrForm::NOMBRE_PANTALLA_GRAFICO;

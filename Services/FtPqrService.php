@@ -674,12 +674,7 @@ HTML;
     public function updateType(array $data): bool
     {
 
-        if (
-            !$data['type'] ||
-            !$data['sys_frecuencia'] ||
-            !$data['sys_impacto'] ||
-            !$data['sys_severidad']
-        ) {
+        if (!$data['type']) {
             $this->getErrorManager()->setMessage("Error faltan parametros");
             return false;
         }
@@ -729,22 +724,28 @@ HTML;
             $this->getDocument()->save();
         }
 
-        $textFrecuencia = $this->getTextForUpdateEstadoFreImpSev('sys_frecuencia', $data['sys_frecuencia']);
-        if ($textFrecuencia) {
-            $newAttributes['sys_frecuencia'] = $data['sys_frecuencia'];
-            $textField[] = "Frecuencia $textFrecuencia";
+        if ($data['sys_frecuencia']) {
+            $textFrecuencia = $this->getTextForUpdateEstadoFreImpSev('sys_frecuencia', $data['sys_frecuencia']);
+            if ($textFrecuencia) {
+                $newAttributes['sys_frecuencia'] = $data['sys_frecuencia'];
+                $textField[] = "Frecuencia $textFrecuencia";
+            }
         }
 
-        $textImpacto = $this->getTextForUpdateEstadoFreImpSev('sys_impacto', $data['sys_impacto']);
-        if ($textImpacto) {
-            $newAttributes['sys_impacto'] = $data['sys_impacto'];
-            $textField[] = "Impacto $textImpacto";
+        if ($data['sys_impacto']) {
+            $textImpacto = $this->getTextForUpdateEstadoFreImpSev('sys_impacto', $data['sys_impacto']);
+            if ($textImpacto) {
+                $newAttributes['sys_impacto'] = $data['sys_impacto'];
+                $textField[] = "Impacto $textImpacto";
+            }
         }
 
-        $textSeveridad = $this->getTextForUpdateEstadoFreImpSev('sys_severidad', $data['sys_severidad']);
-        if ($textSeveridad) {
-            $newAttributes['sys_severidad'] = $data['sys_severidad'];
-            $textField[] = "Severidad $textSeveridad";
+        if ($data['sys_severidad']) {
+            $textSeveridad = $this->getTextForUpdateEstadoFreImpSev('sys_severidad', $data['sys_severidad']);
+            if ($textSeveridad) {
+                $newAttributes['sys_severidad'] = $data['sys_severidad'];
+                $textField[] = "Severidad $textSeveridad";
+            }
         }
 
         if (!$newAttributes) {
