@@ -9,12 +9,8 @@ use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\models\busqueda\BusquedaComponente;
-use Saia\controllers\generator\FormatGenerator;
 use App\Bundles\pqr\Services\models\PqrFormField;
-use Saia\controllers\generator\webservice\WsGenerator;
-use App\Bundles\pqr\Services\controllers\WebserviceCalificacion;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
-use App\Bundles\pqr\Services\controllers\AddEditFormat\IAddEditFormat;
 use Saia\models\Modulo;
 
 class PqrFormService extends ModelService
@@ -145,32 +141,6 @@ class PqrFormService extends ModelService
     }
 
     /**
-     * Actualiza los dias de vencimientos de los tipo de PQR
-     *
-     * @param array $data
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    public function updatePqrTypes(array $data): bool
-    {
-
-        $PqrFormFieldService = ($this->getModel()->getRow(PqrFormField::FIELD_NAME_SYS_TIPO))->getService();
-        if (!$PqrFormFieldService->update([
-            'setting' => $data
-        ])) {
-            $this->getErrorManager()->setMessage("No fue posible actualizar los tipos");
-            return false;
-        }
-
-        if ($PqrFormFieldService->getModel()->fk_campos_formato) {
-            $PqrFormFieldService->addEditformatOptions();
-        }
-
-        return true;
-    }
-
-    /**
      * publica o crea el formulario en el webservice
      *
      * @return boolean
@@ -179,12 +149,7 @@ class PqrFormService extends ModelService
      */
     public function publish(): bool
     {
-        if (!$this->addEditFormat(
-            new AddEditFtPqr($this->getModel())
-        )) {
-            $this->getErrorManager()->setMessage("No fue posible generar el formulario");
-            return false;
-        }
+        (new AddEditFtPqr($this->getModel()))->updateChange();
 
         if (!$this->getModel()->fk_field_time) {
             $this->editFieldTime(PqrFormField::getSysTipoField()->fk_campos_formato);
@@ -202,11 +167,7 @@ class PqrFormService extends ModelService
             $FormatoR->etiqueta = $formatNameR;
             $FormatoR->save();
         }
-
-        if (!$this->generateForm($FormatoR)) {
-            $this->getErrorManager()->setMessage("No fue posible generar el formulario: $formatNameR ");
-            return false;
-        }
+        $FormatoR->getService()->generate();
 
         if (!$FormatoC = Formato::findByAttributes([
             'nombre' => 'pqr_calificacion'
@@ -216,15 +177,14 @@ class PqrFormService extends ModelService
         }
 
         $formatNameC = "CALIFICACIÓN ({$this->getModel()->label})";
-        if ($FormatoC->etiqueta != $formatNameC) {
+        if ($FormatoC->etiqueta != $formatNameC || !$FormatoC->webservice) {
             $FormatoC->etiqueta = $formatNameC;
+            $FormatoC->webservice = 1;
+            $FormatoC->clase_ws = 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqrCalificacion';
+
             $FormatoC->save();
         }
-
-        if (!$this->generateForm($FormatoC)) {
-            $this->getErrorManager()->setMessage("No fue posible generar el formulario: $FormatoC->etiqueta ");
-            return false;
-        }
+        $FormatoC->getService()->generate();
 
         $this->generaReport();
         $this->viewRespuestaPqr();
@@ -233,15 +193,7 @@ class PqrFormService extends ModelService
         PqrService::activeGraphics();
         $this->activeInfoForDependency();
 
-        if (!$this->generatePqrWs()) {
-            $this->getErrorManager()->setMessage("No fue posible generar el Ws");
-            return false;
-        }
-
-        if (!$this->generateCalificacionWs($FormatoC)) {
-            $this->getErrorManager()->setMessage("No fue posible generar el Ws Calificacion");
-            return false;
-        }
+        $this->getModel()->getFormatoFk()->getService()->generate();
 
         return true;
     }
@@ -349,36 +301,6 @@ class PqrFormService extends ModelService
             }
         }
         return $data;
-    }
-
-    /**
-     * Genera el formulario recibido
-     *
-     * @param IAddEditFormat $Instance
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    private function addEditFormat(IAddEditFormat $Instance): bool
-    {
-        return $Instance->updateChange() &&
-            $this->generateForm($Instance->getFormat());
-    }
-
-    /**
-     * Genera el Formato
-     *
-     * @param Formato $Formato
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2021
-     */
-    private function generateForm(Formato $Formato): bool
-    {
-        $FormatGenerator = new FormatGenerator($Formato);
-        $FormatGenerator->generate();
-
-        return true;
     }
 
     /**
@@ -716,56 +638,6 @@ FROM ft_pqr_calificacion ft, documento d, ft_pqr_respuesta ftr
 WHERE ft.documento_iddocumento = d.iddocumento AND ftr.idft_pqr_respuesta = ft.ft_pqr_respuesta AND d.estado <> 'ELIMINADO'
 SQL;
         $this->createView('vpqr_calificacion', $sql);
-    }
-
-    /**
-     * Genera el WS de PQR
-     *
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    private function generatePqrWs(): bool
-    {
-        $folder = 'src/Bundles/pqr/Services/controllers/templates/';
-        $page404 = WsGenerator::generateFileForWs('src/legacy/controllers/generator/webservice/templates/404.html');
-        $infoQrFile = WsGenerator::generateFileForWs($folder . 'infoQR.html');
-        $infoQRJsFile = WsGenerator::generateFileForWs($folder . 'infoQR.js');
-        $timelineFile = WsGenerator::generateFileForWs($folder . 'TimeLine.js');
-
-        $IWsHtml = $this->getModel()->getWebservicePqr();
-        $WsGenerator = new WsGenerator(
-            $IWsHtml,
-            $this->getModel()->getFormatoFk()->nombre,
-            false
-        );
-
-        $WsGenerator->addFiles([$infoQrFile, $infoQRJsFile, $timelineFile, $page404]);
-
-        return $WsGenerator->create();
-    }
-
-    /**
-     * Genera el WS de Calificacion PQR
-     *
-     * @param Formato $FormatoC
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    private function generateCalificacionWs(Formato $FormatoC): bool
-    {
-        $page404 = WsGenerator::generateFileForWs('src/legacy/controllers/generator/webservice/templates/404.html');
-
-        $IWsHtml = new WebserviceCalificacion($FormatoC);
-        $WsGenerator = new WsGenerator(
-            $IWsHtml,
-            $FormatoC->nombre,
-            false
-        );
-        $WsGenerator->addFiles([$page404]);
-
-        return $WsGenerator->create();
     }
 
     /**

@@ -56,7 +56,7 @@ final class Version20200321234633 extends AbstractMigration
         $idcontador = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$idcontador, "El contador apoyo NO existe");
 
-        $sql = "SELECT idfuncionario FROM funcionario WHERE login='cerok'";
+        $sql = "SELECT idfuncionario FROM funcionario WHERE login like 'cerok'";
         $idfuncionario = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$idfuncionario, "El funcionario ceork NO existe");
 
@@ -95,8 +95,9 @@ final class Version20200321234633 extends AbstractMigration
             'version'                   => 1,
             'publicar'                  => 1,
             'module'                    => 'pqr',
-            'generador_pdf'             => 'Mpdf'
-
+            'generador_pdf'             => 'Mpdf',
+            'webservice'                => 1,
+            'clase_ws'                  => 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqrCalificacion'
         ];
 
         $this->connection->insert('formato', $data);

@@ -121,7 +121,9 @@ class AddEditFtPqr implements IAddEditFormat
             'version'                   => 1,
             'module'                    => 'pqr',
             'publicar'                  => 1,
-            'formato_fecha_radicado'    => 'Ymd'
+            'formato_fecha_radicado'    => 'Ymd',
+            'webservice'                => 1,
+            'clase_ws'                  => 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqr'
         ];
 
         if ($edit) {
@@ -429,7 +431,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => '1,Bajo 2,Medio 3,Alto',
                 'longitud_vis'      => null
             ],
-            'sys_oportuno'                 => [
+            'sys_oportuno'                  => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
@@ -479,7 +481,7 @@ class AddEditFtPqr implements IAddEditFormat
                 Rad::COLILLA), [
                 'campoOpciones' => Rad::getAttributesMoreFieldsOptions(0, Rad::COLILLA)
             ]),
-            Rad::DIGITALIZACION               => Rad::getAttributesMoreFields($this->PqrForm->fk_formato,
+            Rad::DIGITALIZACION             => Rad::getAttributesMoreFields($this->PqrForm->fk_formato,
                 Rad::DIGITALIZACION),
         ];
 
