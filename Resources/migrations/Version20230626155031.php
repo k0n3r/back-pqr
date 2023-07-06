@@ -43,6 +43,7 @@ final class Version20230626155031 extends AbstractMigration
                 'email_notifica'   => 'soporte@cerok.com',
                 'estado'           => 1,
                 'pertenece_nucleo' => 0,
+                'orden'            => 8
             ]);
         }
     }
