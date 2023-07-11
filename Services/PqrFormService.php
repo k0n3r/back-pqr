@@ -151,6 +151,8 @@ class PqrFormService extends ModelService
     {
         (new AddEditFtPqr($this->getModel()))->updateChange();
 
+        $this->getModel()->getFormatoFk()->getService()->generate();
+
         if (!$this->getModel()->fk_field_time) {
             $this->editFieldTime(PqrFormField::getSysTipoField()->fk_campos_formato);
         }
@@ -192,8 +194,6 @@ class PqrFormService extends ModelService
 
         PqrService::activeGraphics();
         $this->activeInfoForDependency();
-
-        $this->getModel()->getFormatoFk()->getService()->generate();
 
         return true;
     }
