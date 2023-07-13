@@ -182,7 +182,10 @@ class PqrFormService extends ModelService
         if ($FormatoC->etiqueta != $formatNameC || !$FormatoC->webservice) {
             $FormatoC->etiqueta = $formatNameC;
             $FormatoC->webservice = 1;
-            $FormatoC->clase_ws = 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqrCalificacion';
+
+            if (!$FormatoC->clase_ws) {
+                $FormatoC->clase_ws = 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqrCalificacion';
+            }
 
             $FormatoC->save();
         }

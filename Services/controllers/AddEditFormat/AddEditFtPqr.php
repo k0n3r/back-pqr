@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Services\controllers\AddEditFormat;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
-use Exception;
+use App\services\exception\SaiaException;
 use Saia\controllers\generator\component\Distribution;
 use Saia\controllers\generator\component\Hidden;
 use Saia\controllers\generator\component\Rad;
@@ -82,12 +82,13 @@ class AddEditFtPqr implements IAddEditFormat
     /**
      * Obtiene los datos por defecto para la creacion del registro en Formato
      *
-     * @param bool $edit
+     * @param bool         $edit
+     * @param Formato|null $Formato
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function getFormatDefaultData(bool $edit = false): array
+    private function getFormatDefaultData(bool $edit = false, ?Formato $Formato = null): array
     {
         $name = $this->PqrForm->name;
         $data = [
@@ -127,6 +128,9 @@ class AddEditFtPqr implements IAddEditFormat
         ];
 
         if ($edit) {
+            if ($Formato->clase_ws) {
+                unset($data['clase_ws']);
+            }
             unset($data['contador_idcontador']);
             unset($data['encabezado']);
             unset($data['pie_pagina']);
@@ -163,7 +167,7 @@ class AddEditFtPqr implements IAddEditFormat
         if (!$Respuesta = Formato::findByAttributes([
             'nombre' => 'pqr_respuesta'
         ])) {
-            throw new Exception("No se encontro el formato RESPUESTA PQR", 1);
+            throw new SaiaException("No se encontro el formato RESPUESTA PQR", 1);
         }
 
         $Respuesta->setAttributes([
@@ -184,7 +188,7 @@ class AddEditFtPqr implements IAddEditFormat
     private function updateRecordInFormat(): self
     {
         $Formato = new Formato($this->PqrForm->fk_formato);
-        $Formato->setAttributes($this->getFormatDefaultData(true));
+        $Formato->setAttributes($this->getFormatDefaultData(true, $Formato));
         $Formato->save();
 
         return $this;
@@ -248,7 +252,7 @@ class AddEditFtPqr implements IAddEditFormat
         $fieldType = $PqrFormField->getPqrHtmlField()->type_saia;
 
         if (!$className = $this->resolveClass($fieldType)) {
-            throw new Exception("No se encontro la clase para el tipo $fieldType", 1);
+            throw new SaiaException("No se encontro la clase para el tipo $fieldType", 1);
         }
         $Fields = new $className($PqrFormField);
 
