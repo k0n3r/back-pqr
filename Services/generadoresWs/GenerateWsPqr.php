@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Services\generadoresWs;
 
+use App\Bundles\pqr\Services\controllers\WebservicePqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\services\exception\SaiaException;
 use App\services\generadoresWs\GenerateWsFt;
@@ -14,12 +15,17 @@ class GenerateWsPqr extends GenerateWsFt
         return false;
     }
 
-    public function generate(): void
+    protected function getIWsHtml(): WebservicePqr
     {
         $PqrForm = PqrForm::getInstance();
+        return $PqrForm->getWebservicePqr();
+    }
 
+
+    public function generate(): void
+    {
         $WsGenerator = new WsGenerator(
-            $PqrForm->getWebservicePqr(),
+            $this->getIWsHtml(),
             $this->getNameFormat(),
             $this->getGenerateSearch()
         );
