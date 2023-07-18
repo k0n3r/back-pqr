@@ -683,13 +683,14 @@ HTML;
             $this->getErrorManager()->setMessage("Error faltan parametros");
             return false;
         }
-
+        $refreshDescription = false;
         $newAttributes = [];
         $textField = [];
         if ($data['type'] != $this->getModel()->sys_tipo) {
             $oldType = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
             $newAttributes['sys_tipo'] = $data['type'];
-            $textField[] = "tipo de $oldType a {newType}";
+            $textField[] = "tipo de '$oldType' a '{newType}'";
+            $refreshDescription = true;
         }
 
         if ($this->getPqrService()->subTypeExist()) {
@@ -755,6 +756,11 @@ HTML;
         $SaveFt = new SaveFt($this->getDocument());
         $SaveFt->edit($newAttributes);
         $this->Model = $this->getDocument()->getFt();
+
+        if($refreshDescription){
+            $this->getDocument()->refreshDescription();
+        }
+
 
         $text = "Se actualiza: " . implode(', ', $textField);
         $newType = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
