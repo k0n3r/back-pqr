@@ -1,4 +1,6 @@
 <?php
+$comment = $recaptchaPublicKey ? '' : '//';
+
 $code = <<<JAVASCRIPT
 $(function () {
     const key = window.credential.key; //Componente dropzone   
@@ -77,14 +79,14 @@ $(function () {
             }
         },
         submitHandler: function (form) {
-            grecaptcha.ready(function () {
-                grecaptcha.execute('$recaptchaPublicKey', { action: 'submit' }).then(function (tokenRecaptcha) {
+$comment    grecaptcha.ready(function () {
+$comment       grecaptcha.execute('$recaptchaPublicKey', { action: 'submit' }).then(function (tokenRecaptcha) {
 
                     let dataForm = window.getFormObject($('#formulario').serializeArray());
                     let data = Object.assign(dataForm, {
+$comment                tokenRecaptcha,
                         formatId: $formatId,
-                        dependencia: window.credential.WsRol,
-                        tokenRecaptcha
+                        dependencia: window.credential.WsRol
                     });
 
                     top.$.ajax({
@@ -122,10 +124,8 @@ $(function () {
                     }).always(function () {
                         window.toggleButton('form_buttons');
                     });
-
-
-                });
-            });
+$comment      });
+$comment   });
 
             return false;
         },

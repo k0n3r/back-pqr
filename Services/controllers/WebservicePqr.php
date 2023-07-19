@@ -29,13 +29,11 @@ class WebservicePqr extends WsFt
     public function getHtmlContentForm(array $filesToInclude, ?string $urlSearch): string
     {
         $this->addFilesToLoad($filesToInclude);
-        $html = $urlSearch ? "<a href='$urlSearch'>Consultar</a>" : '';
 
         $values = array_merge($this->getDefaultValuesForHtmlContent(), [
             'emailLabel'    => $this->PqrForm->getRow('sys_email')->label,
             'showAnonymous' => (int)$this->PqrForm->show_anonymous,
-            'showLabel'     => (int)$this->PqrForm->show_label,
-            'hrefSearch'    => $html
+            'showLabel'     => (int)$this->PqrForm->show_label
         ]);
 
         return static::getContent(
@@ -52,7 +50,7 @@ class WebservicePqr extends WsFt
         $values = array_merge($this->getDefaultValuesForJsContent(), [
             'fieldsWithoutAnonymous' => json_encode($this->getFieldsWithoutAnonymous()),
             'fieldsWithAnonymous'    => json_encode($this->getFieldsWithAnonymous()),
-            'urlSaveFt'              => '/api/pqr/captcha/saveDocument'
+            'urlSaveFt'              => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'] ? '/api/pqr/captcha/saveDocument' : '/api/pqr/webservice/saveDocument'
         ]);
 
         return static::getContent(

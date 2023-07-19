@@ -8,7 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, shrink-to-fit=no"/>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <?= $linksCss ?>
-    <script src="https://www.google.com/recaptcha/api.js?render=<?= $recaptchaPublicKey ?>"></script>
 </head>
 
 <body>
@@ -27,16 +26,18 @@
                 <div class="modal-body">
                     <form name='formSearch' id='formSearch' role='form' autocomplete='off'>
                         <div class="form-group form-group-default required">
-                            <label>Número radicado:</label>
-                            <input class="form-control required" name="numero" type="number">
+                            <label>Número radicado:
+                                <input class="form-control required" name="numero" type="number">
+                            </label>
                         </div>
 
                         <h6 style="color:#ff0000;font-size: 12px">Si al momento de crear la solicitud suministro
                             el "<?= $emailLabel ?>", debe ingresarlo si desea obtener resultados
                         </h6>
                         <div class="form-group form-group-default">
-                            <label><?= $emailLabel ?>:</label>
-                            <input class="form-control" name="sys_email" type="email">
+                            <label><?= $emailLabel ?>:
+                                <input class="form-control" name="sys_email" type="email">
+                            </label>
                         </div>
 
                         <div class='form-group text-right' id='form_buttons_search'>
@@ -102,8 +103,12 @@
             </form>
         </div>
     </div>
-
 </div>
+
+<?php if ($recaptchaPublicKey) : ?>
+    <script src="https://www.google.com/recaptcha/api.js?render=<?= $recaptchaPublicKey ?>"></script>
+<?php endif; ?>
+
 <?= $scripts ?>
 </body>
 

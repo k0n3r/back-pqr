@@ -29,7 +29,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
      * @param Connection    $Connection
      * @return Response
      */
-    public function save(
+    public function saveDocument(
         Request $Request,
         ISaiaResponse $saiaResponse,
         Connection $Connection
