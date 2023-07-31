@@ -1,5 +1,5 @@
-
 <?php
+$comment = $recaptchaPublicKey ? '' : '//';
 $code = <<<JAVASCRIPT
     $(function () {
 
@@ -29,13 +29,14 @@ $code = <<<JAVASCRIPT
                 }
             },
             submitHandler: function (form) {
-                grecaptcha.execute('$recaptchaPublicKey', { action: 'submit' }).then(function (tokenRecaptcha) {
+$comment    grecaptcha.ready(function () {
+$comment       grecaptcha.execute('$recaptchaPublicKey', { action: 'submit' }).then(function (tokenRecaptcha) {
 
                     let dataForm = window.getFormObject($('#formulario').serializeArray());
                     let data = Object.assign(dataForm, {
                         formatId: $formatId,
                         dependencia:window.credential.WsRol,
-                        tokenRecaptcha,
+$comment                tokenRecaptcha,
                         ft_pqr_respuesta: localStorage.getItem('WsFtPqr'),
                         anterior: localStorage.getItem('WsIddocPqr')
                     });
@@ -75,7 +76,8 @@ $code = <<<JAVASCRIPT
                     }).always(function () {
                         toggleButton();
                     });
-                });
+$comment      });
+$comment   });
 
                 return false;
             },
