@@ -6,6 +6,7 @@ use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\services\exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Types;
 use Saia\models\crontab\ICrontab;
 use Throwable;
 
@@ -17,7 +18,7 @@ class ChangeStatusOfOportunoField implements ICrontab
         $Logger = GlobalContainer::getLogger();
         $response = true;
 
-        $status = [
+        $statusOportuno = [
             FtPqr::OPORTUNO_PENDIENTES_SIN_VENCER,
             FtPqr::OPORTUNO_VENCIDAS_SIN_CERRAR
         ];
@@ -25,8 +26,10 @@ class ChangeStatusOfOportunoField implements ICrontab
         $records = $Connection->createQueryBuilder()
             ->select('idft')
             ->from('vpqr')
-            ->where("sys_oportuno IN (:status)")
-            ->setParameter(':status', $status, Connection::PARAM_STR_ARRAY)
+            ->where("sys_oportuno IN (:oportuno)")
+            ->setParameter(':oportuno', $statusOportuno, Connection::PARAM_STR_ARRAY)
+            ->andWhere('sys_estado<>:status')
+            ->setParameter(':status', FtPqr::ESTADO_INICIADO, Types::STRING)
             ->execute()->fetchAllAssociative();
 
 
