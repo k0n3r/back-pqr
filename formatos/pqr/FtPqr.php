@@ -339,11 +339,10 @@ HTML;
      */
     protected function getTableRows(): array
     {
-        $PqrBackup = $this->getPqrBackup();
-        if (!$PqrBackup) {
+        if (!$this->getPqrBackup()) {
             return [];
         }
-        $data = $PqrBackup->getDataJson();
+        $data = $this->getJsonFromPqrBackup();
 
         $showEmpty = $this->getService()->getPqrForm()->show_empty ?? 1;
 
@@ -432,6 +431,17 @@ HTML;
     public function getDefaultSubjectForPqrRespuesta(): string
     {
         return "Respondiendo a la {$this->getFormat()->etiqueta} No {$this->getDocument()->numero}";
+    }
+
+    /**
+     * Obtiene el json de los datos a mostrar en la PQR
+     *
+     * @return object
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-08-14
+     */
+    protected function getJsonFromPqrBackup(): object
+    {
+        return $this->getPqrBackup()->getDataJson();
     }
 
 }
