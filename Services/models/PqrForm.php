@@ -2,7 +2,6 @@
 
 namespace App\Bundles\pqr\Services\models;
 
-use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\controllers\WebservicePqr;
 use App\services\exception\SaiaException;
 use Saia\controllers\generator\webservice\IWsHtml;
@@ -140,7 +139,7 @@ class PqrForm extends Model
      */
     public function getWebservicePqr(): IWsHtml
     {
-        return UtilitiesPqr::getWebservicePqr($this->getFormatoFk());
+        return $this->getFormatoFk()->getClassToGenerateWs()->getIWsHtml();
     }
 
     /**

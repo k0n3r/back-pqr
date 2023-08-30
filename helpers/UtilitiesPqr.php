@@ -7,7 +7,6 @@ use App\services\correo\SendEmailSaia;
 use App\services\GlobalContainer;
 use Saia\controllers\anexos\FileJson;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
-use Saia\controllers\generator\webservice\IWsHtml;
 use Saia\core\model\ModelFormat;
 use Saia\models\formatos\Formato;
 use Saia\models\tarea\TareaEstado;
@@ -53,19 +52,6 @@ class UtilitiesPqr
     {
         $className = self::getFormatPqr()->getFtClass();
         return new $className($idft);
-    }
-
-    /**
-     * Obtiene el nombre de la clase que se usara para el generar el Ws
-     *
-     * @param Formato $Formato
-     * @return IWsHtml
-     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-05-16
-     */
-    public static function getWebservicePqr(Formato $Formato): IWsHtml
-    {
-        $className = self::getFormatPqr()->getFtClass();
-        return $className::getClassWebservicePqr($Formato);
     }
 
     public static function notifyAdministrator(string $message, array $log = []): void
