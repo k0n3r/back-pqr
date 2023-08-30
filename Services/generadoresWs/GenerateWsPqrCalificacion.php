@@ -8,13 +8,12 @@ use Saia\controllers\generator\webservice\IWsHtml;
 
 class GenerateWsPqrCalificacion extends GenerateWsFt
 {
-
     protected function getGenerateSearch(): bool
     {
         return false;
     }
 
-    protected function getIWsHtml(): IWsHtml
+    public function getIWsHtml(): IWsHtml
     {
         return new WebserviceCalificacion($this->Formato);
     }
