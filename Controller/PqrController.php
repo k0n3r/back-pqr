@@ -138,7 +138,9 @@ class PqrController extends AbstractController
         $Connection->beginTransaction();
 
         try {
-            $PqrForms = new PqrForm(1);
+            $PqrForms = PqrForm::findByAttributes([
+                'active' => 1
+            ]);
 
             if (!$PqrForms->description_field || (int)$PqrForms->description_field !== $fieldId) {
                 //Nuevo campo descripcion
@@ -155,16 +157,18 @@ class PqrController extends AbstractController
                     'acciones' => implode(',', $actionList)
                 ]);
 
-                //Se desactiva el campo descripcion anterior
-                $PqrFormFieldOld = new PqrFormField($PqrForms->description_field);
-                $CamposFormatoOld = new CamposFormato($PqrFormFieldOld->fk_campos_formato);
-                $arrayActionOld = explode(',', $CamposFormatoOld->acciones);
-                $actionListOld = array_diff($arrayActionOld, ['p']);
+                if ($PqrForms->description_field) {
+                    //Se desactiva el campo descripcion anterior
+                    $PqrFormFieldOld = new PqrFormField($PqrForms->description_field);
+                    $CamposFormatoOld = new CamposFormato($PqrFormFieldOld->fk_campos_formato);
+                    $arrayActionOld = explode(',', $CamposFormatoOld->acciones);
+                    $actionListOld = array_diff($arrayActionOld, ['p']);
 
-                //Se guardan los cambios
-                $CamposFormatoOld->getService()->save([
-                    'acciones' => implode(',', $actionListOld)
-                ]);
+                    //Se guardan los cambios
+                    $CamposFormatoOld->getService()->save([
+                        'acciones' => implode(',', $actionListOld)
+                    ]);
+                }
 
                 $PqrForms->getService()->save([
                     'description_field' => $fieldId
