@@ -42,10 +42,12 @@ class FtPqrProperties extends ModelFormat
 				'sys_tipo',
 				'sys_email',
 				'sys_folios',
+				'otro_campo',
 				'sys_anexos',
 				'distribucion',
 				'destino_interno',
 				'select_mensajeria',
+				'descripcion',
 				'colilla',
 				'digitalizacion' 
             ],

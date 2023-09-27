@@ -222,7 +222,8 @@ class PqrFormFieldService extends ModelService
             Distribution::DESTINO_INTERNO,
             Distribution::SELECT_MENSAJERIA,
             Rad::COLILLA,
-            Rad::DIGITALIZACION
+            Rad::DIGITALIZACION,
+            Rad::DESCRIPCION
         ];
 
         return in_array($label, $reservedWords);
@@ -490,8 +491,6 @@ class PqrFormFieldService extends ModelService
                 ]);
             }
         }
-
-
     }
 
     /**

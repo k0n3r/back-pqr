@@ -15,6 +15,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Services\models\PqrForm;
+use Saia\models\formatos\CamposFormato;
+use Doctrine\DBAL\Connection;
 use Throwable;
 
 class PqrController extends AbstractController
@@ -102,7 +106,6 @@ class PqrController extends AbstractController
         Request $request,
         ISaiaResponse $saiaResponse
     ): Response {
-
         try {
 
             if (!$request->get('dataCrypt')) {
@@ -114,6 +117,64 @@ class PqrController extends AbstractController
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
         } catch (Throwable $th) {
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * Actualiza el campo tipo descripcion de la pqr adicional al tipo.
+     * 
+     * @Route("/descriptionField/{fieldId}", name="descriptionField", methods={"PUT"})
+     * @author Julian Otalvaro <julian.otalvaro@cerok.com>
+     * @since 2023-09-26
+     */
+    public function descriptionField(
+        int $fieldId,
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
+        $Connection->beginTransaction();
+
+        try {
+            $PqrForms = new PqrForm(1);
+
+            if (!$PqrForms->description_field || (int)$PqrForms->description_field !== $fieldId) {
+                //Nuevo campo descripcion
+                $PqrFormField = new PqrFormField($fieldId);
+                $CamposFormato = new CamposFormato($PqrFormField->fk_campos_formato);
+
+                $actionList = explode(',', $CamposFormato->acciones);
+
+                if (!in_array('p', $actionList)) {
+                    array_push($actionList, 'p');
+                }
+
+                $CamposFormato->getService()->save([
+                    'acciones' => implode(',', $actionList)
+                ]);
+
+                //Se desactiva el campo descripcion anterior
+                $PqrFormFieldOld = new PqrFormField($PqrForms->description_field);
+                $CamposFormatoOld = new CamposFormato($PqrFormFieldOld->fk_campos_formato);
+                $arrayActionOld = explode(',', $CamposFormatoOld->acciones);
+                $actionListOld = array_diff($arrayActionOld, ['p']);
+
+                //Se guardan los cambios
+                $CamposFormatoOld->getService()->save([
+                    'acciones' => implode(',', $actionListOld)
+                ]);
+
+                $PqrForms->getService()->save([
+                    'description_field' => $fieldId
+                ]);
+            }
+
+            $saiaResponse->setSuccess(1);
+            $Connection->commit();
+        } catch (Throwable $th) {
+            $Connection->rollBack();
             $saiaResponse->setMessage($th->getMessage());
         }
 

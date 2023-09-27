@@ -95,7 +95,6 @@ class FtPqr extends FtPqrProperties
                 'fieldsWithoutAnonymous' => $IWsHtml->getFieldsWithoutAnonymous(),
                 'fieldsWithAnonymous'    => $IWsHtml->getFieldsWithAnonymous(),
             ];
-
         } else {
             $data['isStarted'] = (int)(new self($idft))->getDocument()->isStarted();
         }
@@ -249,6 +248,9 @@ class FtPqr extends FtPqrProperties
             return true;
         }
 
+        $this->descripcion = $this->getDocument()->getDescription();
+        $this->save();
+
         return $this->getService()->saveDistribution() &&
             $this->getService()->sendNotifications() &&
             $this->getService()->notifyEmail();
@@ -317,7 +319,6 @@ class FtPqr extends FtPqrProperties
             $tr
         </table>
 HTML;
-
     }
 
     /**
@@ -430,5 +431,4 @@ HTML;
     {
         return $this->getPqrBackup()->getDataJson();
     }
-
 }

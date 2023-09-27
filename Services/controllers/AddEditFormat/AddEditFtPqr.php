@@ -13,6 +13,7 @@ use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\controllers\SessionController;
 use Saia\models\formatos\CamposFormato;
+use Doctrine\DBAL\Types\Types;
 
 class AddEditFtPqr implements IAddEditFormat
 {
@@ -471,22 +472,46 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => null,
                 'longitud_vis'      => null
             ],
-            Rad::DISTRIBUCION               => Rad::getAttributesMoreFields($this->PqrForm->fk_formato,
-                Rad::DISTRIBUCION),
-            Distribution::DESTINO_INTERNO   => array_merge(Distribution::getAttributesMoreFields($this->PqrForm->fk_formato,
-                Distribution::DESTINO_INTERNO), [
+            Rad::DESCRIPCION       => [
+                'formato_idformato' => $this->PqrForm->fk_formato,
+                'nombre'            => Rad::DESCRIPCION,
+                'etiqueta'          => 'Asunto',
+                'tipo_dato'         => Types::STRING,
+                'longitud'          => 255,
+                'obligatoriedad'    => 1,
+                'acciones'          => 'a,e,p',
+                'etiqueta_html'     => Hidden::getIdentification(),
+                'orden'             => 108,
+                'fila_visible'      => 1,
+                'placeholder'       => 'campo texto',
+                'listable'          => 0
+            ],
+            Rad::DISTRIBUCION               => Rad::getAttributesMoreFields(
+                $this->PqrForm->fk_formato,
+                Rad::DISTRIBUCION
+            ),
+            Distribution::DESTINO_INTERNO   => array_merge(Distribution::getAttributesMoreFields(
+                $this->PqrForm->fk_formato,
+                Distribution::DESTINO_INTERNO
+            ), [
                 'opciones' => '{"tipo_seleccion":"unico","multiple_destino":false,"dependenciaCargo":true}'
             ]),
-            Distribution::SELECT_MENSAJERIA => array_merge(Distribution::getAttributesMoreFields($this->PqrForm->fk_formato,
-                Distribution::SELECT_MENSAJERIA), [
+            Distribution::SELECT_MENSAJERIA => array_merge(Distribution::getAttributesMoreFields(
+                $this->PqrForm->fk_formato,
+                Distribution::SELECT_MENSAJERIA
+            ), [
                 'campoOpciones' => Distribution::getAttributesMoreFieldsOptions(0, Distribution::SELECT_MENSAJERIA)
             ]),
-            Rad::COLILLA                    => array_merge(Rad::getAttributesMoreFields($this->PqrForm->fk_formato,
-                Rad::COLILLA), [
+            Rad::COLILLA                    => array_merge(Rad::getAttributesMoreFields(
+                $this->PqrForm->fk_formato,
+                Rad::COLILLA
+            ), [
                 'campoOpciones' => Rad::getAttributesMoreFieldsOptions(0, Rad::COLILLA)
             ]),
-            Rad::DIGITALIZACION             => Rad::getAttributesMoreFields($this->PqrForm->fk_formato,
-                Rad::DIGITALIZACION),
+            Rad::DIGITALIZACION             => Rad::getAttributesMoreFields(
+                $this->PqrForm->fk_formato,
+                Rad::DIGITALIZACION
+            )
         ];
 
         foreach ($fields as $name => $data) {

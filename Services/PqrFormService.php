@@ -130,13 +130,14 @@ class PqrFormService extends ModelService
     public function getSetting(): array
     {
         return [
-            'urlWs'               => static::getUrlWsPQR(),
-            'publish'             => $this->getModel()->fk_formato ? 1 : 0,
-            'pqrForm'             => $this->getDataPqrForm(),
-            'pqrFormFields'       => $this->getDataPqrFormFields(),
-            'pqrNotifications'    => $this->getDataPqrNotifications(),
-            'optionsNotyMessages' => PqrNotyMessageService::getDataPqrNotyMessages(),
-            'responseTimeOptions' => $this->getDataresponseTime()
+            'urlWs'                  => static::getUrlWsPQR(),
+            'publish'                => $this->getModel()->fk_formato ? 1 : 0,
+            'pqrForm'                => $this->getDataPqrForm(),
+            'pqrFormFields'          => $this->getDataPqrFormFields(),
+            'pqrNotifications'       => $this->getDataPqrNotifications(),
+            'optionsNotyMessages'    => PqrNotyMessageService::getDataPqrNotyMessages(),
+            'responseTimeOptions'    => $this->getDataresponseTime(),
+            'descriptionField'       => $this->getdescriptionField()
         ];
     }
 
@@ -254,7 +255,6 @@ class PqrFormService extends ModelService
         if (!$ModuloService->save($data)) {
             throw new SaiaException("No fue posible registrar el reporte de PQR por Dependencia");
         }
-
     }
 
 
@@ -402,6 +402,28 @@ class PqrFormService extends ModelService
             'ft.idft_pqr as idft'
         ];
     }
+    /**
+     * Informacion del campo tipo descripción por defecto
+     *
+     * @return array
+     * @author Julian Otalvaro <julian.otalvaro@cerok.com>
+     * @since 2023-09-27
+     */
+    private function getDescriptionField(): array
+    {
+        $pqrFormId = $this->getDataPqrForm()['description_field'];
+        $data = [];
+
+        if ($pqrFormId) {
+            $PqrFormField = new PqrFormField($pqrFormId);
+            $data = [
+                "id"   => $pqrFormId,
+                "name" => $PqrFormField->label
+            ];
+        }
+
+        return $data;
+    }
 
     /**
      * Crea la vista en la DB
@@ -432,11 +454,11 @@ class PqrFormService extends ModelService
         foreach ($fields as $PqrFormField) {
             $code = '';
             switch ($PqrFormField->getPqrHtmlField()->type_saia) {
-                // case 'Textarea':
-                //     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
-                //         return substr(\$value, 0, 30).' ...';
-                //     }";
-                //     break;
+                    // case 'Textarea':
+                    //     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                    //         return substr(\$value, 0, 30).' ...';
+                    //     }";
+                    //     break;
                 case 'Select':
                 case 'Radio':
                     $code = "function get_$PqrFormField->name(int \$idft,\$value){
@@ -490,7 +512,6 @@ class PqrFormService extends ModelService
         if (!file_put_contents($file, $codeFunction)) {
             throw new SaiaException("No fue posible crear las funciones del formulario");
         }
-
     }
 
     /**
@@ -557,7 +578,6 @@ class PqrFormService extends ModelService
             );
             $Todos->save();
         }
-
     }
 
 
@@ -657,7 +677,8 @@ SQL;
             foreach ($records as $PqrFormField) {
                 $PqrHtmlField = $PqrFormField->getPqrHtmlField();
 
-                if ($PqrHtmlField->isValidFieldForResponseDays() &&
+                if (
+                    $PqrHtmlField->isValidFieldForResponseDays() &&
                     $PqrFormField->isActive() &&
                     $PqrFormField->fk_campos_formato
                 ) {
