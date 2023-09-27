@@ -41,7 +41,7 @@ $comment                tokenRecaptcha,
                         anterior: localStorage.getItem('WsIddocPqr')
                     });
 
-                    top.$.ajax({
+                    $.ajax({
                         method: 'POST',
                         url: '$urlSaveFt',
                         data,

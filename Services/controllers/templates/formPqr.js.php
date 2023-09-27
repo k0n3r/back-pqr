@@ -89,7 +89,7 @@ $comment                tokenRecaptcha,
                         dependencia: window.credential.WsRol
                     });
 
-                    top.$.ajax({
+                    $.ajax({
                         method: 'POST',
                         url: '$urlSaveFt',
                         data,
