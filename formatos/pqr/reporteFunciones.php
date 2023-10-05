@@ -24,6 +24,11 @@ if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
 }
 
+$fileAdditionalFunctions = $_SERVER['ROOT_PATH'] . 'src/Bundles/client/pqr/functionsReportPqr.php';
+if (file_exists($fileAdditionalFunctions)) {
+    include_once $fileAdditionalFunctions;
+}
+
 /**
  * @param int $idft
  * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12

@@ -257,7 +257,6 @@ class PqrFormService extends ModelService
         }
     }
 
-
     /**
      * Obtiene los campos del formulario
      *
@@ -524,17 +523,25 @@ class PqrFormService extends ModelService
      */
     private function updateReport(array $fields): void
     {
-        $code = $nameFields = [];
+        $selectedFields = $nameOfSeletedFields = [];
         foreach ($fields as $PqrFormField) {
-            $nameFields[] = $PqrFormField->name;
+            $nameOfSeletedFields[] = $PqrFormField->name;
             $type = $PqrFormField->getPqrHtmlField()->type_saia;
             switch ($type) {
                 case 'Text':
                 case 'Textarea':
-                    $code[] = '{"title":"' . strtoupper($PqrFormField->label) . '","field":"{*' . $PqrFormField->name . '*}","align":"center"}';
+                    $selectedFields[] = [
+                        'title' => strtoupper($PqrFormField->label),
+                        'field' => "{*$PqrFormField->name*}",
+                        'align' => 'center',
+                    ];
                     break;
                 default:
-                    $code[] = '{"title":"' . strtoupper($PqrFormField->label) . '","field":"{*get_' . $PqrFormField->name . '@idft,' . $PqrFormField->name . '*}","align":"center"}';
+                    $selectedFields[] = [
+                        'title' => strtoupper($PqrFormField->label),
+                        'field' => "{*get_$PqrFormField->name@idft,$PqrFormField->name*}",
+                        'align' => 'center',
+                    ];
                     break;
             }
         }
@@ -544,7 +551,10 @@ class PqrFormService extends ModelService
             'nombre' => PqrForm::NOMBRE_REPORTE_PENDIENTE
         ])) {
             $Pendiente->setAttributes(
-                $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_PENDIENTE)
+                $this->getDefaultDataComponente(
+                    $selectedFields,
+                    $nameOfSeletedFields,
+                    PqrForm::NOMBRE_REPORTE_PENDIENTE)
             );
             $Pendiente->save();
         }
@@ -554,7 +564,10 @@ class PqrFormService extends ModelService
             'nombre' => PqrForm::NOMBRE_REPORTE_PROCESO
         ])) {
             $Proceso->setAttributes(
-                $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_PROCESO)
+                $this->getDefaultDataComponente(
+                    $selectedFields,
+                    $nameOfSeletedFields,
+                    PqrForm::NOMBRE_REPORTE_PROCESO)
             );
             $Proceso->save();
         }
@@ -564,7 +577,10 @@ class PqrFormService extends ModelService
             'nombre' => PqrForm::NOMBRE_REPORTE_TERMINADO
         ])) {
             $Terminado->setAttributes(
-                $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_TERMINADO)
+                $this->getDefaultDataComponente(
+                    $selectedFields,
+                    $nameOfSeletedFields,
+                    PqrForm::NOMBRE_REPORTE_TERMINADO)
             );
             $Terminado->save();
         }
@@ -574,7 +590,10 @@ class PqrFormService extends ModelService
             'nombre' => PqrForm::NOMBRE_REPORTE_TODOS
         ])) {
             $Todos->setAttributes(
-                $this->getDefaultDataComponente($code, $nameFields, PqrForm::NOMBRE_REPORTE_TODOS)
+                $this->getDefaultDataComponente(
+                    $selectedFields,
+                    $nameOfSeletedFields,
+                    PqrForm::NOMBRE_REPORTE_TODOS)
             );
             $Todos->save();
         }
@@ -585,48 +604,73 @@ class PqrFormService extends ModelService
      * Obtiene los campos y el info por defecto
      * de los reportes (busqueda componente)
      *
-     * @param array  $infoFields
-     * @param array  $nameFields
-     * @param string $nameReport
+     * @param array  $selectedFields
+     * @param array  $nameOfSeletedFields
+     * @param string $reportName
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
     private function getDefaultDataComponente(
-        array $infoFields,
-        array $nameFields,
-        string $nameReport
+        array $selectedFields,
+        array $nameOfSeletedFields,
+        string $reportName
     ): array {
 
-        $aditionalInfo = '';
-        if ($infoFields) {
-            $aditionalInfo = implode(',', $infoFields) . ',';
-        }
+        $info = array_merge(
+            [
+                [
+                    'title' => 'RADICADO',
+                    'field' => '{*viewFtPqr@idft,numero*}',
+                    'align' => 'center'
+                ],
+                [
+                    'title' => 'FECHA',
+                    'field' => '{*dateRadication@fecha*}',
+                    'align' => 'center'
+                ],
+            ],
+            $selectedFields,
+            [
+                [
+                    'title' => 'TIPO',
+                    'field' => '{*getValueSysTipo@iddocumento,sys_tipo*}',
+                    'align' => 'center'
+                ],
+                [
+                    'title' => 'OPORTUNIDAD EN LAS RESPUESTAS',
+                    'field' => '{*sys_oportuno*}',
+                    'align' => 'center'
+                ],
+                [
+                    'title' => 'CANAL DE RECEPCIÓN',
+                    'field' => '{*canal_recepcion*}',
+                    'align' => 'center'
+                ],
+            ],
+            $this->getFieldsByStateForReport($reportName),
+            [
+                [
+                    'title' => 'OPCIONES',
+                    'field' => '{*options@iddocumento,sys_estado,idft*}',
+                    'align' => 'center'
+                ]
+            ]
+        );
 
-        $otherFields = '';
-        if ($nameFields) {
-            $otherFields .= "," . implode(',', $nameFields);
-        }
-
-        switch ($nameReport) {
-            case PqrForm::NOMBRE_REPORTE_TODOS:
-                $NewField = '{"title":"ESTADO","field":"{*sys_estado*}","align":"center"},{"title":"DIAS DE ESPERA","field":"{*getDaysWait@idft*}","align":"center"},{"title":"FECHA VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPONSABLES","field":"{*getResponsible@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},{"title":"CALIFICACIÓN GESTIÓN","field":"{*qualificationGest@idft*}","align":"center"},{"title":"CALIFICACIÓN SERVICIO","field":"{*qualificationServ@idft*}","align":"center"},';
-                break;
-            case PqrForm::NOMBRE_REPORTE_PROCESO:
-                $NewField = '{"title":"DIAS DE ESPERA","field":"{*getDaysWait@idft*}","align":"center"},{"title":"FECHA VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPONSABLES","field":"{*getResponsible@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},{"title":"CALIFICACIÓN GESTIÓN","field":"{*qualificationGest@idft*}","align":"center"},{"title":"CALIFICACIÓN SERVICIO","field":"{*qualificationServ@idft*}","align":"center"},';
-                break;
-            case PqrForm::NOMBRE_REPORTE_TERMINADO:
-                $NewField = '{"title":"FECHA FINALIZACIÓN","field":"{*getEndDate@idft*}","align":"center"},{"title":"DÍAS RETRASO","field":"{*getDaysLate@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPONSABLES","field":"{*getResponsible@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},{"title":"CALIFICACIÓN GESTIÓN","field":"{*qualificationGest@idft*}","align":"center"},{"title":"CALIFICACIÓN SERVICIO","field":"{*qualificationServ@idft*}","align":"center"},';
-                break;
-            case PqrForm::NOMBRE_REPORTE_PENDIENTE:
-            default:
-                $NewField = '{"title":"DIAS DE ESPERA","field":"{*getDaysWait@idft*}","align":"center"},{"title":"FECHA VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},';
-                break;
-        }
+        $fieldNames = array_merge([
+            'v.numero',
+            'v.fecha',
+            'v.sys_tipo',
+            'v.sys_estado',
+            'v.idft',
+            'v.sys_oportuno',
+            'v.canal_recepcion'
+        ], $nameOfSeletedFields);
 
         return [
-            'info'               => '[{"title":"RADICADO","field":"{*viewFtPqr@idft,numero*}","align":"center"},{"title":"FECHA","field":"{*dateRadication@fecha*}","align":"center"},' . $aditionalInfo . '{"title":"TIPO","field":"{*getValueSysTipo@iddocumento,sys_tipo*}","align":"center"},{"title":"OPORTUNIDAD EN LAS RESPUESTAS","field":"{*sys_oportuno*}","align":"center"},{"title":"CANAL DE RECEPCIÓN","field":"{*canal_recepcion*}","align":"center"},' . $NewField . '{"title":"OPCIONES","field":"{*options@iddocumento,sys_estado,idft*}","align":"center"}]',
-            'campos_adicionales' => 'v.numero,v.fecha,v.sys_tipo,v.sys_estado,v.idft,v.sys_oportuno,v.canal_recepcion' . $otherFields
+            'info'               => json_encode($info),
+            'campos_adicionales' => implode(',', $fieldNames)
         ];
     }
 
@@ -719,5 +763,96 @@ SQL;
         $this->save([
             'fk_field_time' => $idCampoFormato
         ]);
+    }
+
+    /**
+     * Obtiene las columnas que tendran las columnas de los reportes
+     *
+     * @param string $reportName
+     * @return array[]
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-10-05
+     */
+    private function getFieldsByStateForReport(string $reportName): array
+    {
+        $defaultFiels = [
+            [
+                'title' => 'TAREAS',
+                'field' => '{*totalTask@iddocumento*}',
+                'align' => 'center'
+            ],
+            [
+                'title' => 'RESPONSABLES',
+                'field' => '{*getResponsible@iddocumento*}',
+                'align' => 'center'
+            ],
+            [
+                'title' => 'RESPUESTAS',
+                'field' => '{*totalAnswers@idft*}',
+                'align' => 'center'
+            ],
+            [
+                'title' => 'CALIFICACIÓN GESTIÓN',
+                'field' => '{*qualificationGest@idft*}',
+                'align' => 'center'
+            ],
+            [
+                'title' => 'CALIFICACIÓN SERVICIO',
+                'field' => '{*qualificationServ@idft*}',
+                'align' => 'center'
+            ]
+        ];
+
+        $otherDefaultFields = [
+            [
+                'title' => 'DIAS DE ESPERA',
+                'field' => '{*getDaysWait@idft*}',
+                'align' => 'center'
+            ],
+            [
+                'title' => 'FECHA VENCIMIENTO',
+                'field' => '{*getExpiration@idft*}',
+                'align' => 'center'
+            ]
+        ];
+
+        switch ($reportName) {
+            case PqrForm::NOMBRE_REPORTE_TODOS:
+                $fieldForReport = array_merge([
+                    [
+                        'title' => 'ESTADO',
+                        'field' => '{*sys_estado*}',
+                        'align' => 'center'
+                    ],
+                ], $defaultFiels);
+                break;
+            case PqrForm::NOMBRE_REPORTE_PROCESO:
+                $fieldForReport = array_merge($otherDefaultFields, $defaultFiels);
+                break;
+            case PqrForm::NOMBRE_REPORTE_TERMINADO:
+                $fieldForReport = array_merge([
+                    [
+                        'title' => 'DÍAS RETRASO',
+                        'field' => '{*getDaysLate@idft*}',
+                        'align' => 'center'
+                    ],
+                    [
+                        'title' => 'FECHA FINALIZACIÓN',
+                        'field' => '{*getEndDate@idft*}',
+                        'align' => 'center'
+                    ],
+                ], $defaultFiels);
+                break;
+            case PqrForm::NOMBRE_REPORTE_PENDIENTE:
+            default:
+                $fieldForReport = $otherDefaultFields;
+                break;
+        }
+
+        $FtClassName = $this->getModel()->getFormatoFk()->getFtClass();
+        if (method_exists($FtClassName, 'getCustomColumnsForReport')) {
+            $fieldForReport = array_merge($fieldForReport, $FtClassName::getCustomColumnsForReport($reportName));
+        }
+
+        return $fieldForReport;
     }
 }
