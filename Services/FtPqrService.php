@@ -808,7 +808,7 @@ HTML;
     /**
      * Obtiene Instancias de las respuestas a la PQR
      *
-     * @return array
+     * @return FtPqrRespuesta[]
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
