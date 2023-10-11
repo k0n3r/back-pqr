@@ -114,7 +114,6 @@ class PqrForm extends Model
         return $fields ? count($fields) : 0;
     }
 
-
     /**
      * Obtiene la instancia del formulario activo
      *
@@ -184,5 +183,19 @@ class PqrForm extends Model
     public function getCampoFormatoForFieldTime(): CamposFormato
     {
         return new CamposFormato($this->fk_field_time);
+    }
+
+    /**
+     * Obtiene el PqrFormField que se utiliza como campo descripcion adicional
+     *
+     * @return PqrFormField|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-10-11
+     */
+    public function getPqrFormFieldDescription(): ?PqrFormField
+    {
+        if ($this->description_field) {
+            return new PqrFormField($this->description_field);
+        }
+        return null;
     }
 }

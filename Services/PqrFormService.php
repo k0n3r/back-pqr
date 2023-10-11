@@ -130,14 +130,14 @@ class PqrFormService extends ModelService
     public function getSetting(): array
     {
         return [
-            'urlWs'                  => static::getUrlWsPQR(),
-            'publish'                => $this->getModel()->fk_formato ? 1 : 0,
-            'pqrForm'                => $this->getDataPqrForm(),
-            'pqrFormFields'          => $this->getDataPqrFormFields(),
-            'pqrNotifications'       => $this->getDataPqrNotifications(),
-            'optionsNotyMessages'    => PqrNotyMessageService::getDataPqrNotyMessages(),
-            'responseTimeOptions'    => $this->getDataresponseTime(),
-            'descriptionField'       => $this->getdescriptionField()
+            'urlWs'               => static::getUrlWsPQR(),
+            'publish'             => $this->getModel()->fk_formato ? 1 : 0,
+            'pqrForm'             => $this->getDataPqrForm(),
+            'pqrFormFields'       => $this->getDataPqrFormFields(),
+            'pqrNotifications'    => $this->getDataPqrNotifications(),
+            'optionsNotyMessages' => PqrNotyMessageService::getDataPqrNotyMessages(),
+            'responseTimeOptions' => $this->getDataresponseTime(),
+            'descriptionField'    => $this->getdescriptionField()
         ];
     }
 
@@ -401,12 +401,13 @@ class PqrFormService extends ModelService
             'ft.idft_pqr as idft'
         ];
     }
+
     /**
      * Informacion del campo tipo descripción por defecto
      *
      * @return array
      * @author Julian Otalvaro <julian.otalvaro@cerok.com>
-     * @since 2023-09-27
+     * @since  2023-09-27
      */
     private function getDescriptionField(): array
     {
@@ -453,11 +454,11 @@ class PqrFormService extends ModelService
         foreach ($fields as $PqrFormField) {
             $code = '';
             switch ($PqrFormField->getPqrHtmlField()->type_saia) {
-                    // case 'Textarea':
-                    //     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
-                    //         return substr(\$value, 0, 30).' ...';
-                    //     }";
-                    //     break;
+                // case 'Textarea':
+                //     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                //         return substr(\$value, 0, 30).' ...';
+                //     }";
+                //     break;
                 case 'Select':
                 case 'Radio':
                     $code = "function get_$PqrFormField->name(int \$idft,\$value){
@@ -854,5 +855,60 @@ SQL;
         }
 
         return $fieldForReport;
+    }
+
+    /**
+     * Actualiza el campo descripcion adicional que se adicionara al formulario de PQR
+     *
+     * @param int $fieldId
+     * @return bool
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-10-11
+     */
+    public function updateFieldDescription(int $fieldId): bool
+    {
+        $PqrForms = $this->getModel();
+
+        if ($PqrForms->description_field && $PqrForms->description_field == $fieldId) {
+            return true;
+        }
+
+        $CamposFormato = (new PqrFormField($fieldId))->getCamposFormato();
+        if ($CamposFormato->isDescriptionField()) {
+            return true;
+        }
+
+        $actionList = explode(',', $CamposFormato->acciones);
+        $actionList[] = 'p';
+
+        $CamposFormatoService = $CamposFormato->getService();
+        $success = $CamposFormato->getService()->save([
+            'acciones' => implode(',', array_filter($actionList))
+        ]);
+
+        if (!$success) {
+            $this->setErrorManager($CamposFormatoService->getErrorManager());
+            return false;
+        }
+
+        $PqrFormFieldDes = $PqrForms->getPqrFormFieldDescription();
+        if ($PqrFormFieldDes) {
+            $CamposFormatoOld = $PqrFormFieldDes->getCamposFormato();
+
+            $actionListOld = array_diff(explode(',', $CamposFormatoOld->acciones), ['p']);
+
+            $CamposFormatoServiceOld = $CamposFormatoOld->getService();
+            $success = $CamposFormatoServiceOld->save([
+                'acciones' => implode(',', array_filter($actionListOld))
+            ]);
+
+            if (!$success) {
+                $this->setErrorManager($CamposFormatoService->getErrorManager());
+                return false;
+            }
+        }
+
+        return $PqrForms->getService()->save([
+            'description_field' => $fieldId
+        ]);
     }
 }

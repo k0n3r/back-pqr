@@ -173,6 +173,11 @@ final class Version20200103155146 extends AbstractMigration
         ]);
 
         $table->addColumn('enable_filter_dep', 'boolean', ['default' => 0]);
+
+        $table->addColumn('description_field', 'integer', [
+            'length'  => 11,
+            'default' => 0
+        ]);
     }
 
     private function tablePqrBackup(Table $table)

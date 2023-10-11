@@ -9,6 +9,7 @@ use Exception;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
+use Saia\models\formatos\CamposFormato;
 use Saia\models\funcion\Funcion;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,6 +34,45 @@ class PqrFormController extends AbstractController
 
         try {
             $saiaResponse->replaceData(PqrService::getTextFields());
+            $saiaResponse->setSuccess(1);
+        } catch (Throwable $th) {
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * @Route("/setting", name="getSetting", methods={"GET"})
+     */
+    public function getSetting(
+        ISaiaResponse $saiaResponse
+    ): Response {
+
+        try {
+            $data = (PqrForm::getInstance())->getService()
+                ->getSetting();
+
+            $saiaResponse->replaceData($data);
+            $saiaResponse->setSuccess(1);
+        } catch (Throwable $th) {
+            $saiaResponse->setMessage($th->getMessage());
+        }
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * @Route("/responseSetting", name="getResponseSetting", methods={"GET"})
+     */
+    public function getResponseSetting(
+        ISaiaResponse $saiaResponse
+    ): Response {
+
+        try {
+            $data = (PqrForm::getInstance())
+                ->getResponseConfiguration(true) ?? [];
+
+            $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
         } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
@@ -70,45 +110,6 @@ class PqrFormController extends AbstractController
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setMessage($th->getMessage());
-        }
-
-        return $saiaResponse->getResponse();
-    }
-
-    /**
-     * @Route("/setting", name="getSetting", methods={"GET"})
-     */
-    public function getSetting(
-        ISaiaResponse $saiaResponse
-    ): Response {
-
-        try {
-            $data = (PqrForm::getInstance())->getService()
-                ->getSetting();
-
-            $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
-        } catch (Throwable $th) {
-            $saiaResponse->setMessage($th->getMessage());
-        }
-        return $saiaResponse->getResponse();
-    }
-
-    /**
-     * @Route("/responseSetting", name="getResponseSetting", methods={"GET"})
-     */
-    public function getResponseSetting(
-        ISaiaResponse $saiaResponse
-    ): Response {
-
-        try {
-            $data = (PqrForm::getInstance())
-                    ->getResponseConfiguration(true) ?? [];
-
-            $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
-        } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }
 
@@ -335,6 +336,46 @@ class PqrFormController extends AbstractController
             }
 
             $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
+            $saiaResponse->setSuccess(1);
+            $Connection->commit();
+        } catch (Throwable $th) {
+            $Connection->rollBack();
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * Actualiza el campo que quedara como descripcion de la pqr adicional al tipo.
+     * @Route("/descriptionField", name="descriptionField", methods={"PUT"})
+     *
+     * @param ISaiaResponse $saiaResponse
+     * @param Request       $Request
+     * @param Connection    $Connection
+     * @return Response
+     * @author Julian Otalvaro <julian.otalvaro@cerok.com> 2023-10-11
+     */
+    public function descriptionField(
+        ISaiaResponse $saiaResponse,
+        Request $Request,
+        Connection $Connection
+    ): Response {
+        $Connection->beginTransaction();
+
+        try {
+            $fieldId = $Request->get('fieldId');
+
+            if (!$fieldId) {
+                throw new SaiaException("Debe indicar el identificador del campo descripción");
+            }
+
+            $PqrFormsService = (PqrForm::getInstance())->getService();
+
+            if (!$PqrFormsService->updateFieldDescription((int)$fieldId)) {
+                throw new SaiaException($PqrFormsService->getErrorManager()->getMessage());
+            }
+
             $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
