@@ -21,7 +21,7 @@ final class Version20230925163206 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $table = $schema->getTable('pqr_forms');
-        if (!$table->hasColumn('pqr_forms')) {
+        if (!$table->hasColumn('description_field')) {
             $table->addColumn('description_field', 'integer', [
                 'length'  => 11,
                 'default' => 0
