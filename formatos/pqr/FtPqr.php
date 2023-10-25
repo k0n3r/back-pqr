@@ -298,7 +298,7 @@ class FtPqr extends FtPqrProperties
 
         $text = sprintf(
             '%s %s',
-            'Radicado:',
+            'No:',
             $this->getDocument()->getService()->getFilingReferenceNumber()
         );
 
