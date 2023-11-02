@@ -824,7 +824,7 @@ SQL;
                         'field' => '{*sys_estado*}',
                         'align' => 'center'
                     ],
-                ], $defaultFiels);
+                ], $otherDefaultFields, $defaultFiels);
                 break;
             case PqrForm::NOMBRE_REPORTE_PROCESO:
                 $fieldForReport = array_merge($otherDefaultFields, $defaultFiels);
