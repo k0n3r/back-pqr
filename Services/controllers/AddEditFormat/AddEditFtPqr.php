@@ -472,7 +472,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'ayuda'             => null,
                 'longitud_vis'      => null
             ],
-            Rad::DESCRIPCION       => [
+            Rad::DESCRIPCION                => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
                 'nombre'            => Rad::DESCRIPCION,
                 'etiqueta'          => 'Asunto',

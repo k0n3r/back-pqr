@@ -93,7 +93,8 @@ final class Version20200310032827 extends AbstractMigration
             'version'                   => 1,
             'publicar'                  => 1,
             'module'                    => 'pqr',
-            'generador_pdf'             => 'Mpdf'
+            'generador_pdf'             => 'Mpdf',
+            'formato_fecha_radicado'    => 'Ymd'
         ];
 
         $this->connection->insert('formato', $data);
