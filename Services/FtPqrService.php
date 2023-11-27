@@ -139,7 +139,7 @@ class FtPqrService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function getDataRow(): array
+    protected function getDataRow(): array
     {
         $data = [];
         if ($this->getPqrForm()->show_anonymous) {
@@ -173,7 +173,7 @@ class FtPqrService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function getValue(PqrFormField $PqrFormField): ?array
+    protected function getValue(PqrFormField $PqrFormField): ?array
     {
         $PqrHtmlField = $PqrFormField->getPqrHtmlField();
         $fieldName = $PqrFormField->name;
@@ -214,7 +214,7 @@ class FtPqrService extends ModelService
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-04
      */
-    private function getKey(string $label): string
+    protected function getKey(string $label): string
     {
         return strtoupper($label);
     }
@@ -249,7 +249,7 @@ class FtPqrService extends ModelService
      * @return int
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
      */
-    private function getDays(): int
+    protected function getDays(): int
     {
         if ($PqrResponseTime = PqrResponseTime::findByAttributes([
             'fk_campo_opciones' => $this->getIdFromResponseTimes(),
@@ -276,7 +276,7 @@ class FtPqrService extends ModelService
      * @return int
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
      */
-    private function getIdFromResponseTimes(): int
+    protected function getIdFromResponseTimes(): int
     {
         $CamposFormato = $this->getPqrForm()->getCampoFormatoForFieldTime();
         if ($CamposFormato->getPK() == PqrFormField::getSysTipoField()->fk_campos_formato) {
@@ -421,7 +421,7 @@ class FtPqrService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function getExpirationDate(): DateTime
+    protected function getExpirationDate(): DateTime
     {
         return DateController::getDateTimeFromDataBase($this->getModel()->sys_fecha_vencimiento);
 
@@ -434,7 +434,7 @@ class FtPqrService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function getInitialRequestData(): array
+    protected function getInitialRequestData(): array
     {
         return [
             'iconPoint'      => 'fa fa-map-marker',
@@ -452,7 +452,7 @@ class FtPqrService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function getDataFinish(): array
+    protected function getDataFinish(): array
     {
         $type = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
 
@@ -497,7 +497,7 @@ class FtPqrService extends ModelService
 
         $EmailSaia = (new EmailSaia())
             ->subject($subject)
-            ->htmlWithTemplate($message)
+            ->html($message)
             ->to($this->getModel()->sys_email)
             ->addAttachments($files)
             ->saveShipmentTraceability($Documento->getPK());
@@ -1035,7 +1035,7 @@ HTML;
      * @return string|null
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
-    private function getTextForUpdateEstadoFreImpSev(string $fieldName, $value): ?string
+    protected function getTextForUpdateEstadoFreImpSev(string $fieldName, $value): ?string
     {
         if ($value == $this->getModel()->$fieldName) {
             return null;
@@ -1057,7 +1057,7 @@ HTML;
      * @return string|null
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
-    private function getTextForUpdateExpirationDate(string $expirationDate): ?string
+    protected function getTextForUpdateExpirationDate(string $expirationDate): ?string
     {
         $expiration = $this->getExpirationDate();
         if ($expirationDate == $expiration->format('Y-m-d')) {
@@ -1170,7 +1170,7 @@ HTML;
         return true;
     }
 
-    private function sendNotificationToInternalDestination(): void
+    protected function sendNotificationToInternalDestination(): void
     {
         $FuncionarioDesInt = $this->getModel()->getFuncionarioDestinoInterno();
         if (!$FuncionarioDesInt) {
@@ -1240,7 +1240,7 @@ HTML;
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-06-23
      */
-    private function getRespuestaOportuna(?string $date = null): string
+    protected function getRespuestaOportuna(?string $date = null): string
     {
         $fExpiration = $date ?? $this->getExpirationDate()->format('Y-m-d');
 
@@ -1267,7 +1267,7 @@ HTML;
      * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-06-26
      */
-    private function saveHistory(array $data): bool
+    protected function saveHistory(array $data): bool
     {
         $history = array_merge([
             'fecha'          => date('Y-m-d H:i:s'),
