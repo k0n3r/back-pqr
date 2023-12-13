@@ -45,9 +45,9 @@ class WebservicePqr extends WsFt
     /**
      * @inheritDoc
      */
-    public function getJsContentForm(): string
+    public function getJsContentForm(bool $isEdit = false): string
     {
-        $values = array_merge($this->getDefaultValuesForJsContent(), [
+        $values = array_merge($this->getDefaultValuesForJsContent($isEdit), [
             'fieldsWithoutAnonymous' => json_encode($this->getFieldsWithoutAnonymous()),
             'fieldsWithAnonymous'    => json_encode($this->getFieldsWithAnonymous()),
             'urlSaveFt'              => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'] ? '/api/pqr/captcha/saveDocument' : '/api/pqr/webservice/saveDocument'

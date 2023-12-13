@@ -9,11 +9,11 @@ class WebserviceCalificacion extends WsFormulario
     /**
      * @inheritDoc
      */
-    public function getJsContentForm(): string
+    public function getJsContentForm(bool $isEdit = false): string
     {
         return static::getContent(
             'src/Bundles/pqr/Services/controllers/templates/formCalificacion.js.php',
-            $this->getDefaultValuesForJsContent()
+            $this->getDefaultValuesForJsContent($isEdit)
         );
     }
 }
