@@ -144,7 +144,7 @@ $comment   });
         submitHandler: function (form) {
             let data = window.getFormObject($('#formSearch').serializeArray());
 
-            top.$.ajax({
+            $.ajax({
                 url: `/api/pqr/searchByNumber`,
                 data
             }).done((response) => {

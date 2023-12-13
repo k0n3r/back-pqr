@@ -119,7 +119,7 @@ $comment   });
         }
 
         function decrypt(d){
-            top.$.ajax({
+            $.ajax({
                 url: `/api/pqr/decrypt`,
                 async: false,
                 data:{
