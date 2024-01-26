@@ -15,7 +15,7 @@ $(function () {
     }
 
     function loadjsComponent() {
-        $content
+        $componentsJS
     }
 
     function processField(field, applyShow = false) {

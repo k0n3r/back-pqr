@@ -3,7 +3,6 @@
 namespace App\Bundles\pqr\Services\generadoresWs;
 
 use App\Bundles\pqr\Services\controllers\WebservicePqr;
-use App\services\exception\SaiaException;
 use App\services\generadoresWs\GenerateWsFt;
 use Saia\controllers\generator\webservice\WsGenerator;
 
@@ -14,29 +13,23 @@ class GenerateWsPqr extends GenerateWsFt
         return false;
     }
 
+    protected function generateEdit(): bool
+    {
+        return false;
+    }
+
     public function getIWsHtml(): WebservicePqr
     {
-        return new WebservicePqr($this->Formato);
+        $WebservicePqr = new WebservicePqr($this->Formato);
+        $WebservicePqr->setHtmlTemplate('src/Bundles/pqr/Services/controllers/templates/formPqr.html.php');
+        $WebservicePqr->setJsTemplate('src/Bundles/pqr/Services/controllers/templates/formPqr.js.php');
+
+        return $WebservicePqr;
     }
 
-
-    public function generate(): void
+    protected function executeMoreActions(): void
     {
-        $WsGenerator = new WsGenerator(
-            $this->getIWsHtml(),
-            $this->getNameFormat(),
-            $this->getGenerateSearch()
-        );
-
-        $this->createFiles($WsGenerator);
-
-        if (!$WsGenerator->create()) {
-            throw new SaiaException("No fue posible generar el ws: {$this->Formato->etiqueta}");
-        }
-    }
-
-    protected function createFiles(WsGenerator $WsGenerator): void
-    {
+        $WsGenerator = $this->getWsGenerator();
         $folder = 'src/Bundles/pqr/Services/controllers/templates/';
         $page404 = WsGenerator::generateFileForWs('src/legacy/controllers/generator/webservice/templates/404.html');
         $infoQrFile = WsGenerator::generateFileForWs($folder . 'infoQR.html');

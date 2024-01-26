@@ -4,11 +4,11 @@ namespace App\Bundles\pqr\Services\controllers;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\controllers\generator\webservice\IWsFields;
-use Saia\controllers\generator\webservice\WsFt;
+use Saia\controllers\generator\webservice\WsFormulario;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrFormField;
 
-class WebservicePqr extends WsFt
+class WebservicePqr extends WsFormulario
 {
 
     protected PqrForm $PqrForm;
@@ -23,40 +23,22 @@ class WebservicePqr extends WsFt
         parent::__construct($Formato);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getHtmlContentForm(array $filesToInclude, ?string $urlSearch): string
+    public function getOtherValuesFromForm(): array
     {
-        $this->addFilesToLoad($filesToInclude);
-
-        $values = array_merge($this->getDefaultValuesForHtmlContent(), [
+        return [
             'emailLabel'    => $this->PqrForm->getRow('sys_email')->label,
             'showAnonymous' => (int)$this->PqrForm->show_anonymous,
             'showLabel'     => (int)$this->PqrForm->show_label
-        ]);
-
-        return static::getContent(
-            $this->htmlTemplateUrl ?? 'src/Bundles/pqr/Services/controllers/templates/formPqr.html.php',
-            $values
-        );
+        ];
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getJsContentForm(bool $isEdit = false): string
+    public function getOtherValuesFromJsForm(): array
     {
-        $values = array_merge($this->getDefaultValuesForJsContent($isEdit), [
+        return [
             'fieldsWithoutAnonymous' => json_encode($this->getFieldsWithoutAnonymous()),
             'fieldsWithAnonymous'    => json_encode($this->getFieldsWithAnonymous()),
             'urlSaveFt'              => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'] ? '/api/pqr/captcha/saveDocument' : '/api/pqr/webservice/saveDocument'
-        ]);
-
-        return static::getContent(
-            $this->jsTemplateUrl ?? 'src/Bundles/pqr/Services/controllers/templates/formPqr.js.php',
-            $values
-        );
+        ];
     }
 
     /**
@@ -136,7 +118,7 @@ class WebservicePqr extends WsFt
     /**
      * @inheritDoc
      */
-    public function getHtmlContentSearchForm(array $filesToInclude, ?string $urlForm): string
+    public function getHtmlContentSearchForm(array $filesToInclude, string $urlForm = null): string
     {
         return '';
     }
@@ -145,30 +127,6 @@ class WebservicePqr extends WsFt
      * @inheritDoc
      */
     public function getJsContentSearchForm(): string
-    {
-        return '';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getMoreFilesToCopy(): array
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getHtmlContentFormExposed(array $filesToInclude, bool $adicionar): string
-    {
-        return '';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getJsContentFormExpose(bool $adicionar): string
     {
         return '';
     }
