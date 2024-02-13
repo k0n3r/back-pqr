@@ -25,6 +25,7 @@
                 </div>
                 <div class="modal-body">
                     <form name='formSearch' id='formSearch' role='form' autocomplete='off'>
+                        <input type="hidden" name="_csrf" value="">
                         <div class="form-group form-group-default required">
                             <label>Número radicado:
                                 <input class="form-control required" name="numero" type="number">
@@ -86,6 +87,7 @@
             </div>
 
             <form name='formulario' id='formulario' role='form' autocomplete='off'>
+                <input type="hidden" name="_csrf" value="">
                 <?php if ($showAnonymous) : ?>
                     <div class="form-group" id="group_sys_anonimo">
                         <p>

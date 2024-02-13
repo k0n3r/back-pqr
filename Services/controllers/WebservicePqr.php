@@ -4,11 +4,11 @@ namespace App\Bundles\pqr\Services\controllers;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\controllers\generator\webservice\IWsFields;
-use Saia\controllers\generator\webservice\WsFormulario;
+use Saia\controllers\generator\webservice\WsFt;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrFormField;
 
-class WebservicePqr extends WsFormulario
+class WebservicePqr extends WsFt
 {
 
     protected PqrForm $PqrForm;
@@ -115,22 +115,6 @@ class WebservicePqr extends WsFormulario
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getHtmlContentSearchForm(array $filesToInclude, string $urlForm = null): string
-    {
-        return '';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getJsContentSearchForm(): string
-    {
-        return '';
-    }
-
     private function processFields(): void
     {
         if ($this->isProcessFields) {
@@ -155,8 +139,10 @@ class WebservicePqr extends WsFormulario
                     $this->setFieldsAnonymous($PqrFormField);
                 }
             } else {
-                if ($class = $this->resolveClass($PqrFormField->getCamposFormato()->etiqueta_html)) {
-                    $this->fields[] = new $class($PqrFormField->getCamposFormato());
+
+                $ComponentBuilder = $PqrFormField->getCamposFormato()->getComponentBuilder();
+                if ($ComponentBuilder->supportWs() && $PqrFormField->getCamposFormato()->isVisibleFieldAdd()) {
+                    $this->fields[] = $ComponentBuilder;
                     $this->setFieldsAnonymous($PqrFormField);
                 }
             }

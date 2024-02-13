@@ -27,17 +27,6 @@ class PqrFormService extends ModelService
     }
 
     /**
-     * Ruta del Ws de la Calificacion de la PQR
-     *
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-25
-     */
-    public static function getUrlWsCalificacion(): string
-    {
-        return $_SERVER['APP_DOMAIN'] . 'ws/pqr_calificacion/index.html';
-    }
-
-    /**
      * Obtiene la instancia de PqrForm actualizada
      *
      * @return PqrForm

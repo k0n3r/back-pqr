@@ -3,53 +3,45 @@
 namespace App\Bundles\pqr\Services\controllers\customFields;
 
 use App\Bundles\pqr\Services\models\PqrFormField;
-
 use Saia\controllers\generator\webservice\IWsFields;
-use Saia\controllers\generator\webservice\fields\Field;
+use Saia\models\formatos\CamposFormato;
 
-class Autocomplete extends Field implements IWsFields
+class Autocomplete implements IWsFields
 {
+    protected CamposFormato $CamposFormato;
 
-  public function __construct(PqrFormField $PqrFormField)
-  {
-    parent::__construct($PqrFormField->getCamposFormato());
-  }
+    public function __construct(PqrFormField $PqrFormField)
+    {
+        $this->CamposFormato = $PqrFormField->getCamposFormato();
+    }
 
-  public function aditionalFiles(): array
-  {
-    return [
-      [
-        'origin' => 'views/node_modules/select2/dist/js/select2.min.js',
-        'newName' => 'select2.min.js'
-      ],
-      [
-        'origin' => 'views/node_modules/select2/dist/js/i18n/es.js',
-        'newName' => 'es.js',
-        'subFolder' => 'i18n/'
-      ],
-      [
-        'origin' => 'views/node_modules/select2/dist/css/select2.min.css',
-        'newName' => 'select2.min.css'
-      ]
-    ];
-  }
+    public function getLibrariesWs(): array
+    {
+        return [
+            '/views/node_modules/select2/dist/js/select2.min.js',
+            '/views/node_modules/select2/dist/js/i18n/es.js',
+            '/views/node_modules/select2/dist/css/select2.min.css'
+        ];
+    }
 
-  public function htmlContent(): string
-  {
-    $requiredClass = $this->getRequiredClass();
-    $title = $this->CamposFormato->ayuda ? " title='{$this->CamposFormato->ayuda}'" : '';
+    public function getAdditionHTMLWs(): string
+    {
+        $ComponentBuilder = $this->CamposFormato->getComponentBuilder();
 
-      return "<div class='form-group form-group-default form-group-default-select2 $requiredClass' id='group_{$this->CamposFormato->nombre}'>
-              <label$title>{$this->getLabel()}</label>
+        $requiredClass = $ComponentBuilder->getRequiredClass();
+        $label = $ComponentBuilder->getLabel();
+
+        return "<div class='form-group form-group-default form-group-default-select2 $requiredClass' id='group_{$this->CamposFormato->nombre}'>
+              <label>$label</label>
               <select class='full-width $requiredClass' name='{$this->CamposFormato->nombre}' id='{$this->CamposFormato->nombre}'>
               <option value=''>Por favor seleccione...</option>
               </select>
           </div>";
-  }
+    }
 
-  public function jsContent(): ?string
-  {
-    return <<<JAVASCRIPT
+    public function getAdditionJsWs(): string
+    {
+        return <<<JAVASCRIPT
         let options_{$this->CamposFormato->nombre} = {
           language: "es",
           minimumInputLength: 3,
@@ -71,5 +63,21 @@ class Autocomplete extends Field implements IWsFields
         };
         $('#{$this->CamposFormato->nombre}').select2(options_{$this->CamposFormato->nombre});
 JAVASCRIPT;
-  }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEditionHTMLWs(): string
+    {
+        return '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEditionJsWs(): string
+    {
+        return '';
+    }
 }

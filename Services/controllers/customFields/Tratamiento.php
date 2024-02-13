@@ -11,9 +11,9 @@ class Tratamiento implements IWsFields
     /**
      * Instancia de PqrFormField
      *
-     * @var PqrFormField
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
+     * @var PqrFormField
      */
     protected PqrFormField $PqrFormField;
 
@@ -22,12 +22,12 @@ class Tratamiento implements IWsFields
         $this->PqrFormField = $PqrFormField;
     }
 
-    public function aditionalFiles(): array
+    public function getLibrariesWs(): array
     {
         return [];
     }
 
-    public function htmlContent(): string
+    public function getAdditionHTMLWs(): string
     {
         $setting = $this->PqrFormField->getSetting();
 
@@ -54,16 +54,27 @@ class Tratamiento implements IWsFields
 HTML;
     }
 
-    public function jsContent(): ?string
+    /**
+     * @inheritDoc
+     */
+    public function getAdditionJsWs(): string
     {
-        return null;
+        return '';
     }
 
     /**
      * @inheritDoc
      */
-    public function getEditionJS(): ?string
+    public function getEditionHTMLWs(): string
     {
-        return null;
+        return '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEditionJsWs(): string
+    {
+        return '';
     }
 }

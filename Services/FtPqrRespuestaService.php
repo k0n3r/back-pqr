@@ -9,15 +9,15 @@ use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\services\correo\EmailSaia;
 use App\services\correo\SendEmailSaia;
+use App\services\documento\DocumentoExpuestoService;
 use App\services\models\ModelService\ModelService;
 use Saia\controllers\anexos\FileJson;
-use Saia\controllers\CryptController;
-use Saia\controllers\DateController;
 use Saia\controllers\DistributionService;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\functions\CoreFunctions;
-use Saia\models\anexos\Anexos;
 use Saia\models\BuzonSalida;
+use Saia\models\documento\DocumentoExpuesto;
+use Saia\models\formatos\Formato;
 use Saia\models\Tercero;
 
 class FtPqrRespuestaService extends ModelService
@@ -289,12 +289,18 @@ class FtPqrRespuestaService extends ModelService
      */
     private function getUrlEncuesta(): string
     {
-        $params = CryptController::encrypt(json_encode([
-            'ft_pqr_respuesta' => $this->getModel()->getPK(),
-            'anterior'         => $this->getModel()->getDocument()->getPK()
-        ]));
+        $Formato = Formato::findByAttributes([
+            'nombre' => 'pqr_calificacion'
+        ]);
 
-        return PqrFormService::getUrlWsCalificacion() . "?d=$params";
+        $DocumentoExpuesto = DocumentoExpuestoService::createOrUpdate(
+            $this->getModel()->getDocument(),
+            DocumentoExpuesto::TIPO_HIJO,
+            $Formato,
+            24 * 7 //1 Semana
+        );
+
+        return $DocumentoExpuesto->getUrl();
     }
 
     /**

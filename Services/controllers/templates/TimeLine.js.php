@@ -7,7 +7,7 @@ class TimeLine {
     }
 
     init() {
-        let list = new String();
+        let list;
         this.sourceData = this.options.source();
 
         if (!this.sourceData.length) {
@@ -16,7 +16,7 @@ class TimeLine {
             list = this.createTemplate();
         }
 
-        var div = document.createElement('section');
+        const div = document.createElement('section');
         div.setAttribute('class', 'timeline');
         div.innerHTML = list;
 
@@ -35,7 +35,7 @@ class TimeLine {
     }
 
     createItem() {
-        let response='';
+        let response;
         let iconPoint = `<div class="timeline-point small"></div>`;
         if(typeof this.activeItem.iconPoint!='undefined'){
             iconPoint = `<div class="timeline-point \${this.activeItem.iconPointColor}">

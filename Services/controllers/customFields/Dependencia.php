@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Services\controllers\customFields;
 
 class Dependencia extends Autocomplete
 {
-  public function jsContent(): ?string
+  public function getAdditionJsWs(): string
   {
     return <<<JAVASCRIPT
           let options_{$this->CamposFormato->nombre} = {

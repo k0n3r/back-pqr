@@ -13,7 +13,7 @@ class GenerateWsPqr extends GenerateWsFt
         return false;
     }
 
-    protected function generateEdit(): bool
+    public function generateEdit(): bool
     {
         return false;
     }
@@ -31,6 +31,7 @@ class GenerateWsPqr extends GenerateWsFt
     {
         $WsGenerator = $this->getWsGenerator();
         $folder = 'src/Bundles/pqr/Services/controllers/templates/';
+
         $page404 = WsGenerator::generateFileForWs('src/legacy/controllers/generator/webservice/templates/404.html');
         $infoQrFile = WsGenerator::generateFileForWs($folder . 'infoQR.html');
         $infoQRJsFile = WsGenerator::generateFileForWs($folder . 'infoQR.js');

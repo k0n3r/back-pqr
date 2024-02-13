@@ -17,6 +17,18 @@ $(function () {
     function loadjsComponent() {
         $componentsJS
     }
+    
+    function loadHelper() {
+        $('[data-toggle="popover"]').popover({
+            html: true,
+            trigger: 'click',
+            placement: 'right',
+            content: function () {
+                const content = $("#" + $(this).data('field') + "_help").clone().removeClass('d-none');
+                return content[0].outerHTML;
+            }
+        });
+    }
 
     function processField(field, applyShow = false) {
         const sGroup = $("#group_" + field.name);
@@ -86,6 +98,7 @@ $comment       grecaptcha.execute('$recaptchaPublicKey', { action: 'submit' }).t
                     let data = Object.assign(dataForm, {
 $comment                tokenRecaptcha,
                         formatId: $formatId,
+                        webservice : 1,
                         dependencia: window.credential.WsRol
                     });
 
@@ -211,6 +224,7 @@ $comment   });
     //TERMINA Search
 
     loadjsComponent();
+    loadHelper();
 });
 JAVASCRIPT;
 echo $code;

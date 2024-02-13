@@ -2,18 +2,30 @@
 
 namespace App\Bundles\pqr\Services\controllers;
 
-use Saia\controllers\generator\webservice\WsFormulario;
+use Saia\controllers\generator\webservice\WsFt;
 
-class WebserviceCalificacion extends WsFormulario
+class WebserviceCalificacion extends WsFt
 {
     /**
      * @inheritDoc
      */
-    public function getJsContentForm(bool $isEdit = false): string
+    protected function getCodeJsNotification(): string
     {
-        return static::getContent(
-            'src/Bundles/pqr/Services/controllers/templates/formCalificacion.js.php',
-            $this->getDefaultValuesForJsContent($isEdit)
-        );
+        return <<<JS
+window.notification({
+    title: "¡Muchas gracias por su tiempo!",
+    color: 'green',
+    position: "center",
+    overlay: true,
+    timeout: false,
+    icon: 'fa fa-check',
+    layout: 2,
+    message: '<br/>Con esta calificación nos ayuda a mejorar nuestros servicios',
+    onClosed: function () {
+        window.location.href = '../pqr/index.html';
+    }
+});
+JS;
+
     }
 }
