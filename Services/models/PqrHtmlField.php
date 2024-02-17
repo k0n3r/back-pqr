@@ -28,12 +28,12 @@ class PqrHtmlField extends Model
 
     /**
      * Valida si el tipo de campo es valido
-     * para guardar como dias de respuesta
+     * para guardar como dias de respuesta o balanceo
      *
      * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-05
      */
-    public function isValidFieldForResponseDays(): bool
+    public function isValidFieldForResponseDaysOrBalance(): bool
     {
         $allow = [
             'Select',

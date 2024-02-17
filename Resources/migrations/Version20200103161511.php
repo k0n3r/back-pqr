@@ -168,7 +168,6 @@ final class Version20200103161511 extends AbstractMigration
 
     private function getDataPqrFormFields(int $idform, array $idsHtmlFields): array
     {
-
         return [
             [
                 'label'              => 'Tipo',

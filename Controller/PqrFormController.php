@@ -9,7 +9,6 @@ use Exception;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
-use Saia\models\formatos\CamposFormato;
 use Saia\models\funcion\Funcion;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -258,7 +257,7 @@ class PqrFormController extends AbstractController
     }
 
     /**
-     * Acutaliza el campo mostrar/ocultar campos vacios
+     * Actualiza el campo mostrar/ocultar campos vacios
      * @Route("/showEmpty", name="updateShowEmpty", methods={"PUT"})
      *
      * @param Request       $Request
@@ -329,6 +328,49 @@ class PqrFormController extends AbstractController
 
             $success = $PqrFormService->save([
                 'enable_filter_dep' => $status
+            ]);
+
+            if (!$success) {
+                throw new SaiaException($PqrFormService->getErrorManager()->getMessage());
+            }
+
+            $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
+            $saiaResponse->setSuccess(1);
+            $Connection->commit();
+        } catch (Throwable $th) {
+            $Connection->rollBack();
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * Habilita/deshabilita el balanceo
+     * @Route("/balancer", name="updateEnableBalancer", methods={"PUT"})
+     *
+     * @param Request       $Request
+     * @param ISaiaResponse $saiaResponse
+     * @param Connection    $Connection
+     * @return Response
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
+     */
+    public function updateEnableBalancer(
+        Request $Request,
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
+
+        $Connection->beginTransaction();
+        try {
+
+            $status = $Request->get('enable_balancer', 0);
+
+            $PqrForm = PqrForm::getInstance();
+            $PqrFormService = $PqrForm->getService();
+
+            $success = $PqrFormService->save([
+                'enable_balancer' => $status
             ]);
 
             if (!$success) {

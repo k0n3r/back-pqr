@@ -1,14 +1,12 @@
 <?php
 
-
 namespace App\Bundles\pqr\Services\models;
 
-
-use App\Bundles\pqr\Services\PqrResponseTimeService;
+use App\Bundles\pqr\Services\PqrBalancerService;
 use Saia\core\model\Model;
 use Saia\models\formatos\CampoOpciones;
 
-class PqrResponseTime extends Model
+class PqrBalancer extends Model
 {
     private ?CampoOpciones $CampoOpcion = null;
 
@@ -18,31 +16,26 @@ class PqrResponseTime extends Model
             'safe'    => [
                 'fk_campo_opciones',
                 'fk_sys_tipo',
-                'number_days',
+                'fk_grupo',
                 'active'
             ],
             'primary' => 'id',
-            'table'   => 'pqr_response_times',
+            'table'   => 'pqr_balancer',
         ];
     }
 
-    /**
-     * Obtiene el servicio
-     *
-     * @return PqrResponseTimeService
-     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
-     */
-    public function getService(): PqrResponseTimeService
+    public function getService(): PqrBalancerService
     {
-        return new PqrResponseTimeService($this);
+        return new PqrBalancerService($this);
     }
+
 
     /**
      * Obtiene la instancia del campo segundario sobre el cual
-     * se esta validando el tiempo de respuesta (opciones de sys_tipo)
+     * se esta validando el balanceo (opciones de sys_tipo)
      *
      * @return CampoOpciones
-     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-17
      */
     public function getCampoOpcionForSysTipo(): CampoOpciones
     {
@@ -51,5 +44,4 @@ class PqrResponseTime extends Model
         }
         return $this->CampoOpcion;
     }
-
 }

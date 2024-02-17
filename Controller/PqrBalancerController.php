@@ -1,11 +1,9 @@
 <?php
 
-
 namespace App\Bundles\pqr\Controller;
 
-
+use App\Bundles\pqr\Services\models\PqrBalancer;
 use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrResponseTime;
 use App\services\exception\SaiaException;
 use App\services\response\ISaiaResponse;
 use Doctrine\DBAL\Connection;
@@ -17,45 +15,33 @@ use Throwable;
 
 
 /**
- * @Route("/responseTimes", name="responseTimes_")
+ * @Route("/balancer", name="responseTimes_")
  */
-class PqrResponseTimeController extends AbstractController
+class PqrBalancerController extends AbstractController
 {
     /**
-     * @Route("/field/{id}", name="timesForField", methods={"GET"})
+     * @Route("/field/{id}", name="groupsForField", methods={"GET"})
      */
-    public function timesForField(
+    public function groupsForField(
         int $id,
         ISaiaResponse $saiaResponse
     ): Response {
 
         try {
-            $record = PqrResponseTime::findAllByAttributes([
+            $record = PqrBalancer::findAllByAttributes([
                 'fk_campo_opciones' => $id,
                 'active'            => 1
             ]);
 
             $data = [];
-            $keys = [];
-            $mayor = 0;
-            foreach ($record as $PqrResponseTime) {
-                $CampoOpcion = $PqrResponseTime->getCampoOpcionForSysTipo();
+            foreach ($record as $PqrBalancer) {
+                $CampoOpcion = $PqrBalancer->getCampoOpcionForSysTipo();
 
-                $key = (int)$CampoOpcion->orden;
-                $mayor = max($key, $mayor);
-
-                if (!in_array($key, $keys)) {
-                    $keys[] = $key;
-                    $orden = $key;
-                } else {
-                    $mayor++;
-                    $orden = $mayor;
-                }
-
+                $orden = (int)$CampoOpcion->orden;
                 $data[$orden] = [
-                    'id'   => $PqrResponseTime->getPK(),
-                    'text' => $CampoOpcion->valor,
-                    'dias' => (int)$PqrResponseTime->number_days ?: 1
+                    'id'      => $PqrBalancer->getPK(),
+                    'text'    => $CampoOpcion->valor,
+                    'groupId' => (int)$PqrBalancer->fk_grupo
                 ];
             }
 
@@ -70,9 +56,9 @@ class PqrResponseTimeController extends AbstractController
     }
 
     /**
-     * @Route("", name="updateTimes", methods={"PUT"})
+     * @Route("", name="updateGroupsBalancer", methods={"PUT"})
      */
-    public function updateTimes(
+    public function updateGroupsBalancer(
         Request $Request,
         ISaiaResponse $saiaResponse,
         Connection $Connection
@@ -81,27 +67,21 @@ class PqrResponseTimeController extends AbstractController
         $Connection->beginTransaction();
         try {
 
-            if (!$id = $Request->get('fk_field_time', 0)) {
+            if (!$id = $Request->get('fk_field_balancer', 0)) {
                 throw new SaiaException("Falta el identificador del campo de los tiempos de respuesta");
             }
 
             $PqrForm = PqrForm::getInstance();
             $PqrForm->getService()->save([
-                'fk_field_time' => $id
+                'fk_field_balancer' => $id
             ]);
 
             $options = $Request->get('options');
-            $i = 1;
             foreach ($options as $option) {
-                $PqrResponseTimeService = (new PqrResponseTime($option['id']))->getService();
-                $PqrResponseTimeService->save([
-                    'number_days' => $option['dias']
+                $PqrBalancerService = (new PqrBalancer($option['id']))->getService();
+                $PqrBalancerService->save([
+                    'fk_grupo' => $option['groupId']
                 ]);
-                $CampoOpcionesService = $PqrResponseTimeService->getModel()->getCampoOpcionForSysTipo()->getService();
-                $CampoOpcionesService->save([
-                    'orden' => $i
-                ]);
-                $i++;
             }
 
             $saiaResponse->setSuccess(1);

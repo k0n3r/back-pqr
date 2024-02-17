@@ -11,6 +11,7 @@ use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\models\busqueda\BusquedaComponente;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
+use Saia\models\grupo\Grupo;
 use Saia\models\Modulo;
 
 class PqrFormService extends ModelService
@@ -118,6 +119,7 @@ class PqrFormService extends ModelService
      */
     public function getSetting(): array
     {
+        $options = $this->getDataresponseTime();
         return [
             'urlWs'               => static::getUrlWsPQR(),
             'publish'             => $this->getModel()->fk_formato ? 1 : 0,
@@ -125,9 +127,27 @@ class PqrFormService extends ModelService
             'pqrFormFields'       => $this->getDataPqrFormFields(),
             'pqrNotifications'    => $this->getDataPqrNotifications(),
             'optionsNotyMessages' => PqrNotyMessageService::getDataPqrNotyMessages(),
-            'responseTimeOptions' => $this->getDataresponseTime(),
+            'responseTimeOptions' => $options,
+            'balancerOptions'     => $options,
+            'groupOptions'        => $this->getGroupsForBalancer(),
             'descriptionField'    => $this->getdescriptionField()
         ];
+    }
+
+    private function getGroupsForBalancer(): array
+    {
+        $Groups = Grupo::findAllByAttributes([
+            'estado' => 1
+        ]);
+
+        $dataGroups = [];
+        foreach ($Groups as $Grupo) {
+            $dataGroups[] = [
+                'id'   => $Grupo->getPK(),
+                'name' => $Grupo->nombre
+            ];
+        }
+        return $dataGroups;
     }
 
     /**
@@ -712,7 +732,7 @@ SQL;
                 $PqrHtmlField = $PqrFormField->getPqrHtmlField();
 
                 if (
-                    $PqrHtmlField->isValidFieldForResponseDays() &&
+                    $PqrHtmlField->isValidFieldForResponseDaysOrBalance() &&
                     $PqrFormField->isActive() &&
                     $PqrFormField->fk_campos_formato
                 ) {

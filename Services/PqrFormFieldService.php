@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\Bundles\pqr\Services\models\PqrBalancer;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
 use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
@@ -22,6 +23,8 @@ class PqrFormFieldService extends ModelService
      */
     const INITIAL_ORDER = 2;
     const DEFAULT_DAY = 15;
+
+    private array $CampoOpcionesSysTipo = [];
 
     /**
      * Obtiene la instancia de PqrFormField actualizada
@@ -431,8 +434,8 @@ class PqrFormFieldService extends ModelService
         ]);
         $CampoFormato->save();
 
-        if ($PqrFormField->getPqrHtmlField()->isValidFieldForResponseDays()) {
-            $this->addEditPqrResponseTimes();
+        if ($PqrFormField->getPqrHtmlField()->isValidFieldForResponseDaysOrBalance()) {
+            $this->addEditPqrResponseTimesAndBalancer();
         }
     }
 
@@ -441,12 +444,14 @@ class PqrFormFieldService extends ModelService
      *
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
      */
-    private function addEditPqrResponseTimes(): void
+    private function addEditPqrResponseTimesAndBalancer(): void
     {
         if ($this->getModel()->name == PqrFormField::FIELD_NAME_SYS_TIPO) {
             $this->addEditPqrResponseTimesForSysTipo();
+            $this->addEditPqrBalancerForSysTipo();
         } else {
             $this->addEditPqrResponseTimesForOtherFields();
+            $this->addEditPqrBalancerForOtherFields();
         }
     }
 
@@ -487,6 +492,44 @@ class PqrFormFieldService extends ModelService
                     'fk_campo_opciones' => -1,
                     'fk_sys_tipo'       => $Option->getPK(),
                     'number_days'       => $this->getDaysForSystipo($Option->valor),
+                    'active'            => 1
+                ]);
+            }
+        }
+    }
+
+    private function addEditPqrBalancerForSysTipo(): void
+    {
+        $sysTipoOptions = $this->getSysTipoOptions();
+
+        PqrBalancer::executeUpdate([
+            'active' => 0
+        ], [
+            'fk_campo_opciones' => -1
+        ]);
+
+        foreach ($sysTipoOptions as $Option) {
+            if (!$Option->estado) {
+                continue;
+            }
+
+            $PqrBalancer = PqrBalancer::findByAttributes([
+                'fk_campo_opciones' => -1,
+                'fk_sys_tipo'       => $Option->getPK(),
+            ]);
+
+            if ($PqrBalancer) {
+                if (!$PqrBalancer->active) {
+                    $PqrBalancer->getService()->save([
+                        'active' => 1
+                    ]);
+                }
+            } else {
+                $PqrBalancerService = (new PqrBalancer)->getService();
+                $PqrBalancerService->save([
+                    'fk_campo_opciones' => -1,
+                    'fk_sys_tipo'       => $Option->getPK(),
+                    'fk_grupo'          => -1,
                     'active'            => 1
                 ]);
             }
@@ -544,6 +587,52 @@ class PqrFormFieldService extends ModelService
         }
     }
 
+    private function addEditPqrBalancerForOtherFields(): void
+    {
+        $sysTipoOptions = $this->getSysTipoOptions();
+
+        $records = $this->getModel()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
+
+        foreach ($records as $CampoOpciones) {
+            PqrBalancer::executeUpdate([
+                'active' => 0
+            ], [
+                'fk_campo_opciones' => $CampoOpciones->getPK()
+            ]);
+
+            if (!$CampoOpciones->estado) {
+                continue;
+            }
+
+            foreach ($sysTipoOptions as $Option) {
+                if (!$Option->estado) {
+                    continue;
+                }
+
+                $PqrBalancer = PqrBalancer::findByAttributes([
+                    'fk_campo_opciones' => $CampoOpciones->getPK(),
+                    'fk_sys_tipo'       => $Option->getPK(),
+                ]);
+
+                if ($PqrBalancer) {
+                    if (!$PqrBalancer->active) {
+                        $PqrBalancer->getService()->save([
+                            'active' => 1
+                        ]);
+                    }
+                } else {
+                    $PqrBalancerService = (new PqrBalancer)->getService();
+                    $PqrBalancerService->save([
+                        'fk_campo_opciones' => $CampoOpciones->getPK(),
+                        'fk_sys_tipo'       => $Option->getPK(),
+                        'fk_grupo'          => -1,
+                        'active'            => 1
+                    ]);
+                }
+            }
+        }
+    }
+
     /**
      * Retorna los dias por defecto que tendra el campo
      * sys_tipo
@@ -569,6 +658,9 @@ class PqrFormFieldService extends ModelService
      */
     private function getSysTipoOptions(): array
     {
-        return $this->getModel()::getSysTipoField()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
+        if (!$this->CampoOpcionesSysTipo) {
+            $this->CampoOpcionesSysTipo = $this->getModel()::getSysTipoField()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
+        }
+        return $this->CampoOpcionesSysTipo;
     }
 }

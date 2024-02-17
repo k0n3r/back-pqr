@@ -41,9 +41,11 @@ class PqrForm extends Model
                 'show_empty',
                 'active',
                 'response_configuration',
-                'fk_field_time',
+                'fk_field_time', //Campos Formato
                 'enable_filter_dep',
-                'description_field'
+                'description_field',
+                'enable_balancer',
+                'fk_field_balancer' //Campos Formato
             ],
             'primary' => 'id',
             'table'   => 'pqr_forms'

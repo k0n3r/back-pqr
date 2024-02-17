@@ -44,6 +44,9 @@ final class Version20200103155146 extends AbstractMigration
 
         $table9 = $schema->createTable('pqr_response_times');
         $this->tablePqrResponseTime($table9);
+
+        $table10 = $schema->createTable('pqr_balancer');
+        $this->tablePqrBalancer($table10);
     }
 
     private function tablePqrFormFields(Table $table)
@@ -178,6 +181,13 @@ final class Version20200103155146 extends AbstractMigration
             'length'  => 11,
             'default' => 0
         ]);
+
+        $table->addColumn('enable_balancer', 'boolean', ['default' => 0]);
+        $table->addColumn('fk_field_balancer', 'integer', [
+            'default' => 0,
+            'comment' => 'idcampos_formato'
+        ]);
+
     }
 
     private function tablePqrBackup(Table $table)
@@ -298,7 +308,8 @@ final class Version20200103155146 extends AbstractMigration
             'pqr_notifications',
             'pqr_history',
             'pqr_noty_messages',
-            'pqr_response_times'
+            'pqr_response_times',
+            'pqr_balancer'
         ];
 
         foreach ($data as $table) {
@@ -306,5 +317,22 @@ final class Version20200103155146 extends AbstractMigration
                 $schema->dropTable($table);
             }
         }
+    }
+
+    private function tablePqrBalancer(Table $table)
+    {
+        $table->addColumn('id', 'integer', [
+            'autoincrement' => true
+        ]);
+        $table->setPrimaryKey(['id']);
+
+        $table->addColumn('fk_campo_opciones', 'integer');
+        $table->addColumn('fk_sys_tipo', 'integer', [
+            'comment' => 'idcampo_opciones'
+        ]);
+        $table->addColumn('fk_grupo', 'integer');
+        $table->addColumn('active', 'boolean', [
+            'default' => 1
+        ]);
     }
 }
