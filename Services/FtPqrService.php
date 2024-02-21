@@ -3,6 +3,7 @@
 namespace App\Bundles\pqr\Services;
 
 use App\Bundles\pqr\Services\models\PqrBackup;
+use App\Bundles\pqr\Services\models\PqrBalancer;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
@@ -10,9 +11,11 @@ use App\Bundles\pqr\Services\models\PqrResponseTime;
 use App\services\correo\EmailSaia;
 use App\services\correo\SendEmailSaia;
 use App\services\exception\SaiaException;
+use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use DateInterval;
 use DateTime;
+use Doctrine\DBAL\Types\Types;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
 use Saia\controllers\DistributionService;
@@ -28,8 +31,10 @@ use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+use Saia\models\grupo\Grupo;
 use Saia\models\tarea\Tarea;
 use Saia\models\Tercero;
+use Saia\models\vistas\VfuncionarioDc;
 
 class FtPqrService extends ModelService
 {
@@ -269,6 +274,18 @@ class FtPqrService extends ModelService
 
     }
 
+    public function getFuncionarioFromBalacer(): ?VfuncionarioDc
+    {
+        if ($PqrBalancer = PqrBalancer::findByAttributes([
+            'fk_campo_opciones' => $this->getIdFromBalancer(),
+            'fk_sys_tipo'       => $this->getModel()->sys_tipo
+        ])) {
+            return $this->getFuncionarioFromGroup($PqrBalancer->getGrupo());
+        }
+
+        return null;
+    }
+
     /**
      * Obtiene el id del campo seleccionado como
      * tiempo de respuesta
@@ -279,6 +296,17 @@ class FtPqrService extends ModelService
     protected function getIdFromResponseTimes(): int
     {
         $CamposFormato = $this->getPqrForm()->getCampoFormatoForFieldTime();
+        if ($CamposFormato->getPK() == PqrFormField::getSysTipoField()->fk_campos_formato) {
+            return -1;
+        }
+        $nameField = $CamposFormato->nombre;
+        return (int)$this->getModel()->$nameField;
+
+    }
+
+    protected function getIdFromBalancer(): int
+    {
+        $CamposFormato = $this->getPqrForm()->getCampoFormatoForFieldBalancer();
         if ($CamposFormato->getPK() == PqrFormField::getSysTipoField()->fk_campos_formato) {
             return -1;
         }
@@ -757,7 +785,7 @@ HTML;
         $SaveFt->edit($newAttributes);
         $this->Model = $this->getDocument()->getFt();
 
-        if($refreshDescription){
+        if ($refreshDescription) {
             $this->getDocument()->refreshDescription();
         }
 
@@ -1204,13 +1232,24 @@ HTML;
                     'external' => 0
                 ]
             ],
-            'notification'  => 1,// Notificar por Email
+            'notification'  => $this->enableEmailNotificationTask(),// Notificar por Email
             'fecha_inicial' => $this->getTaskDefaultStartDate($DateTime),
             'fecha_final'   => $this->getTaskDefaultEndDate($DateTime),
             'descripcion'   => '',
             'relacion'      => Tarea::RELACION_DOCUMENTO,
             'relacion_id'   => $this->getDocument()->getPK()
         ];
+    }
+
+    /**
+     * Uno para enviar correo de la tarea y 0 para no enviar
+     *
+     * @return int
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-20
+     */
+    protected function enableEmailNotificationTask(): int
+    {
+        return 0;
     }
 
     /**
@@ -1283,6 +1322,89 @@ HTML;
         }
 
         return true;
+    }
+
+    /**
+     * Obtiene el funcionario a quien se le asignara la PQR
+     *
+     * @param Grupo $Grupo
+     * @return VfuncionarioDc|null
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-20
+     */
+    protected function getFuncionarioFromGroup(Grupo $Grupo): ?VfuncionarioDc
+    {
+        if (!$Grupo->estado) {
+            return null;
+        }
+
+        $arrGrupoFunc = $this->getUserForGroup($Grupo);
+        if (!$arrGrupoFunc) {
+            return null;
+        }
+
+        $arraFunc = [];
+        foreach ($arrGrupoFunc as $row) {
+            $cantTask = $this->getTaskForUser($row['idfuncionario']);
+            $arraFunc[$row['fk_dependencia_cargo']] = $cantTask;
+        }
+
+        $minValue = min($arraFunc);
+        $fKdependenciaCargo = array_search($minValue, $arraFunc);
+
+        return VfuncionarioDc::findByRole($fKdependenciaCargo);
+
+        /*
+        SELECT tf.usuario as idfuncionario,count(tf.usuario) as cant_task
+        FROM vpqr p
+        JOIN tarea t ON p.iddocumento=t.relacion_id
+        JOIN tarea_funcionario tf ON tf.fk_tarea=t.idtarea
+        JOIN tarea_estado te ON te.fk_tarea=t.idtarea
+        WHERE t.relacion=1
+        AND tf.tipo=1 AND tf.externo=0
+        AND te.valor IN (2,3,5) AND te.estado=1
+        GROUP BY tf.usuario;
+
+        */
+    }
+
+    /**
+     * Obtiene los funcionarios asignados al grupo
+     *
+     * @param Grupo $Grupo
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-20
+     */
+    protected function getUserForGroup(Grupo $Grupo): array
+    {
+        return GlobalContainer::getConnection()
+            ->createQueryBuilder()
+            ->select('dc.funcionario_idfuncionario as idfuncionario,gf.fk_dependencia_cargo')
+            ->from('grupo_funcionario', 'gf')
+            ->join('gf', 'dependencia_cargo', 'dc')
+            ->where('gf.estado=1')
+            ->andWhere('dc.estado=1')
+            ->andWhere('gf.fk_grupo=:groupId')
+            ->setParameter(':groupId', $Grupo->getPK(), Types::INTEGER)
+            ->execute()->fetchAllAssociative();
+    }
+
+    /**
+     * Obtiene las tareas por funcionario asignadas a los documentos
+     * del formato PQR
+     *
+     * @param int $idfuncionario
+     * @return int
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-20
+     */
+    protected function getTaskForUser(int $idfuncionario): int
+    {
+        return (int)GlobalContainer::getConnection()
+            ->createQueryBuilder()
+            ->select('cant_task')
+            ->from('vpqr_tareas')
+            ->where('idfuncionario=:idfuncionario')
+            ->setParameter(':idfuncionario', $idfuncionario, Types::INTEGER)
+            ->execute()->fetchOne();
     }
 
 }

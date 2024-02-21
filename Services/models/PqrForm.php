@@ -188,6 +188,17 @@ class PqrForm extends Model
     }
 
     /**
+     * Obtiene la instancia de CamposFormato sobre el cual
+     * se valida el balanceo
+     *
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
+     */
+    public function getCampoFormatoForFieldBalancer(): CamposFormato
+    {
+        return new CamposFormato($this->fk_field_balancer);
+    }
+
+    /**
      * Obtiene el PqrFormField que se utiliza como campo descripcion adicional
      *
      * @return PqrFormField|null
@@ -199,5 +210,14 @@ class PqrForm extends Model
             return new PqrFormField($this->description_field);
         }
         return null;
+    }
+
+    /**
+     * @return bool
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-20
+     */
+    public function isEnableBalancer(): bool
+    {
+        return (bool)$this->enable_balancer;
     }
 }

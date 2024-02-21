@@ -5,10 +5,12 @@ namespace App\Bundles\pqr\Services\models;
 use App\Bundles\pqr\Services\PqrBalancerService;
 use Saia\core\model\Model;
 use Saia\models\formatos\CampoOpciones;
+use Saia\models\grupo\Grupo;
 
 class PqrBalancer extends Model
 {
     private ?CampoOpciones $CampoOpcion = null;
+    private ?Grupo $Grupo = null;
 
     protected function defineAttributes(): void
     {
@@ -43,5 +45,17 @@ class PqrBalancer extends Model
             $this->CampoOpcion = new CampoOpciones($this->fk_sys_tipo);
         }
         return $this->CampoOpcion;
+    }
+
+    /**
+     * @return Grupo
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-20
+     */
+    public function getGrupo(): Grupo
+    {
+        if (!$this->Grupo) {
+            $this->Grupo = new Grupo($this->fk_grupo);
+        }
+        return $this->Grupo;
     }
 }

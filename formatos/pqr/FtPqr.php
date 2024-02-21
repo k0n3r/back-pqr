@@ -10,7 +10,6 @@ use Doctrine\DBAL\Types\Types;
 use Saia\controllers\generator\component\Distribution;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\CamposFormato;
-use Saia\models\Funcionario;
 use Saia\models\Tercero;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrService;
@@ -40,7 +39,7 @@ class FtPqr extends FtPqrProperties
 
     protected ?FtPqrService $FtPqrService = null;
     private ?FtPqrCalificacion $lastFtPqrCalificacion = null;
-    private ?Funcionario $FuncionarioDestinoInterno = null;
+    private ?VfuncionarioDc $FuncionarioDestinoInterno = null;
 
     /**
      * @inheritDoc
@@ -248,6 +247,7 @@ class FtPqr extends FtPqrProperties
             return true;
         }
 
+        $this->saveDestinoInterno();
         $this->descripcion = $this->getDocument()->getDescription();
         $this->save();
 
@@ -286,7 +286,7 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
-     * Carga todo el mostrar del formulario
+     * Carga el mostrar del formulario
      *
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -398,16 +398,21 @@ HTML;
      */
     public function getFuncionarioDestinoInterno(): ?VfuncionarioDc
     {
-        if ($this->getDocument()->fromWebservice()) {
+        $fieldName = $this->getFieldNameDestinoInterno();
+        if (!$this->$fieldName) {
             return null;
         }
 
         if (!$this->FuncionarioDestinoInterno) {
-            $fieldName = Distribution::DESTINO_INTERNO;
             $this->FuncionarioDestinoInterno = VfuncionarioDc::findByRole($this->$fieldName);
         }
 
         return $this->FuncionarioDestinoInterno;
+    }
+
+    private function getFieldNameDestinoInterno(): string
+    {
+        return Distribution::DESTINO_INTERNO;
     }
 
     /**
@@ -430,5 +435,27 @@ HTML;
     protected function getJsonFromPqrBackup(): object
     {
         return $this->getPqrBackup()->getDataJson();
+    }
+
+    /**
+     * Guarda el funcionario que quedara como responsable de la pqr
+     *
+     * @return bool
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-20
+     */
+    public function saveDestinoInterno(): bool
+    {
+        if ($this->getDocument()->fromWebservice()) {
+            $PqrForm = $this->getService()->getPqrService()->getPqrForm();
+            if ($PqrForm->isEnableBalancer()) {
+                if ($VfuncionarioDc = $this->getService()->getFuncionarioFromBalacer()) {
+                    $fieldName = $this->getFieldNameDestinoInterno();
+
+                    $this->FuncionarioDestinoInterno = $VfuncionarioDc;
+                    $this->$fieldName = $VfuncionarioDc->iddependencia_cargo;
+                }
+            }
+        }
+        return true;
     }
 }
