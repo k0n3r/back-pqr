@@ -1352,19 +1352,6 @@ HTML;
         $fKdependenciaCargo = array_search($minValue, $arraFunc);
 
         return VfuncionarioDc::findByRole($fKdependenciaCargo);
-
-        /*
-        SELECT tf.usuario as idfuncionario,count(tf.usuario) as cant_task
-        FROM vpqr p
-        JOIN tarea t ON p.iddocumento=t.relacion_id
-        JOIN tarea_funcionario tf ON tf.fk_tarea=t.idtarea
-        JOIN tarea_estado te ON te.fk_tarea=t.idtarea
-        WHERE t.relacion=1
-        AND tf.tipo=1 AND tf.externo=0
-        AND te.valor IN (2,3,5) AND te.estado=1
-        GROUP BY tf.usuario;
-
-        */
     }
 
     /**

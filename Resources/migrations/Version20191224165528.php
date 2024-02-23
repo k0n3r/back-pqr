@@ -470,6 +470,8 @@ final class Version20191224165528 extends AbstractMigration
         $OtherQueriesForPlatform->dropViewIfExist('vpqr');
         $OtherQueriesForPlatform->dropViewIfExist('vpqr_respuesta');
         $OtherQueriesForPlatform->dropViewIfExist('vpqr_calificacion');
+        $OtherQueriesForPlatform->dropViewIfExist('vpqr_tareas');
+
     }
 
     private function delOtherModules()

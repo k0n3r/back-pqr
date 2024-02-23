@@ -13,6 +13,9 @@ use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use Saia\models\grupo\Grupo;
 use Saia\models\Modulo;
+use Saia\models\tarea\Tarea;
+use Saia\models\tarea\TareaEstado;
+use Saia\models\tarea\TareaFuncionario;
 
 class PqrFormService extends ModelService
 {
@@ -204,6 +207,7 @@ class PqrFormService extends ModelService
         $this->generaReport();
         $this->viewRespuestaPqr();
         $this->viewCalificacionPqr();
+        $this->viewPqrTarea();
 
         PqrService::activeGraphics();
         $this->activeInfoForDependency();
@@ -718,6 +722,36 @@ SQL;
     }
 
     /**
+     *
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-21
+     */
+    private function viewPqrTarea()
+    {
+        $tRelacion = Tarea::RELACION_DOCUMENTO;
+        $teEstados = implode(',', [
+            TareaEstado::PENDIENTE,
+            TareaEstado::PROCESO,
+            TareaEstado::DEVUELTA,
+        ]);
+        $tfTipo=TareaFuncionario::TYPE_MANAGER;
+        $tfExterno=TareaFuncionario::INTERNAL_USER;
+
+        $sql = <<<SQL
+SELECT tf.usuario as idfuncionario,count(tf.usuario) as cant_task
+FROM vpqr p
+JOIN tarea t ON p.iddocumento=t.relacion_id
+JOIN tarea_funcionario tf ON tf.fk_tarea=t.idtarea
+JOIN tarea_estado te ON te.fk_tarea=t.idtarea
+WHERE t.relacion=$tRelacion
+AND tf.tipo=$tfTipo AND tf.externo=$tfExterno
+AND te.valor IN ($teEstados) AND te.estado=1
+GROUP BY tf.usuario;
+SQL;
+
+        $this->createView('vpqr_tareas', $sql);
+    }
+
+    /**
      * Obtiene los campos que se utilizaran para la combinacion
      * de dias de respuesta
      *
@@ -920,4 +954,6 @@ SQL;
             'description_field' => $fieldId
         ]);
     }
+
+
 }
