@@ -1367,7 +1367,7 @@ HTML;
             ->createQueryBuilder()
             ->select('dc.funcionario_idfuncionario as idfuncionario,gf.fk_dependencia_cargo')
             ->from('grupo_funcionario', 'gf')
-            ->join('gf', 'dependencia_cargo', 'dc')
+            ->join('gf', 'dependencia_cargo', 'dc', 'dc.iddependencia_cargo=gf.fk_dependencia_cargo')
             ->where('gf.estado=1')
             ->andWhere('dc.estado=1')
             ->andWhere('gf.fk_grupo=:groupId')
