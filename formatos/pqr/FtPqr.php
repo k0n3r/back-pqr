@@ -106,6 +106,10 @@ class FtPqr extends FtPqrProperties
      */
     public function getNumberFolios(): int
     {
+        if ($this->getDocument()->isRadicated()) {
+            return parent::getNumberFolios();
+        }
+
         return $this->sys_folios ?: 0;
     }
 
