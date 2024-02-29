@@ -6,9 +6,6 @@ use Saia\controllers\generator\webservice\WsFt;
 
 class WebserviceCalificacion extends WsFt
 {
-    /**
-     * @inheritDoc
-     */
     protected function getCodeJsNotification(): string
     {
         return <<<JS
