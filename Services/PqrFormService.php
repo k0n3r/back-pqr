@@ -745,7 +745,7 @@ JOIN tarea_estado te ON te.fk_tarea=t.idtarea
 WHERE t.relacion=$tRelacion
 AND tf.tipo=$tfTipo AND tf.externo=$tfExterno
 AND te.valor IN ($teEstados) AND te.estado=1
-GROUP BY tf.usuario;
+GROUP BY tf.usuario
 SQL;
 
         $this->createView('vpqr_tareas', $sql);
