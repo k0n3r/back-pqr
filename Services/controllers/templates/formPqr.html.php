@@ -27,7 +27,7 @@
                     <form name='formSearch' id='formSearch' role='form' autocomplete='off'>
                         <input type="hidden" name="_csrf" value="">
                         <div class="form-group form-group-default required">
-                            <label>Número radicado:
+                            <label>Número de Consecutivo:
                                 <input class="form-control required" name="numero" type="number">
                             </label>
                         </div>
