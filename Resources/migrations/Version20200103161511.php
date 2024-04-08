@@ -47,7 +47,7 @@ final class Version20200103161511 extends AbstractMigration
             );
         }
 
-        $fields = $this->getDataPqrNotyMessages();
+        $fields = self::getDataPqrNotyMessages();
         foreach ($fields as $field) {
             $this->connection->insert('pqr_noty_messages', $field);
         }
@@ -251,7 +251,7 @@ final class Version20200103161511 extends AbstractMigration
         ];
     }
 
-    private function getDataPqrNotyMessages(): array
+    public static function getDataPqrNotyMessages(): array
     {
         return [
             [
@@ -259,7 +259,7 @@ final class Version20200103161511 extends AbstractMigration
                 'label'        => 'Radicar solicitud (Notificación)',
                 'description'  => 'Mensaje informativo que se muestra al radicar la solicitud desde el webservice',
                 'subject'      => null,
-                'message_body' => '<br/>Su solicitud ha sido generada con el número de radicado <strong>{*n_numeroPqr*}</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!',
+                'message_body' => '<br/>Su solicitud ha sido generada con el radicado {*n_radicadoPqr*}<br/>el seguimiento lo puede realizar en el apartado de consulta con el número de consecutivo <strong>{*n_consecutivoPqr*}</strong> y el correo registrado<br/><br/>Gracias por visitarnos!',
                 'type'         => 1,
                 'active'       => 1,
             ],
@@ -267,8 +267,8 @@ final class Version20200103161511 extends AbstractMigration
                 'name'         => 'f1_email_solicitante',
                 'label'        => 'Radicar solicitud (E-mail)',
                 'description'  => 'E-mail que se envia al radicar una solicitud',
-                'subject'      => 'Solicitud de {*n_nombreFormularioPqr*} # {*n_numeroPqr*}',
-                'message_body' => 'Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {*n_numeroPqr*}, adjunto encontrará una copia de la información diligenciada el día de hoy.<br/><br/>El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado',
+                'subject'      => 'Solicitud de {*n_nombreFormularioPqr*} # {*n_radicadoPqr*}',
+                'message_body' => 'Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el radicado {*n_radicadoPqr*}, adjunto encontrará una copia de la información diligenciada el día de hoy.<br/><br/>El seguimiento lo puede realizar escaneando el código QR o consultando con el número de consecutivo asignado',
                 'type'         => 2,
                 'active'       => 1,
             ],
@@ -276,8 +276,8 @@ final class Version20200103161511 extends AbstractMigration
                 'name'         => 'f2_email_respuesta',
                 'label'        => 'Respuesta a la solicitud (E-mail)',
                 'description'  => 'E-mail que se envia al generar una respuesta a la solicitud',
-                'subject'      => 'Respuesta solicitud de {*n_nombreFormularioPqr*} # {*n_numeroPqr*}',
-                'message_body' => 'Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {*n_nombreFormularioPqr*} con número de radicado {*n_numeroPqr*}.<br/><br/>',
+                'subject'      => 'Respuesta solicitud de {*n_nombreFormularioPqr*} # {*n_radicadoPqr*}',
+                'message_body' => 'Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {*n_nombreFormularioPqr*} con radicado {*n_radicadoPqr*}.<br/><br/>',
                 'type'         => 2,
                 'active'       => 1,
             ]

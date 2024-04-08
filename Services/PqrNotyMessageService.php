@@ -23,7 +23,7 @@ class PqrNotyMessageService extends ModelService
      *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2020
+     * @date   2020
      */
     public static function getDataPqrNotyMessages(): array
     {
@@ -33,13 +33,13 @@ class PqrNotyMessageService extends ModelService
         ])) {
             foreach ($records as $PqrNotyMessage) {
                 $data[] = [
-                    'text' => $PqrNotyMessage->label,
+                    'text'  => $PqrNotyMessage->label,
                     'value' => [
-                        'id' => $PqrNotyMessage->getPK(),
-                        'description' => $PqrNotyMessage->description,
-                        'subject' => $PqrNotyMessage->subject,
+                        'id'           => $PqrNotyMessage->getPK(),
+                        'description'  => $PqrNotyMessage->description,
+                        'subject'      => $PqrNotyMessage->subject,
                         'message_body' => $PqrNotyMessage->message_body,
-                        'type' => $PqrNotyMessage->type
+                        'type'         => $PqrNotyMessage->type
                     ]
                 ];
             }
@@ -52,10 +52,10 @@ class PqrNotyMessageService extends ModelService
      * Resuelve y reemplaza las variables por los valores
      *
      * @param string $baseContent
-     * @param FtPqr $FtPqr
+     * @param FtPqr  $FtPqr
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
      */
     public static function resolveVariables(
         string $baseContent,
@@ -79,13 +79,13 @@ class PqrNotyMessageService extends ModelService
     /**
      * Obtiene el numero de la PQR
      *
-     * @see resolveVariables
      * @param FtPqr $FtPqr
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
+     * @see    resolveVariables
      */
-    public static function n_numeroPqr(FtPqr $FtPqr): string
+    public static function n_radicadoPqr(FtPqr $FtPqr): string
     {
         return $FtPqr->getDocument()->getService()->getFilingReferenceNumber();
     }
@@ -93,14 +93,28 @@ class PqrNotyMessageService extends ModelService
     /**
      * Obtiene la etiqueta el formulario PQR
      *
-     * @see resolveVariables
      * @param FtPqr $FtPqr
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date 2021
+     * @date   2021
+     * @see    resolveVariables
      */
     public static function n_nombreFormularioPqr(FtPqr $FtPqr): string
     {
         return $FtPqr->getService()->getPqrForm()->label;
+    }
+
+    /**
+     * Obtiene la etiqueta el formulario PQR
+     *
+     * @param FtPqr $FtPqr
+     * @return string
+     * @author Andres Agudelo <andres.agudelo@cerok.com>
+     * @date   2021
+     * @see    resolveVariables
+     */
+    public static function n_consecutivoPqr(FtPqr $FtPqr): string
+    {
+        return $FtPqr->getDocument()->numero;
     }
 }
