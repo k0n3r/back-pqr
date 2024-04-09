@@ -110,7 +110,7 @@ $comment                tokenRecaptcha,
                         if (response.success) {
                             clearForm(form);
                             window.notification({
-                                title: "Consecutivo No " + response.data.number,
+                                title: "Número Consecutivo: " + response.data.number,
                                 color: 'green',
                                 position: "center",
                                 overlay: true,
