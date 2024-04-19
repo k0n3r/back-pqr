@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\helpers;
 
+use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\services\correo\EmailSaia;
 use App\services\correo\SendEmailSaia;
 use App\services\GlobalContainer;
@@ -16,16 +17,27 @@ use Throwable;
 
 class UtilitiesPqr
 {
-    private static ?Formato $Formato = null;
+    private static ?Formato $FormatoPqr = null;
+    private static ?Formato $FormatoPqrRespuesta = null;
 
     private static function getFormatPqr(): Formato
     {
-        if (!static::$Formato) {
-            static::$Formato = Formato::findByAttributes([
+        if (!static::$FormatoPqr) {
+            static::$FormatoPqr = Formato::findByAttributes([
                 'nombre' => 'pqr'
             ]);
         }
-        return static::$Formato;
+        return static::$FormatoPqr;
+    }
+
+    private static function getFormatPqrRespuesta(): Formato
+    {
+        if (!static::$FormatoPqrRespuesta) {
+            static::$FormatoPqrRespuesta = Formato::findByAttributes([
+                'nombre' => 'pqr_respuesta'
+            ]);
+        }
+        return static::$FormatoPqrRespuesta;
     }
 
     /**
@@ -51,6 +63,19 @@ class UtilitiesPqr
     public static function getInstanceForFtId(int $idft): FtPqr
     {
         $className = self::getFormatPqr()->getFtClass();
+        return new $className($idft);
+    }
+
+    /**
+     * Obtiene la instancia de la FtPqrRespuesta o clase que la extienda
+     *
+     * @param int $idft
+     * @return FtPqrRespuesta
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
+     */
+    public static function getInstanceForFtIdPqrRespuesta(int $idft): FtPqrRespuesta
+    {
+        $className = self::getFormatPqrRespuesta()->getFtClass();
         return new $className($idft);
     }
 

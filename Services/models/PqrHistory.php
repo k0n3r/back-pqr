@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Services\models;
 
+use App\Bundles\pqr\helpers\UtilitiesPqr;
 use Saia\core\model\Model;
 use Saia\models\Funcionario;
 use Saia\controllers\DateController;
@@ -89,7 +90,7 @@ class PqrHistory extends Model
             self::TIPO_RESPUESTA,
             self::TIPO_CALIFICACION
         ])) {
-            return new FtPqrRespuesta($this->idfk);
+            return UtilitiesPqr::getInstanceForFtIdPqrRespuesta($this->idfk);
         }
 
         return null;
