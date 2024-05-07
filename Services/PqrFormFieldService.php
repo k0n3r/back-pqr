@@ -303,9 +303,14 @@ class PqrFormFieldService extends ModelService
             ->setFirstResult(0)
             ->setMaxResults(40);
 
-        if ($data['term']) {
-            $Qb->andWhere('nombre like :nombre')
-                ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
+        if (isset($data['term'])) {
+            $Qb->andWhere('nombre like :nombre');
+
+            if ($data['term']) {
+                $Qb->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
+            } else {
+                $Qb->setParameter(':nombre', $data['term'], Type::getType('string'));
+            }
         }
 
         if (!$ObjSettings->allDependency) {

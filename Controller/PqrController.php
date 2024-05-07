@@ -50,7 +50,7 @@ class PqrController extends AbstractController
 
             $data = [];
             foreach ($records as $FtPqr) {
-                if (trim($FtPqr->sys_email) == $email) {
+                if (mb_strtolower(trim($FtPqr->sys_email)) == mb_strtolower(trim($email))) {
                     $data[] = [
                         'fecha'       => DateController::convertDate($FtPqr->getDocument()->fecha),
                         'descripcion' => array_filter(explode("<br>", $FtPqr->getDocument()->getDescription())),
