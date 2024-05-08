@@ -280,7 +280,9 @@ class FtPqrService extends ModelService
             'fk_campo_opciones' => $this->getIdFromBalancer(),
             'fk_sys_tipo'       => $this->getModel()->sys_tipo
         ])) {
-            return $this->getFuncionarioFromGroup($PqrBalancer->getGrupo());
+            if ($Grupo = $PqrBalancer->getGrupo()) {
+                return $this->getFuncionarioFromGroup($Grupo);
+            }
         }
 
         return null;

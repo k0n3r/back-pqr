@@ -48,12 +48,12 @@ class PqrBalancer extends Model
     }
 
     /**
-     * @return Grupo
+     * @return null|Grupo
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-20
      */
-    public function getGrupo(): Grupo
+    public function getGrupo(): ?Grupo
     {
-        if (!$this->Grupo) {
+        if (!$this->Grupo && $this->fk_grupo > 0) {
             $this->Grupo = new Grupo($this->fk_grupo);
         }
         return $this->Grupo;
