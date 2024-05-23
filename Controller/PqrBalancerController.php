@@ -34,15 +34,23 @@ class PqrBalancerController extends AbstractController
             ]);
 
             $data = [];
+            $defaultOrder = 0;
+            $skipOrder = false;
             foreach ($record as $PqrBalancer) {
                 $CampoOpcion = $PqrBalancer->getCampoOpcionForSysTipo();
 
-                $orden = (int)$CampoOpcion->orden;
-                $data[$orden] = [
+                if (!$defaultOrder) {
+                    $skipOrder = is_null($CampoOpcion->orden);
+                }
+
+                $order = $skipOrder ? $defaultOrder : (int)$CampoOpcion->orden;
+
+                $data[$order] = [
                     'id'      => $PqrBalancer->getPK(),
                     'text'    => $CampoOpcion->valor,
                     'groupId' => (int)$PqrBalancer->fk_grupo
                 ];
+                $defaultOrder++;
             }
 
             $saiaResponse->replaceData($data);
