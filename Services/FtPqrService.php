@@ -527,7 +527,7 @@ class FtPqrService extends ModelService
 
         $EmailSaia = (new EmailSaia())
             ->subject($subject)
-            ->html($message)
+            ->htmlWithTemplate($message)
             ->to($this->getModel()->sys_email)
             ->addAttachments($files)
             ->saveShipmentTraceability($Documento->getPK());
