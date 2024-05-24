@@ -2,12 +2,17 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\Services\models\PqrHistory;
+use App\services\exception\SaiaException;
+use App\services\GlobalContainer;
 use Doctrine\DBAL\Connection;
 use Exception;
 use Saia\controllers\DateController;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
+use Saia\models\Tercero;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,6 +26,49 @@ use Throwable;
  */
 class FtPqrController extends AbstractController
 {
+    /**
+     * @Route("/externalUser", name="getExternalUser", methods={"GET"})
+     * @param int           $idft
+     * @param ISaiaResponse $saiaResponse
+     * @return Response
+     */
+    public function getExternalUser(
+        int $idft,
+        ISaiaResponse $saiaResponse
+    ): Response {
+
+        try {
+            $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
+            $data = [
+                'sys_tercero' => $FtPqr->sys_tercero,
+                'fieldId'     => $this->getFieldIdSysTercero($FtPqr)
+            ];
+
+            $saiaResponse->replaceData($data);
+
+            $saiaResponse->setSuccess(1);
+        } catch (Throwable $th) {
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    private function getFieldIdSysTercero(FtPqr $FtPqr): int
+    {
+        $cache = GlobalContainer::getCache();
+        $item = $cache->getItem('FieldIdPqrSysTercero');
+
+        if ($item->isHit()) {
+            return $item->get();
+        }
+        $id = $FtPqr->getFormat()->getField('sys_tercero')->getPK();
+        $item->set($id);
+        $item->expiresAfter(86400); // 1 Dia
+        $cache->save($item);
+
+        return $id;
+    }
 
     /**
      * @Route("/dataToLoadResponse", name="getDataToLoadResponse", methods={"GET"})
@@ -148,6 +196,88 @@ class FtPqrController extends AbstractController
         }
 
         return new JsonResponse($data);
+    }
+
+
+    /**
+     * @Route("/externalUser", name="setExternalUser", methods={"POST"})
+     * @param int           $idft
+     * @param Request       $request
+     * @param ISaiaResponse $saiaResponse
+     * @param Connection    $Connection
+     * @return Response
+     */
+    public function setExternalUser(
+        int $idft,
+        Request $request,
+        ISaiaResponse $saiaResponse,
+        Connection $Connection
+    ): Response {
+        $Connection->beginTransaction();
+        try {
+            if (!$request->get('sys_tercero')) {
+                throw new SaiaException("No fue posible actualizar el tercero");
+            }
+
+            $Tercero = new Tercero($request->get('sys_tercero'));
+            $attributesNew = $Tercero->getAttributes(true);
+
+            $FtPqr = new FtPqr($idft);
+            $attributesOld = ($FtPqr->getTercero())->getAttributes(true);
+            $FtPqr->sys_tercero = $Tercero->getPK();
+            $FtPqr->save();
+
+
+            $modified = [];
+            $skip = [
+                'imagen',
+                'tipo',
+                'titulo',
+                'ciudad',
+                'estado'
+            ];
+
+            foreach ($attributesOld as $key => $valueOld) {
+                if (in_array($key, $skip)) {
+                    continue;
+                }
+
+                if (isset($attributesNew[$key]) && $attributesNew[$key] !== $valueOld) {
+                    $modified[] = "cambio $key: '$valueOld' por '$attributesNew[$key]'";
+                }
+            }
+
+            if ($modified) {
+                $PqrHistoryService = (new PqrHistory)->getService();
+                $history = [
+                    'fecha'          => date('Y-m-d H:i:s'),
+                    'idft'           => $FtPqr->getPK(),
+                    'fk_funcionario' => $PqrHistoryService->getFuncionario()->getPK(),
+                    'tipo'           => PqrHistory::TIPO_MODIFICACION_TERCERO,
+                    'idfk'           => $Tercero->getPK(),
+                    'descripcion'    => 'Se actualizo el tercero: ' . implode(', ', $modified)
+                ];
+                if (!$PqrHistoryService->save($history)) {
+                    throw new Exception(
+                        $PqrHistoryService->getErrorManager()->getMessage(),
+                        $PqrHistoryService->getErrorManager()->getCode()
+                    );
+                }
+            }
+
+            $data = [
+                'correo' => (bool)$Tercero->getEmail()
+            ];
+
+            $saiaResponse->replaceData($data);
+            $saiaResponse->setSuccess(1);
+            $Connection->commit();
+        } catch (Throwable $th) {
+            $Connection->rollBack();
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
     }
 
     /**

@@ -20,6 +20,7 @@ class PqrHistory extends Model
     const TIPO_CAMBIO_VENCIMIENTO = 5;
     const TIPO_CALIFICACION = 6;
     const TIPO_ERROR_DIAS_VENCIMIENTO = 7;
+    const TIPO_MODIFICACION_TERCERO = 8;
 
     protected function defineAttributes(): void
     {
