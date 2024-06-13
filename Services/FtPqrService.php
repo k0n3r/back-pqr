@@ -507,8 +507,8 @@ class FtPqrService extends ModelService
             return true;
         }
 
-        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el número de radicado {$this->getDocument()->numero}, adjunto encontrará una copia de la {$this->getPqrForm()->label} diligenciada el día de hoy.<br/><br/>
-        El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado";
+        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el radicado {$this->getDocument()->getService()->getFilingReferenceNumber()}, adjunto encontrará una copia de la {$this->getPqrForm()->label} diligenciada el día de hoy.<br/><br/>
+        El seguimiento lo puede realizar escaneando el código QR o consultando con el número de consecutivo asignado";
         $subject = "Solicitud de {$this->getPqrForm()->label} # {$this->getDocument()->numero}";
 
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
@@ -606,8 +606,8 @@ HTML;
         }
 
         if ($emails) {
-            $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->getPqrForm()->label} con radicado $Documento->numero.<br/><br/>
-            El seguimiento lo puede realizar escaneando el código QR o consultando con el número de radicado asignado";
+            $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->getPqrForm()->label} con radicado {$Documento->getService()->getFilingReferenceNumber()}.<br/><br/>
+            El seguimiento lo puede realizar escaneando el código QR o consultando con el número de consecutivo asignado";
 
             $files[] = new FileJson($Documento->getPdfJson());
 
