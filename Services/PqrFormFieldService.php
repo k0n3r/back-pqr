@@ -39,14 +39,9 @@ class PqrFormFieldService extends ModelService
     }
 
     /**
-     * Crea el registro en la DB
-     *
-     * @param array $attributes
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2021
+     * @inheritDoc
      */
-    public function create(array $attributes): bool
+    public function processAttributesBeforeCreating(array $attributes)
     {
         if (!isset($attributes['fk_pqr_form'])) {
             $this->getErrorManager()->setMessage("Falta el identificador del formulario");
@@ -67,27 +62,23 @@ class PqrFormFieldService extends ModelService
         ];
         $attributes = array_merge($defaultFields, $attributes);
 
-        return $this->update($attributes);
-    }
-
-    /**
-     * Actualiza un registro
-     *
-     * @param array $attributes
-     * @return boolean
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2021
-     */
-    public function update(array $attributes): bool
-    {
-
         if (isset($attributes['setting'])) {
             $attributes['setting'] = json_encode($attributes['setting']);
         }
 
-        $this->getModel()->setAttributes($attributes);
+        return $attributes;
+    }
 
-        return $this->getModel()->save();
+    /**
+     * @inheritDoc
+     */
+    public function processAttributesBeforeUpdating(array $attributes)
+    {
+        if (isset($attributes['setting'])) {
+            $attributes['setting'] = json_encode($attributes['setting']);
+        }
+
+        return $attributes;
     }
 
     /**
@@ -99,18 +90,18 @@ class PqrFormFieldService extends ModelService
      */
     public function delete(): bool
     {
-        if ($this->getModel()->delete()) {
+        if (parent::delete()) {
             if ($this->getModel()->fk_campos_formato) {
-                if (!$this->getModel()->getCamposFormato()->delete()) {
+                if (!$this->getModel()->getCamposFormato()->getService()->delete()) {
                     $this->getErrorManager()->setMessage("No fue posible eliminar el campo");
                     return false;
                 }
             }
             return true;
-        } else {
-            $this->getErrorManager()->setMessage("No fue posible eliminar");
-            return false;
         }
+
+        $this->getErrorManager()->setMessage("No fue posible eliminar");
+        return false;
     }
 
     /**

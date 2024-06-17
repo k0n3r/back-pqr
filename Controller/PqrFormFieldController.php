@@ -32,7 +32,7 @@ class PqrFormFieldController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrFormFieldService = (new PqrFormField())->getService();
-            if (!$PqrFormFieldService->create($request->get('data'))) {
+            if (!$PqrFormFieldService->save($request->get('data'))) {
                 throw new Exception(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                     $PqrFormFieldService->getErrorManager()->getCode()
@@ -67,7 +67,7 @@ class PqrFormFieldController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
-            if (!$PqrFormFieldService->update($request->get('data'))) {
+            if (!$PqrFormFieldService->save($request->get('data'))) {
                 throw new Exception(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                     $PqrFormFieldService->getErrorManager()->getCode()
