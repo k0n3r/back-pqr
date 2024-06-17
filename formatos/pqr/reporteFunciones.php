@@ -254,7 +254,7 @@ function options(int $iddocumento, string $estado, int $idft): string
                 <i class="fa fa-edit"></i> Validar PQRSF
             </a>
            <a href="#" class="dropdown-item editUser" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-user"></i> Actualizar Tercero
+                <i class="fa fa-user"></i> Datos remitente
             </a>
             <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-history"></i> Historial
@@ -294,7 +294,7 @@ HTML;
                 <i class="fa fa-edit"></i> Validar PQRSF
             </a>
            <a href="#" class="dropdown-item editUser" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-user"></i> Actualizar Tercero
+                <i class="fa fa-user"></i> Datos remitente
             </a>
             <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-history"></i> Historial
