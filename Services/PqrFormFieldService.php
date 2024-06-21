@@ -2,10 +2,14 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\Bundles\pqr\Event\PqrFormFieldCreatedEvent;
+use App\Bundles\pqr\Event\PqrFormFieldDeleteEvent;
+use App\Bundles\pqr\Event\PqrFormFieldUpdateEvent;
 use App\Bundles\pqr\Services\models\PqrBalancer;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
 use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
+use App\services\ServiceEventDispatcher;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use App\Bundles\pqr\Services\models\PqrForm;
@@ -36,6 +40,18 @@ class PqrFormFieldService extends ModelService
     public function getModel(): PqrFormField
     {
         return $this->Model;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEvents(): array
+    {
+        return [
+            ServiceEventDispatcher::EVENT_CREATED => PqrFormFieldCreatedEvent::class,
+            ServiceEventDispatcher::EVENT_UPDATED => PqrFormFieldUpdateEvent::class,
+            ServiceEventDispatcher::EVENT_DELETED => PqrFormFieldDeleteEvent::class
+        ];
     }
 
     /**
