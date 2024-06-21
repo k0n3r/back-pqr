@@ -204,6 +204,9 @@ class FtPqr extends FtPqrProperties
         if ($this->getDocument()->isStarted()) {
             $this->sys_estado = self::ESTADO_PENDIENTE;
             $this->getDocument()->estado = Documento::APROBADO;
+            $this->getDocument()->estado_aprobacion = Documento::APROBADO_LABEL;
+
+            $this->getDocument()->getPdfJson(true);
 
             return $this->beforeRad() && $this->afterRad();
         }
