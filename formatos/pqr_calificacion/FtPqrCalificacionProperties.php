@@ -20,12 +20,12 @@ class FtPqrCalificacionProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'idft_pqr_calificacion',
-				'documento_iddocumento',
+                'documento_iddocumento',
 				'encabezado',
 				'firma',
-				'ft_pqr_respuesta',
+				'idft_pqr_calificacion',
 				'dependencia',
+				'ft_pqr_respuesta',
 				'experiencia_gestion',
 				'experiencia_servicio' 
             ],
@@ -34,23 +34,7 @@ class FtPqrCalificacionProperties extends ModelFormat
             'primary' => 'idft_pqr_calificacion'
         ];
     }
-
-    /**
-    * @inheritDoc
-    */
-    protected function defineMoreAttributes(): array
-    {
-        return [];
-    }
     
-    /**
-    * @inheritDoc
-    */
-    public static function getParamsToAddEdit(int $action, int $idft): array
-    {
-        return [];
-    }
-
     public function defaultDocumentRoute(): bool
     {
         $RutaFormato = new RutaFormato();
@@ -60,22 +44,6 @@ class FtPqrCalificacionProperties extends ModelFormat
         );
 
         return true;
-    }
-    
-    /**
-    * @inheritDoc
-    */
-    public function getNumberFolios(): int
-    {
-        $Documento = $this->getDocument();
-
-        if ($Documento->numero_folios) {
-            $total = $Documento->numero_folios;
-        } else {
-            $total = ($this->numero_folios ?? 0);
-        }
-
-        return (int)$total;
     }
         
     

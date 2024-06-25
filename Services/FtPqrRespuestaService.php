@@ -10,6 +10,7 @@ use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\services\correo\EmailSaia;
 use App\services\correo\SendEmailSaia;
 use App\services\documento\DocumentoExpuestoService;
+use App\services\exception\SaiaException;
 use App\services\models\ModelService\ModelService;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\DistributionService;
@@ -18,6 +19,7 @@ use Saia\controllers\functions\CoreFunctions;
 use Saia\models\BuzonSalida;
 use Saia\models\documento\DocumentoExpuesto;
 use Saia\models\formatos\Formato;
+use Saia\models\tarea\TareaEstado;
 use Saia\models\Tercero;
 
 class FtPqrRespuestaService extends ModelService
@@ -365,6 +367,39 @@ class FtPqrRespuestaService extends ModelService
             }
         }
         return $data;
+    }
+
+    /**
+     * Cierra todas las tareas Pendientes
+     *
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-06-25
+     */
+    public function closeTask(): void
+    {
+        $records = $this->getModel()->getFtPqr()->getDocument()->getService()->getTasks();
+        if (!$records) {
+            return;
+        }
+
+        foreach ($records as $Tarea) {
+            $TareaService = $Tarea->getService();
+            $valor = $TareaService->getState()->valor;
+            if (
+                $valor != TareaEstado::REALIZADA &&
+                $valor != TareaEstado::CANCELADA
+            ) {
+
+                $save = $TareaService->setState(
+                    TareaEstado::REALIZADA,
+                    $this->getFuncionario()->getPK(),
+                    'La tarea se cambia a estado realizada al radicar la COMUNICACIÓN EXTERNA (PQRSF)'
+                );
+
+                if (!$save) {
+                    throw new SaiaException("No fue posible cambiar el estado de la tarea, ID:" . $Tarea->getPK());
+                }
+            }
+        }
     }
 
 }

@@ -7,6 +7,12 @@ namespace App\Bundles\pqr\Resources\migrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 use Saia\controllers\generator\component\Distribution;
+use Saia\controllers\generator\component\ExternalUser;
+use Saia\controllers\generator\component\Method;
+use Saia\controllers\generator\component\Select;
+use Saia\controllers\generator\component\Text;
+use Saia\controllers\generator\component\Textarea;
+use Saia\controllers\generator\component\UserAutocomplete;
 use Saia\models\Modulo;
 
 /**
@@ -111,13 +117,13 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta'          => 'pqr',
                 'tipo_dato'         => 'integer',
                 'longitud'          => '11',
-                'obligatoriedad'    => '1',
+                'obligatoriedad'    => 1,
                 'acciones'          => 'a',
                 'banderas'          => 'i',
-                'etiqueta_html'     => 'Method',
-                'orden'             => '1',
-                'fila_visible'      => '1',
-                'listable'          => '1'
+                'etiqueta_html'     => Method::getIdentification(),
+                'orden'             => 1,
+                'fila_visible'      => 1,
+                'listable'          => 1
             ],
             'ciudad_origen'     => [
                 'formato_idformato' => $idformato,
@@ -125,13 +131,13 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta'          => 'Ciudad de Origen',
                 'tipo_dato'         => 'string',
                 'longitud'          => '255',
-                'obligatoriedad'    => '1',
+                'obligatoriedad'    => 1,
                 'valor'             => '{*selectCity*}',
                 'acciones'          => 'a,e',
-                'etiqueta_html'     => 'Method',
-                'orden'             => '2',
-                'fila_visible'      => '1',
-                'listable'          => '1'
+                'etiqueta_html'     => Method::getIdentification(),
+                'orden'             => 2,
+                'fila_visible'      => 1,
+                'listable'          => 1
             ],
             'destino'           => [
                 'formato_idformato' => $idformato,
@@ -139,13 +145,13 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta'          => 'Destino',
                 'tipo_dato'         => 'string',
                 'longitud'          => '255',
-                'obligatoriedad'    => '1',
+                'obligatoriedad'    => 1,
                 'acciones'          => 'a,e',
-                'etiqueta_html'     => 'ExternalUser',
-                'orden'             => '3',
-                'fila_visible'      => '1',
+                'etiqueta_html'     => ExternalUser::getIdentification(),
+                'orden'             => 3,
+                'fila_visible'      => 1,
                 'opciones'          => '{"tipo_seleccion":"unico","tipo":true,"nombre":true,"correo":true,"tipo_identificacion":true,"identificacion":true,"ciudad":true,"titulo":true,"cargo":false,"direccion":true,"telefono":true,"sede":false,"empresa":false}',
-                'listable'          => '1'
+                'listable'          => 1
             ],
             'tipo_distribucion' => [
                 'formato_idformato' => $idformato,
@@ -153,14 +159,14 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta'          => 'Tipo distribución',
                 'tipo_dato'         => 'string',
                 'longitud'          => '255',
-                'obligatoriedad'    => '1',
+                'obligatoriedad'    => 1,
                 'valor'             => '1,1;2,2;3,3;4,4',
                 'acciones'          => 'a,e',
-                'etiqueta_html'     => 'Select',
-                'orden'             => '4',
-                'fila_visible'      => '1',
+                'etiqueta_html'     => Select::getIdentification(),
+                'orden'             => 4,
+                'fila_visible'      => 1,
                 'placeholder'       => 'seleccionar..',
-                'listable'          => '1',
+                'listable'          => 1,
                 'campoOpciones'     => Distribution::getAttributesMoreFieldsOptions(0, Distribution::SELECT_MENSAJERIA)
             ],
             'copia'             => [
@@ -169,11 +175,11 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta'          => 'Con copia a',
                 'tipo_dato'         => 'string',
                 'longitud'          => '255',
-                'obligatoriedad'    => '0',
+                'obligatoriedad'    => 0,
                 'acciones'          => 'a,e',
-                'etiqueta_html'     => 'ExternalUser',
-                'orden'             => '5',
-                'fila_visible'      => '1',
+                'etiqueta_html'     => ExternalUser::getIdentification(),
+                'orden'             => 5,
+                'fila_visible'      => 1,
                 'opciones'          => '{"tipo_seleccion":"multiple","tipo":true,"nombre":true,"correo":true,"tipo_identificacion":true,"identificacion":true,"ciudad":true,"titulo":true,"cargo":false,"direccion":true,"telefono":true,"sede":false,"empresa":false}',
                 'listable'          => 1
             ],
@@ -183,27 +189,27 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta'          => 'Asunto',
                 'tipo_dato'         => 'string',
                 'longitud'          => '255',
-                'obligatoriedad'    => '1',
+                'obligatoriedad'    => 1,
                 'acciones'          => 'a,e,p,b',
-                'etiqueta_html'     => 'Text',
-                'orden'             => '6',
-                'fila_visible'      => '1',
+                'etiqueta_html'     => Text::getIdentification(),
+                'orden'             => 6,
+                'fila_visible'      => 1,
                 'longitud_vis'      => '255',
-                'listable'          => '1'
+                'listable'          => 1
             ],
             'contenido'         => [
                 'formato_idformato' => $idformato,
                 'nombre'            => 'contenido',
                 'etiqueta'          => 'Contenido',
                 'tipo_dato'         => 'text',
-                'obligatoriedad'    => '1',
+                'obligatoriedad'    => 1,
                 'valor'             => 'avanzado',
                 'acciones'          => 'a,e',
-                'etiqueta_html'     => 'Textarea',
-                'orden'             => '7',
-                'fila_visible'      => '1',
+                'etiqueta_html'     => Textarea::getIdentification(),
+                'orden'             => 7,
+                'fila_visible'      => 1,
                 'opciones'          => '{"avanzado":true}',
-                'listable'          => '1'
+                'listable'          => 1
             ],
             'despedida'         => [
                 'formato_idformato' => $idformato,
@@ -211,14 +217,14 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta'          => 'Despedida',
                 'tipo_dato'         => 'string',
                 'longitud'          => '255',
-                'obligatoriedad'    => '1',
+                'obligatoriedad'    => 1,
                 'valor'             => '1,1;2,2;3,3;4,4',
                 'acciones'          => 'a,e',
-                'etiqueta_html'     => 'Select',
-                'orden'             => '8',
-                'fila_visible'      => '1',
+                'etiqueta_html'     => Select::getIdentification(),
+                'orden'             => 8,
+                'fila_visible'      => 1,
                 'placeholder'       => 'seleccionar..',
-                'listable'          => '1',
+                'listable'          => 1,
                 'campoOpciones'     => [
                     ['llave' => '1', 'valor' => 'Atentamente,', 'estado' => '1', 'orden' => '0'],
                     ['llave' => '2', 'valor' => 'Cordialmente,', 'estado' => '1', 'orden' => '1'],
@@ -231,13 +237,13 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta'          => 'Escribe la despedida',
                 'tipo_dato'         => 'string',
                 'longitud'          => '255',
-                'obligatoriedad'    => '0',
+                'obligatoriedad'    => 0,
                 'acciones'          => 'a,e',
-                'etiqueta_html'     => 'Text',
-                'orden'             => '9',
-                'fila_visible'      => '1',
+                'etiqueta_html'     => Text::getIdentification(),
+                'orden'             => 9,
+                'fila_visible'      => 1,
                 'longitud_vis'      => '255',
-                'listable'          => '1'
+                'listable'          => 1
             ],
             'anexos_digitales'  => [
                 'formato_idformato' => $idformato,
@@ -245,28 +251,28 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta'          => 'Anexos Digitales',
                 'tipo_dato'         => 'string',
                 'longitud'          => '255',
-                'obligatoriedad'    => '0',
+                'obligatoriedad'    => 0,
                 'valor'             => '.pdf|.doc|.docx|.jpg|.jpeg|.gif|.png|.bmp|.xls|.xlsx|.ppt@multiple',
                 'acciones'          => 'a,e,b',
                 'banderas'          => 'a',
                 'etiqueta_html'     => 'Attached',
-                'orden'             => '10',
-                'fila_visible'      => '1',
+                'orden'             => 10,
+                'fila_visible'      => 1,
                 'opciones'          => '{"tipos":".pdf,.doc,.docx,.jpg,.jpeg,.gif,.png,.bmp,.xls,.xlsx,.ppt","longitud":"3","cantidad":"10","ruta_consulta":"api\\/documentFile\\/info"}',
-                'listable'          => '1'
+                'listable'          => 1
             ],
             'anexos_fisicos'    => [
                 'formato_idformato' => $idformato,
                 'nombre'            => 'anexos_fisicos',
                 'etiqueta'          => 'Anexos Fisicos',
                 'tipo_dato'         => 'text',
-                'obligatoriedad'    => '0',
+                'obligatoriedad'    => 0,
                 'acciones'          => 'a,e',
                 'ayuda'             => 'Por favor separar los anexos con comas ","',
                 'etiqueta_html'     => 'Text',
-                'orden'             => '11',
-                'fila_visible'      => '1',
-                'listable'          => '1'
+                'orden'             => 11,
+                'fila_visible'      => 1,
+                'listable'          => 1
             ],
             'ver_copia'         =>
                 [
@@ -278,10 +284,10 @@ final class Version20200310032827 extends AbstractMigration
                     'longitud'          => '1',
                     'obligatoriedad'    => 1,
                     'acciones'          => 'a,e',
-                    'etiqueta_html'     => 'Method',
-                    'orden'             => '12',
-                    'fila_visible'      => '1',
-                    'listable'          => '1',
+                    'etiqueta_html'     => Method::getIdentification(),
+                    'orden'             => 12,
+                    'fila_visible'      => 1,
+                    'listable'          => 1,
                     'predeterminado'    => 0
                 ],
             'copia_interna'     => [
@@ -290,13 +296,13 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta'          => 'Con copia interna a',
                 'tipo_dato'         => 'string',
                 'longitud'          => '255',
-                'obligatoriedad'    => '0',
+                'obligatoriedad'    => 0,
                 'acciones'          => 'a,e',
-                'etiqueta_html'     => 'UserAutocomplete',
-                'orden'             => '13',
-                'fila_visible'      => '1',
+                'etiqueta_html'     => UserAutocomplete::getIdentification(),
+                'orden'             => 13,
+                'fila_visible'      => 1,
                 'opciones'          => '{"dependenciaCargo":true}',
-                'listable'          => '1'
+                'listable'          => 1
             ],
             'sol_encuesta'      => [
                 'formato_idformato' => $idformato,
@@ -307,11 +313,27 @@ final class Version20200310032827 extends AbstractMigration
                 'obligatoriedad'    => 0,
                 'valor'             => '{*fieldSatisfactionSurvey*}',
                 'acciones'          => 'a,e',
-                'etiqueta_html'     => 'Method',
-                'orden'             => '14',
-                'fila_visible'      => '1',
-                'listable'          => '1'
-            ]
+                'etiqueta_html'     => Method::getIdentification(),
+                'orden'             => 14,
+                'fila_visible'      => 1,
+                'listable'          => 1
+            ],
+            'cerrar_tareas'         =>
+                [
+                    'formato_idformato' => $idformato,
+                    'nombre'            => 'cerrar_tareas',
+                    'etiqueta'          => 'Desea cerrar las tareas de la PQRSF?',
+                    'valor'             => '{*showCloseTask@SI,NO*}',
+                    'tipo_dato'         => 'integer',
+                    'longitud'          => '1',
+                    'obligatoriedad'    => 1,
+                    'acciones'          => 'a,e',
+                    'etiqueta_html'     => Method::getIdentification(),
+                    'orden'             => 15,
+                    'fila_visible'      => 1,
+                    'listable'          => 1,
+                    'predeterminado'    => 0
+                ],
         ];
 
         foreach ($data as $field) {

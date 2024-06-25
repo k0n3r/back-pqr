@@ -20,12 +20,12 @@ class FtPqrRespuestaProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'idft_pqr_respuesta',
-				'documento_iddocumento',
+                'documento_iddocumento',
 				'encabezado',
 				'firma',
-				'ft_pqr',
+				'idft_pqr_respuesta',
 				'dependencia',
+				'ft_pqr',
 				'ciudad_origen',
 				'destino',
 				'tipo_distribucion',
@@ -38,30 +38,15 @@ class FtPqrRespuestaProperties extends ModelFormat
 				'anexos_fisicos',
 				'ver_copia',
 				'copia_interna',
-				'sol_encuesta' 
+				'sol_encuesta',
+				'cerrar_tareas' 
             ],
             'date' => [],
             'table' => 'ft_pqr_respuesta',
             'primary' => 'idft_pqr_respuesta'
         ];
     }
-
-    /**
-    * @inheritDoc
-    */
-    protected function defineMoreAttributes(): array
-    {
-        return [];
-    }
     
-    /**
-    * @inheritDoc
-    */
-    public static function getParamsToAddEdit(int $action, int $idft): array
-    {
-        return [];
-    }
-
     public function defaultDocumentRoute(): bool
     {
         $RutaFormato = new RutaFormato();
@@ -71,22 +56,6 @@ class FtPqrRespuestaProperties extends ModelFormat
         );
 
         return true;
-    }
-    
-    /**
-    * @inheritDoc
-    */
-    public function getNumberFolios(): int
-    {
-        $Documento = $this->getDocument();
-
-        if ($Documento->numero_folios) {
-            $total = $Documento->numero_folios;
-        } else {
-            $total = ($this->numero_folios ?? 0);
-        }
-
-        return (int)$total;
     }
         
     
