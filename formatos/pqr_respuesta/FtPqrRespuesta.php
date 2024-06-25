@@ -130,7 +130,9 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
             );
         }
 
-        $this->getService()->closeTask();
+        if ($this->cerrar_tareas) {
+            $this->getService()->closeTask();
+        }
 
         return $this->getService()->transferCopiaInterna();
 
