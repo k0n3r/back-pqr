@@ -206,9 +206,9 @@ class FtPqr extends FtPqrProperties
             $this->getDocument()->estado = Documento::APROBADO;
             $this->getDocument()->estado_aprobacion = Documento::APROBADO_LABEL;
 
+            $this->beforeRad();
             $this->getDocument()->getPdfJson(true);
-
-            return $this->beforeRad() && $this->afterRad();
+            return $this->afterRad();
         }
 
         return true;
@@ -218,7 +218,7 @@ class FtPqr extends FtPqrProperties
      * Obtiene la url del Qr
      *
      * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-13
+     * @author Andres Agudelo <andres.agudelo@ceroqk.com> 2021-05-13
      */
     public function getQrContent(): string
     {
