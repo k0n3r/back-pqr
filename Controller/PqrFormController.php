@@ -129,7 +129,7 @@ class PqrFormController extends AbstractController
 
             foreach ($request->get('fieldOrder') as $record) {
                 $PqrFormFieldService = (new PqrFormField($record['id']))->getService();
-                $status = $PqrFormFieldService->update([
+                $status = $PqrFormFieldService->save([
                     'orden' => $record['order'] + PqrFormFieldService::INITIAL_ORDER
                 ]);
 
@@ -233,7 +233,7 @@ class PqrFormController extends AbstractController
             if ($request->get('ids')) {
                 foreach ($request->get('ids') as $id) {
                     $PqrFormFieldService = (new PqrFormField($id))->getService();
-                    if (!$PqrFormFieldService->update([
+                    if (!$PqrFormFieldService->save([
                         'show_report' => 1
                     ])) {
                         throw new Exception("No fue posible actualizar", 200);
