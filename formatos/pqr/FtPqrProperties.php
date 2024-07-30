@@ -14,70 +14,63 @@ use Saia\models\ruta\RutaFormato;
 class FtPqrProperties extends ModelFormat
 {
     use DistributionExecutor;
-
+    
     public bool $isPDF = false;
 
     /**
-     * @inheritDoc
-     */
+    * @inheritDoc
+    */
     protected function defaultDbAttributes(): array
     {
         return [
-            'safe'    => [
-                'idft_pqr',
+            'safe' => [
                 'documento_iddocumento',
-                'sys_estado',
-                'sys_tercero',
-                'sys_fecha_vencimiento',
-                'sys_fecha_terminado',
-                'sys_anonimo',
-                'sys_frecuencia',
-                'sys_impacto',
-                'sys_severidad',
-                'sys_oportuno',
-                'radicacion',
-                'dependencia',
-                'sys_tipo',
-                'encabezado',
-                'sys_email',
-                'sys_folios',
-                'firma',
-                'sys_anexos',
-                'sys_tratamiento',
-                'sys_dependencia',
-                'radio',
-                'sys_subtipo',
-                'ciudad',
-                'distribucion',
-                'destino_interno',
-                'select_mensajeria',
-                'descripcion',
-                'colilla',
-                'digitalizacion'
+				'encabezado',
+				'firma',
+				'idft_pqr',
+				'sys_tercero',
+				'sys_severidad',
+				'sys_oportuno',
+				'sys_impacto',
+				'radicacion',
+				'sys_frecuencia',
+				'sys_fecha_vencimiento',
+				'sys_anonimo',
+				'sys_fecha_terminado',
+				'sys_estado',
+				'dependencia',
+				'sys_tipo',
+				'sys_email',
+				'sys_folios',
+				'sys_anexos',
+				'distribucion',
+				'destino_interno',
+				'select_mensajeria',
+				'descripcion',
+				'colilla',
+				'digitalizacion' 
             ],
-            'date'    => [
-                'sys_fecha_vencimiento',
-                'sys_fecha_terminado'
-            ],
-            'table'   => 'ft_pqr',
+            'date' => ['sys_fecha_vencimiento',
+				'sys_fecha_terminado'],
+            'table' => 'ft_pqr',
             'primary' => 'idft_pqr'
         ];
     }
-
+    
     public function defaultDocumentRoute(): bool
     {
         $RutaFormato = new RutaFormato();
         $RutaFormato->addDefaultRouteFormat(
-            $this->getFormat()->getPk(),
+            $this->getFormat()->getPk(), 
             $this->getDocument()->getPk()
         );
 
         return true;
     }
-
-    /**
-     * @inheritDoc
-     */
+        
+        /**
+    * @inheritDoc
+    */
     public function afterRad(): bool
     {
         $existInPack = PaqueteDocumento::fromPackage($this->getDocument()->getPK());
@@ -94,16 +87,16 @@ class FtPqrProperties extends ModelFormat
     }
 
     /**
-     * @inheritDoc
-     */
+    * @inheritDoc
+    */
     public function afterEdit(): bool
     {
-        $Documento = $this->getDocument();
-
-        if (!$this->editDistribution()) {
-            throw new SaiaException('No fue posible editar la distribución');
+         $Documento = $this->getDocument();
+         
+        if (!$this->editDistribution()){
+              throw new SaiaException('No fue posible editar la distribución');
         }
-
+        
         if (
             $Documento->isStarted() &&
             $this->getFormat()->isAutoApprove()
@@ -111,7 +104,7 @@ class FtPqrProperties extends ModelFormat
             $Documento->estado = Documento::APROBADO;
             $Documento->estado_aprobacion = Documento::APROBADO_LABEL;
             $Documento->save();
-
+            
             if (!$this->sendDocumentsByEmail()) {
                 throw new SaiaException('No fue posible enviar la notificacion por correo');
             }
