@@ -418,7 +418,7 @@ final class Version20191224165528 extends AbstractMigration
                 'apellidos'             => 'Web',
                 'estado'                => 1,
                 'fecha_ingreso'         => $this->convertDate(date('Y-m-d H:i:s')),
-                'clave'                 => CryptController::encrypt('cerok_saia'),
+                'clave'                 => CryptController::encrypt('cerok_saia421_5'),
                 'nit'                   => '3',
                 'perfil'                => Perfil::GENERAL,
                 'pertenece_nucleo'      => 1,

@@ -8,7 +8,6 @@ class Dependencia extends Autocomplete
   {
     return <<<JAVASCRIPT
           let options_{$this->CamposFormato->nombre} = {
-            language: "es",
             placeholder: "Ingrese el nombre",
             multiple: false,
             ajax: {
