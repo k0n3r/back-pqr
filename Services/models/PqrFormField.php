@@ -14,6 +14,7 @@ class PqrFormField extends Model
     const INACTIVE = 0;
 
     const FIELD_NAME_SYS_TIPO = 'sys_tipo';
+    const FIELD_NAME_SYS_DEPENDENCIA = 'sys_dependencia';
 
     public static ?PqrFormField $PqrFormField_sysTipo = null;
 

@@ -3,10 +3,13 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\Services\models\PqrFormField;
+use App\services\exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Types;
 use Exception;
 use Saia\controllers\DateController;
+use Saia\models\Dependencia;
 use Saia\models\documento\Documento;
 use Saia\controllers\CryptController;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
@@ -112,6 +115,56 @@ class PqrController extends AbstractController
 
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
+        } catch (Throwable $th) {
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * @Route("/contentDependencia", name="contentDependencia", methods={"GET"})
+     */
+    public function contentDependencia(
+        ISaiaResponse $saiaResponse
+    ): Response {
+        try {
+
+            $field = PqrFormField::FIELD_NAME_SYS_DEPENDENCIA;
+            $PqrFormField = PqrFormField::findByAttributes([
+                'name' => $field
+            ]);
+
+            if (!$PqrFormField || !$PqrFormField->fk_campos_formato) {
+                throw new SaiaException("No esta habilitado el campo dependencia");
+            }
+
+            $allDependency = Dependencia::findAllByAttributes();
+            $options[] = "<option value='' data-i18n='g.seleccione'>Por favor Seleccione ...</option>";
+            foreach ($allDependency as $Dependencia) {
+                $options[] = "<option value='{$Dependencia->getPK()}'>$Dependencia->nombre</option>";
+            }
+            $options = implode('', $options);
+
+            $i18n = "data-i18n='{$PqrFormField->getCamposFormato()->getFormat()->getKeyTranslatorAttribute()}.campos.{$PqrFormField->getCamposFormato()->nombre}'";
+            $html = <<<HTML
+    <div class='form-group form-group-default form-group-default-select2'>
+        <label $i18n>$PqrFormField->label</label>
+        <div class='form-group'>
+            <select class='full-width' name='bqCampo_$field' id='$field'>
+               $options 
+            </select>
+        </div>
+    </div>
+HTML;
+
+
+            $data = [
+                'content' => $html
+            ];
+            $saiaResponse->replaceData($data);
+            $saiaResponse->setSuccess(1);
+
         } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }

@@ -245,22 +245,22 @@ function options(int $iddocumento, string $estado, int $idft): string
         case FtPqr::ESTADO_PROCESO:
             $options = <<<HTML
             <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-plus"></i> Asignar tarea
+                <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
             </a>
             <a href="#" class="dropdown-item viewTask" data-id="$iddocumento" data-idft="$idft">
-               <i class="fa fa-eye"></i> Tareas
+               <i class="fa fa-eye"></i> <span data-i18n="g.tareas">Tareas</span>
            </a>
            <a href="#" class="dropdown-item edit" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-edit"></i> Validar PQRSF
+                <i class="fa fa-edit"></i> <span data-i18n="pqr.validar_pqr">Validar PQRSF</span>
             </a>
            <a href="#" class="dropdown-item editUser" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-user"></i> Datos remitente
+                <i class="fa fa-user"></i> <span data-i18n="pqr.datos_remitente">Datos remitente</span>
             </a>
             <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-history"></i> Historial
+                <i class="fa fa-history"></i> <span data-i18n="pqr.historial">Historial</span>
             </a>
             <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
-               <i class="fa fa-mail-reply"></i> Responder
+               <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
            </a>
 
 HTML;
@@ -269,16 +269,16 @@ HTML;
         case FtPqr::ESTADO_TERMINADO:
             $options = <<<HTML
             <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-plus"></i> Asignar tarea
+                <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
             </a>
             <a href="#" class="dropdown-item viewTask" data-id="$iddocumento" data-idft="$idft">
-               <i class="fa fa-eye"></i> Tareas
+               <i class="fa fa-eye"></i> <span data-i18n="g.tareas">Tareas</span>
            </a>
             <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-history"></i> Historial
+                <i class="fa fa-history"></i> <span data-i18n="pqr.historial">Historial</span>
             </a>
             <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
-               <i class="fa fa-mail-reply"></i> Responder
+               <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
            </a>
 
 HTML;
@@ -288,25 +288,25 @@ HTML;
         default:
             $options = <<<HTML
             <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-plus"></i> Asignar tarea
+                <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
             </a>
            <a href="#" class="dropdown-item edit" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-edit"></i> Validar PQRSF
+                <i class="fa fa-edit"></i> <span data-i18n="pqr.validar_pqr">Validar PQRSF</span>
             </a>
            <a href="#" class="dropdown-item editUser" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-user"></i> Datos remitente
+                <i class="fa fa-user"></i> <span data-i18n="pqr.datos_remitente">Datos remitente</span>
             </a>
             <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-history"></i> Historial
+                <i class="fa fa-history"></i> <span data-i18n="pqr.historial">Historial</span>
             </a>
             <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
-               <i class="fa fa-mail-reply"></i> Responder
+               <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
            </a>
             <a href="#" class="dropdown-item finish" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-check"></i> Terminar
+                <i class="fa fa-check"></i> <span data-i18n="pqr.terminar">Terminar</span>
             </a>
             <a href="#" class="dropdown-item cancel" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-exclamation-triangle"></i> Anular
+                <i class="fa fa-exclamation-triangle"></i> <span data-i18n="pqr.anular">Anular</span>
             </a>
 HTML;
             break;
@@ -363,12 +363,14 @@ function getNombreDependencia(int $dependenciaId): string
 function QbDependencia(): QueryBuilder
 {
     $Dependencia = getDependencia();
-
+//    dd($_REQUEST);
     return GlobalContainer::getConnection()->createQueryBuilder()
         ->select('count(sys_dependencia) as cant')
         ->from('vpqr', 'v')
         ->where('sys_dependencia = :dependencyId')
         ->setParameter(':dependencyId', $Dependencia->getPK(), Types::INTEGER);
+
+
 }
 
 /**
@@ -431,12 +433,14 @@ function createView(string $filterName, int $cant): string
 {
     $Dependencia = getDependencia();
     $url = 'views/buzones/grilla.php?';
+
     $url .= http_build_query([
-        'variable_busqueda'     => json_encode([
+        'idbusqueda_filtro_temp' => (int)$_REQUEST['idbusqueda_filtro_temp'],
+        'idbusqueda_componente'  => getComponenteRepTodos(),
+        'variable_busqueda'      => json_encode([
             'sys_dependencia' => $Dependencia->getPK(),
             'filterName'      => $filterName
-        ]),
-        'idbusqueda_componente' => getComponenteRepTodos()
+        ])
     ]);
 
     return <<<HTML

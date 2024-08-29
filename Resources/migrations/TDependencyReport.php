@@ -24,6 +24,7 @@ trait TDependencyReport
             'url'                    => 'views/buzones/grilla.php',
             'info'                   => $info,
             'campos_adicionales'     => 'v.sys_dependencia',
+            'busqueda_avanzada'      => 'views/modules/pqr/formatos/pqr/busqueda_dependencia.html',
             'ordenado_por'           => 'v.sys_dependencia ASC',
             'agrupado_por'           => 'v.sys_dependencia',
             'llave'                  => 'v.sys_dependencia',
