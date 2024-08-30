@@ -7,6 +7,7 @@ use App\Bundles\pqr\Services\models\PqrFormField;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Saia\controllers\SessionController;
+use Saia\models\busqueda\BusquedaFiltroTemp;
 use Saia\models\tarea\TareaEstado;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use Saia\controllers\DateController;
@@ -363,15 +364,31 @@ function getNombreDependencia(int $dependenciaId): string
 function QbDependencia(): QueryBuilder
 {
     $Dependencia = getDependencia();
-//    dd($_REQUEST);
+
     return GlobalContainer::getConnection()->createQueryBuilder()
         ->select('count(sys_dependencia) as cant')
         ->from('vpqr', 'v')
         ->where('sys_dependencia = :dependencyId')
         ->setParameter(':dependencyId', $Dependencia->getPK(), Types::INTEGER);
 
-
 }
+
+function filterByFiltroTemp(): string
+{
+    if (isset($GLOBALS['whereFiltroTemp'])) {
+        return $GLOBALS['whereFiltroTemp'];
+    }
+
+    $where = '';
+    $idBusquedaFiltroTemp = (int)$_REQUEST['idbusqueda_filtro_temp'];
+    if ($idBusquedaFiltroTemp) {
+        $BusquedaFiltroTemp = new BusquedaFiltroTemp($idBusquedaFiltroTemp);
+        $where = $BusquedaFiltroTemp->detalle;
+
+    }
+    return $GLOBALS['whereFiltroTemp'] = $where;
+}
+
 
 /**
  * @return string
@@ -379,7 +396,12 @@ function QbDependencia(): QueryBuilder
  */
 function getCantidad(): string
 {
-    $cant = QbDependencia()->execute()->fetchOne();
+    $Qb = QbDependencia();
+    if ($where = filterByFiltroTemp()) {
+        $Qb->andWhere($where);
+    }
+    $cant = $Qb->execute()->fetchOne();
+
     return createView(PqrForm::FILTER_TODOS, (int)$cant);
 }
 
@@ -389,9 +411,14 @@ function getCantidad(): string
  */
 function getPendientes(): string
 {
-    $cant = QbDependencia()->andWhere('sys_estado IN (:estado)')
-        ->setParameter(':estado', [FtPqr::ESTADO_PROCESO, FtPqr::ESTADO_PENDIENTE], Connection::PARAM_STR_ARRAY)
-        ->execute()->fetchOne();
+    $Qb = QbDependencia()->andWhere('sys_estado IN (:estado)')
+        ->setParameter(':estado', [FtPqr::ESTADO_PROCESO, FtPqr::ESTADO_PENDIENTE], Connection::PARAM_STR_ARRAY);
+
+    if ($where = filterByFiltroTemp()) {
+        $Qb->andWhere($where);
+    }
+
+    $cant = $Qb->execute()->fetchOne();
 
     return createView(PqrForm::FILTER_PENDIENTES, (int)$cant);
 }
@@ -402,9 +429,13 @@ function getPendientes(): string
  */
 function getResueltas(): string
 {
-    $cant = QbDependencia()->andWhere('sys_estado LIKE :estado')
-        ->setParameter(':estado', FtPqr::ESTADO_TERMINADO, Types::STRING)
-        ->execute()->fetchOne();
+    $Qb = QbDependencia()->andWhere('sys_estado LIKE :estado')
+        ->setParameter(':estado', FtPqr::ESTADO_TERMINADO, Types::STRING);
+
+    if ($where = filterByFiltroTemp()) {
+        $Qb->andWhere($where);
+    }
+    $cant = $Qb->execute()->fetchOne();
 
     return createView(PqrForm::FILTER_RESUELTAS, (int)$cant);
 }
