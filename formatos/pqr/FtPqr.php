@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\formatos\pqr;
 
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\Services\models\PqrForm;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Types;
 use Saia\controllers\generator\component\Distribution;
@@ -93,6 +93,7 @@ class FtPqr extends FtPqrProperties
                 'isEnabledAnonymous'     => (int)$PqrForm->show_anonymous,
                 'fieldsWithoutAnonymous' => $IWsHtml->getFieldsWithoutAnonymous(),
                 'fieldsWithAnonymous'    => $IWsHtml->getFieldsWithAnonymous(),
+                'channels'               => $PqrForm->getCanalRecepcion()
             ];
         } else {
             $data['isStarted'] = (int)(new self($idft))->getDocument()->isStarted();

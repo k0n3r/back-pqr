@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Services\controllers\AddEditFormat;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use Saia\controllers\generator\component\Distribution;
 use Saia\controllers\generator\component\Hidden;
 use Saia\controllers\generator\component\Rad;

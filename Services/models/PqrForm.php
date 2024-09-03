@@ -3,7 +3,7 @@
 namespace App\Bundles\pqr\Services\models;
 
 use App\Bundles\pqr\Services\controllers\WebservicePqr;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use Saia\controllers\generator\webservice\IWsHtml;
 use Saia\core\model\Model;
 use Saia\models\formatos\CamposFormato;
@@ -45,7 +45,8 @@ class PqrForm extends Model
                 'enable_filter_dep',
                 'description_field',
                 'enable_balancer',
-                'fk_field_balancer' //Campos Formato
+                'fk_field_balancer', //Campos Formato,
+                'canal_recepcion' // Json
             ],
             'primary' => 'id',
             'table'   => 'pqr_forms'
@@ -219,5 +220,14 @@ class PqrForm extends Model
     public function isEnableBalancer(): bool
     {
         return (bool)$this->enable_balancer;
+    }
+
+    /**
+     * @return array
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-09-03
+     */
+    public function getCanalRecepcion(): array
+    {
+        return json_decode($this->canal_recepcion, true);
     }
 }

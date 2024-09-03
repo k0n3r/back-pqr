@@ -3,7 +3,7 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\FtPqrService;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use Doctrine\DBAL\Connection;
 use Exception;
 use App\Bundles\pqr\Services\PqrService;
@@ -415,6 +415,46 @@ class PqrFormController extends AbstractController
             $PqrFormsService = (PqrForm::getInstance())->getService();
 
             if (!$PqrFormsService->updateFieldDescription((int)$fieldId)) {
+                throw new SaiaException($PqrFormsService->getErrorManager()->getMessage());
+            }
+
+            $saiaResponse->setSuccess(1);
+            $Connection->commit();
+        } catch (Throwable $th) {
+            $Connection->rollBack();
+            $saiaResponse->setMessage($th->getMessage());
+        }
+
+        return $saiaResponse->getResponse();
+    }
+
+    /**
+     * @Route("/receivingchannels", name="receivingchannels", methods={"PUT"})
+     * @param ISaiaResponse $saiaResponse
+     * @param Request       $Request
+     * @param Connection    $Connection
+     * @return Response
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-09-03
+     */
+    public function receivingchannels(
+        ISaiaResponse $saiaResponse,
+        Request $Request,
+        Connection $Connection
+    ): Response {
+        $Connection->beginTransaction();
+
+        try {
+            $channels = $Request->get('channels', []);
+
+            if (!$channels) {
+                throw new SaiaException("Debe indicar los canales de recepción");
+            }
+
+            $PqrFormsService = (PqrForm::getInstance())->getService();
+
+            if (!$PqrFormsService->save([
+                'canal_recepcion' => json_encode($channels)
+            ])) {
                 throw new SaiaException($PqrFormsService->getErrorManager()->getMessage());
             }
 

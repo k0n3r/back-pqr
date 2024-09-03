@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Services;
 
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
@@ -133,7 +133,8 @@ class PqrFormService extends ModelService
             'responseTimeOptions' => $options,
             'balancerOptions'     => $options,
             'groupOptions'        => $this->getGroupsForBalancer(),
-            'descriptionField'    => $this->getdescriptionField()
+            'descriptionField'    => $this->getdescriptionField(),
+            'receivingChannel'    => $this->getModel()->getCanalRecepcion()
         ];
     }
 
@@ -722,7 +723,6 @@ SQL;
     }
 
     /**
-     *
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-21
      */
     private function viewPqrTarea()
@@ -733,8 +733,8 @@ SQL;
             TareaEstado::PROCESO,
             TareaEstado::DEVUELTA,
         ]);
-        $tfTipo=TareaFuncionario::TYPE_MANAGER;
-        $tfExterno=TareaFuncionario::INTERNAL_USER;
+        $tfTipo = TareaFuncionario::TYPE_MANAGER;
+        $tfExterno = TareaFuncionario::INTERNAL_USER;
 
         $sql = <<<SQL
 SELECT tf.usuario as idfuncionario,count(tf.usuario) as cant_task
@@ -954,6 +954,4 @@ SQL;
             'description_field' => $fieldId
         ]);
     }
-
-
 }

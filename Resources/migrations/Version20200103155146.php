@@ -188,6 +188,14 @@ final class Version20200103155146 extends AbstractMigration
             'comment' => 'idcampos_formato'
         ]);
 
+        $table->addColumn('canal_recepcion', 'json', [
+            'default' => json_encode([
+                'cFISICO',
+                'cTELEFONICO',
+                'cREDES'
+            ])
+        ]);
+
     }
 
     private function tablePqrBackup(Table $table)

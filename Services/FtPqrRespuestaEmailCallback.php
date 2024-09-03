@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Services;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\services\correo\SendEmailCallback;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 
 class FtPqrRespuestaEmailCallback implements SendEmailCallback
 {

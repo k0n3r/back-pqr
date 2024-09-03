@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\models\PqrBalancer;
 use App\Bundles\pqr\Services\models\PqrForm;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use App\services\response\ISaiaResponse;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

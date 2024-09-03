@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Services\crontab;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Types;

@@ -10,7 +10,7 @@ use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\services\correo\EmailSaia;
 use App\services\correo\SendEmailSaia;
 use App\services\documento\DocumentoExpuestoService;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use App\services\models\ModelService\ModelService;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\DistributionService;

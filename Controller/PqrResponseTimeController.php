@@ -6,7 +6,7 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use App\services\response\ISaiaResponse;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

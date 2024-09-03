@@ -5,7 +5,7 @@ namespace App\Bundles\pqr\Controller;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrHistory;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Connection;
 use Exception;

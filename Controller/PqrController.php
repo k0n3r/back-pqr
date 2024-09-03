@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrFormField;
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Types;
 use Exception;

@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Services;
 
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
