@@ -103,7 +103,7 @@ class AddEditFtPqr implements IAddEditFormat
             'ruta_adicionar'            => "views/modules/pqr/formatos/$name/adicionar.html",
             'ruta_buscar'               => "views/modules/pqr/formatos/$name/buscar.html",
             'encabezado'                => 1,
-            'cuerpo'                    => '<p>{*showContent*}</p><p>{*mostrar_estado_proceso*}</p>',
+            'cuerpo'                    => '<p>{*showContent*}</p><p>{*mostrarFirmas*}</p>',
             'pie_pagina'                => 0,
             'margenes'                  => '25,25,30,25',
             'orientacion'               => 0,

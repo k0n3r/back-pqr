@@ -289,9 +289,9 @@ HTML;
         return CoreFunctions::mostrar_qr($this);
     }
 
-    protected function showSignatures()
+    protected function showSignatures(): string
     {
-        return CoreFunctions::mostrar_estado_proceso($this);
+        return $this->mostrarFirmas();
     }
 
     protected function getContent(): string
