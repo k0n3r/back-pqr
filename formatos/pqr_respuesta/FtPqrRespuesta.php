@@ -4,6 +4,7 @@ namespace App\Bundles\pqr\formatos\pqr_respuesta;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
+use App\Exception\SaiaException;
 use Exception;
 use Saia\controllers\localidad\MunicipioService;
 use Saia\models\anexos\Anexos;
@@ -86,7 +87,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     {
         if ($this->getService()->sendByEmail()) {
             if (!$this->getService()->validEmails()) {
-                throw new Exception(
+                throw new SaiaException(
                     $this->getService()->getErrorManager()->getMessage(),
                     $this->getService()->getErrorManager()->getCode()
                 );
@@ -102,7 +103,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     {
         if ($this->getService()->sendByEmail()) {
             if (!$this->getService()->validEmails()) {
-                throw new Exception(
+                throw new SaiaException(
                     $this->getService()->getErrorManager()->getMessage(),
                     $this->getService()->getErrorManager()->getCode()
                 );
@@ -124,7 +125,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
             !$this->getService()->saveDistribution() ||
             !$this->getService()->notifyEmail()
         ) {
-            throw new Exception(
+            throw new SaiaException(
                 $this->getService()->getErrorManager()->getMessage(),
                 $this->getService()->getErrorManager()->getCode()
             );

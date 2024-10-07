@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Exception\SaiaException;
 use Doctrine\DBAL\Connection;
 use App\services\response\ISaiaResponse;
 use Exception;
@@ -34,7 +35,7 @@ class PqrNotyMessageController extends AbstractController
 
             $PqrNotyMessageService = (new PqrNotyMessage($id))->getService();
             if (!$PqrNotyMessageService->save($request->get('data'))) {
-                throw new Exception(
+                throw new SaiaException(
                     $PqrNotyMessageService->getErrorManager()->getMessage(),
                     $PqrNotyMessageService->getErrorManager()->getCode()
                 );

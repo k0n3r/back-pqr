@@ -5,6 +5,7 @@ namespace App\Bundles\pqr\Controller;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\Bundles\pqr\Services\PqrNotyMessageService;
 use App\EventSubscriber\middlewares\IHasCaptcha;
+use App\Exception\SaiaException;
 use App\services\response\ISaiaResponse;
 use Doctrine\DBAL\Connection;
 use Exception;
@@ -38,24 +39,24 @@ class CaptchaController extends AbstractController implements IHasCaptcha
         try {
 
             if (empty($Request->get('formatId'))) {
-                throw new Exception("Se debe indicar el formato", 1);
+                throw new SaiaException("Se debe indicar el formato", 1);
             }
 
             if (empty($Request->get('dependencia'))) {
-                throw new Exception("Debe indicar el rol del creador", 1);
+                throw new SaiaException("Debe indicar el rol del creador", 1);
             }
 
 
             $VfuncionarioDc = VfuncionarioDc::findByRole($Request->get('dependencia'));
             if (!$VfuncionarioDc) {
-                throw new Exception("Rol del creador incorrecto", 1);
+                throw new SaiaException("Rol del creador incorrecto", 1);
             }
 
             $Request->request->set('webservice', 1);
             $Formato = new Formato($Request->get('formatId'));
             $SaveDocument = new SaveDocument($Formato, $VfuncionarioDc);
             if (!$SaveDocument->create($Request->request->all())) {
-                throw new Exception("No fue posible generar el documento");
+                throw new SaiaException("No fue posible generar el documento");
             }
 
             $Documento = $SaveDocument->getDocument();

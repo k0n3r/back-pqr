@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use App\services\response\SaiaResponse;
 use Doctrine\DBAL\Connection;
@@ -33,7 +34,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField())->getService();
             if (!$PqrFormFieldService->save($request->get('data'))) {
-                throw new Exception(
+                throw new SaiaException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                     $PqrFormFieldService->getErrorManager()->getCode()
                 );
@@ -68,7 +69,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->save($request->get('data'))) {
-                throw new Exception(
+                throw new SaiaException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                     $PqrFormFieldService->getErrorManager()->getCode()
                 );
@@ -121,7 +122,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->updateActive($status)) {
-                throw new Exception(
+                throw new SaiaException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                     $PqrFormFieldService->getErrorManager()->getCode()
                 );
@@ -154,7 +155,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->delete()) {
-                throw new Exception(
+                throw new SaiaException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                     $PqrFormFieldService->getErrorManager()->getCode()
                 );

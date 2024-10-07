@@ -258,7 +258,7 @@ class FtPqrController extends AbstractController
                     'descripcion'    => 'Se actualizo el tercero: ' . implode(', ', $modified)
                 ];
                 if (!$PqrHistoryService->save($history)) {
-                    throw new Exception(
+                    throw new SaiaException(
                         $PqrHistoryService->getErrorManager()->getMessage(),
                         $PqrHistoryService->getErrorManager()->getCode()
                     );
@@ -299,7 +299,7 @@ class FtPqrController extends AbstractController
 
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
             if (!$FtPqrService->updateType($request->get('data'))) {
-                throw new Exception(
+                throw new SaiaException(
                     $FtPqrService->getErrorManager()->getMessage(),
                     $FtPqrService->getErrorManager()->getCode(),
                 );
@@ -335,7 +335,7 @@ class FtPqrController extends AbstractController
 
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
             if (!$FtPqrService->finish($request->get('observaciones'))) {
-                throw new Exception(
+                throw new SaiaException(
                     $FtPqrService->getErrorManager()->getMessage(),
                     $FtPqrService->getErrorManager()->getCode(),
                 );

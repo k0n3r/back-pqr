@@ -9,6 +9,7 @@ use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Event\tarea\TaskCreatedEvent;
 use App\Event\tarea\TaskDeletedEvent;
 use App\Event\tarea\TaskStatusCreatedEvent;
+use App\Exception\SaiaException;
 use App\services\models\tareas\TareaService;
 use Exception;
 use Saia\models\documento\Documento;
@@ -109,14 +110,14 @@ class PqrSubscriber implements EventSubscriberInterface
 
                 $PqrHistoryService = (new PqrHistory)->getService();
                 if (!$PqrHistoryService->save($history)) {
-                    throw new Exception(
+                    throw new SaiaException(
                         $PqrHistoryService->getErrorManager()->getMessage(),
                         $PqrHistoryService->getErrorManager()->getCode()
                     );
                 }
 
                 if (!$this->updateEstado($Documento)) {
-                    throw new Exception("No fue posible actualizar el estado de la solicitud", 200);
+                    throw new SaiaException("No fue posible actualizar el estado de la solicitud", 200);
                 }
             }
         }

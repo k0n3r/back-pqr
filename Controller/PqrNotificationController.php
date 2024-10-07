@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Exception\SaiaException;
 use Doctrine\DBAL\Connection;
 use Exception;
 use App\services\response\ISaiaResponse;
@@ -33,7 +34,7 @@ class PqrNotificationController extends AbstractController
             if (!$PqrNotificationService->create([
                 'fk_funcionario' => $request->get('id')
             ])) {
-                throw new Exception(
+                throw new SaiaException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
                     $PqrNotificationService->getErrorManager()->getCode()
                 );
@@ -68,7 +69,7 @@ class PqrNotificationController extends AbstractController
 
             $PqrNotificationService = (new PqrNotification($id))->getService();
             if (!$PqrNotificationService->update($request->get('data'))) {
-                throw new Exception(
+                throw new SaiaException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
                     $PqrNotificationService->getErrorManager()->getCode()
                 );
@@ -102,7 +103,7 @@ class PqrNotificationController extends AbstractController
 
             $PqrNotificationService = (new PqrNotification($id))->getService();
             if (!$PqrNotificationService->delete()) {
-                throw new Exception(
+                throw new SaiaException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
                     $PqrNotificationService->getErrorManager()->getCode()
                 );
