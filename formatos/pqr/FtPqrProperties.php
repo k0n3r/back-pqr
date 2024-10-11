@@ -73,6 +73,7 @@ class FtPqrProperties extends ModelFormat
     */
     public function afterRad(): bool
     {
+        $this->createTaskFromDataTemp();
         $existInPack = PaqueteDocumento::fromPackage($this->getDocument()->getPK());
         if (!$this->radicacion_rapida) {
             if ($existInPack == 0) {

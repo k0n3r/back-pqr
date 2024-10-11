@@ -46,5 +46,13 @@ class FtPqrCalificacionProperties extends ModelFormat
         return true;
     }
         
-    
+        /**
+    * @inheritDoc
+    */
+    public function afterRad(): bool
+    {
+        $this->createTaskFromDataTemp();
+        
+        return true;
+    }
 }
