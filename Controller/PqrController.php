@@ -154,6 +154,8 @@ class PqrController extends AbstractController
             <select class='full-width' name='bqCampo_$field' id='$field'>
                $options 
             </select>
+            <input type="hidden" value="=" name="bqCondicional_$field">
+            <input type="hidden" value="1" name="bqNumerico_$field">
         </div>
     </div>
 HTML;
