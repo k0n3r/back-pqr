@@ -255,6 +255,8 @@ class FtPqr extends FtPqrProperties
             return true;
         }
 
+        $this->createTaskFromDataTemp();
+
         $this->saveDestinoInterno();
         $this->descripcion = $this->getDocument()->getDescription();
         $this->save();
