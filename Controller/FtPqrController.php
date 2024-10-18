@@ -6,12 +6,11 @@ use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Exception\SaiaException;
-use App\services\GlobalContainer;
 use Doctrine\DBAL\Connection;
-use Exception;
 use Saia\controllers\DateController;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
+use Saia\controllers\functions\CoreFunctions;
 use Saia\models\Tercero;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,18 +55,11 @@ class FtPqrController extends AbstractController
 
     private function getFieldIdSysTercero(FtPqr $FtPqr): int
     {
-        $cache = GlobalContainer::getCache();
-        $item = $cache->getItem('FieldIdPqrSysTercero');
+        $callback = function () use ($FtPqr) {
+            return $FtPqr->getFormat()->getField('sys_tercero')->getPK();
+        };
 
-        if ($item->isHit()) {
-            return $item->get();
-        }
-        $id = $FtPqr->getFormat()->getField('sys_tercero')->getPK();
-        $item->set($id);
-        $item->expiresAfter(86400); // 1 Dia
-        $cache->save($item);
-
-        return $id;
+        return CoreFunctions::createItemCache('FieldIdPqrSysTercero', $callback);
     }
 
     /**
