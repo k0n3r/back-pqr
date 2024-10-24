@@ -162,7 +162,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('show_anonymous', 'boolean', ['default' => 0]);
         $table->addColumn('show_label', 'boolean', ['default' => 1]);
         $table->addColumn('show_empty', 'boolean', ['default' => 1]);
-        $table->addColumn('response_configuration', 'text', [
+        $table->addColumn('response_configuration', 'json', [
             'notnull' => false
         ]);
 
@@ -188,13 +188,7 @@ final class Version20200103155146 extends AbstractMigration
             'comment' => 'idcampos_formato'
         ]);
 
-        $table->addColumn('canal_recepcion', 'json', [
-            'default' => json_encode([
-                'cFISICO',
-                'cTELEFONICO',
-                'cREDES'
-            ])
-        ]);
+        $table->addColumn('canal_recepcion', 'json');
 
     }
 
@@ -211,7 +205,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('fk_pqr', 'integer');
         $table->addIndex(['fk_pqr'], 'ipqr_backufk_pqr');
 
-        $table->addColumn('data_json', 'text');
+        $table->addColumn('data_json', 'json');
     }
 
     private function tablePqrNotify(Table $table)

@@ -6,6 +6,7 @@ namespace App\Bundles\pqr\Resources\migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Saia\models\Funcionario;
 use Saia\models\Modulo;
 
 /**
@@ -56,9 +57,8 @@ final class Version20200321234633 extends AbstractMigration
         $idcontador = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$idcontador, "El contador apoyo NO existe");
 
-        $sql = "SELECT idfuncionario FROM funcionario WHERE login like 'cerok'";
-        $idfuncionario = (int)$this->connection->fetchOne($sql);
-        $this->abortIf(!$idfuncionario, "El funcionario ceork NO existe");
+        $idfuncionario = Funcionario::CEROK;
+        $this->abortIf(!$idfuncionario, "El funcionario SAIA NO existe");
 
         $sqlCodPadre = "SELECT idformato FROM formato WHERE nombre like 'pqr_respuesta'";
         $codPadre = (int)$this->connection->fetchOne($sqlCodPadre);

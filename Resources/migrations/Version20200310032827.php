@@ -13,6 +13,7 @@ use Saia\controllers\generator\component\Select;
 use Saia\controllers\generator\component\Text;
 use Saia\controllers\generator\component\Textarea;
 use Saia\controllers\generator\component\UserAutocomplete;
+use Saia\models\Funcionario;
 use Saia\models\Modulo;
 
 /**
@@ -63,9 +64,8 @@ final class Version20200310032827 extends AbstractMigration
         $idcontador = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$idcontador, "El contador radicacion_salida NO existe");
 
-        $sql = "SELECT idfuncionario FROM funcionario WHERE login='cerok'";
-        $idfuncionario = (int)$this->connection->fetchOne($sql);
-        $this->abortIf(!$idfuncionario, "El funcionario cerok NO existe");
+        $idfuncionario = Funcionario::CEROK;
+        $this->abortIf(!$idfuncionario, "El funcionario SAIA NO existe");
 
 
         $name = $this->formatName;
@@ -318,7 +318,7 @@ final class Version20200310032827 extends AbstractMigration
                 'fila_visible'      => 1,
                 'listable'          => 1
             ],
-            'cerrar_tareas'         =>
+            'cerrar_tareas'     =>
                 [
                     'formato_idformato' => $idformato,
                     'nombre'            => 'cerrar_tareas',

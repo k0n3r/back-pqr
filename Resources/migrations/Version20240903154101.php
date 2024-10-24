@@ -21,7 +21,9 @@ final class Version20240903154101 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $table = $schema->getTable('pqr_forms');
-        $table->addColumn('canal_recepcion', 'json');
+        if (!$table->hasColumn('canal_recepcion')) {
+            $table->addColumn('canal_recepcion', 'json');
+        }
 
     }
 
