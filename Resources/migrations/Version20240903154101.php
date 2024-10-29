@@ -22,7 +22,20 @@ final class Version20240903154101 extends AbstractMigration
     {
         $table = $schema->getTable('pqr_forms');
         if (!$table->hasColumn('canal_recepcion')) {
-            $table->addColumn('canal_recepcion', 'json');
+            $driver = $this->connection->getParams()['driver'];
+            $options = [];
+            if ($driver == 'pdo_sqlsrv') {
+                $chanels = json_encode([
+                    'cFISICO',
+                    'cTELEFONICO',
+                    'cREDES'
+                ]);
+
+                $options = [
+                    'default' => $chanels
+                ];
+            }
+            $table->addColumn('canal_recepcion', 'json', $options);
         }
 
     }
