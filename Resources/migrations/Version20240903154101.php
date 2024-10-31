@@ -24,7 +24,7 @@ final class Version20240903154101 extends AbstractMigration
         if (!$table->hasColumn('canal_recepcion')) {
             $driver = $this->connection->getParams()['driver'];
             $options = [];
-            if ($driver == 'pdo_sqlsrv') {
+            if ($driver != 'pdo_mysql') {
                 $chanels = json_encode([
                     'cFISICO',
                     'cTELEFONICO',
