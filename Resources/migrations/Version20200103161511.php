@@ -158,11 +158,16 @@ final class Version20200103161511 extends AbstractMigration
         $this->abortIf(!$idcontador, 'El contador Externo-Interno NO existe');
 
         return [
-            'fk_formato'  => 0,
-            'fk_contador' => $idcontador,
-            'label'       => 'PQRSF',
-            'name'        => 'pqr',
-            'active'      => 1
+            'fk_formato'      => 0,
+            'fk_contador'     => $idcontador,
+            'label'           => 'PQRSF',
+            'name'            => 'pqr',
+            'active'          => 1,
+            'canal_recepcion' => json_encode([
+                'cFISICO',
+                'cTELEFONICO',
+                'cREDES'
+            ])
         ];
     }
 
