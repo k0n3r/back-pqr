@@ -8,7 +8,6 @@ use App\EventSubscriber\middlewares\IHasCaptcha;
 use App\Exception\SaiaException;
 use App\services\response\ISaiaResponse;
 use Doctrine\DBAL\Connection;
-use Exception;
 use Saia\controllers\SaveDocument;
 use Saia\models\formatos\Formato;
 use Saia\models\vistas\VfuncionarioDc;
@@ -18,18 +17,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Throwable;
 
-/**
- * @Route("/captcha", name="captcha_")
- */
+#[Route('/captcha', name: 'captcha_')]
 class CaptchaController extends AbstractController implements IHasCaptcha
 {
     /**
-     * @Route("/saveDocument", name="register", methods={"POST"})
      * @param Request       $Request
      * @param ISaiaResponse $saiaResponse
      * @param Connection    $Connection
      * @return Response
      */
+    #[Route('/saveDocument', name: 'register', methods: ['POST'])]
     public function saveDocument(
         Request $Request,
         ISaiaResponse $saiaResponse,

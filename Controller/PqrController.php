@@ -6,8 +6,7 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Exception\SaiaException;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\services\GlobalContainer;
-use Doctrine\DBAL\Types\Types;
-use Exception;
+use Doctrine\DBAL\ParameterType;
 use Saia\controllers\DateController;
 use Saia\models\Dependencia;
 use Saia\models\documento\Documento;
@@ -23,9 +22,7 @@ use Throwable;
 class PqrController extends AbstractController
 {
 
-    /**
-     * @Route("/searchByNumber", name="search", methods={"GET"})
-     */
+    #[Route('/searchByNumber', name: 'search', methods: ['GET'])]
     public function search(
         Request $request,
         ISaiaResponse $saiaResponse
@@ -45,9 +42,9 @@ class PqrController extends AbstractController
                 ->from('ft_pqr', 'ft')
                 ->join('ft', 'documento', 'd', 'ft.documento_iddocumento=d.iddocumento')
                 ->where('d.estado<>:estado')
-                ->setParameter(':estado', Documento::ELIMINADO, Types::STRING)
+                ->setParameter('estado', Documento::ELIMINADO)
                 ->andWhere('d.numero = :numero')
-                ->setParameter(':numero', $request->get('numero'), Types::INTEGER);
+                ->setParameter('numero', $request->get('numero'), ParameterType::INTEGER);
 
             $records = FtPqr::findByQueryBuilder($Qb);
 
@@ -71,9 +68,7 @@ class PqrController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/historyForTimeline", name="getHistoryForTimeline", methods={"GET"})
-     */
+    #[Route('/historyForTimeline', name: 'getHistoryForTimeline', methods: ['GET'])]
     public function getHistoryForTimeline(
         Request $request,
         ISaiaResponse $saiaResponse
@@ -98,9 +93,7 @@ class PqrController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/decrypt", name="decrypt", methods={"GET"})
-     */
+    #[Route('/decrypt', name: 'decrypt', methods: ['GET'])]
     public function decrypt(
         Request $request,
         ISaiaResponse $saiaResponse
@@ -122,9 +115,7 @@ class PqrController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/contentDependencia", name="contentDependencia", methods={"GET"})
-     */
+    #[Route('/contentDependencia', name: 'contentDependencia', methods: ['GET'])]
     public function contentDependencia(
         ISaiaResponse $saiaResponse
     ): Response {

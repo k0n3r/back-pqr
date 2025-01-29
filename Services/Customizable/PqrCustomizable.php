@@ -37,7 +37,7 @@ class PqrCustomizable implements Customizable
                     'descripcion' => $data['descripcion'],
                     'asunto'      => $data['descripcion'],
                     'sys_folios'  => $data[Rad::NUMERO_FOLIOS],
-                    'colilla'     => $CampoOpcionColilla ? $CampoOpcionColilla->getPK() : null
+                    'colilla'     => $CampoOpcionColilla?->getPK()
                 ]);
 
                 return true;

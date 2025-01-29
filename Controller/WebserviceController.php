@@ -9,18 +9,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/webservice", name="webservice_")
- */
+#[Route('/webservice', name: 'webservice_')]
 class WebserviceController extends AbstractController
 {
     /**
-     * @Route("/saveDocument", name="register", methods={"POST"})
      * @param Request       $Request
      * @param ISaiaResponse $saiaResponse
      * @param Connection    $Connection
      * @return Response
      */
+    #[Route('/saveDocument', name: 'register', methods: ['POST'])]
     public function saveDocument(
         Request $Request,
         ISaiaResponse $saiaResponse,

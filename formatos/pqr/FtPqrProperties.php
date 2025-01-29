@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\formatos\pqr;
 
-use App\services\exception\SaiaException;
+use App\Exception\SaiaException;
 use Saia\controllers\distribucion\DistributionExecutor;
 use Saia\models\documento\Documento;
 use Saia\models\radicacion_masiva\PaqueteDocumento;
@@ -24,24 +24,24 @@ class FtPqrProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'documento_iddocumento',
+                'firma',
 				'encabezado',
-				'firma',
+				'documento_iddocumento',
 				'idft_pqr',
-				'sys_tercero',
-				'sys_severidad',
 				'sys_oportuno',
-				'sys_impacto',
 				'radicacion',
+				'sys_severidad',
+				'sys_impacto',
 				'sys_frecuencia',
-				'sys_fecha_vencimiento',
 				'sys_anonimo',
 				'sys_fecha_terminado',
+				'sys_fecha_vencimiento',
+				'sys_tercero',
 				'sys_estado',
 				'dependencia',
 				'sys_tipo',
-				'sys_email',
 				'sys_folios',
+				'sys_email',
 				'sys_anexos',
 				'distribucion',
 				'destino_interno',
@@ -50,8 +50,8 @@ class FtPqrProperties extends ModelFormat
 				'colilla',
 				'digitalizacion' 
             ],
-            'date' => ['sys_fecha_vencimiento',
-				'sys_fecha_terminado'],
+            'date' => ['sys_fecha_terminado',
+				'sys_fecha_vencimiento'],
             'table' => 'ft_pqr',
             'primary' => 'idft_pqr'
         ];
@@ -59,10 +59,9 @@ class FtPqrProperties extends ModelFormat
     
     public function defaultDocumentRoute(): bool
     {
-        $RutaFormato = new RutaFormato();
-        $RutaFormato->addDefaultRouteFormat(
-            $this->getFormat()->getPk(), 
-            $this->getDocument()->getPk()
+        RutaFormato::addDefaultRouteFormat(
+            $this->getFormat()->getPK(), 
+            $this->getDocument()->getPK()
         );
 
         return true;
@@ -72,16 +71,16 @@ class FtPqrProperties extends ModelFormat
     * @inheritDoc
     */
     public function afterRad(): bool
-    {
+    {        
         $this->createTaskFromDataTemp();
-        $existInPack = PaqueteDocumento::fromPackage($this->getDocument()->getPK());
         if (!$this->radicacion_rapida) {
-            if ($existInPack == 0) {
+            $this->postDocumentRad();
+            if (!$this->getDocument()->belongsToPackage()) {
                 if (!$this->sendDocumentsByEmail()) {
                     throw new SaiaException('No fue posible enviar la notificacion por correo');
                 }
             }
-            $this->postDocumentRad();
+            
         }
 
         return true;
@@ -105,6 +104,7 @@ class FtPqrProperties extends ModelFormat
             $Documento->estado = Documento::APROBADO;
             $Documento->estado_aprobacion = Documento::APROBADO_LABEL;
             $Documento->save();
+            $Documento->getPdfJson(true);
             
             if (!$this->sendDocumentsByEmail()) {
                 throw new SaiaException('No fue posible enviar la notificacion por correo');

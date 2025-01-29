@@ -10,11 +10,11 @@ class PqrFormField extends Model
 {
     use TModels;
 
-    const ACTIVE = 1;
-    const INACTIVE = 0;
+    const int ACTIVE = 1;
+    const int INACTIVE = 0;
 
-    const FIELD_NAME_SYS_TIPO = 'sys_tipo';
-    const FIELD_NAME_SYS_DEPENDENCIA = 'sys_dependencia';
+    const string FIELD_NAME_SYS_TIPO = 'sys_tipo';
+    const string FIELD_NAME_SYS_DEPENDENCIA = 'sys_dependencia';
 
     public static ?PqrFormField $PqrFormField_sysTipo = null;
 

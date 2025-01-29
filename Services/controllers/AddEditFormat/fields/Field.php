@@ -11,7 +11,7 @@ abstract class Field
     /**
      * Campos que seran utilizados como descripcion/detalle en el modulo
      */
-    const FIELDS_DESCRIPTION = [
+    const array FIELDS_DESCRIPTION = [
         'sys_tipo',
         'sys_email',
         'sys_estado'

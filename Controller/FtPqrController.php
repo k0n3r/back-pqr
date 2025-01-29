@@ -19,18 +19,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Throwable;
 
-
-/**
- * @Route("/{idft}", name="FtPqr_")
- */
+#[Route('/{idft}', name: 'FtPqr_')]
 class FtPqrController extends AbstractController
 {
     /**
-     * @Route("/externalUser", name="getExternalUser", methods={"GET"})
      * @param int           $idft
      * @param ISaiaResponse $saiaResponse
      * @return Response
      */
+    #[Route('/externalUser', name: 'getExternalUser', methods: ['GET'])]
     public function getExternalUser(
         int $idft,
         ISaiaResponse $saiaResponse
@@ -63,11 +60,11 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @Route("/dataToLoadResponse", name="getDataToLoadResponse", methods={"GET"})
      * @param int           $idft
      * @param ISaiaResponse $saiaResponse
      * @return Response
      */
+    #[Route('/dataToLoadResponse', name: 'getDataToLoadResponse', methods: ['GET'])]
     public function getDataToLoadResponse(
         int $idft,
         ISaiaResponse $saiaResponse
@@ -86,12 +83,12 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @Route("/dateForType", name="getDateForType", methods={"GET"})
      * @param int           $idft
      * @param ISaiaResponse $saiaResponse
      * @param Request       $request
      * @return Response
      */
+    #[Route('/dateForType', name: 'getDateForType', methods: ['GET'])]
     public function getDateForType(
         int $idft,
         ISaiaResponse $saiaResponse,
@@ -119,11 +116,11 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @Route("/valuesForType", name="getValuesForType", methods={"GET"})
      * @param int           $idft
      * @param ISaiaResponse $saiaResponse
      * @return Response
      */
+    #[Route('/valuesForType', name: 'getValuesForType', methods: ['GET'])]
     public function getValuesForType(
         int $idft,
         ISaiaResponse $saiaResponse
@@ -164,10 +161,10 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @Route("/history", name="getHistory", methods={"GET"})
      * @param int $idft
      * @return JsonResponse
      */
+    #[Route('/history', name: 'getHistory', methods: ['GET'])]
     public function getHistory(
         int $idft
     ): JsonResponse {
@@ -192,13 +189,13 @@ class FtPqrController extends AbstractController
 
 
     /**
-     * @Route("/externalUser", name="setExternalUser", methods={"POST"})
      * @param int           $idft
      * @param Request       $request
      * @param ISaiaResponse $saiaResponse
      * @param Connection    $Connection
      * @return Response
      */
+    #[Route('/externalUser', name: 'setExternalUser', methods: ['POST'])]
     public function setExternalUser(
         int $idft,
         Request $request,
@@ -273,13 +270,13 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @Route("/updateType", name="updateType", methods={"PUT"})
      * @param int           $idft
      * @param Request       $request
      * @param ISaiaResponse $saiaResponse
      * @param Connection    $Connection
      * @return Response
      */
+    #[Route('/updateType', name: 'updateType', methods: ['PUT'])]
     public function updateType(
         int $idft,
         Request $request,
@@ -308,13 +305,13 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @Route("/finish", name="finish", methods={"PUT"})
      * @param int           $idft
      * @param Request       $request
      * @param ISaiaResponse $saiaResponse
      * @param Connection    $Connection
      * @return Response
      */
+    #[Route('/finish', name: 'finish', methods: ['PUT'])]
     public function finish(
         int $idft,
         Request $request,

@@ -14,14 +14,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Throwable;
 
 
-/**
- * @Route("/balancer", name="responseTimes_")
- */
+#[Route('/balancer', name: 'responseTimes_')]
 class PqrBalancerController extends AbstractController
 {
-    /**
-     * @Route("/field/{id}", name="groupsForField", methods={"GET"})
-     */
+    #[Route('/field/{id}', name: 'groupsForField', methods: ['GET'])]
     public function groupsForField(
         int $id,
         ISaiaResponse $saiaResponse
@@ -63,9 +59,7 @@ class PqrBalancerController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("", name="updateGroupsBalancer", methods={"PUT"})
-     */
+    #[Route('', name: 'updateGroupsBalancer', methods: ['PUT'])]
     public function updateGroupsBalancer(
         Request $Request,
         ISaiaResponse $saiaResponse,

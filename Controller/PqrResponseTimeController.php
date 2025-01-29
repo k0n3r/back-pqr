@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Bundles\pqr\Controller;
-
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
@@ -15,15 +13,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Throwable;
 
-
-/**
- * @Route("/responseTimes", name="responseTimes_")
- */
+#[Route('/responseTimes', name: 'responseTimes_')]
 class PqrResponseTimeController extends AbstractController
 {
-    /**
-     * @Route("/field/{id}", name="timesForField", methods={"GET"})
-     */
+    #[Route('/field/{id}', name: 'timesForField', methods: ['GET'])]
     public function timesForField(
         int $id,
         ISaiaResponse $saiaResponse
@@ -69,9 +62,7 @@ class PqrResponseTimeController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("", name="updateTimes", methods={"PUT"})
-     */
+    #[Route('', name: 'updateTimes', methods: ['PUT'])]
     public function updateTimes(
         Request $Request,
         ISaiaResponse $saiaResponse,

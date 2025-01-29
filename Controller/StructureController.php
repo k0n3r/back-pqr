@@ -10,15 +10,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
-/**
- * @Route("/structure", name="structure_")
- */
+#[Route('/structure', name: 'structure_')]
 class StructureController extends AbstractController
 {
 
-    /**
-     * @Route("/dataViewIndex", name="dataViewIndex", methods={"GET"})
-     */
+    #[Route('/dataViewIndex', name: 'dataViewIndex', methods: ['GET'])]
     public function getDataViewIndex(
         ISaiaResponse $saiaResponse
     ): Response {
@@ -41,9 +37,7 @@ class StructureController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/dataModalViewEditType", name="getDataEditType", methods={"GET"})
-     */
+    #[Route('/dataModalViewEditType', name: 'getDataEditType', methods: ['GET'])]
     public function getDataEditType(
         ISaiaResponse $saiaResponse
     ): Response {

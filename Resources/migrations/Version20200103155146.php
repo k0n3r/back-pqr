@@ -49,7 +49,7 @@ final class Version20200103155146 extends AbstractMigration
         $this->tablePqrBalancer($table10);
     }
 
-    private function tablePqrFormFields(Table $table)
+    private function tablePqrFormFields(Table $table): void
     {
 
         $table->addColumn('id', 'integer', [
@@ -116,7 +116,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    private function tablePqrHtmlFields(Table $table)
+    private function tablePqrHtmlFields(Table $table): void
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -144,7 +144,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    private function tablePqrForm(Table $table)
+    private function tablePqrForm(Table $table): void
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -192,7 +192,7 @@ final class Version20200103155146 extends AbstractMigration
 
     }
 
-    private function tablePqrBackup(Table $table)
+    private function tablePqrBackup(Table $table): void
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -208,7 +208,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('data_json', 'json');
     }
 
-    private function tablePqrNotify(Table $table)
+    private function tablePqrNotify(Table $table): void
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -229,7 +229,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    private function tablePqrHistory(Table $table)
+    private function tablePqrHistory(Table $table): void
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -246,7 +246,7 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('descripcion', 'text');
     }
 
-    private function tablePqrNotyMessages(Table $table)
+    private function tablePqrNotyMessages(Table $table): void
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -283,7 +283,7 @@ final class Version20200103155146 extends AbstractMigration
         ]);
     }
 
-    private function tablePqrResponseTime(Table $table)
+    private function tablePqrResponseTime(Table $table): void
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true
@@ -321,7 +321,7 @@ final class Version20200103155146 extends AbstractMigration
         }
     }
 
-    private function tablePqrBalancer(Table $table)
+    private function tablePqrBalancer(Table $table): void
     {
         $table->addColumn('id', 'integer', [
             'autoincrement' => true

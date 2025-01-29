@@ -5,7 +5,9 @@ namespace App\Bundles\pqr\formatos\pqr_respuesta;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
 use App\Exception\SaiaException;
+use DateTime;
 use Exception;
+use IntlDateFormatter;
 use Saia\controllers\localidad\MunicipioService;
 use Saia\models\anexos\Anexos;
 use Saia\models\Tercero;
@@ -18,14 +20,14 @@ use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 
 class FtPqrRespuesta extends FtPqrRespuestaProperties
 {
-    const ATENTAMENTE_DESPEDIDA = 1;
-    const CORDIALMENTE_DESPEDIDA = 2;
-    const OTRA_DESPEDIDA = 3;
+    const int ATENTAMENTE_DESPEDIDA = 1;
+    const int CORDIALMENTE_DESPEDIDA = 2;
+    const int OTRA_DESPEDIDA = 3;
 
-    const DISTRIBUCION_RECOGIDA_ENTREGA = 1;
-    const DISTRIBUCION_SOLO_ENTREGA = 2;
-    const DISTRIBUCION_NO_REQUIERE_MENSAJERIA = 3;
-    const DISTRIBUCION_ENVIAR_EMAIL = 4;
+    const int DISTRIBUCION_RECOGIDA_ENTREGA = 1;
+    const int DISTRIBUCION_SOLO_ENTREGA = 2;
+    const int DISTRIBUCION_NO_REQUIERE_MENSAJERIA = 3;
+    const int DISTRIBUCION_ENVIAR_EMAIL = 4;
 
     private ?FtPqrRespuestaService $FtPqrRespuestaService = null;
 
@@ -285,7 +287,7 @@ HTML;
 
     }
 
-    protected function showQr()
+    protected function showQr(): string
     {
         return CoreFunctions::mostrar_qr($this);
     }
@@ -309,8 +311,14 @@ HTML;
      */
     public function getFechaCiudad(): string
     {
-        return $this->getMunicipio()->nombre . ", " . strftime("%d de %B de %Y",
-                strtotime($this->getDocument()->fecha));
+        $fecha = new DateTime($this->getDocument()->fecha);
+        $formateador = new IntlDateFormatter(
+            null,
+            IntlDateFormatter::LONG, // Formato largo para la fecha
+            IntlDateFormatter::NONE // No incluye hora
+        );
+
+        return $this->getMunicipio()->nombre . ", " . $formateador->format($fecha);
     }
 
     /**

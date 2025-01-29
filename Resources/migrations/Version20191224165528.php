@@ -200,7 +200,7 @@ final class Version20191224165528 extends AbstractMigration
         ]);
     }
 
-    private function createGraphic($id)
+    private function createGraphic($id): void
     {
         $graphics = [
             [
@@ -474,7 +474,7 @@ final class Version20191224165528 extends AbstractMigration
 
     }
 
-    private function delOtherModules()
+    private function delOtherModules(): void
     {
         $nameModules = [
             'crear_pqr',

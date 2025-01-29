@@ -18,15 +18,11 @@ use App\Bundles\pqr\Services\PqrFormFieldService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
-/**
- * @Route("/form", name="form_")
- */
+#[Route('/form', name: 'form_')]
 class PqrFormController extends AbstractController
 {
 
-    /**
-     * @Route("/textFields", name="getTextFields", methods={"GET"})
-     */
+    #[Route('/textFields', name: 'getTextFields', methods: ['GET'])]
     public function getTextFields(
         ISaiaResponse $saiaResponse
     ): Response {
@@ -41,9 +37,7 @@ class PqrFormController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/setting", name="getSetting", methods={"GET"})
-     */
+    #[Route('/setting', name: 'getSetting', methods: ['GET'])]
     public function getSetting(
         ISaiaResponse $saiaResponse
     ): Response {
@@ -60,9 +54,7 @@ class PqrFormController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/responseSetting", name="getResponseSetting", methods={"GET"})
-     */
+    #[Route('/responseSetting', name: 'getResponseSetting', methods: ['GET'])]
     public function getResponseSetting(
         ISaiaResponse $saiaResponse
     ): Response {
@@ -80,15 +72,14 @@ class PqrFormController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/publish", name="publish", methods={"PUT"})
-     */
+    #[Route('/publish', name: 'publish', methods: ['PUT'])]
     public function publish(
         ISaiaResponse $saiaResponse,
         Connection $Connection
     ): Response {
 
         $Connection->beginTransaction();
+
         try {
 
             $PqrFormService = (PqrForm::getInstance())->getService();
@@ -106,6 +97,7 @@ class PqrFormController extends AbstractController
 
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
+
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
@@ -115,9 +107,7 @@ class PqrFormController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/sortFields", name="sortFields", methods={"PUT"})
-     */
+    #[Route('/sortFields', name: 'sortFields', methods: ['PUT'])]
     public function sortFields(
         Request $request,
         ISaiaResponse $saiaResponse,
@@ -148,9 +138,7 @@ class PqrFormController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/updateSetting", name="updateSetting", methods={"PUT"})
-     */
+    #[Route('/updateSetting', name: 'updateSetting', methods: ['PUT'])]
     public function updateSetting(
         Request $request,
         ISaiaResponse $saiaResponse,
@@ -184,9 +172,7 @@ class PqrFormController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/updateResponseSetting", name="updateResponseSetting", methods={"PUT"})
-     */
+    #[Route('/updateResponseSetting', name: 'updateResponseSetting', methods: ['PUT'])]
     public function updateResponseSetting(
         Request $request,
         ISaiaResponse $saiaResponse,
@@ -214,9 +200,7 @@ class PqrFormController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/updateShowReport", name="updateShowReport", methods={"PUT"})
-     */
+    #[Route('/updateShowReport', name: 'updateShowReport', methods: ['PUT'])]
     public function updateShowReport(
         Request $request,
         ISaiaResponse $saiaResponse,
@@ -228,7 +212,7 @@ class PqrFormController extends AbstractController
 
             $Connection->createQueryBuilder()
                 ->update('pqr_form_fields')
-                ->set('show_report', 0)->execute();
+                ->set('show_report', 0)->executeStatement();
 
             if ($request->get('ids')) {
                 foreach ($request->get('ids') as $id) {
@@ -258,7 +242,6 @@ class PqrFormController extends AbstractController
 
     /**
      * Actualiza el campo mostrar/ocultar campos vacios
-     * @Route("/showEmpty", name="updateShowEmpty", methods={"PUT"})
      *
      * @param Request       $Request
      * @param ISaiaResponse $saiaResponse
@@ -266,6 +249,7 @@ class PqrFormController extends AbstractController
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
+    #[Route('/showEmpty', name: 'updateShowEmpty', methods: ['PUT'])]
     public function updateShowEmpty(
         Request $Request,
         ISaiaResponse $saiaResponse,
@@ -296,7 +280,6 @@ class PqrFormController extends AbstractController
 
     /**
      * Habilita y aplica el filtro por dependencia a los reportes
-     * @Route("/filterReport", name="updateEnableFilterDep", methods={"PUT"})
      *
      * @param Request       $Request
      * @param ISaiaResponse $saiaResponse
@@ -304,6 +287,7 @@ class PqrFormController extends AbstractController
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
      */
+    #[Route('/filterReport', name: 'updateEnableFilterDep', methods: ['PUT'])]
     public function updateEnableFilterDep(
         Request $Request,
         ISaiaResponse $saiaResponse,
@@ -347,7 +331,6 @@ class PqrFormController extends AbstractController
 
     /**
      * Habilita/deshabilita el balanceo
-     * @Route("/balancer", name="updateEnableBalancer", methods={"PUT"})
      *
      * @param Request       $Request
      * @param ISaiaResponse $saiaResponse
@@ -355,6 +338,7 @@ class PqrFormController extends AbstractController
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
      */
+    #[Route('/balancer', name: 'updateEnableBalancer', methods: ['PUT'])]
     public function updateEnableBalancer(
         Request $Request,
         ISaiaResponse $saiaResponse,
@@ -390,7 +374,6 @@ class PqrFormController extends AbstractController
 
     /**
      * Actualiza el campo que quedara como descripcion de la pqr adicional al tipo.
-     * @Route("/descriptionField", name="descriptionField", methods={"PUT"})
      *
      * @param ISaiaResponse $saiaResponse
      * @param Request       $Request
@@ -398,6 +381,7 @@ class PqrFormController extends AbstractController
      * @return Response
      * @author Julian Otalvaro <julian.otalvaro@cerok.com> 2023-10-11
      */
+    #[Route('/descriptionField', name: 'descriptionField', methods: ['PUT'])]
     public function descriptionField(
         ISaiaResponse $saiaResponse,
         Request $Request,
@@ -429,13 +413,13 @@ class PqrFormController extends AbstractController
     }
 
     /**
-     * @Route("/receivingchannels", name="receivingchannels", methods={"PUT"})
      * @param ISaiaResponse $saiaResponse
      * @param Request       $Request
      * @param Connection    $Connection
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-09-03
      */
+    #[Route('/receivingchannels', name: 'receivingchannels', methods: ['PUT'])]
     public function receivingchannels(
         ISaiaResponse $saiaResponse,
         Request $Request,

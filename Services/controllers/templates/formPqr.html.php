@@ -58,9 +58,11 @@
                         <div class="card-body">
                             <table class="table">
                                 <thead class="thead-light text-center" id="thead">
-                                <th>FECHA</th>
-                                <th>DESCRIPCIÓN</th>
-                                <th>INFORMACIÓN</th>
+                                <tr>
+                                    <th>FECHA</th>
+                                    <th>DESCRIPCIÓN</th>
+                                    <th>INFORMACIÓN</th>
+                                </tr>
                                 </thead>
                                 <tbody id="tbody"></tbody>
                             </table>
@@ -90,10 +92,10 @@
                 <input type="hidden" name="_csrf" value="">
                 <?php if ($showAnonymous) : ?>
                     <div class="form-group" id="group_sys_anonimo">
-                        <p>
+                        <label for="sys_anonimo">
                             ¿DESEA REGISTRAR ESTA SOLICITUD COMO UNA PERSONA ANÓNIMA?
                             <input type="checkbox" name="sys_anonimo" id="sys_anonimo" value="1"/>
-                        </p>
+                        </label>
                     </div>
                 <?php endif; ?>
 

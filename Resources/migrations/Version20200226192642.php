@@ -46,21 +46,12 @@ final class Version20200226192642 extends AbstractMigration
 
     private function getDefaultData(string $nameReport): array
     {
-        switch ($nameReport) {
-            case PqrForm::NOMBRE_REPORTE_TODOS:
-                $NewField = '{"title":"ESTADO","field":"{*sys_estado*}","align":"center"},{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
-                break;
-            case PqrForm::NOMBRE_REPORTE_PROCESO:
-                $NewField = '{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
-                break;
-            case PqrForm::NOMBRE_REPORTE_TERMINADO:
-                $NewField = '{"title":"FECHA FINALIZACIÓN","field":"{*getEndDate@idft*}","align":"center"},{"title":"DÍAS RETRASO","field":"{*getDaysLate@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},';
-                break;
-            case PqrForm::NOMBRE_REPORTE_PENDIENTE:
-            default:
-                $NewField = '{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},';
-                break;
-        }
+        $NewField = match ($nameReport) {
+            PqrForm::NOMBRE_REPORTE_TODOS => '{"title":"ESTADO","field":"{*sys_estado*}","align":"center"},{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},',
+            PqrForm::NOMBRE_REPORTE_PROCESO => '{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},',
+            PqrForm::NOMBRE_REPORTE_TERMINADO => '{"title":"FECHA FINALIZACIÓN","field":"{*getEndDate@idft*}","align":"center"},{"title":"DÍAS RETRASO","field":"{*getDaysLate@idft*}","align":"center"},{"title":"TAREAS","field":"{*totalTask@iddocumento*}","align":"center"},{"title":"RESPUESTAS","field":"{*totalAnswers@idft*}","align":"center"},',
+            default => '{"title":"VENCIMIENTO","field":"{*getExpiration@idft*}","align":"center"},',
+        };
 
         return [
             'url'                    => 'views/buzones/grilla.php',
@@ -78,7 +69,7 @@ final class Version20200226192642 extends AbstractMigration
         ];
     }
 
-    private function createComponentePendientes(int $idbusqueda)
+    private function createComponentePendientes(int $idbusqueda): void
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_PENDIENTE;
         $estado = FtPqr::ESTADO_PENDIENTE;
@@ -92,7 +83,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado);
     }
 
-    private function createComponenteProcesos(int $idbusqueda)
+    private function createComponenteProcesos(int $idbusqueda): void
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_PROCESO;
         $estado = FtPqr::ESTADO_PROCESO;
@@ -106,7 +97,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado);
     }
 
-    private function createComponenteTerminados(int $idbusqueda)
+    private function createComponenteTerminados(int $idbusqueda): void
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_TERMINADO;
         $estado = FtPqr::ESTADO_TERMINADO;
@@ -120,7 +111,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado);
     }
 
-    private function createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado)
+    private function createComponent($idbusqueda, $dataComponente, $nombreComponente, $estado): void
     {
         $idbusquedaComponente = $this->createBusquedaComponente(
             $idbusqueda,
@@ -141,7 +132,7 @@ final class Version20200226192642 extends AbstractMigration
         $this->createModulo($data, $nombreComponente);
     }
 
-    private function createComponenteTodos(int $idbusqueda)
+    private function createComponenteTodos(int $idbusqueda): void
     {
         $nombreComponente = PqrForm::NOMBRE_REPORTE_TODOS;
         $dataComponente = [

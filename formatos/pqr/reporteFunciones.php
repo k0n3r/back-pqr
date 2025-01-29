@@ -4,7 +4,9 @@ use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\FtPqrService;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Saia\controllers\SessionController;
 use Saia\models\busqueda\BusquedaFiltroTemp;
@@ -34,7 +36,7 @@ if (file_exists($fileAdditionalFunctions)) {
  * @param int $idft
  * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
  */
-function setFtPqr(int $idft)
+function setFtPqr(int $idft): void
 {
     $GLOBALS['FtPqr'] = UtilitiesPqr::getInstanceForFtId($idft);
 }
@@ -242,9 +244,8 @@ function qualificationServ(): string
  */
 function options(int $iddocumento, string $estado, int $idft): string
 {
-    switch ($estado) {
-        case FtPqr::ESTADO_PROCESO:
-            $options = <<<HTML
+    $options = match ($estado) {
+        FtPqr::ESTADO_PROCESO => <<<HTML
             <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
             </a>
@@ -264,11 +265,8 @@ function options(int $iddocumento, string $estado, int $idft): string
                <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
            </a>
 
-HTML;
-            break;
-
-        case FtPqr::ESTADO_TERMINADO:
-            $options = <<<HTML
+HTML,
+        FtPqr::ESTADO_TERMINADO => <<<HTML
             <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
             </a>
@@ -282,12 +280,8 @@ HTML;
                <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
            </a>
 
-HTML;
-            break;
-
-        case FtPqr::ESTADO_PENDIENTE:
-        default:
-            $options = <<<HTML
+HTML,
+        default => <<<HTML
             <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
             </a>
@@ -309,9 +303,8 @@ HTML;
             <a href="#" class="dropdown-item cancel" data-id="$iddocumento" data-idft="$idft">
                 <i class="fa fa-exclamation-triangle"></i> <span data-i18n="pqr.anular">Anular</span>
             </a>
-HTML;
-            break;
-    }
+HTML,
+    };
 
     return <<<HTML
     <div class="dropdown">
@@ -330,7 +323,7 @@ HTML;
  * @param int $dependenciaId
  * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
  */
-function setDependencia(int $dependenciaId)
+function setDependencia(int $dependenciaId): void
 {
     $GLOBALS['Dependencia'] = new Dependencia($dependenciaId);
 }
@@ -369,7 +362,7 @@ function QbDependencia(): QueryBuilder
         ->select('count(sys_dependencia) as cant')
         ->from('vpqr', 'v')
         ->where('sys_dependencia = :dependencyId')
-        ->setParameter(':dependencyId', $Dependencia->getPK(), Types::INTEGER);
+        ->setParameter('dependencyId', $Dependencia->getPK(), ParameterType::INTEGER);
 
 }
 
@@ -400,7 +393,7 @@ function getCantidad(): string
     if ($where = filterByFiltroTemp()) {
         $Qb->andWhere($where);
     }
-    $cant = $Qb->execute()->fetchOne();
+    $cant = $Qb->executeQuery()->fetchOne();
 
     return createView(PqrForm::FILTER_TODOS, (int)$cant);
 }
@@ -412,13 +405,13 @@ function getCantidad(): string
 function getPendientes(): string
 {
     $Qb = QbDependencia()->andWhere('sys_estado IN (:estado)')
-        ->setParameter(':estado', [FtPqr::ESTADO_PROCESO, FtPqr::ESTADO_PENDIENTE], Connection::PARAM_STR_ARRAY);
+        ->setParameter('estado', [FtPqr::ESTADO_PROCESO, FtPqr::ESTADO_PENDIENTE], ArrayParameterType::INTEGER);
 
     if ($where = filterByFiltroTemp()) {
         $Qb->andWhere($where);
     }
 
-    $cant = $Qb->execute()->fetchOne();
+    $cant = $Qb->executeQuery()->fetchOne();
 
     return createView(PqrForm::FILTER_PENDIENTES, (int)$cant);
 }
@@ -430,12 +423,12 @@ function getPendientes(): string
 function getResueltas(): string
 {
     $Qb = QbDependencia()->andWhere('sys_estado LIKE :estado')
-        ->setParameter(':estado', FtPqr::ESTADO_TERMINADO, Types::STRING);
+        ->setParameter('estado', FtPqr::ESTADO_TERMINADO);
 
     if ($where = filterByFiltroTemp()) {
         $Qb->andWhere($where);
     }
-    $cant = $Qb->execute()->fetchOne();
+    $cant = $Qb->executeQuery()->fetchOne();
 
     return createView(PqrForm::FILTER_RESUELTAS, (int)$cant);
 }
@@ -498,19 +491,11 @@ function filter_pqr(): string
         return $response;
     }
 
-    switch ($params['filterName']) {
-        case PqrForm::FILTER_PENDIENTES:
-            $response = "sys_dependencia=$sysDependencia AND sys_estado IN ('" . FtPqr::ESTADO_PENDIENTE . "','" . FtPqr::ESTADO_PROCESO . "')";
-            break;
-        case PqrForm::FILTER_RESUELTAS:
-            $response = "sys_dependencia=$sysDependencia AND sys_estado LIKE '" . FtPqr::ESTADO_TERMINADO . "'";
-            break;
-        case PqrForm::FILTER_TODOS:
-        default:
-            $response = "sys_dependencia=$sysDependencia";
-            break;
-    }
-    return $response;
+    return match ($params['filterName']) {
+        PqrForm::FILTER_PENDIENTES => "sys_dependencia=$sysDependencia AND sys_estado IN ('" . FtPqr::ESTADO_PENDIENTE . "','" . FtPqr::ESTADO_PROCESO . "')",
+        PqrForm::FILTER_RESUELTAS => "sys_dependencia=$sysDependencia AND sys_estado LIKE '" . FtPqr::ESTADO_TERMINADO . "'",
+        default => "sys_dependencia=$sysDependencia",
+    };
 }
 
 /**
@@ -554,8 +539,8 @@ function filter_pqr_admin(string $nameReport): string
         ->select('iddependencia')
         ->distinct()
         ->andWhere('idfuncionario =:idfuncionario')
-        ->setParameter(':idfuncionario', $Funcionario->getPK(), Types::INTEGER)
-        ->execute()->fetchAllAssociative();
+        ->setParameter('idfuncionario', $Funcionario->getPK(), ParameterType::INTEGER)
+        ->executeQuery()->fetchAllAssociative();
 
     if (!$records) {
         return '1=0';

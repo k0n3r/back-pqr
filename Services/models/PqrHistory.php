@@ -13,14 +13,14 @@ class PqrHistory extends Model
 {
     use TModels;
 
-    const TIPO_TAREA = 1;
-    const TIPO_NOTIFICACION = 2;
-    const TIPO_RESPUESTA = 3;
-    const TIPO_CAMBIO_ESTADO = 4;
-    const TIPO_CAMBIO_VENCIMIENTO = 5;
-    const TIPO_CALIFICACION = 6;
-    const TIPO_ERROR_DIAS_VENCIMIENTO = 7;
-    const TIPO_MODIFICACION_TERCERO = 8;
+    const int TIPO_TAREA = 1;
+    const int TIPO_NOTIFICACION = 2;
+    const int TIPO_RESPUESTA = 3;
+    const int TIPO_CAMBIO_ESTADO = 4;
+    const int TIPO_CAMBIO_VENCIMIENTO = 5;
+    const int TIPO_CALIFICACION = 6;
+    const int TIPO_ERROR_DIAS_VENCIMIENTO = 7;
+    const int TIPO_MODIFICACION_TERCERO = 8;
 
     protected function defineAttributes(): void
     {

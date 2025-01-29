@@ -37,7 +37,7 @@ final class Version20200406213013 extends AbstractMigration
         $this->reporteCalificacionPqr($idbusqueda);
     }
 
-    private function reporteRespuestaPqr(int $idbusqueda)
+    private function reporteRespuestaPqr(int $idbusqueda): void
     {
 
         $nombreComponente = 'respuesta_pqr';
@@ -68,7 +68,7 @@ final class Version20200406213013 extends AbstractMigration
         $this->createBusquedaCondicion($idbusquedaComponente, $busquedaCondicion, $nombreComponente);
     }
 
-    private function reporteCalificacionPqr(int $idbusqueda)
+    private function reporteCalificacionPqr(int $idbusqueda): void
     {
 
         $nombreComponente = 'calificacion_pqr';

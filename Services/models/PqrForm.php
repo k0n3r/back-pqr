@@ -15,15 +15,15 @@ class PqrForm extends Model
     private ?Formato $Formato = null;
     use TModels;
 
-    const NOMBRE_REPORTE_PENDIENTE = 'rep_pendientes_pqr';
-    const NOMBRE_REPORTE_PROCESO = 'rep_proceso_pqr';
-    const NOMBRE_REPORTE_TERMINADO = 'rep_terminados_pqr';
-    const NOMBRE_REPORTE_TODOS = 'rep_todos_pqr';
-    const NOMBRE_REPORTE_POR_DEPENDENCIA = 'rep_dependencia_pqr';
-    const NOMBRE_PANTALLA_GRAFICO = 'PQRSF';
-    const FILTER_TODOS = 'dep_todos';
-    const FILTER_PENDIENTES = 'dep_pendientes';
-    const FILTER_RESUELTAS = 'dep_resueltas';
+    const string NOMBRE_REPORTE_PENDIENTE = 'rep_pendientes_pqr';
+    const string NOMBRE_REPORTE_PROCESO = 'rep_proceso_pqr';
+    const string NOMBRE_REPORTE_TERMINADO = 'rep_terminados_pqr';
+    const string NOMBRE_REPORTE_TODOS = 'rep_todos_pqr';
+    const string NOMBRE_REPORTE_POR_DEPENDENCIA = 'rep_dependencia_pqr';
+    const string NOMBRE_PANTALLA_GRAFICO = 'PQRSF';
+    const string FILTER_TODOS = 'dep_todos';
+    const string FILTER_PENDIENTES = 'dep_pendientes';
+    const string FILTER_RESUELTAS = 'dep_resueltas';
 
 
     private static ?PqrForm $PqrForm = null;
@@ -140,7 +140,7 @@ class PqrForm extends Model
      * @return IWsHtml|WebservicePqr
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-03-22
      */
-    public function getWebservicePqr(): IWsHtml
+    public function getWebservicePqr(): IWsHtml|WebservicePqr
     {
         return $this->getFormatoFk()->getClassToGenerateWs()->getIWsHtml();
     }
@@ -172,7 +172,7 @@ class PqrForm extends Model
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function getResponseConfiguration(bool $inArray = false)
+    public function getResponseConfiguration(bool $inArray = false): object|array|null
     {
         return json_decode($this->response_configuration, $inArray);
     }

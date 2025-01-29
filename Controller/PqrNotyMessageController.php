@@ -5,7 +5,6 @@ namespace App\Bundles\pqr\Controller;
 use App\Exception\SaiaException;
 use Doctrine\DBAL\Connection;
 use App\services\response\ISaiaResponse;
-use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,15 +13,11 @@ use App\Bundles\pqr\Services\PqrNotyMessageService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
-/**
- * @Route("/notyMessage", name="notyMessage_")
- */
+#[Route('/notyMessage', name: 'notyMessage_')]
 class PqrNotyMessageController extends AbstractController
 {
 
-    /**
-     * @Route("/{id}", name="update", methods={"PUT"})
-     */
+    #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(
         int $id,
         Request $request,

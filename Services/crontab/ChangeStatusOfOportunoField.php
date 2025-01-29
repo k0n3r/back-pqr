@@ -6,6 +6,7 @@ use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Exception\SaiaException;
 use App\services\GlobalContainer;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Types;
 use Saia\models\crontab\ICrontab;
@@ -28,10 +29,10 @@ class ChangeStatusOfOportunoField implements ICrontab
             ->select('idft')
             ->from('vpqr')
             ->where("sys_oportuno IN (:oportuno)")
-            ->setParameter(':oportuno', $statusOportuno, Connection::PARAM_STR_ARRAY)
+            ->setParameter('oportuno', $statusOportuno, ArrayParameterType::STRING)
             ->andWhere('sys_estado<>:status')
-            ->setParameter(':status', FtPqr::ESTADO_INICIADO, Types::STRING)
-            ->execute()->fetchAllAssociative();
+            ->setParameter('status', FtPqr::ESTADO_INICIADO )
+            ->executeQuery()->fetchAllAssociative();
 
 
         foreach ($records as $record) {

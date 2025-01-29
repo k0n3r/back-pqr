@@ -5,20 +5,15 @@ namespace App\Bundles\pqr\Controller;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Exception\SaiaException;
 use App\services\response\ISaiaResponse;
-use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
-/**
- * @Route("/answers/{idft}", name="FtPqrRespuesta_")
- */
+#[Route('/answers/{idft}', name: 'FtPqrRespuesta_')]
 class FtPqrRespuestaController extends AbstractController
 {
-    /**
-     * @Route("/requestSurveyByEmail", name="requestSurveyByEmail", methods={"GET"})
-     */
+    #[Route('/requestSurveyByEmail', name: 'requestSurveyByEmail', methods: ['GET'])]
     public function requestSurvey(
         int $idft,
         ISaiaResponse $saiaResponse

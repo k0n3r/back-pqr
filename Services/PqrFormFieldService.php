@@ -10,7 +10,10 @@ use App\Bundles\pqr\Services\models\PqrResponseTime;
 use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use App\services\ServiceEventDispatcher;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Types\Type;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
@@ -25,8 +28,8 @@ class PqrFormFieldService extends ModelService
     /**
      * Bandera que indica el numero minimo donde empezara el orden de los campos
      */
-    const INITIAL_ORDER = 2;
-    const DEFAULT_DAY = 15;
+    const int INITIAL_ORDER = 2;
+    const int DEFAULT_DAY = 15;
 
     private array $CampoOpcionesSysTipo = [];
 
@@ -57,7 +60,7 @@ class PqrFormFieldService extends ModelService
     /**
      * @inheritDoc
      */
-    public function processAttributesBeforeCreating(array $attributes)
+    public function processAttributesBeforeCreating(array $attributes): false|array
     {
         if (!isset($attributes['fk_pqr_form'])) {
             $this->getErrorManager()->setMessage("Falta el identificador del formulario");
@@ -88,7 +91,7 @@ class PqrFormFieldService extends ModelService
     /**
      * @inheritDoc
      */
-    public function processAttributesBeforeUpdating(array $attributes)
+    public function processAttributesBeforeUpdating(array $attributes): false|array
     {
         if (isset($attributes['setting'])) {
             $attributes['setting'] = json_encode($attributes['setting']);
@@ -249,11 +252,13 @@ class PqrFormFieldService extends ModelService
      */
     private function columnExistsDB(string $name): bool
     {
-        $schema = GlobalContainer::getConnection()->getSchemaManager();
-        $Table = $schema->listTableDetails('ft_pqr');
+        $connection = GlobalContainer::getConnection();
+        $schemaManager = $connection->createSchemaManager();
+        $table = $schemaManager->introspectTable('ft_pqr');
 
-        return $Table->hasColumn($name);
+        return $table->hasColumn($name);
     }
+
 
     /**
      * Retorna listado de valores para los campos autocompletar
@@ -300,9 +305,9 @@ class PqrFormFieldService extends ModelService
 
         if ($data['id']) {
             $Qb->where('iddependencia=:iddependencia')
-                ->setParameter(':iddependencia', $data['id'], Type::getType('integer'));
+                ->setParameter('iddependencia', $data['id'], ParameterType::INTEGER);
 
-            return $Qb->execute()->fetchAllAssociative();
+            return $Qb->executeQuery()->fetchAllAssociative();
         }
 
         $Qb->where('estado=1')
@@ -314,9 +319,9 @@ class PqrFormFieldService extends ModelService
             $Qb->andWhere('nombre like :nombre');
 
             if ($data['term']) {
-                $Qb->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
+                $Qb->setParameter('nombre', '%' . $data['term'] . '%');
             } else {
-                $Qb->setParameter(':nombre', $data['term'], Type::getType('string'));
+                $Qb->setParameter('nombre', $data['term']);
             }
         }
 
@@ -327,10 +332,10 @@ class PqrFormFieldService extends ModelService
                 $ids[] = $row->id;
             }
             $Qb->andWhere('iddependencia in (:ids)')
-                ->setParameter(':ids', $ids, Connection::PARAM_INT_ARRAY);
+                ->setParameter('ids', $ids, ArrayParameterType::INTEGER);
         }
 
-        return $Qb->execute()->fetchAllAssociative();
+        return $Qb->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -365,9 +370,9 @@ class PqrFormFieldService extends ModelService
 
         if ($data['id']) {
             $Qb->andWhere('idmunicipio=:idmunicipio')
-                ->setParameter(':idmunicipio', $data['id'], Type::getType('integer'));
+                ->setParameter('idmunicipio', $data['id'], ParameterType::INTEGER);
 
-            return $Qb->execute()->fetchAllAssociative();
+            return $Qb->executeQuery()->fetchAllAssociative();
         }
 
         $Qb->where("CONCAT(a.nombre,CONCAT(' ',b.nombre)) like :query")
@@ -379,10 +384,10 @@ class PqrFormFieldService extends ModelService
 
         if (!$ObjSettings->allCountry) {
             $Qb->andWhere('c.idpais=:idpais')
-                ->setParameter(':idpais', $ObjSettings->country->id);
+                ->setParameter('idpais', $ObjSettings->country->id);
         }
 
-        return $Qb->execute()->fetchAllAssociative();
+        return $Qb->executeQuery()->fetchAllAssociative();
     }
 
     /**

@@ -543,7 +543,7 @@ class AddEditFtPqr implements IAddEditFormat
      * @param int   $fieldId
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-10-19
      */
-    public function createOrUpdateOptions(array $options, int $fieldId)
+    public function createOrUpdateOptions(array $options, int $fieldId): void
     {
         foreach ($options as $option) {
             $option['fk_campos_formato'] = $fieldId;

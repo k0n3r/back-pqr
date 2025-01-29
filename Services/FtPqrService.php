@@ -15,6 +15,7 @@ use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use DateInterval;
 use DateTime;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Types\Types;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
@@ -40,8 +41,8 @@ class FtPqrService extends ModelService
 {
     private PqrService $PqrService;
 
-    const FUNCTION_ADMIN_PQR = 'Administrador PQRS';
-    const FUNCTION_ADMIN_DEP_PQR = 'Administrador Dependencia PQRS';
+    const string FUNCTION_ADMIN_PQR = 'Administrador PQRS';
+    const string FUNCTION_ADMIN_DEP_PQR = 'Administrador Dependencia PQRS';
 
     public function __construct(FtPqr $Ft)
     {
@@ -228,11 +229,12 @@ class FtPqrService extends ModelService
      * Retonar la fecha de vencimiento basado en la fecha de aprobacion
      * y el tipo
      *
+     * @param bool     $instance
+     * @param int|null $days
      * @return string|DateTime
      * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
      */
-    public function getDateForType(bool $instance = false, ?int $days = null)
+    public function getDateForType(bool $instance = false, ?int $days = null): DateTime|string
     {
         $Created = DateController::getDateTimeFromDataBase($this->getDocument()->fecha);
         $DateTime = (DateController::addBusinessDays(
@@ -447,7 +449,7 @@ class FtPqrService extends ModelService
     /**
      * Obtiene la fecha de expiracion/vencimiento
      *
-     * @return DateTime|string
+     * @return DateTime
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -1373,8 +1375,8 @@ HTML;
             ->where('gf.estado=1')
             ->andWhere('dc.estado=1')
             ->andWhere('gf.fk_grupo=:groupId')
-            ->setParameter(':groupId', $Grupo->getPK(), Types::INTEGER)
-            ->execute()->fetchAllAssociative();
+            ->setParameter('groupId', $Grupo->getPK(), ParameterType::INTEGER)
+            ->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -1392,8 +1394,8 @@ HTML;
             ->select('cant_task')
             ->from('vpqr_tareas')
             ->where('idfuncionario=:idfuncionario')
-            ->setParameter(':idfuncionario', $idfuncionario, Types::INTEGER)
-            ->execute()->fetchOne();
+            ->setParameter('idfuncionario', $idfuncionario, ParameterType::INTEGER)
+            ->executeQuery()->fetchOne();
     }
 
 }

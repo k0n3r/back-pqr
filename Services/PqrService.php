@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Services;
 
 use App\Exception\SaiaException;
 use App\services\GlobalContainer;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Types\Types;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\grafico\PantallaGrafico;
@@ -14,7 +14,7 @@ use App\Bundles\pqr\Services\models\PqrHtmlField;
 
 class PqrService
 {
-    const NAME_DEPENDENCY_GRAPH = 'pqr_dependencia';
+    const string NAME_DEPENDENCY_GRAPH = 'pqr_dependencia';
 
     private ?bool $subTypeExist = null;
     private ?bool $dependencyExist = null;
@@ -86,9 +86,9 @@ class PqrService
 
         if ($data['term']) {
             $Qb->andWhere('nombre like :nombre')
-                ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
+                ->setParameter('nombre', '%' . $data['term'] . '%');
         }
-        return $Qb->execute()->fetchAllAssociative();
+        return $Qb->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -112,9 +112,9 @@ class PqrService
 
         if ($data['term']) {
             $Qb->andWhere('nombre like :nombre')
-                ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
+                ->setParameter('nombre', '%' . $data['term'] . '%');
         }
-        return $Qb->execute()->fetchAllAssociative();
+        return $Qb->executeQuery()->fetchAllAssociative();
 
     }
 
@@ -139,15 +139,15 @@ class PqrService
 
         if ($data['idpais']) {
             $Qb->andWhere('pais_idpais=:pais')
-                ->setParameter(':pais', $data['idpais'], Type::getType('integer'));
+                ->setParameter('pais', $data['idpais'], ParameterType::INTEGER);
         }
 
         if ($data['term']) {
             $Qb->andWhere('nombre like :nombre')
-                ->setParameter(':nombre', '%' . $data['term'] . '%', Type::getType('string'));
+                ->setParameter('nombre', '%' . $data['term'] . '%');
         }
 
-        return $Qb->execute()->fetchAllAssociative();
+        return $Qb->executeQuery()->fetchAllAssociative();
     }
 
 
@@ -321,21 +321,22 @@ class PqrService
         $Qb = GlobalContainer::getConnection()
             ->createQueryBuilder()
             ->update('grafico')
-            ->set('estado', 1)
             ->where('fk_pantalla_grafico=:idpantalla')
-            ->setParameter(':idpantalla', $PantallaGrafico->getPK(), Types::INTEGER);
-        $Qb->execute();
+            ->setParameter('idpantalla', $PantallaGrafico->getPK(), ParameterType::INTEGER);
+
+        $Qb2 = clone $Qb;
+
+        $Qb->set('estado', 1)->executeStatement();
 
         $PqrFormField = PqrFormField::findByAttributes([
             'name' => 'sys_dependencia'
         ]);
 
         if (!$PqrFormField) {
-            $Qb->resetQueryPart('set');
-            $Qb->set('estado', 0)
+            $Qb2->set('estado', 0)
                 ->andWhere("nombre LIKE :graficoDependencia")
-                ->setParameter(':graficoDependencia', self::NAME_DEPENDENCY_GRAPH, Types::STRING)
-                ->execute();
+                ->setParameter('graficoDependencia', self::NAME_DEPENDENCY_GRAPH)
+                ->executeStatement();
         }
     }
 

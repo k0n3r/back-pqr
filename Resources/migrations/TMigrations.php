@@ -14,7 +14,7 @@ trait TMigrations
         return 'agrupador_pqr';
     }
 
-    protected function init()
+    protected function init(): void
     {
         $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) LIKE 'administrador'";
         $this->idperfil = (int)$this->connection->fetchOne($sql);
@@ -139,7 +139,7 @@ trait TMigrations
         return $id;
     }
 
-    protected function insertGraphics($graphics)
+    protected function insertGraphics($graphics): void
     {
         foreach ($graphics as $graphic) {
             $graphicSerie = $graphic['children'];
@@ -154,7 +154,7 @@ trait TMigrations
         }
     }
 
-    protected function createGraphicSerie($data, $id)
+    protected function createGraphicSerie($data, $id): void
     {
         foreach ($data as $serie) {
             $serie['fk_grafico'] = $id;

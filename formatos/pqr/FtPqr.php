@@ -6,7 +6,7 @@ use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Exception\SaiaException;
 use App\services\GlobalContainer;
-use Doctrine\DBAL\Types\Types;
+use Doctrine\DBAL\ParameterType;
 use Saia\controllers\generator\component\Distribution;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\CamposFormato;
@@ -20,22 +20,22 @@ use Saia\models\vistas\VfuncionarioDc;
 
 class FtPqr extends FtPqrProperties
 {
-    const ESTADO_PENDIENTE = 'PENDIENTE';
-    const ESTADO_INICIADO = 'INICIADO';
-    const ESTADO_PROCESO = 'PROCESO';
-    const ESTADO_TERMINADO = 'TERMINADO';
+    const string ESTADO_PENDIENTE = 'PENDIENTE';
+    const string ESTADO_INICIADO = 'INICIADO';
+    const string ESTADO_PROCESO = 'PROCESO';
+    const string ESTADO_TERMINADO = 'TERMINADO';
 
-    const VENCIMIENTO_ROJO = 1; //DIAS
-    const VENCIMIENTO_AMARILLO = 5; //DIAS
+    const int VENCIMIENTO_ROJO = 1; //DIAS
+    const int VENCIMIENTO_AMARILLO = 5; //DIAS
 
-    const ESTADO_FRE_IMP_SEV_BAJO = 1;
-    const ESTADO_FRE_IMP_SEV_MEDIO = 2;
-    const ESTADO_FRE_IMP_SEV_ALTO = 3;
+    const int ESTADO_FRE_IMP_SEV_BAJO = 1;
+    const int ESTADO_FRE_IMP_SEV_MEDIO = 2;
+    const int ESTADO_FRE_IMP_SEV_ALTO = 3;
 
-    const OPORTUNO_PENDIENTES_SIN_VENCER = 'PENDIENTES SIN VENCER';
-    const OPORTUNO_VENCIDAS_SIN_CERRAR = 'VENCIDAS SIN CERRAR';
-    const OPORTUNO_CERRADAS_A_TERMINO = 'CERRADAS A TERMINO';
-    const OPORTUNO_CERRADAS_FUERA_DE_TERMINO = 'CERRADAS FUERA DE TERMINO';
+    const string OPORTUNO_PENDIENTES_SIN_VENCER = 'PENDIENTES SIN VENCER';
+    const string OPORTUNO_VENCIDAS_SIN_CERRAR = 'VENCIDAS SIN CERRAR';
+    const string OPORTUNO_CERRADAS_A_TERMINO = 'CERRADAS A TERMINO';
+    const string OPORTUNO_CERRADAS_FUERA_DE_TERMINO = 'CERRADAS FUERA DE TERMINO';
 
     protected ?FtPqrService $FtPqrService = null;
     private ?FtPqrCalificacion $lastFtPqrCalificacion = null;
@@ -156,7 +156,7 @@ class FtPqr extends FtPqrProperties
                 ->from('vpqr_calificacion', 'v')
                 ->join('v', 'ft_pqr_calificacion', 'ft', 'v.idft=ft.idft_pqr_calificacion')
                 ->where('idft_pqr = :id')
-                ->setParameter(':id', $this->getPK(), Types::INTEGER)
+                ->setParameter('id', $this->getPK(), ParameterType::INTEGER)
                 ->orderBy('v.idft', 'desc')
                 ->setMaxResults(1);
 

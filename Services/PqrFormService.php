@@ -62,7 +62,7 @@ class PqrFormService extends ModelService
             ->update('pqr_form_fields')
             ->set('anonymous', 0)
             ->set('required_anonymous', 0)
-            ->where("name<>'sys_tipo'")->execute();
+            ->where("name<>'sys_tipo'")->executeStatement();
 
         if ($this->getModel()->show_anonymous) {
             if ($formFields = $data['formFields']) {
@@ -223,7 +223,7 @@ class PqrFormService extends ModelService
      * @throws SaiaException
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-08
      */
-    private function activeInfoForDependency()
+    private function activeInfoForDependency(): void
     {
         $PqrFormField = PqrFormField::findByAttributes([
             'name' => 'sys_dependencia'
@@ -542,23 +542,18 @@ class PqrFormService extends ModelService
         foreach ($fields as $PqrFormField) {
             $nameOfSeletedFields[] = $PqrFormField->name;
             $type = $PqrFormField->getPqrHtmlField()->type_saia;
-            switch ($type) {
-                case 'Text':
-                case 'Textarea':
-                    $selectedFields[] = [
-                        'title' => strtoupper($PqrFormField->label),
-                        'field' => "{*$PqrFormField->name*}",
-                        'align' => 'center',
-                    ];
-                    break;
-                default:
-                    $selectedFields[] = [
-                        'title' => strtoupper($PqrFormField->label),
-                        'field' => "{*get_$PqrFormField->name@idft,$PqrFormField->name*}",
-                        'align' => 'center',
-                    ];
-                    break;
-            }
+            $selectedFields[] = match ($type) {
+                'Text', 'Textarea' => [
+                    'title' => strtoupper($PqrFormField->label),
+                    'field' => "{*$PqrFormField->name*}",
+                    'align' => 'center',
+                ],
+                default => [
+                    'title' => strtoupper($PqrFormField->label),
+                    'field' => "{*get_$PqrFormField->name@idft,$PqrFormField->name*}",
+                    'align' => 'center',
+                ],
+            };
         }
 
         //REPORTE PENDIENTE
@@ -725,7 +720,7 @@ SQL;
     /**
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-21
      */
-    private function viewPqrTarea()
+    private function viewPqrTarea(): void
     {
         $tRelacion = Tarea::RELACION_DOCUMENTO;
         $teEstados = implode(',', [
@@ -859,38 +854,29 @@ SQL;
             ]
         ];
 
-        switch ($reportName) {
-            case PqrForm::NOMBRE_REPORTE_TODOS:
-                $fieldForReport = array_merge([
-                    [
-                        'title' => 'ESTADO',
-                        'field' => '{*sys_estado*}',
-                        'align' => 'center'
-                    ],
-                ], $otherDefaultFields, $defaultFiels);
-                break;
-            case PqrForm::NOMBRE_REPORTE_PROCESO:
-                $fieldForReport = array_merge($otherDefaultFields, $defaultFiels);
-                break;
-            case PqrForm::NOMBRE_REPORTE_TERMINADO:
-                $fieldForReport = array_merge([
-                    [
-                        'title' => 'DÍAS RETRASO',
-                        'field' => '{*getDaysLate@idft*}',
-                        'align' => 'center'
-                    ],
-                    [
-                        'title' => 'FECHA FINALIZACIÓN',
-                        'field' => '{*getEndDate@idft*}',
-                        'align' => 'center'
-                    ],
-                ], $defaultFiels);
-                break;
-            case PqrForm::NOMBRE_REPORTE_PENDIENTE:
-            default:
-                $fieldForReport = $otherDefaultFields;
-                break;
-        }
+        $fieldForReport = match ($reportName) {
+            PqrForm::NOMBRE_REPORTE_TODOS => array_merge([
+                [
+                    'title' => 'ESTADO',
+                    'field' => '{*sys_estado*}',
+                    'align' => 'center'
+                ],
+            ], $otherDefaultFields, $defaultFiels),
+            PqrForm::NOMBRE_REPORTE_PROCESO => array_merge($otherDefaultFields, $defaultFiels),
+            PqrForm::NOMBRE_REPORTE_TERMINADO => array_merge([
+                [
+                    'title' => 'DÍAS RETRASO',
+                    'field' => '{*getDaysLate@idft*}',
+                    'align' => 'center'
+                ],
+                [
+                    'title' => 'FECHA FINALIZACIÓN',
+                    'field' => '{*getEndDate@idft*}',
+                    'align' => 'center'
+                ],
+            ], $defaultFiels),
+            default => $otherDefaultFields,
+        };
 
         $FtClassName = $this->getModel()->getFormatoFk()->getFtClass();
         if (method_exists($FtClassName, 'getCustomColumnsForReport')) {

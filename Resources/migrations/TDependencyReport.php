@@ -8,7 +8,7 @@ trait TDependencyReport
 {
     use TMigrations;
 
-    protected function createComponentePorDependencia(int $idbusqueda)
+    protected function createComponentePorDependencia(int $idbusqueda): void
     {
         $info = '[{"title":"DEPENDENCIA","field":"{*getNombreDependencia@sys_dependencia*}","align":"center"},
                 {"title":"CANTIDAD","field":"{*getCantidad@sys_dependencia*}","align":"center"},

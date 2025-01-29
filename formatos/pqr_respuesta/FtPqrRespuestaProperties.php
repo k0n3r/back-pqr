@@ -20,12 +20,12 @@ class FtPqrRespuestaProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'documento_iddocumento',
+                'firma',
 				'encabezado',
-				'firma',
+				'documento_iddocumento',
 				'idft_pqr_respuesta',
-				'dependencia',
 				'ft_pqr',
+				'dependencia',
 				'ciudad_origen',
 				'destino',
 				'tipo_distribucion',
@@ -49,10 +49,9 @@ class FtPqrRespuestaProperties extends ModelFormat
     
     public function defaultDocumentRoute(): bool
     {
-        $RutaFormato = new RutaFormato();
-        $RutaFormato->addDefaultRouteFormat(
-            $this->getFormat()->getPk(), 
-            $this->getDocument()->getPk()
+        RutaFormato::addDefaultRouteFormat(
+            $this->getFormat()->getPK(), 
+            $this->getDocument()->getPK()
         );
 
         return true;

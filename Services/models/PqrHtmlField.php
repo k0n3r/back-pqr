@@ -8,8 +8,8 @@ class PqrHtmlField extends Model
 {
     use TModels;
 
-    const TYPE_DEPENDENCIA = 'dependencia';
-    const TYPE_LOCALIDAD = 'localidad';
+    const string TYPE_DEPENDENCIA = 'dependencia';
+    const string TYPE_LOCALIDAD = 'localidad';
 
     protected function defineAttributes(): void
     {

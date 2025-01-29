@@ -26,8 +26,8 @@ class FtPqrRespuestaService extends ModelService
 {
     private PqrForm $PqrForm;
 
-    const OPTION_EMAIL_RESPUESTA = 1;
-    const OPTION_EMAIL_CALIFICACION = 2;
+    const int OPTION_EMAIL_RESPUESTA = 1;
+    const int OPTION_EMAIL_CALIFICACION = 2;
 
     public function __construct(FtPqrRespuesta $Ft)
     {

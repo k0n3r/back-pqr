@@ -6,7 +6,6 @@ use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use App\services\response\SaiaResponse;
 use Doctrine\DBAL\Connection;
-use Exception;
 use App\services\response\ISaiaResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,14 +14,10 @@ use App\Bundles\pqr\Services\models\PqrFormField;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
-/**
- * @Route("/formField", name="formField_")
- */
+#[Route('/formField', name: 'formField_')]
 class PqrFormFieldController extends AbstractController
 {
-    /**
-     * @Route("", name="store", methods={"POST"})
-     */
+    #[Route('', name: 'store', methods: ['POST'])]
     public function store(
         Request $request,
         ISaiaResponse $saiaResponse,
@@ -54,9 +49,7 @@ class PqrFormFieldController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/{id}", name="update", methods={"PUT"})
-     */
+    #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(
         int $id,
         Request $request,
@@ -89,9 +82,7 @@ class PqrFormFieldController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/{id}/active", name="active", methods={"PUT"})
-     */
+    #[Route('/{id}/active', name: 'active', methods: ['PUT'])]
     public function active(
         int $id
     ): Response {
@@ -99,9 +90,7 @@ class PqrFormFieldController extends AbstractController
         return $this->activeInactive($id, PqrFormField::ACTIVE);
     }
 
-    /**
-     * @Route("/{id}/inactive", name="inactive", methods={"PUT"})
-     */
+    #[Route('/{id}/inactive', name: 'inactive', methods: ['PUT'])]
     public function inactive(
         int $id
     ): Response {
@@ -141,9 +130,7 @@ class PqrFormFieldController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/{id}", name="destroy", methods={"DELETE"})
-     */
+    #[Route('/{id}', name: 'destroy', methods: ['DELETE'])]
     public function destroy(
         int $id,
         ISaiaResponse $saiaResponse,

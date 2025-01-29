@@ -20,12 +20,12 @@ class FtPqrCalificacionProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'documento_iddocumento',
+                'idft_pqr_calificacion',
+				'documento_iddocumento',
 				'encabezado',
 				'firma',
-				'idft_pqr_calificacion',
-				'dependencia',
 				'ft_pqr_respuesta',
+				'dependencia',
 				'experiencia_gestion',
 				'experiencia_servicio' 
             ],
@@ -37,10 +37,9 @@ class FtPqrCalificacionProperties extends ModelFormat
     
     public function defaultDocumentRoute(): bool
     {
-        $RutaFormato = new RutaFormato();
-        $RutaFormato->addDefaultRouteFormat(
-            $this->getFormat()->getPk(), 
-            $this->getDocument()->getPk()
+        RutaFormato::addDefaultRouteFormat(
+            $this->getFormat()->getPK(), 
+            $this->getDocument()->getPK()
         );
 
         return true;

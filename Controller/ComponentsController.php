@@ -4,7 +4,6 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\PqrService;
 use App\Exception\SaiaException;
-use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Bundles\pqr\Services\models\PqrFormField;
@@ -12,16 +11,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
-/**
- * @Route("/components", name="components_")
- */
+#[Route('/components', name: 'components_')]
 class ComponentsController extends AbstractController
 {
     /**
-     * @Route("/autocomplete/list", name="getListDataForAutocomplete", methods={"GET"})
      * @param Request $request
      * @return JsonResponse
      */
+    #[Route('/autocomplete/list', name: 'getListDataForAutocomplete', methods: ['GET'])]
     public function getListDataForAutocomplete(
         Request $request
     ): JsonResponse {
@@ -43,10 +40,10 @@ class ComponentsController extends AbstractController
     }
 
     /**
-     * @Route("/autocomplete/find", name="findDataForAutocomplete", methods={"GET"})
      * @param Request $request
      * @return JsonResponse
      */
+    #[Route('/autocomplete/find', name: 'findDataForAutocomplete', methods: ['GET'])]
     public function findDataForAutocomplete(
         Request $request
     ): JsonResponse {

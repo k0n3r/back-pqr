@@ -4,7 +4,6 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Exception\SaiaException;
 use Doctrine\DBAL\Connection;
-use Exception;
 use App\services\response\ISaiaResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,14 +12,10 @@ use App\Bundles\pqr\Services\models\PqrNotification;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
-/**
- * @Route("/notification", name="notification_")
- */
+#[Route('/notification', name: 'notification_')]
 class PqrNotificationController extends AbstractController
 {
-    /**
-     * @Route("", name="store", methods={"POST"})
-     */
+    #[Route('', name: 'store', methods: ['POST'])]
     public function store(
         Request $request,
         ISaiaResponse $saiaResponse,
@@ -54,9 +49,7 @@ class PqrNotificationController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/{id}", name="update", methods={"PUT"})
-     */
+    #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(
         int $id,
         Request $request,
@@ -89,9 +82,7 @@ class PqrNotificationController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @Route("/{id}", name="destroy", methods={"DELETE"})
-     */
+    #[Route('/{id}', name: 'destroy', methods: ['DELETE'])]
     public function destroy(
         int $id,
         ISaiaResponse $saiaResponse,
