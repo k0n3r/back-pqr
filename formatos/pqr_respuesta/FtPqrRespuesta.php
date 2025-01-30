@@ -206,10 +206,10 @@ HTML;
                 <label>$CamposFormato->etiqueta</label>
                 <div class='radio radio-success input-group'>
                     <input type='radio' name='$CamposFormato->nombre' id='{$CamposFormato->nombre}1' value='1' $checked1>
-                    <label for='{$CamposFormato->nombre}1' class='mr-3 label-without-focus'> SI </label>
+                    <label for='{$CamposFormato->nombre}1' class='me-3 label-without-focus'> SI </label>
             
                     <input type='radio' name='$CamposFormato->nombre' id='{$CamposFormato->nombre}0' value='0' $checked0>
-                    <label for='{$CamposFormato->nombre}0' class='mr-3 label-without-focus'> NO </label>
+                    <label for='{$CamposFormato->nombre}0' class='me-3 label-without-focus'> NO </label>
                 </div>
                 <label id='$CamposFormato->nombre-error' class='error' for='$CamposFormato->nombre' style='display: none;'></label>
             </div>

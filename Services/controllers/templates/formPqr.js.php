@@ -19,7 +19,7 @@ $(function () {
     }
     
     function loadHelper() {
-        $('[data-toggle="popover"]').popover({
+        $('[data-bs-toggle="popover"]').popover({
             html: true,
             trigger: 'click',
             placement: 'right',

@@ -45,7 +45,7 @@ class Tratamiento implements IWsFields
             $infoUrl
             <div class="checkbox check-danger input-group">
                 <input type="checkbox" name="{$this->PqrFormField->name}" id="{$this->PqrFormField->name}" value="1" aria-required="true" class="required">
-                <label for="{$this->PqrFormField->name}" class="mr-3">
+                <label for="{$this->PqrFormField->name}" class="me-3">
                     ACEPTO LOS TÉRMINOS Y CONDICIONES
                 </label>
             </div>

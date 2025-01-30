@@ -84,7 +84,7 @@
         <?php endif; ?>
         <div class="card-body">
             <div class="text-right mb-4">
-                <button class="btn btn-default" type="button" data-toggle="modal" data-target="#modalSearch">Consultar
+                <button class="btn btn-default" type="button" data-bs-toggle="modal" data-target="#modalSearch">Consultar
                     <i class="fa fa-search"></i></button>
             </div>
 
