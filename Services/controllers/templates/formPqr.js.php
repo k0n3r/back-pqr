@@ -19,14 +19,21 @@ $(function () {
     }
     
     function loadHelper() {
-        $('[data-bs-toggle="popover"]').popover({
-            html: true,
-            trigger: 'click',
-            placement: 'right',
-            content: function () {
-                const content = $("#" + $(this).data('field') + "_help").clone().removeClass('d-none');
-                return content[0].outerHTML;
-            }
+        const plataforma = localStorage.getItem('breakpoint');
+        const accion = (plataforma === 'xs' || plataforma === 'sm') ? 'hover' : 'click';
+        
+        $('[data-bs-toggle="popover"]').each((index, element) => {
+            const el = $(element);
+
+            el.popover({
+                html: true,
+                trigger: accion,
+                placement: 'right',
+                content: function () {
+                    const content = $("#" + el.data('field') + "_help").clone().removeClass('d-none');
+                    return content[0].outerHTML;
+                }
+            });
         });
     }
 
@@ -84,7 +91,7 @@ $(function () {
                 node.tagName === "SELECT" &&
                 node.className.indexOf("select2") !== false
             ) {
-                error.addClass("pl-2");
+                error.addClass("ps-2");
                 element.next().append(error);
             } else {
                 error.insertAfter(element);
