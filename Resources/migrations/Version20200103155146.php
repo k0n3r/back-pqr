@@ -157,8 +157,12 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('fk_contador', 'integer');
         $table->addIndex(['fk_contador'], 'ipqr_formsfk_contad');
 
-        $table->addColumn('label', 'string');
-        $table->addColumn('name', 'string');
+        $table->addColumn('label', 'string', [
+            'length' => 255
+        ]);
+        $table->addColumn('name', 'string', [
+            'length' => 255
+        ]);
         $table->addColumn('show_anonymous', 'boolean', ['default' => 0]);
         $table->addColumn('show_label', 'boolean', ['default' => 1]);
         $table->addColumn('show_empty', 'boolean', ['default' => 1]);
