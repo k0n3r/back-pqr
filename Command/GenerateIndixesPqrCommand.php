@@ -3,12 +3,14 @@
 namespace App\Bundles\pqr\Command;
 
 use App\Command\GenerateIndixesCommand;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(
+    name: 'app:generate:indexesPqr',
+    description: 'Genera los indices del Modulo de PQR',
+)]
 class GenerateIndixesPqrCommand extends GenerateIndixesCommand
 {
-    protected static $defaultName = 'app:generate:indexesPqr';
-    protected static $defaultDescription = 'Genera los indices del Modulo de PQR';
-
     protected function getIndixes(): array
     {
         return [
