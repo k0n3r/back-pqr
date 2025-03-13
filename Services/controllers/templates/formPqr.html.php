@@ -90,6 +90,8 @@
 
             <form name='formulario' id='formulario' role='form' autocomplete='off'>
                 <input type="hidden" name="_csrf" value="">
+                <input type="hidden" name="geolocalizacion" id="geolocalizacion" value="">
+
                 <?php if ($showAnonymous) : ?>
                     <div class="form-group" id="group_sys_anonimo">
                         <label for="sys_anonimo">

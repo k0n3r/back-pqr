@@ -21,17 +21,18 @@ use Throwable;
 class CaptchaController extends AbstractController implements IHasCaptcha
 {
     /**
-     * @param Request       $Request
+     * @param Request $Request
      * @param ISaiaResponse $saiaResponse
-     * @param Connection    $Connection
+     * @param Connection $Connection
      * @return Response
      */
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
     public function saveDocument(
-        Request $Request,
+        Request       $Request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
-    ): Response {
+        Connection    $Connection
+    ): Response
+    {
         $Connection->beginTransaction();
         try {
 
@@ -51,6 +52,10 @@ class CaptchaController extends AbstractController implements IHasCaptcha
 
             $Request->request->set('webservice', 1);
             $Formato = new Formato($Request->get('formatId'));
+            if ($Formato->isRequiredGeolocation() && empty($Request->get('geolocalizacion'))) {
+                throw new SaiaException("Debe permitir la geolocalización para continuar");
+            }
+
             $SaveDocument = new SaveDocument($Formato, $VfuncionarioDc);
             if (!$SaveDocument->create($Request->request->all())) {
                 throw new SaiaException("No fue posible generar el documento");
@@ -67,7 +72,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
 
             $attributes = [
                 'messageBody' => $message,
-                'number'      => $Documento->numero,
+                'number' => $Documento->numero,
             ];
 
             $saiaResponse->replaceData($attributes);

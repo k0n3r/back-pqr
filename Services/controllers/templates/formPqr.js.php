@@ -4,7 +4,8 @@ $comment = $recaptchaPublicKey ? '' : '//';
 $code = <<<JAVASCRIPT
 $(function () {
     const key = window.credential.key; //Componente dropzone   
-    const token = window.credential.token; //Componente dropzone    
+    const token = window.credential.token; //Componente dropzone   
+    const isRequiredGeolocation=$isRequiredGeolocation; 
     const fieldsWithAnonymous = $fieldsWithAnonymous;
     const fieldsWithoutAnonymous = $fieldsWithoutAnonymous;
     
@@ -16,6 +17,69 @@ $(function () {
 
     function loadjsComponent() {
         $componentsJS
+    }
+    
+    function loadGeolocation() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                console.info("Tu navegador no soporta geolocalización");
+                if (isRequiredGeolocation) {
+                    top.notification({
+                        message: 'Tu navegador no soporta geolocalización y es requerida.',
+                        type: 'error',
+                        title: 'Error!'
+                    });
+                    reject();
+                }
+                resolve();
+            }
+    
+            if ($("#geolocalizacion").val().trim().length) {
+                resolve();
+            }
+    
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const geolocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    $("#geolocalizacion").val(JSON.stringify(geolocation));
+                    resolve();
+                },
+                (error) => {
+                    console.error("Error al obtener la ubicación:", error.message);
+    
+                    if (isRequiredGeolocation) {
+                        let errorMessage = 'No se pudo obtener la ubicación.';
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage += ' El usuario denegó el acceso a la geolocalización.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage += ' La información de la ubicación no está disponible.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage += ' El tiempo de espera para obtener la ubicación expiró.';
+                                break;
+                            default:
+                                errorMessage += ' Error desconocido.';
+                                break;
+                        }
+    
+                        top.notification({
+                            message: errorMessage + ' Verifica los permisos.',
+                            type: 'error',
+                            title: 'Error!'
+                        });
+                        
+                        reject();
+                    }
+                    resolve(); 
+                    
+                }
+            );
+        });
     }
     
     function loadHelper() {
@@ -109,41 +173,49 @@ $comment                tokenRecaptcha,
                         dependencia: window.credential.WsRol
                     });
 
-                    $.ajax({
-                        method: 'POST',
-                        url: '$urlSaveFt',
-                        data,
-                    }).done((response) => {
-                        if (response.success) {
-                            clearForm(form);
-                            window.notification({
-                                title: "Número Consecutivo: " + response.data.number,
-                                color: 'green',
-                                position: "center",
-                                overlay: true,
-                                timeout: false,
-                                icon: 'fa fa-check',
-                                layout: 2,
-                                message: response.data.messageBody,
-                                onClosed: function (instance, toast, closedBy) {
-                                    window.location.reload()
+                        loadGeolocation().then(() => {
+                        
+                            $.ajax({
+                                method: 'POST',
+                                url: '$urlSaveFt',
+                                data,
+                            }).done((response) => {
+                                if (response.success) {
+                                    clearForm(form);
+                                    window.notification({
+                                        title: "Número Consecutivo: " + response.data.number,
+                                        color: 'green',
+                                        position: "center",
+                                        overlay: true,
+                                        timeout: false,
+                                        icon: 'fa fa-check',
+                                        layout: 2,
+                                        message: response.data.messageBody,
+                                        onClosed: function (instance, toast, closedBy) {
+                                            window.location.reload()
+                                        }
+                                    });
+        
+                                } else {
+                                    console.error(response);
+                                    window.notification({
+                                        title: 'Error!',
+                                        icon: 'fa fa-exclamation-circle',
+                                        color: 'red',
+                                        message: 'No fue posible radicar su solicitud'
+                                    });
                                 }
+                            }).fail(function () {
+                                console.error(...arguments)
+                            }).always(function () {
+                                window.toggleButton('form_buttons');
                             });
-
-                        } else {
-                            console.error(response);
-                            window.notification({
-                                title: 'Error!',
-                                icon: 'fa fa-exclamation-circle',
-                                color: 'red',
-                                message: 'No fue posible radicar su solicitud'
-                            });
-                        }
-                    }).fail(function () {
-                        console.error(...arguments)
-                    }).always(function () {
-                        window.toggleButton('form_buttons');
-                    });
+                        
+                        }).catch(() => {
+                            setTimeout(() => {
+                                window.location.href = 'https://www.saiasoftware.com';
+                            }, 4000);
+                        });
 $comment      });
 $comment   });
 
@@ -230,8 +302,15 @@ $comment   });
 
     //TERMINA Search
 
-    loadjsComponent();
-    loadHelper();
+    loadGeolocation().then(() => {
+        loadjsComponent();
+        loadHelper();
+    }).catch(() => {
+        setTimeout(() => {
+           window.location.href = 'https://www.saiasoftware.com';
+        }, 4000);
+    });
+
 });
 JAVASCRIPT;
 echo $code;
