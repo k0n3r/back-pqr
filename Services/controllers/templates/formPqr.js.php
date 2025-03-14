@@ -303,8 +303,12 @@ $comment   });
     //TERMINA Search
 
     loadGeolocation().then(() => {
-        loadjsComponent();
-        loadHelper();
+        try {
+            loadjsComponent();
+            loadHelper();
+        } catch (error) {
+           console.error(error);
+        }
     }).catch(() => {
         setTimeout(() => {
            window.location.href = 'https://www.saiasoftware.com';
