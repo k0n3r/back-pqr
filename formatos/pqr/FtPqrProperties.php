@@ -24,24 +24,24 @@ class FtPqrProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'firma',
+                'documento_iddocumento',
 				'encabezado',
-				'documento_iddocumento',
+				'firma',
 				'idft_pqr',
-				'sys_oportuno',
-				'radicacion',
+				'sys_tercero',
 				'sys_severidad',
+				'sys_oportuno',
 				'sys_impacto',
+				'radicacion',
 				'sys_frecuencia',
+				'sys_fecha_vencimiento',
 				'sys_anonimo',
 				'sys_fecha_terminado',
-				'sys_fecha_vencimiento',
-				'sys_tercero',
 				'sys_estado',
 				'dependencia',
 				'sys_tipo',
-				'sys_folios',
 				'sys_email',
+				'sys_folios',
 				'sys_anexos',
 				'distribucion',
 				'destino_interno',
@@ -50,8 +50,8 @@ class FtPqrProperties extends ModelFormat
 				'colilla',
 				'digitalizacion' 
             ],
-            'date' => ['sys_fecha_terminado',
-				'sys_fecha_vencimiento'],
+            'date' => ['sys_fecha_vencimiento',
+				'sys_fecha_terminado'],
             'table' => 'ft_pqr',
             'primary' => 'idft_pqr'
         ];

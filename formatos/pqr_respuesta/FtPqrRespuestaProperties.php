@@ -20,12 +20,12 @@ class FtPqrRespuestaProperties extends ModelFormat
     {
         return [
             'safe' => [
-                'firma',
+                'documento_iddocumento',
 				'encabezado',
-				'documento_iddocumento',
+				'firma',
 				'idft_pqr_respuesta',
-				'ft_pqr',
 				'dependencia',
+				'ft_pqr',
 				'ciudad_origen',
 				'destino',
 				'tipo_distribucion',
