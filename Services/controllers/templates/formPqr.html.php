@@ -15,14 +15,12 @@
     <!-- Modal -->
     <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="modalSearchLabel"
          aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalSearchLabel">Consultar</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <div class="modal-body">
                     <form name='formSearch' id='formSearch' role='form' autocomplete='off'>
                         <input type="hidden" name="_csrf" value="">
@@ -84,8 +82,9 @@
         <?php endif; ?>
         <div class="card-body">
             <div class="text-right mb-4">
-                <button class="btn btn-default" type="button" data-bs-toggle="modal" data-target="#modalSearch">Consultar
-                    <i class="fa fa-search"></i></button>
+                <button type="button" class="btn btn-default" data-bs-toggle="modal" data-bs-target="#modalSearch">
+                    Consultar<i class="fa fa-search"></i>
+                </button>
             </div>
 
             <form name='formulario' id='formulario' role='form' autocomplete='off'>
