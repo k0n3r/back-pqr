@@ -81,7 +81,7 @@ class FtPqrRespuestaService extends ModelService
     /**
      * Se crea un registro en el historial
      *
-     * @param string  $description
+     * @param string $description
      * @param integer $type
      * @return boolean
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -90,12 +90,12 @@ class FtPqrRespuestaService extends ModelService
     public function saveHistory(string $description, int $type): bool
     {
         $history = [
-            'fecha'          => date('Y-m-d H:i:s'),
-            'idft'           => $this->getModel()->getFtPqr()->getPK(),
+            'fecha' => date('Y-m-d H:i:s'),
+            'idft' => $this->getModel()->getFtPqr()->getPK(),
             'fk_funcionario' => $this->getFuncionario()->getPK(),
-            'tipo'           => $type,
-            'idfk'           => $this->getModel()->getPK(),
-            'descripcion'    => $description
+            'tipo' => $type,
+            'idfk' => $this->getModel()->getPK(),
+            'descripcion' => $description
         ];
 
         $PqrHistoryService = (new PqrHistory)->getService();
@@ -251,10 +251,10 @@ class FtPqrRespuestaService extends ModelService
         }
 
         $EmailSaia->defineParamsCallbackClassName([
-            'option'      => self::OPTION_EMAIL_RESPUESTA,
-            'idft'        => $this->getModel()->getPK(),
+            'option' => self::OPTION_EMAIL_RESPUESTA,
+            'idft' => $this->getModel()->getPK(),
             'descripcion' => $description,
-            'tipo'        => PqrHistory::TIPO_NOTIFICACION
+            'tipo' => PqrHistory::TIPO_NOTIFICACION
         ]);
 
         (new SendEmailSaia($EmailSaia))->send();
@@ -289,7 +289,7 @@ class FtPqrRespuestaService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function getUrlEncuesta(): string
+    protected function getUrlEncuesta(): string
     {
         $Formato = Formato::findByAttributes([
             'nombre' => 'pqr_calificacion'
@@ -337,10 +337,10 @@ class FtPqrRespuestaService extends ModelService
             ->saveShipmentTraceability($this->getModel()->getDocument()->getPK())
             ->defineCallbackClassName(FtPqrRespuestaEmailCallback::class)
             ->defineParamsCallbackClassName([
-                'option'      => self::OPTION_EMAIL_CALIFICACION,
-                'idft'        => $this->getModel()->getPK(),
+                'option' => self::OPTION_EMAIL_CALIFICACION,
+                'idft' => $this->getModel()->getPK(),
                 'descripcion' => $description,
-                'tipo'        => PqrHistory::TIPO_CALIFICACION
+                'tipo' => PqrHistory::TIPO_CALIFICACION
             ]);
 
         (new SendEmailSaia($EmailSaia))->send();
