@@ -28,7 +28,8 @@ class WebservicePqr extends WsFt
         return [
             'emailLabel'    => $this->PqrForm->getRow('sys_email')->label,
             'showAnonymous' => (int)$this->PqrForm->show_anonymous,
-            'showLabel'     => (int)$this->PqrForm->show_label
+            'showLabel'     => (int)$this->PqrForm->show_label,
+            'nameForm'      => $this->PqrForm->label,
         ];
     }
 
@@ -37,7 +38,7 @@ class WebservicePqr extends WsFt
         return [
             'fieldsWithoutAnonymous' => json_encode($this->getFieldsWithoutAnonymous()),
             'fieldsWithAnonymous'    => json_encode($this->getFieldsWithAnonymous()),
-            'urlSaveFt'              => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'] ? '/api/pqr/captcha/saveDocument' : '/api/pqr/webservice/saveDocument'
+            'urlSaveFt'              => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'] ? '/api/pqr/captcha/saveDocument' : '/api/pqr/webservice/saveDocument',
         ];
     }
 
@@ -87,13 +88,13 @@ class WebservicePqr extends WsFt
         $this->objectFields[] = [
             'name'     => $PqrFormField->name,
             'required' => (int)$PqrFormField->required,
-            'type'     => $PqrFormField->getPqrHtmlField()->type_saia
+            'type'     => $PqrFormField->getPqrHtmlField()->type_saia,
         ];
         $this->objectFieldsForAnonymous[] = [
             'name'     => $PqrFormField->name,
             'show'     => (int)$PqrFormField->anonymous,
             'required' => (int)($PqrFormField->anonymous ? $PqrFormField->required_anonymous : 0),
-            'type'     => $PqrFormField->getPqrHtmlField()->type_saia
+            'type'     => $PqrFormField->getPqrHtmlField()->type_saia,
         ];
     }
 
@@ -112,6 +113,7 @@ class WebservicePqr extends WsFt
         if (class_exists($className)) {
             return $className;
         }
+
         return null;
     }
 
@@ -125,7 +127,7 @@ class WebservicePqr extends WsFt
         $specialFields = [
             'tratamiento',
             'localidad',
-            'dependencia'
+            'dependencia',
         ];
 
         foreach ($records as $PqrFormField) {
@@ -139,7 +141,6 @@ class WebservicePqr extends WsFt
                     $this->setFieldsAnonymous($PqrFormField);
                 }
             } else {
-
                 $ComponentBuilder = $PqrFormField->getCamposFormato()->getComponentBuilder();
                 if ($ComponentBuilder->supportWs() && $PqrFormField->getCamposFormato()->isVisibleFieldAdd()) {
                     $this->fields[] = $ComponentBuilder;
