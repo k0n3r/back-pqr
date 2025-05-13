@@ -199,9 +199,9 @@ class PqrFormService extends ModelService
         $formatNameC = "CALIFICACIÓN ({$this->getModel()->label})";
         if ($FormatoC->etiqueta != $formatNameC || !$FormatoC->isEnabledWs()) {
             $FormatoC->etiqueta = $formatNameC;
-            $FormatoC->info_ws = array_merge($FormatoC->info_ws, [
+            $FormatoC->info_ws = json_encode(array_merge($FormatoC->getInfoWs(), [
                 'habilita_webservice' => 1,
-            ]);
+            ]));
 
             $FormatoC->save();
         }

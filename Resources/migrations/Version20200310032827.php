@@ -41,7 +41,7 @@ final class Version20200310032827 extends AbstractMigration
     {
         $moduleName = sprintf(
             "crear_%s",
-            $this->formatName
+            $this->formatName,
         );
         $sql = "SELECT idmodulo FROM modulo WHERE nombre like 'modulo_formatos'";
         $idModulo = (int)$this->connection->fetchOne($sql);
@@ -52,7 +52,7 @@ final class Version20200310032827 extends AbstractMigration
             'etiqueta'    => 'COMUNICACIÓN EXTERNA -(PQRSF)',
             'enlace'      => "views/modules/pqr/formatos/$this->formatName/adicionar.html",
             'cod_padre'   => $idModulo,
-            'tiene_hijos' => 0
+            'tiene_hijos' => 0,
         ];
 
         return $this->createModulo($attributes, $moduleName);
@@ -100,7 +100,13 @@ final class Version20200310032827 extends AbstractMigration
             'publicar'                  => 1,
             'module'                    => 'pqr',
             'generador_pdf'             => 'Mpdf',
-            'formato_fecha_radicado'    => 'Ymd'
+            'formato_fecha_radicado'    => 'Ymd',
+            'info_ws'                   => json_encode([
+                'habilita_webservice'  => 0,
+                'habilita_consulta'    => 0,
+                'mensaje_notificacion' => '',
+                'clase_ws'             => '',
+            ]),
         ];
 
         $this->connection->insert('formato', $data);
@@ -123,7 +129,7 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta_html'     => Method::getIdentification(),
                 'orden'             => 1,
                 'fila_visible'      => 1,
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'ciudad_origen'     => [
                 'formato_idformato' => $idformato,
@@ -137,7 +143,7 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta_html'     => Method::getIdentification(),
                 'orden'             => 2,
                 'fila_visible'      => 1,
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'destino'           => [
                 'formato_idformato' => $idformato,
@@ -151,7 +157,7 @@ final class Version20200310032827 extends AbstractMigration
                 'orden'             => 3,
                 'fila_visible'      => 1,
                 'opciones'          => '{"tipo_seleccion":"unico","tipo":true,"nombre":true,"correo":true,"tipo_identificacion":true,"identificacion":true,"ciudad":true,"titulo":true,"cargo":false,"direccion":true,"telefono":true,"sede":false,"empresa":false}',
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'tipo_distribucion' => [
                 'formato_idformato' => $idformato,
@@ -167,7 +173,7 @@ final class Version20200310032827 extends AbstractMigration
                 'fila_visible'      => 1,
                 'placeholder'       => 'seleccionar..',
                 'listable'          => 1,
-                'campoOpciones'     => Distribution::getAttributesMoreFieldsOptions(0, Distribution::SELECT_MENSAJERIA)
+                'campoOpciones'     => Distribution::getAttributesMoreFieldsOptions(0, Distribution::SELECT_MENSAJERIA),
             ],
             'copia'             => [
                 'formato_idformato' => $idformato,
@@ -181,7 +187,7 @@ final class Version20200310032827 extends AbstractMigration
                 'orden'             => 5,
                 'fila_visible'      => 1,
                 'opciones'          => '{"tipo_seleccion":"multiple","tipo":true,"nombre":true,"correo":true,"tipo_identificacion":true,"identificacion":true,"ciudad":true,"titulo":true,"cargo":false,"direccion":true,"telefono":true,"sede":false,"empresa":false}',
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'asunto'            => [
                 'formato_idformato' => $idformato,
@@ -195,7 +201,7 @@ final class Version20200310032827 extends AbstractMigration
                 'orden'             => 6,
                 'fila_visible'      => 1,
                 'longitud_vis'      => '255',
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'contenido'         => [
                 'formato_idformato' => $idformato,
@@ -209,7 +215,7 @@ final class Version20200310032827 extends AbstractMigration
                 'orden'             => 7,
                 'fila_visible'      => 1,
                 'opciones'          => '{"avanzado":true}',
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'despedida'         => [
                 'formato_idformato' => $idformato,
@@ -229,7 +235,7 @@ final class Version20200310032827 extends AbstractMigration
                     ['llave' => '1', 'valor' => 'Atentamente,', 'estado' => '1', 'orden' => '0'],
                     ['llave' => '2', 'valor' => 'Cordialmente,', 'estado' => '1', 'orden' => '1'],
                     ['llave' => '3', 'valor' => 'Otro', 'estado' => '1', 'orden' => '2'],
-                ]
+                ],
             ],
             'otra_despedida'    => [
                 'formato_idformato' => $idformato,
@@ -243,7 +249,7 @@ final class Version20200310032827 extends AbstractMigration
                 'orden'             => 9,
                 'fila_visible'      => 1,
                 'longitud_vis'      => '255',
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'anexos_digitales'  => [
                 'formato_idformato' => $idformato,
@@ -259,7 +265,7 @@ final class Version20200310032827 extends AbstractMigration
                 'orden'             => 10,
                 'fila_visible'      => 1,
                 'opciones'          => '{"tipos":".pdf,.doc,.docx,.jpg,.jpeg,.gif,.png,.bmp,.xls,.xlsx,.ppt","longitud":"3","cantidad":"10","ruta_consulta":"api\\/documentFile\\/info"}',
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'anexos_fisicos'    => [
                 'formato_idformato' => $idformato,
@@ -272,7 +278,7 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta_html'     => 'Text',
                 'orden'             => 11,
                 'fila_visible'      => 1,
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'ver_copia'         =>
                 [
@@ -288,7 +294,7 @@ final class Version20200310032827 extends AbstractMigration
                     'orden'             => 12,
                     'fila_visible'      => 1,
                     'listable'          => 1,
-                    'predeterminado'    => 0
+                    'predeterminado'    => 0,
                 ],
             'copia_interna'     => [
                 'formato_idformato' => $idformato,
@@ -302,7 +308,7 @@ final class Version20200310032827 extends AbstractMigration
                 'orden'             => 13,
                 'fila_visible'      => 1,
                 'opciones'          => '{"dependenciaCargo":true}',
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'sol_encuesta'      => [
                 'formato_idformato' => $idformato,
@@ -316,7 +322,7 @@ final class Version20200310032827 extends AbstractMigration
                 'etiqueta_html'     => Method::getIdentification(),
                 'orden'             => 14,
                 'fila_visible'      => 1,
-                'listable'          => 1
+                'listable'          => 1,
             ],
             'cerrar_tareas'     =>
                 [
@@ -332,7 +338,7 @@ final class Version20200310032827 extends AbstractMigration
                     'orden'             => 15,
                     'fila_visible'      => 1,
                     'listable'          => 1,
-                    'predeterminado'    => 0
+                    'predeterminado'    => 0,
                 ],
         ];
 
