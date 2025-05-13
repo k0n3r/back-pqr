@@ -26,14 +26,13 @@ class FtPqrRespuestaService extends ModelService
 {
     private PqrForm $PqrForm;
 
-    const int OPTION_EMAIL_RESPUESTA = 1;
-    const int OPTION_EMAIL_CALIFICACION = 2;
+    public const int OPTION_EMAIL_RESPUESTA = 1;
+    public const int OPTION_EMAIL_CALIFICACION = 2;
 
     public function __construct(FtPqrRespuesta $Ft)
     {
         parent::__construct($Ft);
         $this->PqrForm = PqrForm::getInstance();
-
     }
 
     public function getModel(): FtPqrRespuesta
@@ -45,7 +44,7 @@ class FtPqrRespuestaService extends ModelService
     /**
      * Verifica si los email son validos
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -54,11 +53,13 @@ class FtPqrRespuestaService extends ModelService
         $email = $this->getModel()->getTercero()->getEmail();
         if (!$email) {
             $this->getErrorManager()->setMessage("Debe ingresar el email (Destino)");
+
             return false;
         }
 
         if (!CoreFunctions::isEmailValid($email)) {
             $this->getErrorManager()->setMessage("El email ($email) NO es valido");
+
             return false;
         }
 
@@ -66,15 +67,18 @@ class FtPqrRespuestaService extends ModelService
             foreach ($emailCopy as $copia) {
                 if (!$copia) {
                     $this->getErrorManager()->setMessage("Debe ingresar el email (Con copia a)");
+
                     return false;
                 }
 
                 if (!CoreFunctions::isEmailValid($copia)) {
                     $this->getErrorManager()->setMessage("El email en copia externa ($copia) NO es valido");
+
                     return false;
                 }
             }
         }
+
         return true;
     }
 
@@ -82,27 +86,28 @@ class FtPqrRespuestaService extends ModelService
      * Se crea un registro en el historial
      *
      * @param string $description
-     * @param integer $type
-     * @return boolean
+     * @param int $type
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
     public function saveHistory(string $description, int $type): bool
     {
         $history = [
-            'fecha' => date('Y-m-d H:i:s'),
-            'idft' => $this->getModel()->getFtPqr()->getPK(),
+            'fecha'          => date('Y-m-d H:i:s'),
+            'idft'           => $this->getModel()->getFtPqr()->getPK(),
             'fk_funcionario' => $this->getFuncionario()->getPK(),
-            'tipo' => $type,
-            'idfk' => $this->getModel()->getPK(),
-            'descripcion' => $description
+            'tipo'           => $type,
+            'idfk'           => $this->getModel()->getPK(),
+            'descripcion'    => $description,
         ];
 
-        $PqrHistoryService = (new PqrHistory)->getService();
+        $PqrHistoryService = (new PqrHistory())->getService();
         if (!$PqrHistoryService->save($history)) {
             $this->getErrorManager()->setMessage(
-                $PqrHistoryService->getErrorManager()->getMessage()
+                $PqrHistoryService->getErrorManager()->getMessage(),
             );
+
             return false;
         }
 
@@ -112,7 +117,7 @@ class FtPqrRespuestaService extends ModelService
     /**
      * Registra la distribucion
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -137,6 +142,7 @@ class FtPqrRespuestaService extends ModelService
 
             default:
                 $this->getErrorManager()->setMessage("Tipo de distribucion no definida");
+
                 return false;
         }
         $DistributionService = new DistributionService($this->getModel()->getDocument());
@@ -146,7 +152,7 @@ class FtPqrRespuestaService extends ModelService
             $this->getModel()->destino,
             DistributionService::TIPO_EXTERNO,
             $estado,
-            $recogida
+            $recogida,
         );
 
         return true;
@@ -155,7 +161,7 @@ class FtPqrRespuestaService extends ModelService
     /**
      * Valida si la respuesta se envia por E-mail
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -168,7 +174,7 @@ class FtPqrRespuestaService extends ModelService
      * Transfiere a los ingresados
      * en copia interna
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -178,7 +184,7 @@ class FtPqrRespuestaService extends ModelService
             $Transfer = new Transfer(
                 $this->getModel()->getDocument(),
                 $this->getFuncionario()->getCode(),
-                BuzonSalida::NOMBRE_COPIA
+                BuzonSalida::NOMBRE_COPIA,
             );
             $destinations = explode(',', $this->getModel()->copia_interna);
             $Transfer->setDestination($destinations);
@@ -192,7 +198,7 @@ class FtPqrRespuestaService extends ModelService
     /**
      * Notifica la respuesta via Email
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -210,7 +216,7 @@ class FtPqrRespuestaService extends ModelService
         $subject = "Respuesta solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero";
 
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
-            'name' => 'f2_email_respuesta'
+            'name' => 'f2_email_respuesta',
         ])) {
             $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $FtPqr);
             $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $FtPqr);
@@ -251,10 +257,10 @@ class FtPqrRespuestaService extends ModelService
         }
 
         $EmailSaia->defineParamsCallbackClassName([
-            'option' => self::OPTION_EMAIL_RESPUESTA,
-            'idft' => $this->getModel()->getPK(),
+            'option'      => self::OPTION_EMAIL_RESPUESTA,
+            'idft'        => $this->getModel()->getPK(),
             'descripcion' => $description,
-            'tipo' => PqrHistory::TIPO_NOTIFICACION
+            'tipo'        => PqrHistory::TIPO_NOTIFICACION,
         ]);
 
         (new SendEmailSaia($EmailSaia))->send();
@@ -292,14 +298,14 @@ class FtPqrRespuestaService extends ModelService
     protected function getUrlEncuesta(): string
     {
         $Formato = Formato::findByAttributes([
-            'nombre' => 'pqr_calificacion'
+            'nombre' => 'pqr_calificacion',
         ]);
 
         $DocumentoExpuesto = DocumentoExpuestoService::createOrUpdate(
             $this->getModel()->getDocument(),
             DocumentoExpuesto::TIPO_HIJO,
             $Formato,
-            24 * 7 //1 Semana
+            24 * 7, //1 Semana
         );
 
         return $DocumentoExpuesto->getUrl();
@@ -308,7 +314,7 @@ class FtPqrRespuestaService extends ModelService
     /**
      * Solicita via email la encuesta de satisfaccion
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -317,6 +323,7 @@ class FtPqrRespuestaService extends ModelService
         $email = $this->getModel()->getTercero()->getEmail();
         if (!CoreFunctions::isEmailValid($email)) {
             $this->getErrorManager()->setMessage("El email ($email) NO es valido");
+
             return false;
         }
 
@@ -337,10 +344,10 @@ class FtPqrRespuestaService extends ModelService
             ->saveShipmentTraceability($this->getModel()->getDocument()->getPK())
             ->defineCallbackClassName(FtPqrRespuestaEmailCallback::class)
             ->defineParamsCallbackClassName([
-                'option' => self::OPTION_EMAIL_CALIFICACION,
-                'idft' => $this->getModel()->getPK(),
+                'option'      => self::OPTION_EMAIL_CALIFICACION,
+                'idft'        => $this->getModel()->getPK(),
                 'descripcion' => $description,
-                'tipo' => PqrHistory::TIPO_CALIFICACION
+                'tipo'        => PqrHistory::TIPO_CALIFICACION,
             ]);
 
         (new SendEmailSaia($EmailSaia))->send();
@@ -366,6 +373,7 @@ class FtPqrRespuestaService extends ModelService
                 }
             }
         }
+
         return $data;
     }
 
@@ -388,15 +396,14 @@ class FtPqrRespuestaService extends ModelService
                 $valor != TareaEstado::REALIZADA &&
                 $valor != TareaEstado::CANCELADA
             ) {
-
                 $save = $TareaService->setState(
                     TareaEstado::REALIZADA,
                     $this->getFuncionario()->getPK(),
-                    'La tarea se cambia a estado realizada al radicar la COMUNICACIÓN EXTERNA (PQRSF)'
+                    'La tarea se cambia a estado realizada al radicar la COMUNICACIÓN EXTERNA (PQRSF)',
                 );
 
                 if (!$save) {
-                    throw new SaiaException("No fue posible cambiar el estado de la tarea, ID:" . $Tarea->getPK());
+                    throw new SaiaException("No fue posible cambiar el estado de la tarea, ID:".$Tarea->getPK());
                 }
             }
         }

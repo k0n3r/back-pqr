@@ -5,7 +5,6 @@ use App\Bundles\pqr\Services\FtPqrService;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Doctrine\DBAL\ArrayParameterType;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Saia\controllers\SessionController;
@@ -18,16 +17,15 @@ use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CampoSeleccionados;
 use Saia\models\Dependencia;
 use App\services\GlobalContainer;
-use Doctrine\DBAL\Types\Types;
 use Saia\models\vistas\VfuncionarioDc;
 
-include_once $_SERVER['ROOT_PATH'] . 'src/Bundles/pqr/formatos/reporteFuncionesGenerales.php';
-$fileAdditionalFunctions = $_SERVER['ROOT_PATH'] . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
+include_once $_SERVER['ROOT_PATH'].'src/Bundles/pqr/formatos/reporteFuncionesGenerales.php';
+$fileAdditionalFunctions = $_SERVER['ROOT_PATH'].'src/Bundles/pqr/formatos/pqr/functionsReport.php';
 if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
 }
 
-$fileAdditionalFunctions = $_SERVER['ROOT_PATH'] . 'src/Bundles/client/pqr/functionsReportPqr.php';
+$fileAdditionalFunctions = $_SERVER['ROOT_PATH'].'src/Bundles/client/pqr/functionsReportPqr.php';
 if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
 }
@@ -71,6 +69,7 @@ function viewFtPqr(int $idft, $numero): string
 function getExpiration(): string
 {
     $FtPqr = getFtPqr();
+
     return $FtPqr->getService()->getColorExpiration();
 }
 
@@ -81,6 +80,7 @@ function getExpiration(): string
 function getEndDate(): string
 {
     $FtPqr = getFtPqr();
+
     return $FtPqr->getService()->getEndDate();
 }
 
@@ -91,6 +91,7 @@ function getEndDate(): string
 function getDaysLate(): string
 {
     $FtPqr = getFtPqr();
+
     return $FtPqr->getService()->getDaysLate();
 }
 
@@ -101,6 +102,7 @@ function getDaysLate(): string
 function getDaysWait(): string
 {
     $FtPqr = getFtPqr();
+
     return $FtPqr->getService()->getDaysWait();
 }
 
@@ -119,7 +121,7 @@ function getValueSysTipo(int $iddocumento, $fkCampoOpciones): string
     $tipo = '';
     if ($valor = CampoSeleccionados::findColumn('valor', [
         'fk_campo_opciones' => $fkCampoOpciones,
-        'fk_documento'      => $iddocumento
+        'fk_documento'      => $iddocumento,
     ])) {
         $tipo = $valor[0];
     }
@@ -152,7 +154,7 @@ function totalAnswers(int $idft): string
 
     if (!$idbusquedaComponenteRespuesta) {
         $GLOBALS['idbusquedaComponenteRespuesta'] = BusquedaComponente::findColumn('idbusqueda_componente', [
-            'nombre' => 'respuesta_pqr'
+            'nombre' => 'respuesta_pqr',
         ])[0];
     }
 
@@ -165,7 +167,7 @@ function totalAnswers(int $idft): string
     $url = 'views/buzones/grilla.php?';
     $url .= http_build_query([
         'variable_busqueda'     => json_encode(['idft_pqr' => $idft]),
-        'idbusqueda_componente' => $idbusquedaComponenteRespuesta
+        'idbusqueda_componente' => $idbusquedaComponenteRespuesta,
     ]);
 
     $numero = $FtPqr->getDocument()->numero;
@@ -236,9 +238,9 @@ function qualificationServ(): string
 }
 
 /**
- * @param int    $iddocumento
+ * @param int $iddocumento
  * @param string $estado
- * @param int    $idft
+ * @param int $idft
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
  */
@@ -246,77 +248,74 @@ function options(int $iddocumento, string $estado, int $idft): string
 {
     $options = match ($estado) {
         FtPqr::ESTADO_PROCESO => <<<HTML
-            <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
+             <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
+             </a>
+             <a href="#" class="dropdown-item viewTask" data-id="$iddocumento" data-idft="$idft">
+                <i class="fa fa-eye"></i> <span data-i18n="g.tareas">Tareas</span>
             </a>
-            <a href="#" class="dropdown-item viewTask" data-id="$iddocumento" data-idft="$idft">
-               <i class="fa fa-eye"></i> <span data-i18n="g.tareas">Tareas</span>
-           </a>
-           <a href="#" class="dropdown-item edit" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-edit"></i> <span data-i18n="pqr.validar_pqr">Validar PQRSF</span>
+            <a href="#" class="dropdown-item edit" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-edit"></i> <span data-i18n="pqr.validar_pqr">Validar PQRSF</span>
+             </a>
+            <a href="#" class="dropdown-item editUser" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-user"></i> <span data-i18n="pqr.datos_remitente">Datos remitente</span>
+             </a>
+             <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-history"></i> <span data-i18n="pqr.historial">Historial</span>
+             </a>
+             <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
+                <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
             </a>
-           <a href="#" class="dropdown-item editUser" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-user"></i> <span data-i18n="pqr.datos_remitente">Datos remitente</span>
-            </a>
-            <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-history"></i> <span data-i18n="pqr.historial">Historial</span>
-            </a>
-            <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
-               <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
-           </a>
-
-HTML,
+            HTML,
         FtPqr::ESTADO_TERMINADO => <<<HTML
-            <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
+             <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
+             </a>
+             <a href="#" class="dropdown-item viewTask" data-id="$iddocumento" data-idft="$idft">
+                <i class="fa fa-eye"></i> <span data-i18n="g.tareas">Tareas</span>
             </a>
-            <a href="#" class="dropdown-item viewTask" data-id="$iddocumento" data-idft="$idft">
-               <i class="fa fa-eye"></i> <span data-i18n="g.tareas">Tareas</span>
-           </a>
-            <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-history"></i> <span data-i18n="pqr.historial">Historial</span>
+             <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-history"></i> <span data-i18n="pqr.historial">Historial</span>
+             </a>
+             <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
+                <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
             </a>
-            <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
-               <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
-           </a>
-
-HTML,
+            HTML,
         default => <<<HTML
-            <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
+             <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-plus"></i> <span data-i18n="pqr.asignar_tarea">Asignar tarea</span>
+             </a>
+            <a href="#" class="dropdown-item edit" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-edit"></i> <span data-i18n="pqr.validar_pqr">Validar PQRSF</span>
+             </a>
+            <a href="#" class="dropdown-item editUser" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-user"></i> <span data-i18n="pqr.datos_remitente">Datos remitente</span>
+             </a>
+             <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-history"></i> <span data-i18n="pqr.historial">Historial</span>
+             </a>
+             <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
+                <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
             </a>
-           <a href="#" class="dropdown-item edit" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-edit"></i> <span data-i18n="pqr.validar_pqr">Validar PQRSF</span>
-            </a>
-           <a href="#" class="dropdown-item editUser" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-user"></i> <span data-i18n="pqr.datos_remitente">Datos remitente</span>
-            </a>
-            <a href="#" class="dropdown-item history" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-history"></i> <span data-i18n="pqr.historial">Historial</span>
-            </a>
-            <a href="#" class="dropdown-item answer" data-id="$iddocumento" data-idft="$idft">
-               <i class="fa fa-mail-reply"></i> <span data-i18n="pqr.responder">Responder</span>
-           </a>
-            <a href="#" class="dropdown-item finish" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-check"></i> <span data-i18n="pqr.terminar">Terminar</span>
-            </a>
-            <a href="#" class="dropdown-item cancel" data-id="$iddocumento" data-idft="$idft">
-                <i class="fa fa-exclamation-triangle"></i> <span data-i18n="pqr.anular">Anular</span>
-            </a>
-HTML,
+             <a href="#" class="dropdown-item finish" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-check"></i> <span data-i18n="pqr.terminar">Terminar</span>
+             </a>
+             <a href="#" class="dropdown-item cancel" data-id="$iddocumento" data-idft="$idft">
+                 <i class="fa fa-exclamation-triangle"></i> <span data-i18n="pqr.anular">Anular</span>
+             </a>
+            HTML,
     };
 
     return <<<HTML
-    <div class="dropdown">
-        <button class="btn bg-institutional mx-1" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fa fa-ellipsis-v"></i>
-        </button>
-        <div class="dropdown-menu dropdown-menu-left bg-white" role="menu">
-           $options
+        <div class="dropdown">
+            <button class="btn bg-institutional mx-1" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-ellipsis-v"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-left bg-white" role="menu">
+               $options
+            </div>
         </div>
-    </div>
-HTML;
-
+        HTML;
 }
 
 /**
@@ -363,7 +362,6 @@ function QbDependencia(): QueryBuilder
         ->from('vpqr', 'v')
         ->where('sys_dependencia = :dependencyId')
         ->setParameter('dependencyId', $Dependencia->getPK(), ParameterType::INTEGER);
-
 }
 
 function filterByFiltroTemp(): string
@@ -377,8 +375,8 @@ function filterByFiltroTemp(): string
     if ($idBusquedaFiltroTemp) {
         $BusquedaFiltroTemp = new BusquedaFiltroTemp($idBusquedaFiltroTemp);
         $where = $BusquedaFiltroTemp->detalle;
-
     }
+
     return $GLOBALS['whereFiltroTemp'] = $where;
 }
 
@@ -404,7 +402,8 @@ function getCantidad(): string
  */
 function getPendientes(): string
 {
-    $Qb = QbDependencia()->andWhere('sys_estado IN (:estado)')
+    $Qb = QbDependencia()
+        ->andWhere('sys_estado IN (:estado)')
         ->setParameter('estado', [FtPqr::ESTADO_PROCESO, FtPqr::ESTADO_PENDIENTE], ArrayParameterType::INTEGER);
 
     if ($where = filterByFiltroTemp()) {
@@ -422,7 +421,8 @@ function getPendientes(): string
  */
 function getResueltas(): string
 {
-    $Qb = QbDependencia()->andWhere('sys_estado LIKE :estado')
+    $Qb = QbDependencia()
+        ->andWhere('sys_estado LIKE :estado')
         ->setParameter('estado', FtPqr::ESTADO_TERMINADO);
 
     if ($where = filterByFiltroTemp()) {
@@ -441,15 +441,16 @@ function getComponenteRepTodos(): int
 {
     if (!$GLOBALS['idbusquedaComponenteRepTodos']) {
         $GLOBALS['idbusquedaComponenteRepTodos'] = BusquedaComponente::findColumn('idbusqueda_componente', [
-            'nombre' => PqrForm::NOMBRE_REPORTE_TODOS
+            'nombre' => PqrForm::NOMBRE_REPORTE_TODOS,
         ])[0];
     }
+
     return (int)$GLOBALS['idbusquedaComponenteRepTodos'];
 }
 
 /**
  * @param string $filterName
- * @param int    $cant
+ * @param int $cant
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-12
  */
@@ -463,15 +464,15 @@ function createView(string $filterName, int $cant): string
         'idbusqueda_componente'  => getComponenteRepTodos(),
         'variable_busqueda'      => json_encode([
             'sys_dependencia' => $Dependencia->getPK(),
-            'filterName'      => $filterName
-        ])
+            'filterName'      => $filterName,
+        ]),
     ]);
 
     return <<<HTML
-    <a class='kenlace_saia' data-enlace='$url' title='PQRS' href='#'>
-            <button class='btn btn-complete'>$cant</button>
-    </a>
-HTML;
+        <a class='kenlace_saia' data-enlace='$url' title='PQRS' href='#'>
+                <button class='btn btn-complete'>$cant</button>
+        </a>
+        HTML;
 }
 
 /**
@@ -492,8 +493,8 @@ function filter_pqr(): string
     }
 
     return match ($params['filterName']) {
-        PqrForm::FILTER_PENDIENTES => "sys_dependencia=$sysDependencia AND sys_estado IN ('" . FtPqr::ESTADO_PENDIENTE . "','" . FtPqr::ESTADO_PROCESO . "')",
-        PqrForm::FILTER_RESUELTAS => "sys_dependencia=$sysDependencia AND sys_estado LIKE '" . FtPqr::ESTADO_TERMINADO . "'",
+        PqrForm::FILTER_PENDIENTES => "sys_dependencia=$sysDependencia AND sys_estado IN ('".FtPqr::ESTADO_PENDIENTE."','".FtPqr::ESTADO_PROCESO."')",
+        PqrForm::FILTER_RESUELTAS => "sys_dependencia=$sysDependencia AND sys_estado LIKE '".FtPqr::ESTADO_TERMINADO."'",
         default => "sys_dependencia=$sysDependencia",
     };
 }
@@ -555,5 +556,5 @@ function filter_pqr_admin(string $nameReport): string
         }
     }
 
-    return " AND (sys_dependencia IN (" . implode(',', array_unique($ids)) . ") OR v.iddocumento IN ($subconsulta))";
+    return " AND (sys_dependencia IN (".implode(',', array_unique($ids)).") OR v.iddocumento IN ($subconsulta))";
 }

@@ -38,7 +38,7 @@ class PqrHistoryService extends ModelService
             'userName'    => $this->getModel()->getFuncionario()->getName(),
             'business'    => $this->getCustomerName(),
             'date'        => $this->getModel()->getFecha(),
-            'description' => $this->getModel()->descripcion
+            'description' => $this->getModel()->descripcion,
         ];
 
         switch ($this->getModel()->tipo) {
@@ -47,7 +47,7 @@ class PqrHistoryService extends ModelService
                 $data = array_merge($data, [
                     'iconPoint'      => 'fa fa-envelope-o',
                     'iconPointColor' => 'warning',
-                    'url'            => UtilitiesPqr::getRoutePdf($FtPqrRespuesta->getDocument())
+                    'url'            => UtilitiesPqr::getRoutePdf($FtPqrRespuesta->getDocument()),
                 ]);
                 break;
 
@@ -56,7 +56,7 @@ class PqrHistoryService extends ModelService
                 $data = array_merge($data, [
                     'iconPoint'      => 'fa fa-comment',
                     'iconPointColor' => 'danger',
-                    'description'    => "Se solicita la calificación del servicio prestado a la respuesta # {$FtPqrRespuesta->getDocument()->numero}"
+                    'description'    => "Se solicita la calificación del servicio prestado a la respuesta # {$FtPqrRespuesta->getDocument()->numero}",
                 ]);
                 break;
 
@@ -85,7 +85,7 @@ class PqrHistoryService extends ModelService
     {
         if (!$this->logo) {
             $Configuracion = Configuracion::findByAttributes([
-                'nombre' => 'logo'
+                'nombre' => 'logo',
             ]);
 
             if (!$Configuracion->getValue()) {
@@ -94,7 +94,7 @@ class PqrHistoryService extends ModelService
 
             $FileJson = new FileJson($Configuracion->getValue());
             $FileTemporal = $FileJson->convertToFileTemporal();
-            $this->logo = $_SERVER['APP_DOMAIN'] . $FileTemporal->getRouteFromRoot();
+            $this->logo = $_SERVER['APP_DOMAIN'].$FileTemporal->getRouteFromRoot();
         }
 
         return $this->logo;

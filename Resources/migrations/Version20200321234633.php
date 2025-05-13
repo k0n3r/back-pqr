@@ -34,7 +34,7 @@ final class Version20200321234633 extends AbstractMigration
     {
         $moduleName = sprintf(
             "crear_%s",
-            $this->formatName
+            $this->formatName,
         );
         $sql = "SELECT idmodulo FROM modulo WHERE nombre like 'modulo_formatos'";
         $idModulo = (int)$this->connection->fetchOne($sql);
@@ -45,7 +45,7 @@ final class Version20200321234633 extends AbstractMigration
             'etiqueta'    => 'CALIFICACIÓN -PQRSF',
             'enlace'      => "views/modules/pqr/formatos/$this->formatName/adicionar.html",
             'cod_padre'   => $idModulo,
-            'tiene_hijos' => 0
+            'tiene_hijos' => 0,
         ];
 
         return $this->createModulo($attributes, $moduleName);
@@ -96,8 +96,12 @@ final class Version20200321234633 extends AbstractMigration
             'publicar'                  => 1,
             'module'                    => 'pqr',
             'generador_pdf'             => 'Mpdf',
-            'webservice'                => 1,
-            'clase_ws'                  => 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqrCalificacion'
+            'info_ws'                   => json_encode([
+                'habilita_webservice'  => 1,
+                'habilita_consulta'    => 1,
+                'mensaje_notificacion' => '<br/>Con esta calificación nos ayuda a mejorar nuestros servicios',
+                'clase_ws'             => 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqrCalificacion',
+            ]),
         ];
 
         $this->connection->insert('formato', $data);
@@ -122,7 +126,7 @@ final class Version20200321234633 extends AbstractMigration
                 'acciones'          => 'a',
                 'listable'          => 1,
                 'ayuda'             => null,
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             'experiencia_gestion'  => [
                 'formato_idformato' => $idformato,
@@ -143,21 +147,21 @@ final class Version20200321234633 extends AbstractMigration
                 'campoOpciones'     => [
                     [
                         'llave' => 4,
-                        'valor' => 'Excelente'
+                        'valor' => 'Excelente',
                     ],
                     [
                         'llave' => 3,
-                        'valor' => 'Bueno'
+                        'valor' => 'Bueno',
                     ],
                     [
                         'llave' => 2,
-                        'valor' => 'Regular'
+                        'valor' => 'Regular',
                     ],
                     [
                         'llave' => 1,
-                        'valor' => 'Deficiente'
-                    ]
-                ]
+                        'valor' => 'Deficiente',
+                    ],
+                ],
             ],
             'experiencia_servicio' => [
                 'formato_idformato' => $idformato,
@@ -178,22 +182,22 @@ final class Version20200321234633 extends AbstractMigration
                 'campoOpciones'     => [
                     [
                         'llave' => 4,
-                        'valor' => 'Excelente'
+                        'valor' => 'Excelente',
                     ],
                     [
                         'llave' => 3,
-                        'valor' => 'Bueno'
+                        'valor' => 'Bueno',
                     ],
                     [
                         'llave' => 2,
-                        'valor' => 'Regular'
+                        'valor' => 'Regular',
                     ],
                     [
                         'llave' => 1,
-                        'valor' => 'Deficiente'
-                    ]
-                ]
-            ]
+                        'valor' => 'Deficiente',
+                    ],
+                ],
+            ],
         ];
 
         foreach ($data as $field) {
@@ -209,7 +213,7 @@ final class Version20200321234633 extends AbstractMigration
             if ($campoOpciones) {
                 foreach ($campoOpciones as $option) {
                     $dataOption = array_merge($option, [
-                        'fk_campos_formato' => $id
+                        'fk_campos_formato' => $id,
                     ]);
                     $this->connection->insert('campo_opciones', $dataOption);
                 }

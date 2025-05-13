@@ -12,13 +12,13 @@ class PqrBackup extends Model
     protected function defineAttributes(): void
     {
         $this->dbAttributes = (object)[
-            'safe' => [
+            'safe'    => [
                 'fk_documento',
                 'fk_pqr',
-                'data_json'
+                'data_json',
             ],
             'primary' => 'id',
-            'table' => 'pqr_backups'
+            'table'   => 'pqr_backups',
         ];
     }
 

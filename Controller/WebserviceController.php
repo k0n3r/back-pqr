@@ -13,21 +13,21 @@ use Symfony\Component\Routing\Annotation\Route;
 class WebserviceController extends AbstractController
 {
     /**
-     * @param Request       $Request
+     * @param Request $Request
      * @param ISaiaResponse $saiaResponse
-     * @param Connection    $Connection
+     * @param Connection $Connection
      * @return Response
      */
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
     public function saveDocument(
         Request $Request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
         return (new CaptchaController())->saveDocument(
             $Request,
             $saiaResponse,
-            $Connection
+            $Connection,
         );
     }
 }

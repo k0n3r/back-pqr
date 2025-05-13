@@ -23,21 +23,20 @@ use Throwable;
 class FtPqrController extends AbstractController
 {
     /**
-     * @param int           $idft
+     * @param int $idft
      * @param ISaiaResponse $saiaResponse
      * @return Response
      */
     #[Route('/externalUser', name: 'getExternalUser', methods: ['GET'])]
     public function getExternalUser(
         int $idft,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
             $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
             $data = [
                 'sys_tercero' => $FtPqr->sys_tercero,
-                'fieldId'     => $this->getFieldIdSysTercero($FtPqr)
+                'fieldId'     => $this->getFieldIdSysTercero($FtPqr),
             ];
 
             $saiaResponse->replaceData($data);
@@ -60,16 +59,15 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @param int           $idft
+     * @param int $idft
      * @param ISaiaResponse $saiaResponse
      * @return Response
      */
     #[Route('/dataToLoadResponse', name: 'getDataToLoadResponse', methods: ['GET'])]
     public function getDataToLoadResponse(
         int $idft,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
             $data = (UtilitiesPqr::getInstanceForFtId($idft))->getService()->getDataToLoadResponse();
             $saiaResponse->replaceData($data);
@@ -83,29 +81,28 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @param int           $idft
+     * @param int $idft
      * @param ISaiaResponse $saiaResponse
-     * @param Request       $request
+     * @param Request $request
      * @return Response
      */
     #[Route('/dateForType', name: 'getDateForType', methods: ['GET'])]
     public function getDateForType(
         int $idft,
         ISaiaResponse $saiaResponse,
-        Request $request
+        Request $request,
     ): Response {
-
         try {
             $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
             $FtPqr->sys_tipo = $request->get('type');
             $date = DateController::convertDate(
                 $FtPqr->getService()->getDateForType(),
                 'Y-m-d',
-                'Y-m-d H:i:s'
+                'Y-m-d H:i:s',
             );
 
             $saiaResponse->replaceData([
-                'date' => $date
+                'date' => $date,
             ]);
             $saiaResponse->setSuccess(1);
         } catch (Throwable $th) {
@@ -116,18 +113,16 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @param int           $idft
+     * @param int $idft
      * @param ISaiaResponse $saiaResponse
      * @return Response
      */
     #[Route('/valuesForType', name: 'getValuesForType', methods: ['GET'])]
     public function getValuesForType(
         int $idft,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
-
             $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
             $DateTime = DateController::getDateTimeFromDataBase($FtPqr->sys_fecha_vencimiento);
 
@@ -136,7 +131,7 @@ class FtPqrController extends AbstractController
             if ($idDependencia) {
                 $options = [
                     'id'   => $idDependencia,
-                    'text' => $FtPqr->getService()->getValueForReport('sys_dependencia')
+                    'text' => $FtPqr->getService()->getValueForReport('sys_dependencia'),
                 ];
             }
 
@@ -148,7 +143,7 @@ class FtPqrController extends AbstractController
                 'optionsDependency'     => $options,
                 'sys_frecuencia'        => (int)$FtPqr->sys_frecuencia,
                 'sys_impacto'           => (int)$FtPqr->sys_impacto,
-                'sys_severidad'         => (int)$FtPqr->sys_severidad
+                'sys_severidad'         => (int)$FtPqr->sys_severidad,
             ];
 
             $saiaResponse->replaceData($data);
@@ -166,21 +161,19 @@ class FtPqrController extends AbstractController
      */
     #[Route('/history', name: 'getHistory', methods: ['GET'])]
     public function getHistory(
-        int $idft
+        int $idft,
     ): JsonResponse {
-
         try {
-
             $records = (UtilitiesPqr::getInstanceForFtId($idft))->getService()->getRecordsHistory();
 
             $data = [
                 'total' => count($records),
-                'rows'  => $records
+                'rows'  => $records,
             ];
         } catch (Throwable $th) {
             $data = [
                 'total' => 0,
-                'rows'  => []
+                'rows'  => [],
             ];
         }
 
@@ -189,10 +182,10 @@ class FtPqrController extends AbstractController
 
 
     /**
-     * @param int           $idft
-     * @param Request       $request
+     * @param int $idft
+     * @param Request $request
      * @param ISaiaResponse $saiaResponse
-     * @param Connection    $Connection
+     * @param Connection $Connection
      * @return Response
      */
     #[Route('/externalUser', name: 'setExternalUser', methods: ['POST'])]
@@ -200,7 +193,7 @@ class FtPqrController extends AbstractController
         int $idft,
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
         $Connection->beginTransaction();
         try {
@@ -223,7 +216,7 @@ class FtPqrController extends AbstractController
                 'tipo',
                 'titulo',
                 'ciudad',
-                'estado'
+                'estado',
             ];
 
             foreach ($attributesOld as $key => $valueOld) {
@@ -237,25 +230,25 @@ class FtPqrController extends AbstractController
             }
 
             if ($modified) {
-                $PqrHistoryService = (new PqrHistory)->getService();
+                $PqrHistoryService = (new PqrHistory())->getService();
                 $history = [
                     'fecha'          => date('Y-m-d H:i:s'),
                     'idft'           => $FtPqr->getPK(),
                     'fk_funcionario' => $PqrHistoryService->getFuncionario()->getPK(),
                     'tipo'           => PqrHistory::TIPO_MODIFICACION_TERCERO,
                     'idfk'           => $Tercero->getPK(),
-                    'descripcion'    => 'Se actualizo el tercero: ' . implode(', ', $modified)
+                    'descripcion'    => 'Se actualizo el tercero: '.implode(', ', $modified),
                 ];
                 if (!$PqrHistoryService->save($history)) {
                     throw new SaiaException(
                         $PqrHistoryService->getErrorManager()->getMessage(),
-                        $PqrHistoryService->getErrorManager()->getCode()
+                        $PqrHistoryService->getErrorManager()->getCode(),
                     );
                 }
             }
 
             $data = [
-                'correo' => (bool)$Tercero->getEmail()
+                'correo' => (bool)$Tercero->getEmail(),
             ];
 
             $saiaResponse->replaceData($data);
@@ -270,10 +263,10 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @param int           $idft
-     * @param Request       $request
+     * @param int $idft
+     * @param Request $request
      * @param ISaiaResponse $saiaResponse
-     * @param Connection    $Connection
+     * @param Connection $Connection
      * @return Response
      */
     #[Route('/updateType', name: 'updateType', methods: ['PUT'])]
@@ -281,11 +274,10 @@ class FtPqrController extends AbstractController
         int $idft,
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
         $Connection->beginTransaction();
         try {
-
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
             if (!$FtPqrService->updateType($request->get('data'))) {
                 throw new SaiaException(
@@ -305,10 +297,10 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @param int           $idft
-     * @param Request       $request
+     * @param int $idft
+     * @param Request $request
      * @param ISaiaResponse $saiaResponse
-     * @param Connection    $Connection
+     * @param Connection $Connection
      * @return Response
      */
     #[Route('/finish', name: 'finish', methods: ['PUT'])]
@@ -316,9 +308,8 @@ class FtPqrController extends AbstractController
         int $idft,
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         try {
             $Connection->beginTransaction();
 

@@ -21,9 +21,8 @@ class PqrFormFieldController extends AbstractController
     public function store(
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         try {
             $Connection->beginTransaction();
 
@@ -31,7 +30,7 @@ class PqrFormFieldController extends AbstractController
             if (!$PqrFormFieldService->save($request->get('data'))) {
                 throw new SaiaException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
-                    $PqrFormFieldService->getErrorManager()->getCode()
+                    $PqrFormFieldService->getErrorManager()->getCode(),
                 );
             }
 
@@ -54,9 +53,8 @@ class PqrFormFieldController extends AbstractController
         int $id,
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         try {
             $Connection->beginTransaction();
 
@@ -64,7 +62,7 @@ class PqrFormFieldController extends AbstractController
             if (!$PqrFormFieldService->save($request->get('data'))) {
                 throw new SaiaException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
-                    $PqrFormFieldService->getErrorManager()->getCode()
+                    $PqrFormFieldService->getErrorManager()->getCode(),
                 );
             }
 
@@ -84,25 +82,22 @@ class PqrFormFieldController extends AbstractController
 
     #[Route('/{id}/active', name: 'active', methods: ['PUT'])]
     public function active(
-        int $id
+        int $id,
     ): Response {
-
         return $this->activeInactive($id, PqrFormField::ACTIVE);
     }
 
     #[Route('/{id}/inactive', name: 'inactive', methods: ['PUT'])]
     public function inactive(
-        int $id
+        int $id,
     ): Response {
-
         return $this->activeInactive($id, PqrFormField::INACTIVE);
     }
 
     private function activeInactive(
         int $id,
-        int $status
+        int $status,
     ): Response {
-
         $saiaResponse = new SaiaResponse();
         $Connection = GlobalContainer::getConnection();
 
@@ -113,7 +108,7 @@ class PqrFormFieldController extends AbstractController
             if (!$PqrFormFieldService->updateActive($status)) {
                 throw new SaiaException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
-                    $PqrFormFieldService->getErrorManager()->getCode()
+                    $PqrFormFieldService->getErrorManager()->getCode(),
                 );
             }
 
@@ -134,9 +129,8 @@ class PqrFormFieldController extends AbstractController
     public function destroy(
         int $id,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         try {
             $Connection->beginTransaction();
 
@@ -144,7 +138,7 @@ class PqrFormFieldController extends AbstractController
             if (!$PqrFormFieldService->delete()) {
                 throw new SaiaException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
-                    $PqrFormFieldService->getErrorManager()->getCode()
+                    $PqrFormFieldService->getErrorManager()->getCode(),
                 );
             }
 

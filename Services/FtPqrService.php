@@ -16,7 +16,6 @@ use App\services\models\ModelService\ModelService;
 use DateInterval;
 use DateTime;
 use Doctrine\DBAL\ParameterType;
-use Doctrine\DBAL\Types\Types;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
 use Saia\controllers\DistributionService;
@@ -41,8 +40,8 @@ class FtPqrService extends ModelService
 {
     private PqrService $PqrService;
 
-    const string FUNCTION_ADMIN_PQR = 'Administrador PQRS';
-    const string FUNCTION_ADMIN_DEP_PQR = 'Administrador Dependencia PQRS';
+    public const string FUNCTION_ADMIN_PQR = 'Administrador PQRS';
+    public const string FUNCTION_ADMIN_DEP_PQR = 'Administrador Dependencia PQRS';
 
     public function __construct(FtPqr $Ft)
     {
@@ -94,7 +93,7 @@ class FtPqrService extends ModelService
     /**
      * Valida si el campo sys_email es valido
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -102,17 +101,21 @@ class FtPqrService extends ModelService
     {
         if ($this->getModel()->sys_email) {
             if (!CoreFunctions::isEmailValid($this->getModel()->sys_email)) {
-                $this->getErrorManager()->setMessage("Esta dirección de correo ({$this->getModel()->sys_email}) no es válida.");
+                $this->getErrorManager()->setMessage(
+                    "Esta dirección de correo ({$this->getModel()->sys_email}) no es válida.",
+                );
+
                 return false;
             }
         }
+
         return true;
     }
 
     /**
      * Genera el backup del formulario
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -121,7 +124,7 @@ class FtPqrService extends ModelService
         $data = [
             'fk_documento' => $this->getModel()->documento_iddocumento,
             'fk_pqr'       => $this->getModel()->getPK(),
-            'data_json'    => json_encode($this->getDataRow())
+            'data_json'    => json_encode($this->getDataRow()),
         ];
 
         $PqrBackup = PqrBackup::findByAttributes([
@@ -129,9 +132,10 @@ class FtPqrService extends ModelService
             'fk_pqr'       => $this->getModel()->getPK(),
         ]);
 
-        $PqrBackupService = $PqrBackup ? $PqrBackup->getService() : (new PqrBackup)->getService();
+        $PqrBackupService = $PqrBackup ? $PqrBackup->getService() : (new PqrBackup())->getService();
         if (!$PqrBackupService->save($data)) {
             $this->getErrorManager()->setMessage("No fue posible registrar el backup");
+
             return false;
         }
 
@@ -150,7 +154,7 @@ class FtPqrService extends ModelService
         $data = [];
         if ($this->getPqrForm()->show_anonymous) {
             $data = [
-                'REGISTRADO COMO ANÓNIMO' => $this->getModel()->sys_anonimo ? 'SI' : 'NO'
+                'REGISTRADO COMO ANÓNIMO' => $this->getModel()->sys_anonimo ? 'SI' : 'NO',
             ];
         }
 
@@ -160,7 +164,7 @@ class FtPqrService extends ModelService
                 if ($value = $this->getValue($PqrFormField)) {
                     $key = $this->getKey($PqrFormField->label);
                     if (array_key_exists($key, $data)) {
-                        $value[$key . "__" . uniqid()] = $value[$key];
+                        $value[$key."__".uniqid()] = $value[$key];
                         unset($value[$key]);
                     }
                     $data = array_merge($data, $value);
@@ -201,7 +205,9 @@ class FtPqrService extends ModelService
             case 'AutocompleteM';
                 $value = null;
                 if ($this->getModel()->$fieldName) {
-                    $value = $PqrFormField->getService()->getListDataForAutocomplete(['id' => $this->getModel()->$fieldName]);
+                    $value = $PqrFormField->getService()->getListDataForAutocomplete(
+                        ['id' => $this->getModel()->$fieldName],
+                    );
                 }
                 $data[$label] = $value ? $value[0]['text'] : '';
                 break;
@@ -229,7 +235,7 @@ class FtPqrService extends ModelService
      * Retonar la fecha de vencimiento basado en la fecha de aprobacion
      * y el tipo
      *
-     * @param bool     $instance
+     * @param bool $instance
      * @param int|null $days
      * @return string|DateTime
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -239,12 +245,12 @@ class FtPqrService extends ModelService
         $Created = DateController::getDateTimeFromDataBase($this->getDocument()->fecha);
         $DateTime = (DateController::addBusinessDays(
             $Created,
-            is_null($days) ? $this->getDays() : $days
+            is_null($days) ? $this->getDays() : $days,
         ));
         $DateTime->setTime(
             $Created->format('H'),
             $Created->format('i'),
-            $Created->format('s')
+            $Created->format('s'),
         );
 
         return $instance ? $DateTime : $DateTime->format('Y-m-d H:i:s');
@@ -260,27 +266,26 @@ class FtPqrService extends ModelService
     {
         if ($PqrResponseTime = PqrResponseTime::findByAttributes([
             'fk_campo_opciones' => $this->getIdFromResponseTimes(),
-            'fk_sys_tipo'       => $this->getModel()->sys_tipo
+            'fk_sys_tipo'       => $this->getModel()->sys_tipo,
         ])) {
             return $PqrResponseTime->number_days ?: 1;
         }
 
         $history = [
             'tipo'        => PqrHistory::TIPO_ERROR_DIAS_VENCIMIENTO,
-            'descripcion' => "No se configuro dias de vencimiento para las opciones seleccionadas por el cliente"
+            'descripcion' => "No se configuro dias de vencimiento para las opciones seleccionadas por el cliente",
         ];
 
         $this->saveHistory($history);
 
         return 1;
-
     }
 
     public function getFuncionarioFromBalacer(): ?VfuncionarioDc
     {
         if ($PqrBalancer = PqrBalancer::findByAttributes([
             'fk_campo_opciones' => $this->getIdFromBalancer(),
-            'fk_sys_tipo'       => $this->getModel()->sys_tipo
+            'fk_sys_tipo'       => $this->getModel()->sys_tipo,
         ])) {
             if ($Grupo = $PqrBalancer->getGrupo()) {
                 return $this->getFuncionarioFromGroup($Grupo);
@@ -304,8 +309,8 @@ class FtPqrService extends ModelService
             return -1;
         }
         $nameField = $CamposFormato->nombre;
-        return (int)$this->getModel()->$nameField;
 
+        return (int)$this->getModel()->$nameField;
     }
 
     protected function getIdFromBalancer(): int
@@ -315,8 +320,8 @@ class FtPqrService extends ModelService
             return -1;
         }
         $nameField = $CamposFormato->nombre;
-        return (int)$this->getModel()->$nameField;
 
+        return (int)$this->getModel()->$nameField;
     }
 
     /**
@@ -329,16 +334,15 @@ class FtPqrService extends ModelService
      */
     public function getDataToLoadResponse(): array
     {
-
         if ($Tercero = $this->getModel()->getTercero()) {
             $destino = [
                 'id'   => $Tercero->getPK(),
-                'text' => "$Tercero->identificacion - $Tercero->nombre"
+                'text' => "$Tercero->identificacion - $Tercero->nombre",
             ];
         }
 
         $Formato = Formato::findByAttributes([
-            'nombre' => 'pqr_respuesta'
+            'nombre' => 'pqr_respuesta',
         ]);
 
         if ($records = $Formato->getField('tipo_distribucion')->getCampoOpciones()) {
@@ -364,7 +368,7 @@ class FtPqrService extends ModelService
             'destino'           => $destino ?? 0,
             'tipo_distribucion' => $tipoDistribucion ?? 0,
             'despedida'         => $despedida ?? 0,
-            'asunto'            => $this->getModel()->getDefaultSubjectForPqrRespuesta()
+            'asunto'            => $this->getModel()->getDefaultSubjectForPqrRespuesta(),
         ];
     }
 
@@ -372,7 +376,7 @@ class FtPqrService extends ModelService
      * Termina una PQR
      *
      * @param string $observaciones
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -380,7 +384,7 @@ class FtPqrService extends ModelService
     {
         return $this->changeStatus(
             FtPqr::ESTADO_TERMINADO,
-            $observaciones
+            $observaciones,
         );
     }
 
@@ -399,8 +403,8 @@ class FtPqrService extends ModelService
             $rows[] = array_merge(
                 $PqrHistory->getDataAttributes(),
                 [
-                    'nombre_funcionario' => $PqrHistory->getFuncionario()->getName()
-                ]
+                    'nombre_funcionario' => $PqrHistory->getFuncionario()->getName(),
+                ],
             );
         }
 
@@ -416,7 +420,6 @@ class FtPqrService extends ModelService
      */
     public function getHistoryForTimeline(): array
     {
-
         $rows = [];
 
         $records = $this->getHistory('fecha asc');
@@ -456,7 +459,6 @@ class FtPqrService extends ModelService
     protected function getExpirationDate(): DateTime
     {
         return DateController::getDateTimeFromDataBase($this->getModel()->sys_fecha_vencimiento);
-
     }
 
     /**
@@ -473,7 +475,7 @@ class FtPqrService extends ModelService
             'iconPointColor' => 'success',
             'date'           => DateController::convertDate($this->getDocument()->fecha),
             'description'    => "Se registra la solicitud No # {$this->getDocument()->numero}",
-            'url'            => UtilitiesPqr::getRoutePdf($this->getDocument())
+            'url'            => UtilitiesPqr::getRoutePdf($this->getDocument()),
         ];
     }
 
@@ -492,14 +494,14 @@ class FtPqrService extends ModelService
             'iconPoint'      => 'fa fa-flag-checkered',
             'iconPointColor' => 'success',
             'date'           => $this->getExpirationDate()->format(DateController::PUBLIC_DATE_FORMAT),
-            'description'    => "Fecha maxima para dar respuesta a la solicitud de tipo $type"
+            'description'    => "Fecha maxima para dar respuesta a la solicitud de tipo $type",
         ];
     }
 
     /**
      * Notifica al email registrado
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -514,7 +516,7 @@ class FtPqrService extends ModelService
         $subject = "Solicitud de {$this->getPqrForm()->label} # {$this->getDocument()->numero}";
 
         if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
-            'name' => 'f1_email_solicitante'
+            'name' => 'f1_email_solicitante',
         ])) {
             $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $this->getModel());
             $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $this->getModel());
@@ -561,21 +563,21 @@ class FtPqrService extends ModelService
         }
 
         return <<<HTML
-    <div class='form-group form-group-default form-group-default-select2 $required' id='group_$name'>
-        <label>$PqrFormField->label</label>
-        <div class='form-group'>
-            <select class='full-width pqrAutocomplete $required' name='$name' id='$name'>
-                $options
-            </select>
-        </div>
-    </div>
-HTML;
+            <div class='form-group form-group-default form-group-default-select2 $required' id='group_$name'>
+                <label>$PqrFormField->label</label>
+                <div class='form-group'>
+                    <select class='full-width pqrAutocomplete $required' name='$name' id='$name'>
+                        $options
+                    </select>
+                </div>
+            </div>
+            HTML;
     }
 
     /**
      * Notifica a los funcionarios configurados
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -621,7 +623,6 @@ HTML;
                 ->saveShipmentTraceability($Documento->getPK());
 
             (new SendEmailSaia($EmailSaia))->send();
-
         }
 
         return true;
@@ -630,7 +631,7 @@ HTML;
     /**
      * Crea el tercero segun la configuracion del funcionario
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -639,7 +640,10 @@ HTML;
         $config = $this->getPqrForm()->getResponseConfiguration(true);
 
         if (!$config['tercero']) {
-            $this->getErrorManager()->setMessage("Contacte al administrador!, Se debe definir la configuración de la respuesta");
+            $this->getErrorManager()->setMessage(
+                "Contacte al administrador!, Se debe definir la configuración de la respuesta",
+            );
+
             return false;
         }
 
@@ -648,16 +652,16 @@ HTML;
             'identificacion'      => Tercero::IDENTIFICACION_INDEFINIDA,
             'tipo'                => Tercero::TIPO_NATURAL,
             'tipo_identificacion' => Tercero::TIPO_IDENTIFICACION_CC,
-            'correo'              => $this->getModel()->sys_email
+            'correo'              => $this->getModel()->sys_email,
         ];
 
         foreach ($config['tercero'] as $row) {
             $value = [];
             foreach ($row['value'] as $idPqrFormField) {
                 $PqrFormField = PqrFormField::findByAttributes([
-                    'id' => $idPqrFormField
+                    'id' => $idPqrFormField,
                 ], [
-                    'name'
+                    'name',
                 ]);
 
                 if ($PqrFormField) {
@@ -681,13 +685,14 @@ HTML;
 
         $Tercero = Tercero::findByAttributes([
             'identificacion' => $data['identificacion'],
-            'estado'         => 1
+            'estado'         => 1,
         ]);
 
         $Tercero ??= new Tercero();
         $TerceroService = new TerceroService($Tercero);
         if (!$TerceroService->save($data)) {
             $this->getErrorManager()->setMessage($TerceroService->getErrorManager()->getMessage());
+
             return false;
         }
         $this->getModel()->sys_tercero = $TerceroService->getModel()->getPK();
@@ -699,20 +704,21 @@ HTML;
      * Actualiza el tipo de PQR y guarda en el historial
      *
      * @param array $data
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
     public function updateType(array $data): bool
     {
-
         if (!$data['type']) {
             $this->getErrorManager()->setMessage("Error faltan parametros");
+
             return false;
         }
 
         if ($this->getPqrService()->subTypeExist() && !$data['subtype']) {
             $this->getErrorManager()->setMessage("Error faltan parametros");
+
             return false;
         }
         $refreshDescription = false;
@@ -794,7 +800,7 @@ HTML;
         }
 
 
-        $text = "Se actualiza: " . implode(', ', $textField);
+        $text = "Se actualiza: ".implode(', ', $textField);
         $newType = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
         $newSubType = $this->getPqrService()->subTypeExist() ? $this->getModel()->getFieldValue('sys_subtipo') : '';
         $newDependency = $this->getPqrService()->dependencyExist() ? $this->getValueForReport('sys_dependencia') : '';
@@ -802,17 +808,18 @@ HTML;
         $text = str_replace([
             '{newType}',
             '{newSubType}',
-            '{newDependency}'
+            '{newDependency}',
         ], [
             $newType,
             $newSubType,
-            $newDependency
+            $newDependency,
         ], $text);
 
         $history = [
             'tipo'        => PqrHistory::TIPO_CAMBIO_ESTADO,
-            'descripcion' => $text
+            'descripcion' => $text,
         ];
+
         return $this->saveHistory($history);
     }
 
@@ -831,7 +838,7 @@ HTML;
 
         $history = [
             'tipo'        => PqrHistory::TIPO_CAMBIO_ESTADO,
-            'descripcion' => "Se actualiza la oportunidad en la respuesta de : $oldOportuno a $newOportuno"
+            'descripcion' => "Se actualiza la oportunidad en la respuesta de : $oldOportuno a $newOportuno",
         ];
 
         return $this->saveHistory($history);
@@ -853,6 +860,7 @@ HTML;
                 $data[] = $FtPqrRespuesta;
             }
         }
+
         return $data;
     }
 
@@ -870,7 +878,9 @@ HTML;
             return 'Fecha vencimiento no configurada';
         }
 
-        $now = $this->getModel()->sys_fecha_terminado ? DateController::getDateTimeFromDataBase($this->getModel()->sys_fecha_terminado) : new DateTime();
+        $now = $this->getModel()->sys_fecha_terminado ? DateController::getDateTimeFromDataBase(
+            $this->getModel()->sys_fecha_terminado,
+        ) : new DateTime();
         $now->setTime(0, 0);
 
         $expirationDate = $this->getExpirationDate();
@@ -881,10 +891,8 @@ HTML;
         $color = "success";
         if ($diff->invert || $diff->days <= FtPqr::VENCIMIENTO_ROJO) {
             $color = 'danger';
-        } else {
-            if ($diff->days <= FtPqr::VENCIMIENTO_AMARILLO) {
-                $color = 'warning';
-            }
+        } elseif ($diff->days <= FtPqr::VENCIMIENTO_AMARILLO) {
+            $color = 'warning';
         }
 
         $date = $this->getExpirationDate()->format(DateController::PUBLIC_DATE_FORMAT);
@@ -907,7 +915,7 @@ HTML;
 
         return DateController::convertDate(
             $this->getModel()->sys_fecha_terminado,
-            DateController::PUBLIC_DATE_FORMAT
+            DateController::PUBLIC_DATE_FORMAT,
         );
     }
 
@@ -961,7 +969,6 @@ HTML;
         $DateTime->setTime(0, 0);
 
         return DateController::diasHabilesEntreFechas($DateTime, $now);
-
     }
 
     /**
@@ -990,7 +997,7 @@ HTML;
     public function getHistory(string $order = 'id desc'): array
     {
         return PqrHistory::findAllByAttributes([
-            'idft' => $this->getModel()->getPK()
+            'idft' => $this->getModel()->getPK(),
         ], [], $order);
     }
 
@@ -1005,7 +1012,7 @@ HTML;
     {
         $params = [
             'id'         => $this->getModel()->getPK(),
-            'documentId' => $this->getDocument()->getPK()
+            'documentId' => $this->getDocument()->getPK(),
         ];
         $data = CryptController::encrypt(json_encode($params));
 
@@ -1013,7 +1020,7 @@ HTML;
             "%sws/%s/infoQR.html?data=%s",
             $_SERVER['APP_DOMAIN'],
             $this->getModel()->getFormat()->nombre,
-            $data
+            $data,
         );
     }
 
@@ -1022,7 +1029,7 @@ HTML;
      *
      * @param string $newStatus
      * @param string $observations
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -1049,15 +1056,17 @@ HTML;
                 'fk_funcionario' => $this->getFuncionario()->getPK(),
                 'tipo'           => PqrHistory::TIPO_CAMBIO_ESTADO,
                 'idfk'           => 0,
-                'descripcion'    => "Se actualiza el estado de la solicitud de $actualStatus a $newStatus. $observations"
+                'descripcion'    => "Se actualiza el estado de la solicitud de $actualStatus a $newStatus. $observations",
             ];
 
-            $PqrHistoryService = (new PqrHistory)->getService();
+            $PqrHistoryService = (new PqrHistory())->getService();
             if (!$PqrHistoryService->save($history)) {
                 $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
+
                 return false;
             }
         }
+
         return true;
     }
 
@@ -1101,7 +1110,7 @@ HTML;
         $newDate = DateController::convertDate(
             $expirationDate,
             DateController::PUBLIC_DATE_FORMAT,
-            'Y-m-d'
+            'Y-m-d',
         );
 
         return "fecha de vencimiento de $oldDate a $newDate";
@@ -1110,7 +1119,7 @@ HTML;
     /**
      * Actualiza la fecha de vencimiento
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -1123,7 +1132,6 @@ HTML;
             : null;
 
         if ($oldDate != $DateTimeForType->format('Y-m-d')) {
-
             $this->getModel()->sys_fecha_vencimiento = $DateTimeForType->format('Y-m-d H:i:s');
             $this->getModel()->save();
 
@@ -1136,16 +1144,16 @@ HTML;
                 'fk_funcionario' => $this->getFuncionario()->getPK(),
                 'tipo'           => PqrHistory::TIPO_CAMBIO_VENCIMIENTO,
                 'idfk'           => 0,
-                'descripcion'    => "Se actualiza la fecha de vencimiento a " .
-                    $DateTimeForType->format(DateController::PUBLIC_DATE_FORMAT)
+                'descripcion'    => "Se actualiza la fecha de vencimiento a ".
+                    $DateTimeForType->format(DateController::PUBLIC_DATE_FORMAT),
             ];
 
-            $PqrHistoryService = (new PqrHistory)->getService();
+            $PqrHistoryService = (new PqrHistory())->getService();
             if (!$PqrHistoryService->save($history)) {
                 $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
+
                 return false;
             }
-
         }
 
         return true;
@@ -1154,7 +1162,7 @@ HTML;
     /**
      * Registra la distribucion
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -1185,6 +1193,7 @@ HTML;
 
             default:
                 $this->getErrorManager()->setMessage("Tipo de distribucion no definida");
+
                 return false;
         }
         $DistributionService = new DistributionService($this->getModel()->getDocument());
@@ -1196,7 +1205,7 @@ HTML;
             $this->getModel()->$fieldName,
             DistributionService::TIPO_INTERNO,
             $estado,
-            $recogida
+            $recogida,
         );
 
         return true;
@@ -1229,19 +1238,19 @@ HTML;
 
         return [
             'tarea'         => 0,
-            'nombre'        => 'Resolver PQR # ' . $this->getDocument()->numero,
+            'nombre'        => 'Resolver PQR # '.$this->getDocument()->numero,
             'managers'      => [
                 [
                     'id'       => $FuncionarioDesInt->getPK(),
-                    'external' => 0
-                ]
+                    'external' => 0,
+                ],
             ],
             'notification'  => $this->enableEmailNotificationTask(),// Notificar por Email
             'fecha_inicial' => $this->getTaskDefaultStartDate($DateTime),
             'fecha_final'   => $this->getTaskDefaultEndDate($DateTime),
             'descripcion'   => '',
             'relacion'      => Tarea::RELACION_DOCUMENTO,
-            'relacion_id'   => $this->getDocument()->getPK()
+            'relacion_id'   => $this->getDocument()->getPK(),
         ];
     }
 
@@ -1294,12 +1303,14 @@ HTML;
             if ($fTerminado->format('Y-m-d') <= $fExpiration) {
                 return FtPqr::OPORTUNO_CERRADAS_A_TERMINO;
             }
+
             return FtPqr::OPORTUNO_CERRADAS_FUERA_DE_TERMINO;
         }
 
         if ($fTerminado->format('Y-m-d') <= $fExpiration) {
             return FtPqr::OPORTUNO_PENDIENTES_SIN_VENCER;
         }
+
         return FtPqr::OPORTUNO_VENCIDAS_SIN_CERRAR;
     }
 
@@ -1322,6 +1333,7 @@ HTML;
         $PqrHistoryService = (new PqrHistory())->getService();
         if (!$PqrHistoryService->save($history)) {
             $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
+
             return false;
         }
 

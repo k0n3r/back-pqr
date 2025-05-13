@@ -12,7 +12,7 @@ class PqrCustomizable implements Customizable
 
     /**
      * @param string $methodName
-     * @param array  $params
+     * @param array $params
      * @return bool|void
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-10-20
      */
@@ -29,7 +29,7 @@ class PqrCustomizable implements Customizable
                 $CampoOpcionColilla = CampoOpciones::getFieldOptions(
                     $Documento->getFormat(),
                     Rad::COLILLA,
-                    $data[Rad::COLILLA]
+                    $data[Rad::COLILLA],
                 );
 
                 $SaveFt = new SaveFt($Documento);
@@ -37,7 +37,7 @@ class PqrCustomizable implements Customizable
                     'descripcion' => $data['descripcion'],
                     'asunto'      => $data['descripcion'],
                     'sys_folios'  => $data[Rad::NUMERO_FOLIOS],
-                    'colilla'     => $CampoOpcionColilla?->getPK()
+                    'colilla'     => $CampoOpcionColilla?->getPK(),
                 ]);
 
                 return true;

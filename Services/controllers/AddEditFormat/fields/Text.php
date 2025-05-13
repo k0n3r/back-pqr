@@ -16,7 +16,7 @@ class Text extends Field implements IField
 
         $data = array_merge($this->getDefaultValues(), [
             'placeholder' => $PqrFormField->getSetting()->placeholder,
-            'opciones' => '{"type":"' . $typeHtml . '"}'
+            'opciones'    => '{"type":"'.$typeHtml.'"}',
         ]);
 
         if (!$PqrFormField->active) {

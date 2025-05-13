@@ -12,10 +12,9 @@ class Radio extends Field implements IField
      */
     public function getValues(): array
     {
-
         $data = array_merge($this->getDefaultValues(), [
             'tipo_dato' => 'integer',
-            'longitud' => 11,
+            'longitud'  => 11,
         ]);
 
         if (!$this->getPqrFormField()->active) {

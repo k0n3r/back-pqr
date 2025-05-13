@@ -2,7 +2,7 @@
 
 use Saia\models\formatos\CampoSeleccionados;
 
-include_once $_SERVER['ROOT_PATH'] . 'src/Bundles/pqr/formatos/reporteFuncionesGenerales.php';
+include_once $_SERVER['ROOT_PATH'].'src/Bundles/pqr/formatos/reporteFuncionesGenerales.php';
 
 /**
  * Obtiene el filtro por las calificaciones
@@ -20,14 +20,15 @@ function filter_calificacion(): string
             return "ft_pqr_respuesta=$idft";
         }
     }
+
     return '1=1';
 }
 
 /**
  * Obtiene la calificacion sobre la gestion
  *
- * @param integer $iddocumento
- * @param integer $fkCampoOpciones
+ * @param int $iddocumento
+ * @param int $fkCampoOpciones
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com>
  * @date   2020
@@ -37,7 +38,7 @@ function getGestion(int $iddocumento, int $fkCampoOpciones): string
     $calGestion = '';
     if ($valor = CampoSeleccionados::findColumn('valor', [
         'fk_campo_opciones' => $fkCampoOpciones,
-        'fk_documento' => $iddocumento
+        'fk_documento'      => $iddocumento,
     ])) {
         $calGestion = $valor[0];
     }
@@ -48,8 +49,8 @@ function getGestion(int $iddocumento, int $fkCampoOpciones): string
 /**
  * Obtiene la calificacion sobre el servicio
  *
- * @param integer $iddocumento
- * @param integer $fkCampoOpciones
+ * @param int $iddocumento
+ * @param int $fkCampoOpciones
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com>
  * @date   2020
@@ -59,7 +60,7 @@ function getServicio(int $iddocumento, int $fkCampoOpciones): string
     $calExperiencia = '';
     if ($valor = CampoSeleccionados::findColumn('valor', [
         'fk_campo_opciones' => $fkCampoOpciones,
-        'fk_documento' => $iddocumento
+        'fk_documento'      => $iddocumento,
     ])) {
         $calExperiencia = $valor[0];
     }

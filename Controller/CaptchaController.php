@@ -28,14 +28,12 @@ class CaptchaController extends AbstractController implements IHasCaptcha
      */
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
     public function saveDocument(
-        Request       $Request,
+        Request $Request,
         ISaiaResponse $saiaResponse,
-        Connection    $Connection
-    ): Response
-    {
+        Connection $Connection,
+    ): Response {
         $Connection->beginTransaction();
         try {
-
             if (empty($Request->get('formatId'))) {
                 throw new SaiaException("Se debe indicar el formato", 1);
             }
@@ -65,14 +63,14 @@ class CaptchaController extends AbstractController implements IHasCaptcha
 
             $message = "<br/>Su solicitud ha sido generada con el número de radicado <strong>$Documento->numero</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
             if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
-                'name' => 'ws_noty_radicado'
+                'name' => 'ws_noty_radicado',
             ])) {
                 $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $Documento->getFt());
             }
 
             $attributes = [
                 'messageBody' => $message,
-                'number' => $Documento->numero,
+                'number'      => $Documento->numero,
             ];
 
             $saiaResponse->replaceData($attributes);
@@ -82,6 +80,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
             $Connection->rollBack();
             $saiaResponse->setMessage($th->getMessage());
         }
+
         return $saiaResponse->getResponse();
     }
 }

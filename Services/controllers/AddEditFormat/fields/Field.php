@@ -11,10 +11,10 @@ abstract class Field
     /**
      * Campos que seran utilizados como descripcion/detalle en el modulo
      */
-    const array FIELDS_DESCRIPTION = [
+    public const array FIELDS_DESCRIPTION = [
         'sys_tipo',
         'sys_email',
-        'sys_estado'
+        'sys_estado',
     ];
 
     private PqrFormField $PqrFormField;
@@ -33,7 +33,7 @@ abstract class Field
     {
         $actions = [
             CamposFormato::ACTION_ADD,
-            CamposFormato::ACTION_EDIT
+            CamposFormato::ACTION_EDIT,
         ];
 
         if ($this->PqrFormField->required) {
@@ -41,6 +41,7 @@ abstract class Field
                 $actions[] = CamposFormato::ACTION_DESCRIPTION;
             }
         }
+
         return $actions;
     }
 }

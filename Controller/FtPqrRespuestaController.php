@@ -16,15 +16,14 @@ class FtPqrRespuestaController extends AbstractController
     #[Route('/requestSurveyByEmail', name: 'requestSurveyByEmail', methods: ['GET'])]
     public function requestSurvey(
         int $idft,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
             $FtPqrRespuestaService = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($idft)->getService();
             if (!$FtPqrRespuestaService->requestSurvey()) {
                 throw new SaiaException(
                     $FtPqrRespuestaService->getErrorManager()->getMessage(),
-                    $FtPqrRespuestaService->getErrorManager()->getCode()
+                    $FtPqrRespuestaService->getErrorManager()->getCode(),
                 );
             }
 

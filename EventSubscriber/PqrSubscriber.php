@@ -24,14 +24,14 @@ class PqrSubscriber implements EventSubscriberInterface
     {
         return [
             TaskCreatedEvent::class       => [
-                ['onTaskCreated', -1]
+                ['onTaskCreated', -1],
             ],
             TaskDeletedEvent::class       => [
-                ['onTaskDeletedEvent', -1]
+                ['onTaskDeletedEvent', -1],
             ],
             TaskStatusCreatedEvent::class => [
-                ['onTaskStatusCreatedEvent', -1]
-            ]
+                ['onTaskStatusCreatedEvent', -1],
+            ],
         ];
     }
 
@@ -89,7 +89,7 @@ class PqrSubscriber implements EventSubscriberInterface
      * Actualiza el historial de cambios
      *
      * @param TareaService $TareaService
-     * @param string       $description
+     * @param string $description
      * @return bool
      * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-03-18
@@ -105,14 +105,14 @@ class PqrSubscriber implements EventSubscriberInterface
                     'fk_funcionario' => $TareaService->getFuncionario()->getPK(),
                     'tipo'           => PqrHistory::TIPO_TAREA,
                     'idfk'           => $TareaService->getModel()->getPK(),
-                    'descripcion'    => $description
+                    'descripcion'    => $description,
                 ];
 
-                $PqrHistoryService = (new PqrHistory)->getService();
+                $PqrHistoryService = (new PqrHistory())->getService();
                 if (!$PqrHistoryService->save($history)) {
                     throw new SaiaException(
                         $PqrHistoryService->getErrorManager()->getMessage(),
-                        $PqrHistoryService->getErrorManager()->getCode()
+                        $PqrHistoryService->getErrorManager()->getCode(),
                     );
                 }
 
@@ -121,6 +121,7 @@ class PqrSubscriber implements EventSubscriberInterface
                 }
             }
         }
+
         return true;
     }
 
@@ -128,7 +129,7 @@ class PqrSubscriber implements EventSubscriberInterface
      * Actualiza el estado de la PQR
      *
      * @param Documento $Documento
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */

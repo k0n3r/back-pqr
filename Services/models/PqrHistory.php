@@ -13,14 +13,14 @@ class PqrHistory extends Model
 {
     use TModels;
 
-    const int TIPO_TAREA = 1;
-    const int TIPO_NOTIFICACION = 2;
-    const int TIPO_RESPUESTA = 3;
-    const int TIPO_CAMBIO_ESTADO = 4;
-    const int TIPO_CAMBIO_VENCIMIENTO = 5;
-    const int TIPO_CALIFICACION = 6;
-    const int TIPO_ERROR_DIAS_VENCIMIENTO = 7;
-    const int TIPO_MODIFICACION_TERCERO = 8;
+    public const int TIPO_TAREA = 1;
+    public const int TIPO_NOTIFICACION = 2;
+    public const int TIPO_RESPUESTA = 3;
+    public const int TIPO_CAMBIO_ESTADO = 4;
+    public const int TIPO_CAMBIO_VENCIMIENTO = 5;
+    public const int TIPO_CALIFICACION = 6;
+    public const int TIPO_ERROR_DIAS_VENCIMIENTO = 7;
+    public const int TIPO_MODIFICACION_TERCERO = 8;
 
     protected function defineAttributes(): void
     {
@@ -31,13 +31,13 @@ class PqrHistory extends Model
                 'descripcion',
                 'idft',
                 'tipo',
-                'idfk'
+                'idfk',
             ],
             'date'    => [
-                'fecha'
+                'fecha',
             ],
             'primary' => 'id',
-            'table'   => 'pqr_history'
+            'table'   => 'pqr_history',
         ];
     }
 
@@ -89,7 +89,7 @@ class PqrHistory extends Model
     {
         if (in_array($this->tipo, [
             self::TIPO_RESPUESTA,
-            self::TIPO_CALIFICACION
+            self::TIPO_CALIFICACION,
         ])) {
             return UtilitiesPqr::getInstanceForFtIdPqrRespuesta($this->idfk);
         }

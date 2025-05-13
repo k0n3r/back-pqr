@@ -24,9 +24,10 @@ class UtilitiesPqr
     {
         if (!static::$FormatoPqr) {
             static::$FormatoPqr = Formato::findByAttributes([
-                'nombre' => 'pqr'
+                'nombre' => 'pqr',
             ]);
         }
+
         return static::$FormatoPqr;
     }
 
@@ -34,9 +35,10 @@ class UtilitiesPqr
     {
         if (!static::$FormatoPqrRespuesta) {
             static::$FormatoPqrRespuesta = Formato::findByAttributes([
-                'nombre' => 'pqr_respuesta'
+                'nombre' => 'pqr_respuesta',
             ]);
         }
+
         return static::$FormatoPqrRespuesta;
     }
 
@@ -50,6 +52,7 @@ class UtilitiesPqr
     public static function getInstanceForDocumentId(int $documentId): ModelFormat
     {
         $Documento = new Documento($documentId);
+
         return $Documento->getFt();
     }
 
@@ -63,6 +66,7 @@ class UtilitiesPqr
     public static function getInstanceForFtId(int $idft): FtPqr
     {
         $className = self::getFormatPqr()->getFtClass();
+
         return new $className($idft);
     }
 
@@ -76,6 +80,7 @@ class UtilitiesPqr
     public static function getInstanceForFtIdPqrRespuesta(int $idft): FtPqrRespuesta
     {
         $className = self::getFormatPqrRespuesta()->getFtClass();
+
         return new $className($idft);
     }
 
@@ -125,7 +130,7 @@ class UtilitiesPqr
         return [
             'finish' => $finish,
             'cancel' => $cancel,
-            'total'  => $total
+            'total'  => $total,
         ];
     }
 
@@ -139,7 +144,7 @@ class UtilitiesPqr
      */
     public static function showQr(FtPqr $FtPqr): string
     {
-        return '<img src="/' . $FtPqr->getDocument()->getQR() . '" width="80px" height="80px" />';
+        return '<img src="/'.$FtPqr->getDocument()->getQR().'" width="80px" height="80px" />';
     }
 
     /**
@@ -153,19 +158,17 @@ class UtilitiesPqr
     public static function getRoutePdf(Documento $Documento): string
     {
         try {
-
             if (!$Documento->pdf) {
                 $Documento->getPdfJson(true);
             }
             $FileJson = new FileJson($Documento->pdf);
             $FileTemporal = $FileJson->convertToFileTemporal();
 
-            return $_SERVER['APP_DOMAIN'] . $FileTemporal->getRouteFromRoot();
-
+            return $_SERVER['APP_DOMAIN'].$FileTemporal->getRouteFromRoot();
         } catch (Throwable $th) {
             $log = [
                 'errorMessage' => $th->getMessage(),
-                'iddocumento'  => $Documento->getPK()
+                'iddocumento'  => $Documento->getPK(),
             ];
             $message = "No se ha podido generar el pdf del documento con radicado: $Documento->numero (ID:{$Documento->getPK()})";
             self::notifyAdministrator($message, $log);

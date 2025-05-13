@@ -45,7 +45,7 @@ function filter_answer_by_pqr(): string
 /**
  * obtiene el nombre del responsable
  *
- * @param integer $iddocumento
+ * @param int $iddocumento
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com>
  * @date   2020
@@ -61,7 +61,7 @@ function getResponsable(int $iddocumento): string
 /**
  * Muestra el enlace hacia el reporte de Calificaciones
  *
- * @param integer $idft
+ * @param int $idft
  * @return string
  * @author Andres Agudelo <andres.agudelo@cerok.com>
  * @date   2020
@@ -75,31 +75,32 @@ function viewCalificacion(int $idft): string
 
     if (!$cant = count($records)) {
         $email = $FtPqrRespuesta->getTercero()->correo ?? '';
-        return '<a class="requestSurvey" href="#" data-email="' . $email . '" data-idft="' . $idft . '">SOLICITAR CALIFICACIÓN</a>';
+
+        return '<a class="requestSurvey" href="#" data-email="'.$email.'" data-idft="'.$idft.'">SOLICITAR CALIFICACIÓN</a>';
     }
 
     if (!$idbusquedaComponenteCalificacion) {
         $GLOBALS['idbusquedaComponenteCalificacion'] = BusquedaComponente::findColumn(
             'idbusqueda_componente',
             [
-                'nombre' => 'calificacion_pqr'
-            ]
+                'nombre' => 'calificacion_pqr',
+            ],
         )[0];
     }
 
     $url = 'views/buzones/grilla.php?';
     $url .= http_build_query([
-        'variable_busqueda' => json_encode(['idft_pqr_respuesta' => $idft]),
-        'idbusqueda_componente' => $idbusquedaComponenteCalificacion
+        'variable_busqueda'     => json_encode(['idft_pqr_respuesta' => $idft]),
+        'idbusqueda_componente' => $idbusquedaComponenteCalificacion,
     ]);
     $numero = $FtPqrRespuesta->getDocument()->numero;
     $nombreFormato = $FtPqrRespuesta->getFormat()->etiqueta;
 
     return <<<HTML
-    <div class='kenlace_saia'
-    data-enlace='$url' 
-    title='Calificación a $nombreFormato No $numero'>
-        <button class='btn btn-complete' style='margin:auto'>$cant</button>
-    </div>
-HTML;
+        <div class='kenlace_saia'
+        data-enlace='$url' 
+        title='Calificación a $nombreFormato No $numero'>
+            <button class='btn btn-complete' style='margin:auto'>$cant</button>
+        </div>
+        HTML;
 }

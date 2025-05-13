@@ -14,7 +14,7 @@ class Select extends Field implements IField
     {
         $data = array_merge($this->getDefaultValues(), [
             'tipo_dato' => 'integer',
-            'longitud' => 11,
+            'longitud'  => 11,
         ]);
 
         if (!$this->getPqrFormField()->active && $this->getPqrFormField()->name != 'sys_subtipo') {

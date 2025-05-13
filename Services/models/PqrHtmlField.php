@@ -8,21 +8,21 @@ class PqrHtmlField extends Model
 {
     use TModels;
 
-    const string TYPE_DEPENDENCIA = 'dependencia';
-    const string TYPE_LOCALIDAD = 'localidad';
+    public const string TYPE_DEPENDENCIA = 'dependencia';
+    public const string TYPE_LOCALIDAD = 'localidad';
 
     protected function defineAttributes(): void
     {
         $this->dbAttributes = (object)[
-            'safe' => [
+            'safe'    => [
                 'label',
                 'type',
                 'type_saia',
                 'uniq',
-                'active'
+                'active',
             ],
             'primary' => 'id',
-            'table' => 'pqr_html_fields'
+            'table'   => 'pqr_html_fields',
         ];
     }
 
@@ -37,7 +37,7 @@ class PqrHtmlField extends Model
     {
         $allow = [
             'Select',
-            'Radio'
+            'Radio',
         ];
 
         return in_array($this->type_saia, $allow);
@@ -54,7 +54,7 @@ class PqrHtmlField extends Model
         $allowOptions = [
             'Select',
             'Radio',
-            'Checkbox'
+            'Checkbox',
         ];
 
         return in_array($this->type_saia, $allowOptions);

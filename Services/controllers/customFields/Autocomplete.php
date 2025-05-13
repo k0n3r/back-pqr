@@ -20,7 +20,7 @@ class Autocomplete implements IWsFields
         return [
             '/views/node_modules/select2/dist/js/select2.min.js',
             '/views/assets/theme/assets/js/cerok_libraries/ui/globalSelect2.js',
-            '/views/node_modules/select2/dist/css/select2.min.css'
+            '/views/node_modules/select2/dist/css/select2.min.css',
         ];
     }
 
@@ -42,26 +42,26 @@ class Autocomplete implements IWsFields
     public function getAdditionJsWs(): string
     {
         return <<<JAVASCRIPT
-        let options_{$this->CamposFormato->nombre} = {
-          minimumInputLength: 3,
-          placeholder: "Ingrese el nombre",
-          multiple: false,
-          ajax: {
-            delay: 400,
-            url: `/api/pqr/components/autocomplete/list`,
-            dataType: "json",
-            data: function(p) {
-              return {
-                name: '{$this->CamposFormato->nombre}',
-                data: {
-                  term: p.term
+            let options_{$this->CamposFormato->nombre} = {
+              minimumInputLength: 3,
+              placeholder: "Ingrese el nombre",
+              multiple: false,
+              ajax: {
+                delay: 400,
+                url: `/api/pqr/components/autocomplete/list`,
+                dataType: "json",
+                data: function(p) {
+                  return {
+                    name: '{$this->CamposFormato->nombre}',
+                    data: {
+                      term: p.term
+                    }
+                  };
                 }
-              };
-            }
-          }
-        };
-        $('#{$this->CamposFormato->nombre}').select2(options_{$this->CamposFormato->nombre});
-JAVASCRIPT;
+              }
+            };
+            $('#{$this->CamposFormato->nombre}').select2(options_{$this->CamposFormato->nombre});
+            JAVASCRIPT;
     }
 
     /**

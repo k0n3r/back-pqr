@@ -6,7 +6,6 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
 use App\Exception\SaiaException;
 use DateTime;
-use Exception;
 use IntlDateFormatter;
 use Saia\controllers\localidad\MunicipioService;
 use Saia\models\anexos\Anexos;
@@ -20,14 +19,14 @@ use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 
 class FtPqrRespuesta extends FtPqrRespuestaProperties
 {
-    const int ATENTAMENTE_DESPEDIDA = 1;
-    const int CORDIALMENTE_DESPEDIDA = 2;
-    const int OTRA_DESPEDIDA = 3;
+    public const int ATENTAMENTE_DESPEDIDA = 1;
+    public const int CORDIALMENTE_DESPEDIDA = 2;
+    public const int OTRA_DESPEDIDA = 3;
 
-    const int DISTRIBUCION_RECOGIDA_ENTREGA = 1;
-    const int DISTRIBUCION_SOLO_ENTREGA = 2;
-    const int DISTRIBUCION_NO_REQUIERE_MENSAJERIA = 3;
-    const int DISTRIBUCION_ENVIAR_EMAIL = 4;
+    public const int DISTRIBUCION_RECOGIDA_ENTREGA = 1;
+    public const int DISTRIBUCION_SOLO_ENTREGA = 2;
+    public const int DISTRIBUCION_NO_REQUIERE_MENSAJERIA = 3;
+    public const int DISTRIBUCION_ENVIAR_EMAIL = 4;
 
     private ?FtPqrRespuestaService $FtPqrRespuestaService = null;
 
@@ -78,7 +77,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     public function getFtPqrCalificaciones(): array
     {
         return FtPqrCalificacion::findAllByAttributes([
-            'ft_pqr_respuesta' => $this->getPK()
+            'ft_pqr_respuesta' => $this->getPK(),
         ]);
     }
 
@@ -91,10 +90,11 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
             if (!$this->getService()->validEmails()) {
                 throw new SaiaException(
                     $this->getService()->getErrorManager()->getMessage(),
-                    $this->getService()->getErrorManager()->getCode()
+                    $this->getService()->getErrorManager()->getCode(),
                 );
             }
         }
+
         return true;
     }
 
@@ -107,10 +107,11 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
             if (!$this->getService()->validEmails()) {
                 throw new SaiaException(
                     $this->getService()->getErrorManager()->getMessage(),
-                    $this->getService()->getErrorManager()->getCode()
+                    $this->getService()->getErrorManager()->getCode(),
                 );
             }
         }
+
         return true;
     }
 
@@ -129,7 +130,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         ) {
             throw new SaiaException(
                 $this->getService()->getErrorManager()->getMessage(),
-                $this->getService()->getErrorManager()->getCode()
+                $this->getService()->getErrorManager()->getCode(),
             );
         }
 
@@ -138,7 +139,6 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         }
 
         return $this->getService()->transferCopiaInterna();
-
     }
 
     /**
@@ -174,14 +174,13 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         }
 
         return <<<HTML
-        <div class='form-group form-group-default form-group-default-select2 required' id='group_$CamposFormato->nombre'>
-            <label title='Ciudad origen' class='autocomplete'>$CamposFormato->etiqueta</label>
-            <select class="full-width required" id='ciudad_origen' name='$CamposFormato->nombre'>
-            $options
-            </select>
-        </div>
-HTML;
-
+            <div class='form-group form-group-default form-group-default-select2 required' id='group_$CamposFormato->nombre'>
+                <label title='Ciudad origen' class='autocomplete'>$CamposFormato->etiqueta</label>
+                <select class="full-width required" id='ciudad_origen' name='$CamposFormato->nombre'>
+                $options
+                </select>
+            </div>
+            HTML;
     }
 
     /**
@@ -213,7 +212,7 @@ HTML;
                 </div>
                 <label id='$CamposFormato->nombre-error' class='error' for='$CamposFormato->nombre' style='display: none;'></label>
             </div>
-HTML;
+            HTML;
     }
 
 
@@ -236,7 +235,7 @@ HTML;
                     <tr>
                         <td colspan="2">{$this->getFechaCiudad()}</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
@@ -246,34 +245,34 @@ HTML;
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
-
+            
                     <tr>
                         <td>{$this->getFieldValue('destino')}</td>
                         <td style="text-align:center">$Qr<br/>No.{$this->getRadicado()}</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">ASUNTO: $this->asunto</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">Cordial saludo:</td>
                     </tr>
-                    
+            
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
@@ -283,8 +282,7 @@ HTML;
             <p>{$this->getDespedida()}<br/><br/></p>
             $firmas
             <p>{$this->getOtherData()}</p>
-HTML;
-
+            HTML;
     }
 
     protected function showQr(): string
@@ -315,10 +313,10 @@ HTML;
         $formateador = new IntlDateFormatter(
             null,
             IntlDateFormatter::LONG, // Formato largo para la fecha
-            IntlDateFormatter::NONE // No incluye hora
+            IntlDateFormatter::NONE, // No incluye hora
         );
 
-        return $this->getMunicipio()->nombre . ", " . $formateador->format($fecha);
+        return $this->getMunicipio()->nombre.", ".$formateador->format($fecha);
     }
 
     /**
@@ -400,7 +398,7 @@ HTML;
             'documento_iddocumento' => $this->getDocument()->getPK(),
             'campos_formato'        => $id,
             'estado'                => 1,
-            'eliminado'             => 0
+            'eliminado'             => 0,
         ]);
 
         return $names ? implode(', ', $names) : '';

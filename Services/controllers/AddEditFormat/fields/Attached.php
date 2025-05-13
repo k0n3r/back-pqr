@@ -14,14 +14,16 @@ class Attached extends Field implements IField
         $setting = $this->getPqrFormField()->getSetting();
 
         $data = array_merge($this->getDefaultValues(), [
-            'valor' => $setting->typeFiles,
-            'opciones' => '{"tipos":"' . $setting->typeFiles . '","longitud":"' . $this->getSize() . '","cantidad":"' . $setting->numberFiles . '","ruta_consulta":"api/documentFile/info"}'
+            'valor'    => $setting->typeFiles,
+            'opciones' => '{"tipos":"'.$setting->typeFiles.'","longitud":"'.$this->getSize(
+                ).'","cantidad":"'.$setting->numberFiles.'","ruta_consulta":"api/documentFile/info"}',
         ]);
 
         if (!$this->getPqrFormField()->active) {
             $data['etiqueta_html'] = 'Hidden';
             $data['opciones'] = '{"type":"hidden"}';
         }
+
         return $data;
     }
 

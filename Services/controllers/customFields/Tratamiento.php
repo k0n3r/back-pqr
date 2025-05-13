@@ -34,24 +34,24 @@ class Tratamiento implements IWsFields
         $infoUrl = '';
         if ($setting->url) {
             $infoUrl = '<p class="text-center">
-            <a href="' . $setting->url . '" target="_blank">Condiciones de uso y políticas de privacidad</a>
+            <a href="'.$setting->url.'" target="_blank">Condiciones de uso y políticas de privacidad</a>
           </p>';
         }
 
         return <<<HTML
-        <div class="form-group" id="group_{$this->PqrFormField->name}">
-            <h5 class="text-center">AUTORIZACIÓN PARA EL TRATAMIENTO DE INFORMACIÓN</h5>
-            <p class="text-justify">$setting->tratamiento</p>
-            $infoUrl
-            <div class="checkbox check-danger input-group">
-                <input type="checkbox" name="{$this->PqrFormField->name}" id="{$this->PqrFormField->name}" value="1" aria-required="true" class="required">
-                <label for="{$this->PqrFormField->name}" class="me-3">
-                    ACEPTO LOS TÉRMINOS Y CONDICIONES
-                </label>
+            <div class="form-group" id="group_{$this->PqrFormField->name}">
+                <h5 class="text-center">AUTORIZACIÓN PARA EL TRATAMIENTO DE INFORMACIÓN</h5>
+                <p class="text-justify">$setting->tratamiento</p>
+                $infoUrl
+                <div class="checkbox check-danger input-group">
+                    <input type="checkbox" name="{$this->PqrFormField->name}" id="{$this->PqrFormField->name}" value="1" aria-required="true" class="required">
+                    <label for="{$this->PqrFormField->name}" class="me-3">
+                        ACEPTO LOS TÉRMINOS Y CONDICIONES
+                    </label>
+                </div>
+                <label id="{$this->PqrFormField->name}-error" class="error" for="{$this->PqrFormField->name}" style="display: none;"></label>
             </div>
-            <label id="{$this->PqrFormField->name}-error" class="error" for="{$this->PqrFormField->name}" style="display: none;"></label>
-        </div>
-HTML;
+            HTML;
     }
 
     /**

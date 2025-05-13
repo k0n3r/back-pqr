@@ -9,18 +9,18 @@ class PqrNotyMessage extends Model
 {
     protected function defineAttributes(): void
     {
-        $this->dbAttributes = (object) [
-            'safe' => [
+        $this->dbAttributes = (object)[
+            'safe'    => [
                 'name',
                 'label',
                 'description',
                 'subject',
                 'message_body',
                 'type',
-                'active'
+                'active',
             ],
             'primary' => 'id',
-            'table' => 'pqr_noty_messages',
+            'table'   => 'pqr_noty_messages',
         ];
     }
 

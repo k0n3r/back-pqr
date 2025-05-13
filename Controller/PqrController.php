@@ -25,11 +25,9 @@ class PqrController extends AbstractController
     #[Route('/searchByNumber', name: 'search', methods: ['GET'])]
     public function search(
         Request $request,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
-
             if (empty($request->get('numero'))) {
                 throw new SaiaException("Se debe indicar el numero de radicado", 200);
             }
@@ -37,7 +35,8 @@ class PqrController extends AbstractController
 
             $Connection = GlobalContainer::getConnection();
 
-            $Qb = $Connection->createQueryBuilder()
+            $Qb = $Connection
+                ->createQueryBuilder()
                 ->select('ft.*')
                 ->from('ft_pqr', 'ft')
                 ->join('ft', 'documento', 'd', 'ft.documento_iddocumento=d.iddocumento')
@@ -54,7 +53,7 @@ class PqrController extends AbstractController
                     $data[] = [
                         'fecha'       => DateController::convertDate($FtPqr->getDocument()->fecha),
                         'descripcion' => array_filter(explode("<br>", $FtPqr->getDocument()->getDescription())),
-                        'url'         => $FtPqr->getService()->getUrlQR()
+                        'url'         => $FtPqr->getService()->getUrlQR(),
                     ];
                 }
             }
@@ -71,9 +70,8 @@ class PqrController extends AbstractController
     #[Route('/historyForTimeline', name: 'getHistoryForTimeline', methods: ['GET'])]
     public function getHistoryForTimeline(
         Request $request,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
             $data = json_decode(CryptController::decrypt($request->get('infoCryp')));
             $FtPqr = UtilitiesPqr::getInstanceForDocumentId($data->documentId);
@@ -96,10 +94,9 @@ class PqrController extends AbstractController
     #[Route('/decrypt', name: 'decrypt', methods: ['GET'])]
     public function decrypt(
         Request $request,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
         try {
-
             if (!$request->get('dataCrypt')) {
                 throw new SaiaException("Faltan parametros", 1);
             }
@@ -117,13 +114,12 @@ class PqrController extends AbstractController
 
     #[Route('/contentDependencia', name: 'contentDependencia', methods: ['GET'])]
     public function contentDependencia(
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
         try {
-
             $field = PqrFormField::FIELD_NAME_SYS_DEPENDENCIA;
             $PqrFormField = PqrFormField::findByAttributes([
-                'name' => $field
+                'name' => $field,
             ]);
 
             if (!$PqrFormField || !$PqrFormField->fk_campos_formato) {
@@ -139,25 +135,24 @@ class PqrController extends AbstractController
 
             $i18n = "data-i18n='{$PqrFormField->getCamposFormato()->getFormat()->getKeyTranslatorAttribute()}.campos.{$PqrFormField->getCamposFormato()->nombre}'";
             $html = <<<HTML
-    <div class='form-group form-group-default form-group-default-select2'>
-        <label $i18n>$PqrFormField->label</label>
-        <div class='form-group'>
-            <select class='full-width' name='bqCampo_$field' id='$field'>
-               $options 
-            </select>
-            <input type="hidden" value="=" name="bqCondicional_$field">
-            <input type="hidden" value="1" name="bqNumerico_$field">
-        </div>
-    </div>
-HTML;
+                <div class='form-group form-group-default form-group-default-select2'>
+                    <label $i18n>$PqrFormField->label</label>
+                    <div class='form-group'>
+                        <select class='full-width' name='bqCampo_$field' id='$field'>
+                           $options 
+                        </select>
+                        <input type="hidden" value="=" name="bqCondicional_$field">
+                        <input type="hidden" value="1" name="bqNumerico_$field">
+                    </div>
+                </div>
+                HTML;
 
 
             $data = [
-                'content' => $html
+                'content' => $html,
             ];
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
-
         } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }

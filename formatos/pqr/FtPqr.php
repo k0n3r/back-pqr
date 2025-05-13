@@ -20,22 +20,22 @@ use Saia\models\vistas\VfuncionarioDc;
 
 class FtPqr extends FtPqrProperties
 {
-    const string ESTADO_PENDIENTE = 'PENDIENTE';
-    const string ESTADO_INICIADO = 'INICIADO';
-    const string ESTADO_PROCESO = 'PROCESO';
-    const string ESTADO_TERMINADO = 'TERMINADO';
+    public const string ESTADO_PENDIENTE = 'PENDIENTE';
+    public const string ESTADO_INICIADO = 'INICIADO';
+    public const string ESTADO_PROCESO = 'PROCESO';
+    public const string ESTADO_TERMINADO = 'TERMINADO';
 
-    const int VENCIMIENTO_ROJO = 1; //DIAS
-    const int VENCIMIENTO_AMARILLO = 5; //DIAS
+    public const int VENCIMIENTO_ROJO = 1;            //DIAS
+    public const int VENCIMIENTO_AMARILLO = 5;        //DIAS
 
-    const int ESTADO_FRE_IMP_SEV_BAJO = 1;
-    const int ESTADO_FRE_IMP_SEV_MEDIO = 2;
-    const int ESTADO_FRE_IMP_SEV_ALTO = 3;
+    public const int ESTADO_FRE_IMP_SEV_BAJO = 1;
+    public const int ESTADO_FRE_IMP_SEV_MEDIO = 2;
+    public const int ESTADO_FRE_IMP_SEV_ALTO = 3;
 
-    const string OPORTUNO_PENDIENTES_SIN_VENCER = 'PENDIENTES SIN VENCER';
-    const string OPORTUNO_VENCIDAS_SIN_CERRAR = 'VENCIDAS SIN CERRAR';
-    const string OPORTUNO_CERRADAS_A_TERMINO = 'CERRADAS A TERMINO';
-    const string OPORTUNO_CERRADAS_FUERA_DE_TERMINO = 'CERRADAS FUERA DE TERMINO';
+    public const string OPORTUNO_PENDIENTES_SIN_VENCER = 'PENDIENTES SIN VENCER';
+    public const string OPORTUNO_VENCIDAS_SIN_CERRAR = 'VENCIDAS SIN CERRAR';
+    public const string OPORTUNO_CERRADAS_A_TERMINO = 'CERRADAS A TERMINO';
+    public const string OPORTUNO_CERRADAS_FUERA_DE_TERMINO = 'CERRADAS FUERA DE TERMINO';
 
     protected ?FtPqrService $FtPqrService = null;
     private ?FtPqrCalificacion $lastFtPqrCalificacion = null;
@@ -54,7 +54,7 @@ class FtPqr extends FtPqrProperties
                         self::ESTADO_FRE_IMP_SEV_BAJO  => 'Bajo',
                         self::ESTADO_FRE_IMP_SEV_MEDIO => 'Medio',
                         self::ESTADO_FRE_IMP_SEV_ALTO  => 'Alto',
-                    ]
+                    ],
                 ],
                 'sys_impacto'    => [
                     'label'  => 'Impacto',
@@ -62,7 +62,7 @@ class FtPqr extends FtPqrProperties
                         self::ESTADO_FRE_IMP_SEV_BAJO  => 'Bajo',
                         self::ESTADO_FRE_IMP_SEV_MEDIO => 'Medio',
                         self::ESTADO_FRE_IMP_SEV_ALTO  => 'Alto',
-                    ]
+                    ],
                 ],
                 'sys_severidad'  => [
                     'label'  => 'Severidad',
@@ -70,9 +70,9 @@ class FtPqr extends FtPqrProperties
                         self::ESTADO_FRE_IMP_SEV_BAJO  => 'Bajo',
                         self::ESTADO_FRE_IMP_SEV_MEDIO => 'Medio',
                         self::ESTADO_FRE_IMP_SEV_ALTO  => 'Alto',
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -93,7 +93,7 @@ class FtPqr extends FtPqrProperties
                 'isEnabledAnonymous'     => (int)$PqrForm->show_anonymous,
                 'fieldsWithoutAnonymous' => $IWsHtml->getFieldsWithoutAnonymous(),
                 'fieldsWithAnonymous'    => $IWsHtml->getFieldsWithAnonymous(),
-                'channels'               => $PqrForm->getCanalRecepcion()
+                'channels'               => $PqrForm->getCanalRecepcion(),
             ];
         } else {
             $data['isStarted'] = (int)(new self($idft))->getDocument()->isStarted();
@@ -122,7 +122,7 @@ class FtPqr extends FtPqrProperties
     {
         if (!$this->PqrBackup) {
             $this->PqrBackup = PqrBackup::findByAttributes([
-                'fk_documento' => $this->documento_iddocumento
+                'fk_documento' => $this->documento_iddocumento,
             ]);
         }
 
@@ -136,7 +136,7 @@ class FtPqr extends FtPqrProperties
     public function getPqrRespuestas(): array
     {
         return FtPqrRespuesta::findAllByAttributes([
-            'ft_pqr' => $this->getPK()
+            'ft_pqr' => $this->getPK(),
         ]);
     }
 
@@ -190,6 +190,7 @@ class FtPqr extends FtPqrProperties
         if (!$this->getService()->validSysEmail()) {
             throw new SaiaException($this->getService()->getErrorManager()->getMessage(), 200);
         }
+
         return true;
     }
 
@@ -209,6 +210,7 @@ class FtPqr extends FtPqrProperties
 
             $this->beforeRad();
             $this->getDocument()->getPdfJson(true);
+
             return $this->afterRad();
         }
 
@@ -289,7 +291,8 @@ class FtPqr extends FtPqrProperties
      */
     protected function setDefaultValues(): void
     {
-        $this->sys_estado = ((int)$this->getRequest()['radicacion_rapida']) ? self::ESTADO_INICIADO : self::ESTADO_PENDIENTE;
+        $this->sys_estado = ((int)$this->getRequest(
+        )['radicacion_rapida']) ? self::ESTADO_INICIADO : self::ESTADO_PENDIENTE;
         $this->sys_fecha_vencimiento = null;
         $this->sys_fecha_terminado = null;
         $this->save();
@@ -309,26 +312,26 @@ class FtPqr extends FtPqrProperties
         $text = sprintf(
             '%s %s',
             'No:',
-            $this->getDocument()->getService()->getFilingReferenceNumber()
+            $this->getDocument()->getService()->getFilingReferenceNumber(),
         );
 
         $labelPQR = mb_strtoupper($this->getService()->getPqrForm()->label, 'UTF-8');
         $tr = implode('', $this->getTableRows());
 
         return <<<HTML
-        <table class="table table-borderless" style="width:100%">';
-            <tr>
-                <td style="width:50%;">
-                    <p>Hemos recibido su $labelPQR <br/><br/>
-                        Puede hacer seguimiento en la opción CONSULTAR MI $labelPQR de nuestro sitio Web.
-                    </p>
-                </td>
-                <td style="width:50%;text-align:center">$Qr<br/>$text</td>
-            </tr>
-            <tr><td colspan="2">&nbsp;</td></tr>
-            $tr
-        </table>
-HTML;
+            <table class="table table-borderless" style="width:100%">';
+                <tr>
+                    <td style="width:50%;">
+                        <p>Hemos recibido su $labelPQR <br/><br/>
+                            Puede hacer seguimiento en la opción CONSULTAR MI $labelPQR de nuestro sitio Web.
+                        </p>
+                    </td>
+                    <td style="width:50%;text-align:center">$Qr<br/>$text</td>
+                </tr>
+                <tr><td colspan="2">&nbsp;</td></tr>
+                $tr
+            </table>
+            HTML;
     }
 
     /**
@@ -346,7 +349,6 @@ HTML;
 
         $tr = [];
         foreach ($data as $key => $value) {
-
             if (!$showEmpty && $value == '') {
                 continue;
             }
@@ -357,8 +359,8 @@ HTML;
             }
 
             $tr[$key] = '<tr>
-                <td style="width:50%"><strong>' . mb_strtoupper($key, 'UTF-8') . '</strong></td>
-                <td style="width:50%">' . $value . '</td>
+                <td style="width:50%"><strong>'.mb_strtoupper($key, 'UTF-8').'</strong></td>
+                <td style="width:50%">'.$value.'</td>
             </tr>';
         }
 
@@ -377,8 +379,9 @@ HTML;
     public function autocompleteD(CamposFormato $CamposFormato): string
     {
         $PqrFormField = PqrFormField::findByAttributes([
-            'fk_campos_formato' => $CamposFormato->getPK()
+            'fk_campos_formato' => $CamposFormato->getPK(),
         ]);
+
         return $this->getService()->generateField($PqrFormField);
     }
 
@@ -394,7 +397,7 @@ HTML;
     public function autocompleteM(CamposFormato $CamposFormato): string
     {
         $PqrFormField = PqrFormField::findByAttributes([
-            'fk_campos_formato' => $CamposFormato->getPK()
+            'fk_campos_formato' => $CamposFormato->getPK(),
         ]);
 
         return $this->getService()->generateField($PqrFormField);
@@ -466,6 +469,7 @@ HTML;
                 }
             }
         }
+
         return true;
     }
 }

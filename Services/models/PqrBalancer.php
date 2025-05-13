@@ -19,7 +19,7 @@ class PqrBalancer extends Model
                 'fk_campo_opciones',
                 'fk_sys_tipo',
                 'fk_grupo',
-                'active'
+                'active',
             ],
             'primary' => 'id',
             'table'   => 'pqr_balancer',
@@ -44,6 +44,7 @@ class PqrBalancer extends Model
         if (!$this->CampoOpcion) {
             $this->CampoOpcion = new CampoOpciones($this->fk_sys_tipo);
         }
+
         return $this->CampoOpcion;
     }
 
@@ -56,6 +57,7 @@ class PqrBalancer extends Model
         if (!$this->Grupo && $this->fk_grupo > 0) {
             $this->Grupo = new Grupo($this->fk_grupo);
         }
+
         return $this->Grupo;
     }
 }

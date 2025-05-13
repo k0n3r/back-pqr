@@ -19,13 +19,12 @@ class PqrResponseTimeController extends AbstractController
     #[Route('/field/{id}', name: 'timesForField', methods: ['GET'])]
     public function timesForField(
         int $id,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
             $record = PqrResponseTime::findAllByAttributes([
                 'fk_campo_opciones' => $id,
-                'active'            => 1
+                'active'            => 1,
             ]);
 
             $data = [];
@@ -48,13 +47,12 @@ class PqrResponseTimeController extends AbstractController
                 $data[$orden] = [
                     'id'   => $PqrResponseTime->getPK(),
                     'text' => $CampoOpcion->valor,
-                    'dias' => (int)$PqrResponseTime->number_days ?: 1
+                    'dias' => (int)$PqrResponseTime->number_days ?: 1,
                 ];
             }
 
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
-
         } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }
@@ -66,19 +64,17 @@ class PqrResponseTimeController extends AbstractController
     public function updateTimes(
         Request $Request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         $Connection->beginTransaction();
         try {
-
             if (!$id = $Request->get('fk_field_time', 0)) {
                 throw new SaiaException("Falta el identificador del campo de los tiempos de respuesta");
             }
 
             $PqrForm = PqrForm::getInstance();
             $PqrForm->getService()->save([
-                'fk_field_time' => $id
+                'fk_field_time' => $id,
             ]);
 
             $options = $Request->get('options');
@@ -86,11 +82,11 @@ class PqrResponseTimeController extends AbstractController
             foreach ($options as $option) {
                 $PqrResponseTimeService = (new PqrResponseTime($option['id']))->getService();
                 $PqrResponseTimeService->save([
-                    'number_days' => $option['dias']
+                    'number_days' => $option['dias'],
                 ]);
                 $CampoOpcionesService = $PqrResponseTimeService->getModel()->getCampoOpcionForSysTipo()->getService();
                 $CampoOpcionesService->save([
-                    'orden' => $i
+                    'orden' => $i,
                 ]);
                 $i++;
             }

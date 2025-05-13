@@ -12,7 +12,7 @@ class Hidden extends Field implements IField
     public function getValues(): array
     {
         return array_merge($this->getDefaultValues(), [
-            'opciones' => '{"type":"hidden"}'
+            'opciones' => '{"type":"hidden"}',
         ]);
     }
 }

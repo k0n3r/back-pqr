@@ -17,7 +17,7 @@ class Date extends Field implements IField
         $data = array_merge($this->getDefaultValues(), [
             'tipo_dato'   => 'datetime',
             'placeholder' => $PqrFormField->getSetting()->placeholder,
-            'opciones'    => '{"hoy":true,"tipo":"' . $type . '"}'
+            'opciones'    => '{"hoy":true,"tipo":"'.$type.'"}',
         ]);
 
         if (!$PqrFormField->active) {

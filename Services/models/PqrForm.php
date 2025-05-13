@@ -15,15 +15,15 @@ class PqrForm extends Model
     private ?Formato $Formato = null;
     use TModels;
 
-    const string NOMBRE_REPORTE_PENDIENTE = 'rep_pendientes_pqr';
-    const string NOMBRE_REPORTE_PROCESO = 'rep_proceso_pqr';
-    const string NOMBRE_REPORTE_TERMINADO = 'rep_terminados_pqr';
-    const string NOMBRE_REPORTE_TODOS = 'rep_todos_pqr';
-    const string NOMBRE_REPORTE_POR_DEPENDENCIA = 'rep_dependencia_pqr';
-    const string NOMBRE_PANTALLA_GRAFICO = 'PQRSF';
-    const string FILTER_TODOS = 'dep_todos';
-    const string FILTER_PENDIENTES = 'dep_pendientes';
-    const string FILTER_RESUELTAS = 'dep_resueltas';
+    public const string NOMBRE_REPORTE_PENDIENTE = 'rep_pendientes_pqr';
+    public const string NOMBRE_REPORTE_PROCESO = 'rep_proceso_pqr';
+    public const string NOMBRE_REPORTE_TERMINADO = 'rep_terminados_pqr';
+    public const string NOMBRE_REPORTE_TODOS = 'rep_todos_pqr';
+    public const string NOMBRE_REPORTE_POR_DEPENDENCIA = 'rep_dependencia_pqr';
+    public const string NOMBRE_PANTALLA_GRAFICO = 'PQRSF';
+    public const string FILTER_TODOS = 'dep_todos';
+    public const string FILTER_PENDIENTES = 'dep_pendientes';
+    public const string FILTER_RESUELTAS = 'dep_resueltas';
 
 
     private static ?PqrForm $PqrForm = null;
@@ -45,11 +45,11 @@ class PqrForm extends Model
                 'enable_filter_dep',
                 'description_field',
                 'enable_balancer',
-                'fk_field_balancer', //Campos Formato,
-                'canal_recepcion' // Json
+                'fk_field_balancer',  //Campos Formato,
+                'canal_recepcion',    // Json
             ],
             'primary' => 'id',
-            'table'   => 'pqr_forms'
+            'table'   => 'pqr_forms',
         ];
     }
 
@@ -62,6 +62,7 @@ class PqrForm extends Model
         if (!$this->Formato) {
             $this->Formato = new Formato($this->fk_formato);
         }
+
         return $this->Formato;
     }
 
@@ -74,7 +75,7 @@ class PqrForm extends Model
     public function getPqrFormFields(): array
     {
         return PqrFormField::findAllByAttributes([
-            'fk_pqr_form' => $this->getPK()
+            'fk_pqr_form' => $this->getPK(),
         ], [], 'orden ASC');
     }
 
@@ -87,7 +88,7 @@ class PqrForm extends Model
     public function getPqrNotifications(): array
     {
         return PqrNotification::findAllByAttributes([
-            'fk_pqr_form' => $this->getPK()
+            'fk_pqr_form' => $this->getPK(),
         ]);
     }
 
@@ -106,7 +107,7 @@ class PqrForm extends Model
     /**
      * Cuenta la cantidad de campos que tiene el formulario
      *
-     * @return integer
+     * @return int
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -160,6 +161,7 @@ class PqrForm extends Model
                 return $PqrFormField;
             }
         }
+
         return null;
     }
 
@@ -167,7 +169,7 @@ class PqrForm extends Model
      * Obtiene decodificada la configuracion
      * de la respuesta
      *
-     * @param boolean $inArray : Retorna como array
+     * @param bool $inArray : Retorna como array
      * @return null|object|array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -210,6 +212,7 @@ class PqrForm extends Model
         if ($this->description_field) {
             return new PqrFormField($this->description_field);
         }
+
         return null;
     }
 

@@ -19,7 +19,7 @@ class PqrResponseTime extends Model
                 'fk_campo_opciones',
                 'fk_sys_tipo',
                 'number_days',
-                'active'
+                'active',
             ],
             'primary' => 'id',
             'table'   => 'pqr_response_times',
@@ -49,6 +49,7 @@ class PqrResponseTime extends Model
         if (!$this->CampoOpcion) {
             $this->CampoOpcion = new CampoOpciones($this->fk_sys_tipo);
         }
+
         return $this->CampoOpcion;
     }
 

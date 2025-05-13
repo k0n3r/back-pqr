@@ -24,9 +24,8 @@ class PqrFormController extends AbstractController
 
     #[Route('/textFields', name: 'getTextFields', methods: ['GET'])]
     public function getTextFields(
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
             $saiaResponse->replaceData(PqrService::getTextFields());
             $saiaResponse->setSuccess(1);
@@ -39,11 +38,11 @@ class PqrFormController extends AbstractController
 
     #[Route('/setting', name: 'getSetting', methods: ['GET'])]
     public function getSetting(
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
-            $data = (PqrForm::getInstance())->getService()
+            $data = (PqrForm::getInstance())
+                ->getService()
                 ->getSetting();
 
             $saiaResponse->replaceData($data);
@@ -51,14 +50,14 @@ class PqrFormController extends AbstractController
         } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }
+
         return $saiaResponse->getResponse();
     }
 
     #[Route('/responseSetting', name: 'getResponseSetting', methods: ['GET'])]
     public function getResponseSetting(
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
             $data = (PqrForm::getInstance())
                 ->getResponseConfiguration(true) ?? [];
@@ -75,13 +74,11 @@ class PqrFormController extends AbstractController
     #[Route('/publish', name: 'publish', methods: ['PUT'])]
     public function publish(
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         $Connection->beginTransaction();
 
         try {
-
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->publish()) {
                 throw new SaiaException(
@@ -111,16 +108,14 @@ class PqrFormController extends AbstractController
     public function sortFields(
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         $Connection->beginTransaction();
         try {
-
             foreach ($request->get('fieldOrder') as $record) {
                 $PqrFormFieldService = (new PqrFormField($record['id']))->getService();
                 $status = $PqrFormFieldService->save([
-                    'orden' => $record['order'] + PqrFormFieldService::INITIAL_ORDER
+                    'orden' => $record['order'] + PqrFormFieldService::INITIAL_ORDER,
                 ]);
 
                 if (!$status) {
@@ -142,12 +137,10 @@ class PqrFormController extends AbstractController
     public function updateSetting(
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         $Connection->beginTransaction();
         try {
-
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateSetting($request->get('data'))) {
                 throw new Exception(
@@ -176,12 +169,10 @@ class PqrFormController extends AbstractController
     public function updateResponseSetting(
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         $Connection->beginTransaction();
         try {
-
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateResponseSetting($request->get('data'))) {
                 throw new Exception(
@@ -204,13 +195,12 @@ class PqrFormController extends AbstractController
     public function updateShowReport(
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         $Connection->beginTransaction();
         try {
-
-            $Connection->createQueryBuilder()
+            $Connection
+                ->createQueryBuilder()
                 ->update('pqr_form_fields')
                 ->set('show_report', 0)->executeStatement();
 
@@ -218,7 +208,7 @@ class PqrFormController extends AbstractController
                 foreach ($request->get('ids') as $id) {
                     $PqrFormFieldService = (new PqrFormField($id))->getService();
                     if (!$PqrFormFieldService->save([
-                        'show_report' => 1
+                        'show_report' => 1,
                     ])) {
                         throw new Exception("No fue posible actualizar", 200);
                     }
@@ -243,9 +233,9 @@ class PqrFormController extends AbstractController
     /**
      * Actualiza el campo mostrar/ocultar campos vacios
      *
-     * @param Request       $Request
+     * @param Request $Request
      * @param ISaiaResponse $saiaResponse
-     * @param Connection    $Connection
+     * @param Connection $Connection
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
@@ -253,15 +243,13 @@ class PqrFormController extends AbstractController
     public function updateShowEmpty(
         Request $Request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         $Connection->beginTransaction();
         try {
-
             $PqrFormService = (PqrForm::getInstance())->getService();
             $success = $PqrFormService->save([
-                'show_empty' => $Request->get('show_empty', 1)
+                'show_empty' => $Request->get('show_empty', 1),
             ]);
             if (!$success) {
                 throw new SaiaException($PqrFormService->getErrorManager()->getMessage());
@@ -281,9 +269,9 @@ class PqrFormController extends AbstractController
     /**
      * Habilita y aplica el filtro por dependencia a los reportes
      *
-     * @param Request       $Request
+     * @param Request $Request
      * @param ISaiaResponse $saiaResponse
-     * @param Connection    $Connection
+     * @param Connection $Connection
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
      */
@@ -291,12 +279,10 @@ class PqrFormController extends AbstractController
     public function updateEnableFilterDep(
         Request $Request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         $Connection->beginTransaction();
         try {
-
             $status = $Request->get('enable_filter_dep', 0);
 
             $PqrForm = PqrForm::getInstance();
@@ -311,7 +297,7 @@ class PqrFormController extends AbstractController
 
 
             $success = $PqrFormService->save([
-                'enable_filter_dep' => $status
+                'enable_filter_dep' => $status,
             ]);
 
             if (!$success) {
@@ -332,9 +318,9 @@ class PqrFormController extends AbstractController
     /**
      * Habilita/deshabilita el balanceo
      *
-     * @param Request       $Request
+     * @param Request $Request
      * @param ISaiaResponse $saiaResponse
-     * @param Connection    $Connection
+     * @param Connection $Connection
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
      */
@@ -342,19 +328,17 @@ class PqrFormController extends AbstractController
     public function updateEnableBalancer(
         Request $Request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         $Connection->beginTransaction();
         try {
-
             $status = $Request->get('enable_balancer', 0);
 
             $PqrForm = PqrForm::getInstance();
             $PqrFormService = $PqrForm->getService();
 
             $success = $PqrFormService->save([
-                'enable_balancer' => $status
+                'enable_balancer' => $status,
             ]);
 
             if (!$success) {
@@ -376,8 +360,8 @@ class PqrFormController extends AbstractController
      * Actualiza el campo que quedara como descripcion de la pqr adicional al tipo.
      *
      * @param ISaiaResponse $saiaResponse
-     * @param Request       $Request
-     * @param Connection    $Connection
+     * @param Request $Request
+     * @param Connection $Connection
      * @return Response
      * @author Julian Otalvaro <julian.otalvaro@cerok.com> 2023-10-11
      */
@@ -385,7 +369,7 @@ class PqrFormController extends AbstractController
     public function descriptionField(
         ISaiaResponse $saiaResponse,
         Request $Request,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
         $Connection->beginTransaction();
 
@@ -414,8 +398,8 @@ class PqrFormController extends AbstractController
 
     /**
      * @param ISaiaResponse $saiaResponse
-     * @param Request       $Request
-     * @param Connection    $Connection
+     * @param Request $Request
+     * @param Connection $Connection
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-09-03
      */
@@ -423,7 +407,7 @@ class PqrFormController extends AbstractController
     public function receivingchannels(
         ISaiaResponse $saiaResponse,
         Request $Request,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
         $Connection->beginTransaction();
 
@@ -437,7 +421,7 @@ class PqrFormController extends AbstractController
             $PqrFormsService = (PqrForm::getInstance())->getService();
 
             if (!$PqrFormsService->save([
-                'canal_recepcion' => json_encode($channels)
+                'canal_recepcion' => json_encode($channels),
             ])) {
                 throw new SaiaException($PqrFormsService->getErrorManager()->getMessage());
             }
@@ -456,25 +440,25 @@ class PqrFormController extends AbstractController
      * Crea o edita la funciones utilizadas para filtros sobre los reportes de PQR
      *
      * @param string $functionName
-     * @param int    $status
+     * @param int $status
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
      */
     private function editOrCreateFunction(string $functionName, int $status): void
     {
         $Funcion = Funcion::findByAttributes([
-            'nombre' => $functionName
+            'nombre' => $functionName,
         ]);
 
         if ($Funcion) {
             $Funcion->getService()->save([
-                'estado' => $status
+                'estado' => $status,
             ]);
         } elseif ($status) {
             $FuncionService = (new Funcion())->getService();
             $FuncionService->save([
                 'nombre' => $functionName,
                 'estado' => $status,
-                'fecha'  => date('Y-m-d H:i:s')
+                'fecha'  => date('Y-m-d H:i:s'),
             ]);
         }
     }

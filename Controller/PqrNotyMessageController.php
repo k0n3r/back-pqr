@@ -22,9 +22,8 @@ class PqrNotyMessageController extends AbstractController
         int $id,
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         try {
             $Connection->beginTransaction();
 
@@ -32,7 +31,7 @@ class PqrNotyMessageController extends AbstractController
             if (!$PqrNotyMessageService->save($request->get('data'))) {
                 throw new SaiaException(
                     $PqrNotyMessageService->getErrorManager()->getMessage(),
-                    $PqrNotyMessageService->getErrorManager()->getCode()
+                    $PqrNotyMessageService->getErrorManager()->getCode(),
                 );
             }
 

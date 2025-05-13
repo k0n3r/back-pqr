@@ -24,15 +24,15 @@ class PqrNotificationService extends ModelService
      * Almacena una nueva persona a notificar
      *
      * @param array $attributes
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
     public function create(array $attributes): bool
     {
         $defaultFields = [
-            'email' => 0,
-            'notify' => 1
+            'email'  => 0,
+            'notify' => 1,
         ];
         $attributes = array_merge($defaultFields, $attributes);
 
@@ -43,7 +43,7 @@ class PqrNotificationService extends ModelService
      * Actualiza un registro
      *
      * @param array $attributes
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2021
      */
@@ -60,7 +60,7 @@ class PqrNotificationService extends ModelService
     /**
      * Elimina un campo del formulario
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */

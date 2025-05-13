@@ -19,19 +19,18 @@ class PqrNotificationController extends AbstractController
     public function store(
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         try {
             $Connection->beginTransaction();
 
             $PqrNotificationService = (new PqrNotification())->getService();
             if (!$PqrNotificationService->create([
-                'fk_funcionario' => $request->get('id')
+                'fk_funcionario' => $request->get('id'),
             ])) {
                 throw new SaiaException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
-                    $PqrNotificationService->getErrorManager()->getCode()
+                    $PqrNotificationService->getErrorManager()->getCode(),
                 );
             }
 
@@ -54,9 +53,8 @@ class PqrNotificationController extends AbstractController
         int $id,
         Request $request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         try {
             $Connection->beginTransaction();
 
@@ -64,7 +62,7 @@ class PqrNotificationController extends AbstractController
             if (!$PqrNotificationService->update($request->get('data'))) {
                 throw new SaiaException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
-                    $PqrNotificationService->getErrorManager()->getCode()
+                    $PqrNotificationService->getErrorManager()->getCode(),
                 );
             }
 
@@ -86,9 +84,8 @@ class PqrNotificationController extends AbstractController
     public function destroy(
         int $id,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         try {
             $Connection->beginTransaction();
 
@@ -96,7 +93,7 @@ class PqrNotificationController extends AbstractController
             if (!$PqrNotificationService->delete()) {
                 throw new SaiaException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
-                    $PqrNotificationService->getErrorManager()->getCode()
+                    $PqrNotificationService->getErrorManager()->getCode(),
                 );
             }
 

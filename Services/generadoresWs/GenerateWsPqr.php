@@ -33,9 +33,9 @@ class GenerateWsPqr extends GenerateWsFt
         $folder = 'src/Bundles/pqr/Services/controllers/templates/';
 
         $page404 = WsGenerator::generateFileForWs('src/legacy/controllers/generator/webservice/templates/404.html');
-        $infoQrFile = WsGenerator::generateFileForWs($folder . 'infoQR.html');
-        $infoQRJsFile = WsGenerator::generateFileForWs($folder . 'infoQR.js');
-        $timelineFile = WsGenerator::generateFileForWs($folder . 'TimeLine.js');
+        $infoQrFile = WsGenerator::generateFileForWs($folder.'infoQR.html');
+        $infoQRJsFile = WsGenerator::generateFileForWs($folder.'infoQR.js');
+        $timelineFile = WsGenerator::generateFileForWs($folder.'TimeLine.js');
 
         $WsGenerator->addFiles([$infoQrFile, $infoQRJsFile, $timelineFile, $page404]);
     }

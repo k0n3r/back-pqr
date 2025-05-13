@@ -5,7 +5,6 @@ namespace App\Bundles\pqr\Services;
 use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\ParameterType;
-use Doctrine\DBAL\Types\Types;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\grafico\PantallaGrafico;
 use App\Bundles\pqr\Services\models\PqrForm;
@@ -14,7 +13,7 @@ use App\Bundles\pqr\Services\models\PqrHtmlField;
 
 class PqrService
 {
-    const string NAME_DEPENDENCY_GRAPH = 'pqr_dependencia';
+    public const string NAME_DEPENDENCY_GRAPH = 'pqr_dependencia';
 
     private ?bool $subTypeExist = null;
     private ?bool $dependencyExist = null;
@@ -34,7 +33,7 @@ class PqrService
      * Obtiene los datos
      *
      * @param string $type
-     * @param array  $data
+     * @param array $data
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2021
@@ -58,7 +57,7 @@ class PqrService
         foreach ($records as $row) {
             $list[] = [
                 'id'   => $row['id'],
-                'text' => $row['nombre']
+                'text' => $row['nombre'],
             ];
         }
 
@@ -85,9 +84,11 @@ class PqrService
             ->setMaxResults(40);
 
         if ($data['term']) {
-            $Qb->andWhere('nombre like :nombre')
-                ->setParameter('nombre', '%' . $data['term'] . '%');
+            $Qb
+                ->andWhere('nombre like :nombre')
+                ->setParameter('nombre', '%'.$data['term'].'%');
         }
+
         return $Qb->executeQuery()->fetchAllAssociative();
     }
 
@@ -111,11 +112,12 @@ class PqrService
             ->setMaxResults(40);
 
         if ($data['term']) {
-            $Qb->andWhere('nombre like :nombre')
-                ->setParameter('nombre', '%' . $data['term'] . '%');
+            $Qb
+                ->andWhere('nombre like :nombre')
+                ->setParameter('nombre', '%'.$data['term'].'%');
         }
-        return $Qb->executeQuery()->fetchAllAssociative();
 
+        return $Qb->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -138,13 +140,15 @@ class PqrService
             ->setMaxResults(40);
 
         if ($data['idpais']) {
-            $Qb->andWhere('pais_idpais=:pais')
+            $Qb
+                ->andWhere('pais_idpais=:pais')
                 ->setParameter('pais', $data['idpais'], ParameterType::INTEGER);
         }
 
         if ($data['term']) {
-            $Qb->andWhere('nombre like :nombre')
-                ->setParameter('nombre', '%' . $data['term'] . '%');
+            $Qb
+                ->andWhere('nombre like :nombre')
+                ->setParameter('nombre', '%'.$data['term'].'%');
         }
 
         return $Qb->executeQuery()->fetchAllAssociative();
@@ -165,7 +169,7 @@ class PqrService
 
         $records = (CamposFormato::findByAttributes([
             'nombre'            => PqrFormField::FIELD_NAME_SYS_TIPO,
-            'formato_idformato' => $this->getPqrForm()->fk_formato
+            'formato_idformato' => $this->getPqrForm()->fk_formato,
         ]))->getCampoOpciones();
 
         $data = [];
@@ -173,7 +177,7 @@ class PqrService
             if ($CampoOpciones->estado) {
                 $data[] = [
                     'id'   => $CampoOpciones->getPK(),
-                    'text' => $CampoOpciones->valor
+                    'text' => $CampoOpciones->valor,
                 ];
             }
         }
@@ -181,7 +185,7 @@ class PqrService
         return [
             'dataType'         => $data,
             'dataSubType'      => $subType ?? [],
-            'activeDependency' => (int)$this->dependencyExist()
+            'activeDependency' => (int)$this->dependencyExist(),
         ];
     }
 
@@ -206,7 +210,7 @@ class PqrService
             if ($CampoOpciones->estado) {
                 $data[] = [
                     'id'   => $CampoOpciones->getPK(),
-                    'text' => $CampoOpciones->valor
+                    'text' => $CampoOpciones->valor,
                 ];
             }
         }
@@ -217,7 +221,7 @@ class PqrService
     /**
      * Verifica si el campo subtipo fue creado
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -235,7 +239,7 @@ class PqrService
     /**
      * Verifica si el campo dependencia fue creado
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -273,7 +277,7 @@ class PqrService
             foreach ($records as $PqrFormField) {
                 $data[] = [
                     'id'   => $PqrFormField->getPK(),
-                    'text' => $PqrFormField->label
+                    'text' => $PqrFormField->label,
                 ];
             }
         }
@@ -292,7 +296,7 @@ class PqrService
         $data = [];
 
         if ($records = PqrHtmlField::findAllByAttributes([
-            'active' => 1
+            'active' => 1,
         ])) {
             foreach ($records as $PqrHtmlField) {
                 $data[] = $PqrHtmlField->getDataAttributes();
@@ -313,7 +317,7 @@ class PqrService
     public static function activeGraphics(): void
     {
         if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
+            'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO,
         ])) {
             throw new SaiaException("No se encuentra la pantalla de los grafico");
         }
@@ -329,11 +333,12 @@ class PqrService
         $Qb->set('estado', 1)->executeStatement();
 
         $PqrFormField = PqrFormField::findByAttributes([
-            'name' => 'sys_dependencia'
+            'name' => 'sys_dependencia',
         ]);
 
         if (!$PqrFormField) {
-            $Qb2->set('estado', 0)
+            $Qb2
+                ->set('estado', 0)
                 ->andWhere("nombre LIKE :graficoDependencia")
                 ->setParameter('graficoDependencia', self::NAME_DEPENDENCY_GRAPH)
                 ->executeStatement();

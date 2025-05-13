@@ -9,7 +9,7 @@ interface IAddEditFormat
     /**
      * Actualiza el formulario
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date 2020
      */

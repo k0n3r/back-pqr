@@ -20,13 +20,12 @@ class PqrBalancerController extends AbstractController
     #[Route('/field/{id}', name: 'groupsForField', methods: ['GET'])]
     public function groupsForField(
         int $id,
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
             $record = PqrBalancer::findAllByAttributes([
                 'fk_campo_opciones' => $id,
-                'active'            => 1
+                'active'            => 1,
             ]);
 
             $data = [];
@@ -44,14 +43,13 @@ class PqrBalancerController extends AbstractController
                 $data[$order] = [
                     'id'      => $PqrBalancer->getPK(),
                     'text'    => $CampoOpcion->valor,
-                    'groupId' => (int)$PqrBalancer->fk_grupo
+                    'groupId' => (int)$PqrBalancer->fk_grupo,
                 ];
                 $defaultOrder++;
             }
 
             $saiaResponse->replaceData($data);
             $saiaResponse->setSuccess(1);
-
         } catch (Throwable $th) {
             $saiaResponse->setMessage($th->getMessage());
         }
@@ -63,26 +61,24 @@ class PqrBalancerController extends AbstractController
     public function updateGroupsBalancer(
         Request $Request,
         ISaiaResponse $saiaResponse,
-        Connection $Connection
+        Connection $Connection,
     ): Response {
-
         $Connection->beginTransaction();
         try {
-
             if (!$id = $Request->get('fk_field_balancer', 0)) {
                 throw new SaiaException("Falta el identificador del campo de los tiempos de respuesta");
             }
 
             $PqrForm = PqrForm::getInstance();
             $PqrForm->getService()->save([
-                'fk_field_balancer' => $id
+                'fk_field_balancer' => $id,
             ]);
 
             $options = $Request->get('options');
             foreach ($options as $option) {
                 $PqrBalancerService = (new PqrBalancer($option['id']))->getService();
                 $PqrBalancerService->save([
-                    'fk_grupo' => $option['groupId']
+                    'fk_grupo' => $option['groupId'],
                 ]);
             }
 

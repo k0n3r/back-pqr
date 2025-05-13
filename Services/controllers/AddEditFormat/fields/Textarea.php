@@ -14,9 +14,9 @@ class Textarea extends Field implements IField
         $PqrFormField = $this->getPqrFormField();
 
         $data = array_merge($this->getDefaultValues(), [
-            'tipo_dato' => 'text',
-            'longitud' => null,
-            'placeholder' => $PqrFormField->getSetting()->placeholder
+            'tipo_dato'   => 'text',
+            'longitud'    => null,
+            'placeholder' => $PqrFormField->getSetting()->placeholder,
         ]);
 
         if (!$PqrFormField->active) {

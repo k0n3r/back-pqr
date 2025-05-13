@@ -10,18 +10,18 @@ class PqrFormField extends Model
 {
     use TModels;
 
-    const int ACTIVE = 1;
-    const int INACTIVE = 0;
+    public const int ACTIVE = 1;
+    public const int INACTIVE = 0;
 
-    const string FIELD_NAME_SYS_TIPO = 'sys_tipo';
-    const string FIELD_NAME_SYS_DEPENDENCIA = 'sys_dependencia';
+    public const string FIELD_NAME_SYS_TIPO = 'sys_tipo';
+    public const string FIELD_NAME_SYS_DEPENDENCIA = 'sys_dependencia';
 
     public static ?PqrFormField $PqrFormField_sysTipo = null;
 
     protected function defineAttributes(): void
     {
         $this->dbAttributes = (object)[
-            'safe' => [
+            'safe'    => [
                 'name',
                 'label',
                 'required',
@@ -34,10 +34,10 @@ class PqrFormField extends Model
                 'fk_campos_formato',
                 'is_system',
                 'orden',
-                'active'
+                'active',
             ],
             'primary' => 'id',
-            'table' => 'pqr_form_fields'
+            'table'   => 'pqr_form_fields',
         ];
     }
 
@@ -114,9 +114,10 @@ class PqrFormField extends Model
     {
         if (!static::$PqrFormField_sysTipo) {
             static::$PqrFormField_sysTipo = self::findByAttributes([
-                'name' => PqrFormField::FIELD_NAME_SYS_TIPO
+                'name' => PqrFormField::FIELD_NAME_SYS_TIPO,
             ]);
         }
+
         return static::$PqrFormField_sysTipo;
     }
 

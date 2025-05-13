@@ -18,7 +18,7 @@ class FtPqrCalificacion extends FtPqrCalificacionProperties
             $text = $CamposFormato->etiqueta;
 
             $code .= '<tr>
-                <td>' . mb_strtoupper($text) . ': <br/><strong>' . mb_strtoupper($answer) . '</strong><br/><br/></td>
+                <td>'.mb_strtoupper($text).': <br/><strong>'.mb_strtoupper($answer).'</strong><br/><br/></td>
             </tr>';
         }
         $code .= '</table>';

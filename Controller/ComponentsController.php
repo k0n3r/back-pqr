@@ -20,9 +20,8 @@ class ComponentsController extends AbstractController
      */
     #[Route('/autocomplete/list', name: 'getListDataForAutocomplete', methods: ['GET'])]
     public function getListDataForAutocomplete(
-        Request $request
+        Request $request,
     ): JsonResponse {
-
         try {
             if (!$PqrFormField = PqrFormField::findByAttributes([
                 'name' => $request->get('name'),
@@ -35,7 +34,7 @@ class ComponentsController extends AbstractController
         }
 
         return new JsonResponse([
-            'results' => $data
+            'results' => $data,
         ]);
     }
 
@@ -45,9 +44,8 @@ class ComponentsController extends AbstractController
      */
     #[Route('/autocomplete/find', name: 'findDataForAutocomplete', methods: ['GET'])]
     public function findDataForAutocomplete(
-        Request $request
+        Request $request,
     ): JsonResponse {
-
         try {
             $data = (new PqrService())
                 ->findDataForAutocomplete($request->get('type'), $request->get('data'));
@@ -56,7 +54,7 @@ class ComponentsController extends AbstractController
         }
 
         return new JsonResponse([
-            'results' => $data
+            'results' => $data,
         ]);
     }
 }

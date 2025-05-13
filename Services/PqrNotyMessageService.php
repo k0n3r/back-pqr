@@ -29,7 +29,7 @@ class PqrNotyMessageService extends ModelService
     {
         $data = [];
         if ($records = PqrNotyMessage::findAllByAttributes([
-            'active' => 1
+            'active' => 1,
         ])) {
             foreach ($records as $PqrNotyMessage) {
                 $data[] = [
@@ -39,8 +39,8 @@ class PqrNotyMessageService extends ModelService
                         'description'  => $PqrNotyMessage->description,
                         'subject'      => $PqrNotyMessage->subject,
                         'message_body' => $PqrNotyMessage->message_body,
-                        'type'         => $PqrNotyMessage->type
-                    ]
+                        'type'         => $PqrNotyMessage->type,
+                    ],
                 ];
             }
         }
@@ -52,14 +52,14 @@ class PqrNotyMessageService extends ModelService
      * Resuelve y reemplaza las variables por los valores
      *
      * @param string $baseContent
-     * @param FtPqr  $FtPqr
+     * @param FtPqr $FtPqr
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2021
      */
     public static function resolveVariables(
         string $baseContent,
-        FtPqr $FtPqr
+        FtPqr $FtPqr,
     ): string {
         $functions = Header::getFunctionsFromString($baseContent);
         $functions = str_replace(['{*', '*}'], '', $functions);
@@ -69,7 +69,7 @@ class PqrNotyMessageService extends ModelService
             $baseContent = str_replace(
                 "{*$variable*}",
                 $value,
-                $baseContent
+                $baseContent,
             );
         }
 

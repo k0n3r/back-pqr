@@ -19,10 +19,10 @@ class PqrNotification extends Model
                 'fk_funcionario',
                 'fk_pqr_form',
                 'email',
-                'notify'
+                'notify',
             ],
             'primary' => 'id',
-            'table'   => 'pqr_notifications'
+            'table'   => 'pqr_notifications',
         ];
     }
 
@@ -62,7 +62,7 @@ class PqrNotification extends Model
     {
         return [
             'text' => $this->getFuncionario()->getName(),
-            'id'   => $this->getFuncionario()->getPK()
+            'id'   => $this->getFuncionario()->getPK(),
         ];
     }
 }

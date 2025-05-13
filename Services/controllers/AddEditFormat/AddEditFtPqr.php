@@ -60,7 +60,8 @@ class AddEditFtPqr implements IAddEditFormat
      */
     private function createForm(): void
     {
-        $this->createRecordInFormat()
+        $this
+            ->createRecordInFormat()
             ->addEditRecordsInFormatFields()
             ->addOtherFields();
     }
@@ -74,7 +75,8 @@ class AddEditFtPqr implements IAddEditFormat
      */
     private function updateForm(): void
     {
-        $this->updateRecordInFormat()
+        $this
+            ->updateRecordInFormat()
             ->addEditRecordsInFormatFields()
             ->addOtherFields();
     }
@@ -83,13 +85,13 @@ class AddEditFtPqr implements IAddEditFormat
     /**
      * Obtiene los datos por defecto para la creacion del registro en Formato
      *
-     * @param bool         $edit
+     * @param bool $edit
      * @param Formato|null $Formato
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    private function getFormatDefaultData(bool $edit = false, ?Formato $Formato = null): array
+    private function getFormatDefaultData(bool $edit = false): array
     {
         $name = $this->PqrForm->name;
         $data = [
@@ -124,14 +126,16 @@ class AddEditFtPqr implements IAddEditFormat
             'module'                    => 'pqr',
             'publicar'                  => 1,
             'formato_fecha_radicado'    => 'Ymd',
-            'webservice'                => 1,
-            'clase_ws'                  => 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqr'
+            'info_ws'                   => json_encode([
+                'habilita_webservice'  => 1,
+                'habilita_consulta'    => 1,
+                'mensaje_notificacion' => '<br/>Su solicitud ha sido generada con el radicado {*n_radicadoPqr*}<br/>el seguimiento lo puede realizar en el apartado de consulta con el número de consecutivo <strong>{*n_consecutivoPqr*}</strong> y el correo registrado<br/><br/>Gracias por visitarnos!',
+                'clase_ws'             => 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqr',
+            ]),
         ];
 
         if ($edit) {
-            if ($Formato->clase_ws) {
-                unset($data['clase_ws']);
-            }
+            unset($data['info_ws']);
             unset($data['contador_idcontador']);
             unset($data['encabezado']);
             unset($data['pie_pagina']);
@@ -161,18 +165,18 @@ class AddEditFtPqr implements IAddEditFormat
         $id = $FormatoService->getModel()->getPK();
 
         $this->PqrForm->setAttributes([
-            'fk_formato' => $id
+            'fk_formato' => $id,
         ]);
         $this->PqrForm->save();
 
         if (!$Respuesta = Formato::findByAttributes([
-            'nombre' => 'pqr_respuesta'
+            'nombre' => 'pqr_respuesta',
         ])) {
             throw new SaiaException("No se encontro el formato RESPUESTA PQR", 1);
         }
 
         $Respuesta->setAttributes([
-            'cod_padre' => $id
+            'cod_padre' => $id,
         ]);
         $Respuesta->save();
 
@@ -189,7 +193,7 @@ class AddEditFtPqr implements IAddEditFormat
     private function updateRecordInFormat(): self
     {
         $Formato = new Formato($this->PqrForm->fk_formato);
-        $Formato->setAttributes($this->getFormatDefaultData(true, $Formato));
+        $Formato->setAttributes($this->getFormatDefaultData(true));
         $Formato->save();
 
         return $this;
@@ -219,6 +223,7 @@ class AddEditFtPqr implements IAddEditFormat
                 $PqrFormField->getService()->addEditformatOptions();
             }
         }
+
         return $this;
     }
 
@@ -237,6 +242,7 @@ class AddEditFtPqr implements IAddEditFormat
         if (class_exists($className)) {
             return $className;
         }
+
         return null;
     }
 
@@ -275,7 +281,7 @@ class AddEditFtPqr implements IAddEditFormat
         $id = $CamposFormatoService->getModel()->getPK();
 
         $PqrFormField->setAttributes([
-            'fk_campos_formato' => $id
+            'fk_campos_formato' => $id,
         ]);
 
         $PqrFormField->save();
@@ -308,7 +314,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'listable'          => 1,
                 'opciones'          => null,
                 'ayuda'             => null,
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             'sys_tercero'                   => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -326,7 +332,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'listable'          => 1,
                 'opciones'          => null,
                 'ayuda'             => null,
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             'sys_fecha_vencimiento'         => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -344,7 +350,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'listable'          => 1,
                 'opciones'          => '{"hoy":false,"tipo":"date"}',
                 'ayuda'             => null,
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             'sys_fecha_terminado'           => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -362,7 +368,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'listable'          => 1,
                 'opciones'          => '{"hoy":false,"tipo":"date"}',
                 'ayuda'             => null,
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             'sys_anonimo'                   => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -380,7 +386,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'listable'          => 1,
                 'opciones'          => '{"type":"hidden"}',
                 'ayuda'             => null,
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             'sys_frecuencia'                => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -398,7 +404,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'listable'          => 1,
                 'opciones'          => null,
                 'ayuda'             => '1,Bajo 2,Medio 3,Alto',
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             'sys_impacto'                   => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -416,7 +422,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'listable'          => 1,
                 'opciones'          => null,
                 'ayuda'             => '1,Bajo 2,Medio 3,Alto',
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             'sys_severidad'                 => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -434,7 +440,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'listable'          => 1,
                 'opciones'          => null,
                 'ayuda'             => '1,Bajo 2,Medio 3,Alto',
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             'sys_oportuno'                  => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -452,7 +458,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'listable'          => 1,
                 'opciones'          => null,
                 'ayuda'             => null,
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             'radicacion'                    => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -470,7 +476,7 @@ class AddEditFtPqr implements IAddEditFormat
                 'listable'          => 0,
                 'opciones'          => null,
                 'ayuda'             => null,
-                'longitud_vis'      => null
+                'longitud_vis'      => null,
             ],
             Rad::DESCRIPCION                => [
                 'formato_idformato' => $this->PqrForm->fk_formato,
@@ -484,34 +490,43 @@ class AddEditFtPqr implements IAddEditFormat
                 'orden'             => 108,
                 'fila_visible'      => 1,
                 'placeholder'       => 'campo texto',
-                'listable'          => 0
+                'listable'          => 0,
             ],
             Rad::DISTRIBUCION               => Rad::getAttributesMoreFields(
                 $this->PqrForm->fk_formato,
-                Rad::DISTRIBUCION
+                Rad::DISTRIBUCION,
             ),
-            Distribution::DESTINO_INTERNO   => array_merge(Distribution::getAttributesMoreFields(
-                $this->PqrForm->fk_formato,
-                Distribution::DESTINO_INTERNO
-            ), [
-                'opciones' => '{"tipo_seleccion":"unico","multiple_destino":false,"dependenciaCargo":true}'
-            ]),
-            Distribution::SELECT_MENSAJERIA => array_merge(Distribution::getAttributesMoreFields(
-                $this->PqrForm->fk_formato,
-                Distribution::SELECT_MENSAJERIA
-            ), [
-                'campoOpciones' => Distribution::getAttributesMoreFieldsOptions(0, Distribution::SELECT_MENSAJERIA)
-            ]),
-            Rad::COLILLA                    => array_merge(Rad::getAttributesMoreFields(
-                $this->PqrForm->fk_formato,
-                Rad::COLILLA
-            ), [
-                'campoOpciones' => Rad::getAttributesMoreFieldsOptions(0, Rad::COLILLA)
-            ]),
+            Distribution::DESTINO_INTERNO   => array_merge(
+                Distribution::getAttributesMoreFields(
+                    $this->PqrForm->fk_formato,
+                    Distribution::DESTINO_INTERNO,
+                ),
+                [
+                    'opciones' => '{"tipo_seleccion":"unico","multiple_destino":false,"dependenciaCargo":true}',
+                ],
+            ),
+            Distribution::SELECT_MENSAJERIA => array_merge(
+                Distribution::getAttributesMoreFields(
+                    $this->PqrForm->fk_formato,
+                    Distribution::SELECT_MENSAJERIA,
+                ),
+                [
+                    'campoOpciones' => Distribution::getAttributesMoreFieldsOptions(0, Distribution::SELECT_MENSAJERIA),
+                ],
+            ),
+            Rad::COLILLA                    => array_merge(
+                Rad::getAttributesMoreFields(
+                    $this->PqrForm->fk_formato,
+                    Rad::COLILLA,
+                ),
+                [
+                    'campoOpciones' => Rad::getAttributesMoreFieldsOptions(0, Rad::COLILLA),
+                ],
+            ),
             Rad::DIGITALIZACION             => Rad::getAttributesMoreFields(
                 $this->PqrForm->fk_formato,
-                Rad::DIGITALIZACION
-            )
+                Rad::DIGITALIZACION,
+            ),
         ];
 
         foreach ($fields as $name => $data) {
@@ -520,7 +535,7 @@ class AddEditFtPqr implements IAddEditFormat
 
             if ($CamposFormato = CamposFormato::findByAttributes([
                 'nombre'            => $name,
-                'formato_idformato' => $this->PqrForm->fk_formato
+                'formato_idformato' => $this->PqrForm->fk_formato,
             ])) {
                 $CamposFormato->setAttributes($data);
                 $CamposFormato->save();
@@ -540,7 +555,7 @@ class AddEditFtPqr implements IAddEditFormat
 
     /**
      * @param array $options
-     * @param int   $fieldId
+     * @param int $fieldId
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-10-19
      */
     public function createOrUpdateOptions(array $options, int $fieldId): void
@@ -549,7 +564,7 @@ class AddEditFtPqr implements IAddEditFormat
             $option['fk_campos_formato'] = $fieldId;
             $CampoOpciones = CampoOpciones::findByAttributes([
                 'llave'             => $option['llave'],
-                'fk_campos_formato' => $fieldId
+                'fk_campos_formato' => $fieldId,
             ]);
 
             if ($CampoOpciones) {

@@ -27,7 +27,7 @@ class PqrFormService extends ModelService
      */
     public static function getUrlWsPQR(): string
     {
-        return $_SERVER['APP_DOMAIN'] . 'ws/pqr/index.html';
+        return $_SERVER['APP_DOMAIN'].'ws/pqr/index.html';
     }
 
     /**
@@ -46,7 +46,7 @@ class PqrFormService extends ModelService
      * Actualiza los datos de configuracion del formulario
      *
      * @param array $data
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -54,6 +54,7 @@ class PqrFormService extends ModelService
     {
         if (!$this->update($data['pqrForm'])) {
             $this->getErrorManager()->setMessage("No fue posible actualizar");
+
             return false;
         }
 
@@ -67,9 +68,8 @@ class PqrFormService extends ModelService
         if ($this->getModel()->show_anonymous) {
             if ($formFields = $data['formFields']) {
                 foreach ($formFields['dataShowAnonymous'] as $id) {
-
                     $attributes = [
-                        'anonymous' => 1
+                        'anonymous' => 1,
                     ];
                     if ($dataRequired = $formFields['dataRequiredAnonymous']) {
                         if (in_array($id, $dataRequired)) {
@@ -80,6 +80,7 @@ class PqrFormService extends ModelService
                     $PqrFormFieldService = (new PqrFormField($id))->getService();
                     if (!$PqrFormFieldService->update($attributes)) {
                         $this->getErrorManager()->setMessage("No fue posible actualizar");
+
                         return false;
                     }
                 }
@@ -93,23 +94,22 @@ class PqrFormService extends ModelService
      * Actualiza la configuracion para la respuesta
      *
      * @param array $data
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
     public function updateResponseSetting(array $data): bool
     {
-
         $info = [];
         foreach ($data['tercero'] as $name => $value) {
             $info[] = [
                 'name'  => $name,
-                'value' => $value
+                'value' => $value,
             ];
         }
 
         return $this->update([
-            'response_configuration' => json_encode(['tercero' => $info])
+            'response_configuration' => json_encode(['tercero' => $info]),
         ]);
     }
 
@@ -123,6 +123,7 @@ class PqrFormService extends ModelService
     public function getSetting(): array
     {
         $options = $this->getDataresponseTime();
+
         return [
             'urlWs'               => static::getUrlWsPQR(),
             'publish'             => $this->getModel()->fk_formato ? 1 : 0,
@@ -134,30 +135,31 @@ class PqrFormService extends ModelService
             'balancerOptions'     => $options,
             'groupOptions'        => $this->getGroupsForBalancer(),
             'descriptionField'    => $this->getdescriptionField(),
-            'receivingChannel'    => $this->getModel()->getCanalRecepcion()
+            'receivingChannel'    => $this->getModel()->getCanalRecepcion(),
         ];
     }
 
     private function getGroupsForBalancer(): array
     {
         $Groups = Grupo::findAllByAttributes([
-            'estado' => 1
+            'estado' => 1,
         ]);
 
         $dataGroups = [];
         foreach ($Groups as $Grupo) {
             $dataGroups[] = [
                 'id'   => $Grupo->getPK(),
-                'name' => $Grupo->nombre
+                'name' => $Grupo->nombre,
             ];
         }
+
         return $dataGroups;
     }
 
     /**
      * publica o crea el formulario en el webservice
      *
-     * @return boolean
+     * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -172,9 +174,10 @@ class PqrFormService extends ModelService
         }
 
         if (!$FormatoR = Formato::findByAttributes([
-            'nombre' => 'pqr_respuesta'
+            'nombre' => 'pqr_respuesta',
         ])) {
             $this->getErrorManager()->setMessage("El formato de respuesta PQR no fue encontrado");
+
             return false;
         }
 
@@ -186,20 +189,19 @@ class PqrFormService extends ModelService
         $FormatoR->getService()->generate();
 
         if (!$FormatoC = Formato::findByAttributes([
-            'nombre' => 'pqr_calificacion'
+            'nombre' => 'pqr_calificacion',
         ])) {
             $this->getErrorManager()->setMessage("El formato de calificacion PQR no fue encontrado");
+
             return false;
         }
 
         $formatNameC = "CALIFICACIÓN ({$this->getModel()->label})";
-        if ($FormatoC->etiqueta != $formatNameC || !$FormatoC->webservice) {
+        if ($FormatoC->etiqueta != $formatNameC || !$FormatoC->isEnabledWs()) {
             $FormatoC->etiqueta = $formatNameC;
-            $FormatoC->webservice = 1;
-
-            if (!$FormatoC->clase_ws) {
-                $FormatoC->clase_ws = 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqrCalificacion';
-            }
+            $FormatoC->info_ws = array_merge($FormatoC->info_ws, [
+                'habilita_webservice' => 1,
+            ]);
 
             $FormatoC->save();
         }
@@ -226,7 +228,7 @@ class PqrFormService extends ModelService
     private function activeInfoForDependency(): void
     {
         $PqrFormField = PqrFormField::findByAttributes([
-            'name' => 'sys_dependencia'
+            'name' => 'sys_dependencia',
         ]);
 
         if (!$PqrFormField) {
@@ -240,7 +242,7 @@ class PqrFormService extends ModelService
         }
 
         $ModuloPadre = Modulo::findByAttributes([
-            'nombre' => 'reporte_pqr'
+            'nombre' => 'reporte_pqr',
         ]);
 
         if (!$ModuloPadre) {
@@ -251,7 +253,8 @@ class PqrFormService extends ModelService
             'nombre' => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
         ]);
 
-        $enlace = 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector":"iframe","url": "views/buzones/grilla.php?idbusqueda_componente=' . $BusquedaComponente->getPK() . '"}]';
+        $enlace = 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector":"iframe","url": "views/buzones/grilla.php?idbusqueda_componente='.$BusquedaComponente->getPK(
+            ).'"}]';
         $data = [
             'pertenece_nucleo' => 0,
             'nombre'           => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
@@ -262,7 +265,7 @@ class PqrFormService extends ModelService
             'cod_padre'        => $ModuloPadre->getPK(),
             'orden'            => 4,
             'asignable'        => 1,
-            'tiene_hijos'      => 0
+            'tiene_hijos'      => 0,
         ];
 
         $ModuloService = (new Modulo())->getService();
@@ -286,6 +289,7 @@ class PqrFormService extends ModelService
                 $data[] = $PqrFormField->getDataAttributes();
             }
         }
+
         return $data;
     }
 
@@ -316,6 +320,7 @@ class PqrFormService extends ModelService
                 $data[] = $PqrNotification->getDataAttributes();
             }
         }
+
         return $data;
     }
 
@@ -350,6 +355,7 @@ class PqrFormService extends ModelService
                 $data[] = $PqrFormField;
             }
         }
+
         return $data;
     }
 
@@ -366,6 +372,7 @@ class PqrFormService extends ModelService
         foreach ($fields as $PqrFormField) {
             $data[] = "ft.$PqrFormField->name";
         }
+
         return $data;
     }
 
@@ -378,10 +385,13 @@ class PqrFormService extends ModelService
      */
     private function viewPqr(): void
     {
-        $fields = implode(',', array_merge(
-            $this->defaultFieldsReport(),
-            $this->getFieldsView()
-        ));
+        $fields = implode(
+            ',',
+            array_merge(
+                $this->defaultFieldsReport(),
+                $this->getFieldsView(),
+            ),
+        );
 
         $sql = "SELECT $fields
         FROM ft_pqr ft,documento d
@@ -412,7 +422,7 @@ class PqrFormService extends ModelService
             'ft.sys_impacto',
             'ft.sys_severidad',
             'ft.sys_oportuno',
-            'ft.idft_pqr as idft'
+            'ft.idft_pqr as idft',
         ];
     }
 
@@ -432,7 +442,7 @@ class PqrFormService extends ModelService
             $PqrFormField = new PqrFormField($pqrFormId);
             $data = [
                 "id"   => $pqrFormId,
-                "name" => $PqrFormField->label
+                "name" => $PqrFormField->label,
             ];
         }
 
@@ -517,11 +527,11 @@ class PqrFormService extends ModelService
                 $fieldCode[] = $code;
             }
         }
-        $file = $_SERVER["ROOT_PATH"] . 'src/Bundles/pqr/formatos/pqr/functionsReport.php';
+        $file = $_SERVER["ROOT_PATH"].'src/Bundles/pqr/formatos/pqr/functionsReport.php';
         if (file_exists($file)) {
             unlink($file);
         }
-        $codeFunction = "<?php \n\n" . implode("\n", $fieldCode);
+        $codeFunction = "<?php \n\n".implode("\n", $fieldCode);
 
         if (!file_put_contents($file, $codeFunction)) {
             throw new SaiaException("No fue posible crear las funciones del formulario");
@@ -558,52 +568,56 @@ class PqrFormService extends ModelService
 
         //REPORTE PENDIENTE
         if ($Pendiente = BusquedaComponente::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_REPORTE_PENDIENTE
+            'nombre' => PqrForm::NOMBRE_REPORTE_PENDIENTE,
         ])) {
             $Pendiente->setAttributes(
                 $this->getDefaultDataComponente(
                     $selectedFields,
                     $nameOfSeletedFields,
-                    PqrForm::NOMBRE_REPORTE_PENDIENTE)
+                    PqrForm::NOMBRE_REPORTE_PENDIENTE,
+                ),
             );
             $Pendiente->save();
         }
 
         //REPORTE PROCESO
         if ($Proceso = BusquedaComponente::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_REPORTE_PROCESO
+            'nombre' => PqrForm::NOMBRE_REPORTE_PROCESO,
         ])) {
             $Proceso->setAttributes(
                 $this->getDefaultDataComponente(
                     $selectedFields,
                     $nameOfSeletedFields,
-                    PqrForm::NOMBRE_REPORTE_PROCESO)
+                    PqrForm::NOMBRE_REPORTE_PROCESO,
+                ),
             );
             $Proceso->save();
         }
 
         //REPORTE TERMINADO
         if ($Terminado = BusquedaComponente::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_REPORTE_TERMINADO
+            'nombre' => PqrForm::NOMBRE_REPORTE_TERMINADO,
         ])) {
             $Terminado->setAttributes(
                 $this->getDefaultDataComponente(
                     $selectedFields,
                     $nameOfSeletedFields,
-                    PqrForm::NOMBRE_REPORTE_TERMINADO)
+                    PqrForm::NOMBRE_REPORTE_TERMINADO,
+                ),
             );
             $Terminado->save();
         }
 
         //REPORTE TODOS
         if ($Todos = BusquedaComponente::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_REPORTE_TODOS
+            'nombre' => PqrForm::NOMBRE_REPORTE_TODOS,
         ])) {
             $Todos->setAttributes(
                 $this->getDefaultDataComponente(
                     $selectedFields,
                     $nameOfSeletedFields,
-                    PqrForm::NOMBRE_REPORTE_TODOS)
+                    PqrForm::NOMBRE_REPORTE_TODOS,
+                ),
             );
             $Todos->save();
         }
@@ -614,8 +628,8 @@ class PqrFormService extends ModelService
      * Obtiene los campos y el info por defecto
      * de los reportes (busqueda componente)
      *
-     * @param array  $selectedFields
-     * @param array  $nameOfSeletedFields
+     * @param array $selectedFields
+     * @param array $nameOfSeletedFields
      * @param string $reportName
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -624,20 +638,19 @@ class PqrFormService extends ModelService
     private function getDefaultDataComponente(
         array $selectedFields,
         array $nameOfSeletedFields,
-        string $reportName
+        string $reportName,
     ): array {
-
         $info = array_merge(
             [
                 [
                     'title' => 'RADICADO',
                     'field' => '{*viewFtPqr@idft,numero*}',
-                    'align' => 'center'
+                    'align' => 'center',
                 ],
                 [
                     'title' => 'FECHA',
                     'field' => '{*dateRadication@fecha*}',
-                    'align' => 'center'
+                    'align' => 'center',
                 ],
             ],
             $selectedFields,
@@ -645,17 +658,17 @@ class PqrFormService extends ModelService
                 [
                     'title' => 'TIPO',
                     'field' => '{*getValueSysTipo@iddocumento,sys_tipo*}',
-                    'align' => 'center'
+                    'align' => 'center',
                 ],
                 [
                     'title' => 'OPORTUNIDAD EN LAS RESPUESTAS',
                     'field' => '{*sys_oportuno*}',
-                    'align' => 'center'
+                    'align' => 'center',
                 ],
                 [
                     'title' => 'CANAL DE RECEPCIÓN',
                     'field' => '{*canal_recepcion*}',
-                    'align' => 'center'
+                    'align' => 'center',
                 ],
             ],
             $this->getFieldsByStateForReport($reportName),
@@ -663,9 +676,9 @@ class PqrFormService extends ModelService
                 [
                     'title' => 'OPCIONES',
                     'field' => '{*options@iddocumento,sys_estado,idft*}',
-                    'align' => 'center'
-                ]
-            ]
+                    'align' => 'center',
+                ],
+            ],
         );
 
         $fieldNames = array_merge([
@@ -675,12 +688,12 @@ class PqrFormService extends ModelService
             'v.sys_estado',
             'v.idft',
             'v.sys_oportuno',
-            'v.canal_recepcion'
+            'v.canal_recepcion',
         ], $nameOfSeletedFields);
 
         return [
             'info'               => json_encode($info),
-            'campos_adicionales' => implode(',', $fieldNames)
+            'campos_adicionales' => implode(',', $fieldNames),
         ];
     }
 
@@ -710,10 +723,10 @@ class PqrFormService extends ModelService
     private function viewCalificacionPqr(): void
     {
         $sql = <<<SQL
-SELECT d.iddocumento AS iddocumento, d.numero AS numero, d.fecha AS fecha, ft.idft_pqr_calificacion AS idft, ft.ft_pqr_respuesta AS ft_pqr_respuesta, ft.experiencia_gestion AS experiencia_gestion, ft.experiencia_servicio AS experiencia_servicio, ftr.ft_pqr as idft_pqr
-FROM ft_pqr_calificacion ft, documento d, ft_pqr_respuesta ftr
-WHERE ft.documento_iddocumento = d.iddocumento AND ftr.idft_pqr_respuesta = ft.ft_pqr_respuesta AND d.estado <> 'ELIMINADO'
-SQL;
+            SELECT d.iddocumento AS iddocumento, d.numero AS numero, d.fecha AS fecha, ft.idft_pqr_calificacion AS idft, ft.ft_pqr_respuesta AS ft_pqr_respuesta, ft.experiencia_gestion AS experiencia_gestion, ft.experiencia_servicio AS experiencia_servicio, ftr.ft_pqr as idft_pqr
+            FROM ft_pqr_calificacion ft, documento d, ft_pqr_respuesta ftr
+            WHERE ft.documento_iddocumento = d.iddocumento AND ftr.idft_pqr_respuesta = ft.ft_pqr_respuesta AND d.estado <> 'ELIMINADO'
+            SQL;
         $this->createView('vpqr_calificacion', $sql);
     }
 
@@ -732,16 +745,16 @@ SQL;
         $tfExterno = TareaFuncionario::INTERNAL_USER;
 
         $sql = <<<SQL
-SELECT tf.usuario as idfuncionario,count(tf.usuario) as cant_task
-FROM vpqr p
-JOIN tarea t ON p.iddocumento=t.relacion_id
-JOIN tarea_funcionario tf ON tf.fk_tarea=t.idtarea
-JOIN tarea_estado te ON te.fk_tarea=t.idtarea
-WHERE t.relacion=$tRelacion
-AND tf.tipo=$tfTipo AND tf.externo=$tfExterno
-AND te.valor IN ($teEstados) AND te.estado=1
-GROUP BY tf.usuario
-SQL;
+            SELECT tf.usuario as idfuncionario,count(tf.usuario) as cant_task
+            FROM vpqr p
+            JOIN tarea t ON p.iddocumento=t.relacion_id
+            JOIN tarea_funcionario tf ON tf.fk_tarea=t.idtarea
+            JOIN tarea_estado te ON te.fk_tarea=t.idtarea
+            WHERE t.relacion=$tRelacion
+            AND tf.tipo=$tfTipo AND tf.externo=$tfExterno
+            AND te.valor IN ($teEstados) AND te.estado=1
+            GROUP BY tf.usuario
+            SQL;
 
         $this->createView('vpqr_tareas', $sql);
     }
@@ -773,7 +786,7 @@ SQL;
                             if ($CampoOpcion->estado) {
                                 $fieldOptions[] = [
                                     'id'    => $CampoOpcion->getPK(),
-                                    'label' => $CampoOpcion->valor
+                                    'label' => $CampoOpcion->valor,
                                 ];
                             }
                         }
@@ -782,7 +795,7 @@ SQL;
                     $data[] = [
                         'id'      => $PqrFormField->fk_campos_formato,
                         'label'   => $PqrFormField->label,
-                        'options' => $fieldOptions
+                        'options' => $fieldOptions,
                     ];
                 }
             }
@@ -800,7 +813,7 @@ SQL;
     public function editFieldTime(int $idCampoFormato): void
     {
         $this->save([
-            'fk_field_time' => $idCampoFormato
+            'fk_field_time' => $idCampoFormato,
         ]);
     }
 
@@ -817,41 +830,41 @@ SQL;
             [
                 'title' => 'TAREAS',
                 'field' => '{*totalTask@iddocumento*}',
-                'align' => 'center'
+                'align' => 'center',
             ],
             [
                 'title' => 'RESPONSABLES',
                 'field' => '{*getResponsible@iddocumento*}',
-                'align' => 'center'
+                'align' => 'center',
             ],
             [
                 'title' => 'RESPUESTAS',
                 'field' => '{*totalAnswers@idft*}',
-                'align' => 'center'
+                'align' => 'center',
             ],
             [
                 'title' => 'CALIFICACIÓN GESTIÓN',
                 'field' => '{*qualificationGest@idft*}',
-                'align' => 'center'
+                'align' => 'center',
             ],
             [
                 'title' => 'CALIFICACIÓN SERVICIO',
                 'field' => '{*qualificationServ@idft*}',
-                'align' => 'center'
-            ]
+                'align' => 'center',
+            ],
         ];
 
         $otherDefaultFields = [
             [
                 'title' => 'DIAS DE ESPERA',
                 'field' => '{*getDaysWait@idft*}',
-                'align' => 'center'
+                'align' => 'center',
             ],
             [
                 'title' => 'FECHA VENCIMIENTO',
                 'field' => '{*getExpiration@idft*}',
-                'align' => 'center'
-            ]
+                'align' => 'center',
+            ],
         ];
 
         $fieldForReport = match ($reportName) {
@@ -859,7 +872,7 @@ SQL;
                 [
                     'title' => 'ESTADO',
                     'field' => '{*sys_estado*}',
-                    'align' => 'center'
+                    'align' => 'center',
                 ],
             ], $otherDefaultFields, $defaultFiels),
             PqrForm::NOMBRE_REPORTE_PROCESO => array_merge($otherDefaultFields, $defaultFiels),
@@ -867,12 +880,12 @@ SQL;
                 [
                     'title' => 'DÍAS RETRASO',
                     'field' => '{*getDaysLate@idft*}',
-                    'align' => 'center'
+                    'align' => 'center',
                 ],
                 [
                     'title' => 'FECHA FINALIZACIÓN',
                     'field' => '{*getEndDate@idft*}',
-                    'align' => 'center'
+                    'align' => 'center',
                 ],
             ], $defaultFiels),
             default => $otherDefaultFields,
@@ -911,11 +924,12 @@ SQL;
 
         $CamposFormatoService = $CamposFormato->getService();
         $success = $CamposFormato->getService()->save([
-            'acciones' => implode(',', array_filter($actionList))
+            'acciones' => implode(',', array_filter($actionList)),
         ]);
 
         if (!$success) {
             $this->setErrorManager($CamposFormatoService->getErrorManager());
+
             return false;
         }
 
@@ -927,17 +941,18 @@ SQL;
 
             $CamposFormatoServiceOld = $CamposFormatoOld->getService();
             $success = $CamposFormatoServiceOld->save([
-                'acciones' => implode(',', array_filter($actionListOld))
+                'acciones' => implode(',', array_filter($actionListOld)),
             ]);
 
             if (!$success) {
                 $this->setErrorManager($CamposFormatoService->getErrorManager());
+
                 return false;
             }
         }
 
         return $PqrForms->getService()->save([
-            'description_field' => $fieldId
+            'description_field' => $fieldId,
         ]);
     }
 }

@@ -16,16 +16,15 @@ class StructureController extends AbstractController
 
     #[Route('/dataViewIndex', name: 'dataViewIndex', methods: ['GET'])]
     public function getDataViewIndex(
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
             $PqrFormService = PqrForm::getInstance()->getService();
 
             $data = [
-                'pqrForm' => $PqrFormService->getDataPqrForm(),
+                'pqrForm'       => $PqrFormService->getDataPqrForm(),
                 'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
-                'pqrHtmlFields' => PqrService::getDataHtmlFields()
+                'pqrHtmlFields' => PqrService::getDataHtmlFields(),
             ];
 
             $saiaResponse->replaceData($data);
@@ -39,9 +38,8 @@ class StructureController extends AbstractController
 
     #[Route('/dataModalViewEditType', name: 'getDataEditType', methods: ['GET'])]
     public function getDataEditType(
-        ISaiaResponse $saiaResponse
+        ISaiaResponse $saiaResponse,
     ): Response {
-
         try {
             $data = (new PqrService())->getDataForEditTypes();
 
