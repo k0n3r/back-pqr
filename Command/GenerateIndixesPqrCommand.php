@@ -19,6 +19,7 @@ class GenerateIndixesPqrCommand extends GenerateIndixesCommand
                 'sys_estado',
                 'sys_tipo',
                 'sys_dependencia',
+                'sys_oportuno',
             ],
             'ft_pqr_calificacion' => [
                 'documento_iddocumento',
