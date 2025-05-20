@@ -16,67 +16,68 @@ class GenerateIndixesPqrCommand extends GenerateIndixesCommand
                 'documento_iddocumento',
                 'sys_estado',
                 'sys_tipo',
-                'sys_dependencia'
+                'sys_dependencia',
+                'sys_oportuno',
             ],
             'ft_pqr_calificacion' => [
                 'documento_iddocumento',
-                'ft_pqr_respuesta'
+                'ft_pqr_respuesta',
             ],
             'ft_pqr_respuesta'    => [
                 'documento_iddocumento',
-                'ft_pqr'
+                'ft_pqr',
             ],
             'pqr_backups'         => [
                 'fk_documento',
-                'fk_pqr'
+                'fk_pqr',
             ],
             'pqr_balancer'        => [
                 'fk_campo_opciones',
-                'fk_sys_tipo'
+                'fk_sys_tipo',
             ],
             'pqr_forms'           => [
                 'fk_formato',
-                'fk_contador'
+                'fk_contador',
             ],
             'pqr_form_fields'     => [
                 'fk_pqr_html_field',
                 'fk_pqr_form',
-                'fk_campos_formato'
+                'fk_campos_formato',
             ],
             'pqr_history'         => [
                 'idft',
                 'fk_funcionario',
-                'idfk'
+                'idfk',
             ],
             'pqr_html_fields'     => [
-                'active'
+                'active',
             ],
             'pqr_notifications'   => [
                 'fk_funcionario',
-                'fk_pqr_form'
+                'fk_pqr_form',
             ],
             'pqr_noty_messages'   => [
-                'type'
+                'type',
             ],
             'pqr_response_times'  => [
                 'fk_campo_opciones',
-                'fk_sys_tipo'
+                'fk_sys_tipo',
             ],
             'tarea'               => [
                 'relacion',
-                'relacion_id'
+                'relacion_id',
             ],
             'tarea_funcionario'   => [
                 'fk_tarea',
                 'tipo',
                 'externo',
-                'usuario'
+                'usuario',
             ],
             'tarea_estado'        => [
                 'fk_funcionario',
                 'fk_tarea',
                 'valor',
-                'estado'
+                'estado',
             ],
         ];
     }
