@@ -176,8 +176,9 @@ function totalAnswers(int $idft): string
         $fecha = DateController::convertDate($FtPqrRespuesta->getDocument()->fecha, DateController::PUBLIC_DATE_FORMAT);
         $answers[] = "<a class='kenlace_saia' data-enlace='$url' title='Respuestas a PQR No $numero' href='#'>{$FtPqrRespuesta->getDocument()->numero} - $fecha</a>";
     }
+    $separator = isset($_REQUEST['tempUrl']) ? '|' : '<br/>';
 
-    return implode('<br/>', $answers);
+    return implode($separator, $answers);
 }
 
 /**
@@ -203,8 +204,9 @@ function getResponsible(int $iddocumento): string
             $responsible[$Funcionario->getPK()] = $Funcionario->getName();
         }
     }
+    $separator = isset($_REQUEST['tempUrl']) ? '|' : '<br/>';
 
-    return implode('<br/>', $responsible);
+    return implode($separator, $responsible);
 }
 
 /**
