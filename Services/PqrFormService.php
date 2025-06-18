@@ -2,9 +2,10 @@
 
 namespace App\Bundles\pqr\Services;
 
-use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
+use InvalidArgumentException;
+use RuntimeException;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\formatos\Formato;
 use App\Bundles\pqr\Services\models\PqrForm;
@@ -222,7 +223,6 @@ class PqrFormService extends ModelService
      * Activa el reporte de Dependencia  o PQR por dependencia
      * cuando se activa el compoenten de sys_dependencia
      *
-     * @throws SaiaException
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-04-08
      */
     private function activeInfoForDependency(): void
@@ -246,7 +246,7 @@ class PqrFormService extends ModelService
         ]);
 
         if (!$ModuloPadre) {
-            throw new SaiaException("No se encontro el modulo del Reporte");
+            throw new RuntimeException("No se encontro el modulo del Reporte");
         }
 
         $BusquedaComponente = BusquedaComponente::findByAttributes([
@@ -270,7 +270,7 @@ class PqrFormService extends ModelService
 
         $ModuloService = (new Modulo())->getService();
         if (!$ModuloService->save($data)) {
-            throw new SaiaException("No fue posible registrar el reporte de PQR por Dependencia");
+            throw new InvalidArgumentException("No fue posible registrar el reporte de PQR por Dependencia");
         }
     }
 
@@ -534,7 +534,7 @@ class PqrFormService extends ModelService
         $codeFunction = "<?php \n\n".implode("\n", $fieldCode);
 
         if (!file_put_contents($file, $codeFunction)) {
-            throw new SaiaException("No fue posible crear las funciones del formulario");
+            throw new RuntimeException("No fue posible crear las funciones del formulario");
         }
     }
 

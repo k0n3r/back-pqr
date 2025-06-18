@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Services\controllers\AddEditFormat;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
-use App\Exception\SaiaException;
+use RuntimeException;
 use Saia\controllers\generator\component\Distribution;
 use Saia\controllers\generator\component\Hidden;
 use Saia\controllers\generator\component\Rad;
@@ -86,7 +86,6 @@ class AddEditFtPqr implements IAddEditFormat
      * Obtiene los datos por defecto para la creacion del registro en Formato
      *
      * @param bool $edit
-     * @param Formato|null $Formato
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -126,16 +125,16 @@ class AddEditFtPqr implements IAddEditFormat
             'module'                    => 'pqr',
             'publicar'                  => 1,
             'formato_fecha_radicado'    => 'Ymd',
-            'info_ws'                   => json_encode([
+            'info_ws'                   => [
                 'habilita_webservice'  => 1,
                 'habilita_consulta'    => 1,
                 'mensaje_notificacion' => '<br/>Su solicitud ha sido generada con el radicado {*n_radicadoPqr*}<br/>el seguimiento lo puede realizar en el apartado de consulta con el número de consecutivo <strong>{*n_consecutivoPqr*}</strong> y el correo registrado<br/><br/>Gracias por visitarnos!',
                 'clase_ws'             => 'App\Bundles\pqr\Services\generadoresWs\GenerateWsPqr',
-            ]),
+            ],
         ];
 
         if ($edit) {
-            unset($data['info_ws']);
+//            unset($data['info_ws']);
             unset($data['contador_idcontador']);
             unset($data['encabezado']);
             unset($data['pie_pagina']);
@@ -172,7 +171,7 @@ class AddEditFtPqr implements IAddEditFormat
         if (!$Respuesta = Formato::findByAttributes([
             'nombre' => 'pqr_respuesta',
         ])) {
-            throw new SaiaException("No se encontro el formato RESPUESTA PQR", 1);
+            throw new RuntimeException("No se encontro el formato RESPUESTA PQR");
         }
 
         $Respuesta->setAttributes([
@@ -193,8 +192,8 @@ class AddEditFtPqr implements IAddEditFormat
     private function updateRecordInFormat(): self
     {
         $Formato = new Formato($this->PqrForm->fk_formato);
-        $Formato->setAttributes($this->getFormatDefaultData(true));
-        $Formato->save();
+        $FormatoService = $Formato->getService();
+        $FormatoService->save(array_merge($Formato->getAttributes(), $this->getFormatDefaultData(true)));
 
         return $this;
     }
@@ -259,7 +258,7 @@ class AddEditFtPqr implements IAddEditFormat
         $fieldType = $PqrFormField->getPqrHtmlField()->type_saia;
 
         if (!$className = $this->resolveClass($fieldType)) {
-            throw new SaiaException("No se encontro la clase para el tipo $fieldType", 1);
+            throw new RuntimeException("No se encontro la clase para el tipo $fieldType", 1);
         }
         $Fields = new $className($PqrFormField);
 
