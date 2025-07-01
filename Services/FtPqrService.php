@@ -10,12 +10,12 @@ use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
 use App\services\correo\EmailSaia;
 use App\services\correo\SendEmailSaia;
-use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use DateInterval;
 use DateTime;
 use Doctrine\DBAL\ParameterType;
+use InvalidArgumentException;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
 use Saia\controllers\DistributionService;
@@ -1220,7 +1220,7 @@ class FtPqrService extends ModelService
 
         $TareaService = (new Tarea())->getService();
         if (!$TareaService->createOrUpdate($this->getTaskDefaultData())) {
-            throw new SaiaException($TareaService->getErrorManager()->getMessage());
+            throw new InvalidArgumentException($TareaService->getErrorManager()->getMessage());
         }
     }
 
@@ -1251,6 +1251,7 @@ class FtPqrService extends ModelService
             'descripcion'   => '',
             'relacion'      => Tarea::RELACION_DOCUMENTO,
             'relacion_id'   => $this->getDocument()->getPK(),
+            'permitir_edit' => 0,
         ];
     }
 
