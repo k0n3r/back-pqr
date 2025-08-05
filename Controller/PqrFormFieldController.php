@@ -2,11 +2,11 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use App\services\response\SaiaResponse;
 use Doctrine\DBAL\Connection;
 use App\services\response\ISaiaResponse;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -28,7 +28,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField())->getService();
             if (!$PqrFormFieldService->save($request->get('data'))) {
-                throw new SaiaException(
+                throw new RuntimeException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                     $PqrFormFieldService->getErrorManager()->getCode(),
                 );
@@ -60,7 +60,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->save($request->get('data'))) {
-                throw new SaiaException(
+                throw new RuntimeException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                     $PqrFormFieldService->getErrorManager()->getCode(),
                 );
@@ -106,7 +106,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->updateActive($status)) {
-                throw new SaiaException(
+                throw new RuntimeException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                     $PqrFormFieldService->getErrorManager()->getCode(),
                 );
@@ -136,7 +136,7 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->delete()) {
-                throw new SaiaException(
+                throw new RuntimeException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                     $PqrFormFieldService->getErrorManager()->getCode(),
                 );
