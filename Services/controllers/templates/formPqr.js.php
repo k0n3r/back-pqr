@@ -242,49 +242,46 @@ $comment   });
             }).done((response) => {
                 $("#result").removeClass('d-none');
 
-                if (response.success) {
-                    $("#tbody").empty();
+                $("#tbody").empty();
 
-                    if (+response.data.length) {
-                        $.each(response.data, function (key, value) {
-                            let ul = $("<ul>");
-                            $.each(value.descripcion, function (k, v) {
-                                ul.append(
-                                    $("<li>", {
-                                        text: v
-                                    })
-                                )
-                            });
-                            $("#tbody").append(
-                                $('<tr>').append(
-                                    $('<td>', {
-                                        class: 'text-center',
-                                        text: value.fecha
-                                    }),
-                                    $('<td>').append(ul),
-                                    $('<td>', {
-                                        class: 'text-center'
-                                    }).append(
-                                        $("<a>", {
-                                            href: value.url,
-                                            target: '_blank'
-                                        }).text('Ver')
-                                    )
-                                )
-                            );
+                if (+response.data.length) {
+                    $.each(response.data, function (key, value) {
+                        let ul = $("<ul>");
+                        $.each(value.descripcion, function (k, v) {
+                            ul.append(
+                                $("<li>", {
+                                    text: v
+                                })
+                            )
                         });
-                    } else {
                         $("#tbody").append(
                             $('<tr>').append(
                                 $('<td>', {
                                     class: 'text-center',
-                                    colspan: 3,
-                                    text: 'NO SE ENCONTRARON RESULTADOS'
-                                })
+                                    text: value.fecha
+                                }),
+                                $('<td>').append(ul),
+                                $('<td>', {
+                                    class: 'text-center'
+                                }).append(
+                                    $("<a>", {
+                                        href: value.url,
+                                        target: '_blank'
+                                    }).text('Ver')
+                                )
                             )
                         );
-                    }
-
+                    });
+                } else {
+                    $("#tbody").append(
+                        $('<tr>').append(
+                            $('<td>', {
+                                class: 'text-center',
+                                colspan: 3,
+                                text: 'NO SE ENCONTRARON RESULTADOS'
+                            })
+                        )
+                    );
                 }
 
             }).fail(function () {

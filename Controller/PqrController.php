@@ -3,16 +3,19 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Exception\SaiaException;
 use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Helper\Exception\ExceptionHelper;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\ParameterType;
+use InvalidArgumentException;
+use RuntimeException;
 use Saia\controllers\DateController;
 use Saia\models\Dependencia;
 use Saia\models\documento\Documento;
 use Saia\controllers\CryptController;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\services\response\ISaiaResponse;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,6 +25,8 @@ use Throwable;
 class PqrController extends AbstractController
 {
 
+    use ExceptionHelper;
+
     #[Route('/searchByNumber', name: 'search', methods: ['GET'])]
     public function search(
         Request $request,
@@ -29,7 +34,7 @@ class PqrController extends AbstractController
     ): Response {
         try {
             if (empty($request->get('numero'))) {
-                throw new SaiaException("Se debe indicar el numero de radicado", 200);
+                throw new BadRequestException("Se debe indicar el numero de radicado");
             }
             $email = trim($request->get('sys_email'));
 
@@ -59,10 +64,12 @@ class PqrController extends AbstractController
             }
 
             $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
         } catch (Throwable $th) {
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -77,16 +84,18 @@ class PqrController extends AbstractController
             $FtPqr = UtilitiesPqr::getInstanceForDocumentId($data->documentId);
 
             if ($FtPqr->getPK() != $data->id) {
-                throw new SaiaException("La URL ingresada NO existe o ha sido eliminada", 1);
+                throw new InvalidArgumentException("La URL ingresada NO existe o ha sido eliminada");
             }
 
             $data = $FtPqr->getService()->getHistoryForTimeline();
 
             $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
         } catch (Throwable $th) {
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -98,7 +107,7 @@ class PqrController extends AbstractController
     ): Response {
         try {
             if (!$request->get('dataCrypt')) {
-                throw new SaiaException("Faltan parametros", 1);
+                throw new InvalidArgumentException("Faltan parametros");
             }
 
             $data = json_decode(CryptController::decrypt($request->get('dataCrypt')), true);
@@ -123,7 +132,7 @@ class PqrController extends AbstractController
             ]);
 
             if (!$PqrFormField || !$PqrFormField->fk_campos_formato) {
-                throw new SaiaException("No esta habilitado el campo dependencia");
+                throw new RuntimeException("No esta habilitado el campo dependencia");
             }
 
             $allDependency = Dependencia::findAllByAttributes();

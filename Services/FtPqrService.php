@@ -1020,7 +1020,7 @@ class FtPqrService extends ModelService
             "%sws/%s/infoQR.html?data=%s",
             $_SERVER['APP_DOMAIN'],
             $this->getModel()->getFormat()->nombre,
-            $data,
+            urlencode($data),
         );
     }
 

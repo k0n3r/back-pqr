@@ -17,29 +17,29 @@ $(function () {
     let options = {
             selector: '#timeline-container',
             source: function () {
-                let data = new Array();
+                let data = [];
                 $.ajax({
                     url: `/api/pqr/historyForTimeline`,
                     async: false,
                     data: {
                         infoCryp: d
                     },
-                }).done((response) => {
-                    if (!response.success) {
-                        window.notification({
-                            title: 'Error!',
-                            icon: 'fa fa-exclamation-circle',
-                            timeout: 5000,
-                            color: 'red',
-                            message: response.message
-                        });
-                        setTimeout(function () { window.location.href = "404.html" }, 5000);
-                        return;
-                    } 
-                       
+                }).done((response) => {                       
                     data = response.data;
-                }).fail(function () {
-                    console.error(...arguments)
+                }).fail((jqXHR) => {
+                    console.error(jqXHR);
+    
+                    window.notification({
+                        title: 'Error!',
+                        icon: 'fa fa-exclamation-circle',
+                        timeout: 5000,
+                        color: 'red',
+                        message: jqXHR.responseJSON.message,
+                    });
+    
+                    setTimeout(function () {
+                        window.location.href = "404.html"
+                    }, 5000);
                 });
 
                 return data;
