@@ -23,15 +23,14 @@ trait TMigrations
         $sql = "SELECT idperfil FROM perfil WHERE lower(nombre) LIKE 'administrador interno'";
         $this->idperfilInterno = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$this->idperfilInterno, "No se encontro el perfil del administador interno");
-
     }
 
     /**
      * Crea o actualiza un modulo
      *
-     * @param array  $data
+     * @param array $data
      * @param string $search
-     * @return integer
+     * @return int
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -42,7 +41,7 @@ trait TMigrations
 
         if ($id) {
             $this->connection->update('modulo', $data, [
-                'idmodulo' => $id
+                'idmodulo' => $id,
             ]);
         } else {
             $this->connection->insert('modulo', $data);
@@ -63,7 +62,7 @@ trait TMigrations
         if (!$idpermiso) {
             $this->connection->insert('permiso_perfil', [
                 'modulo_idmodulo' => $idmodulo,
-                'perfil_idperfil' => $idperfil
+                'perfil_idperfil' => $idperfil,
             ]);
         }
     }
@@ -78,11 +77,11 @@ trait TMigrations
         }
 
         $this->connection->delete('modulo', [
-            'idmodulo' => $id
+            'idmodulo' => $id,
         ]);
 
         $this->connection->delete('permiso_perfil', [
-            'modulo_idmodulo' => $id
+            'modulo_idmodulo' => $id,
         ]);
     }
 
@@ -93,7 +92,7 @@ trait TMigrations
 
         if ($id) {
             $this->connection->update('busqueda', $data, [
-                'idbusqueda' => $id
+                'idbusqueda' => $id,
             ]);
         } else {
             $this->connection->insert('busqueda', $data);
@@ -111,7 +110,7 @@ trait TMigrations
 
         if ($id) {
             $this->connection->update('busqueda_componente', $data, [
-                'idbusqueda_componente' => $id
+                'idbusqueda_componente' => $id,
             ]);
         } else {
             $this->connection->insert('busqueda_componente', $data);
@@ -129,7 +128,7 @@ trait TMigrations
 
         if ($id) {
             $this->connection->update('busqueda_condicion', $data, [
-                'idbusqueda_condicion' => $id
+                'idbusqueda_condicion' => $id,
             ]);
         } else {
             $this->connection->insert('busqueda_condicion', $data);
@@ -172,7 +171,7 @@ trait TMigrations
         }
 
         $this->connection->delete('busqueda', [
-            'idbusqueda' => $idbusqueda
+            'idbusqueda' => $idbusqueda,
         ]);
 
         $sql = "SELECT idbusqueda_componente FROM busqueda_componente WHERE busqueda_idbusqueda=$idbusqueda";
@@ -181,14 +180,13 @@ trait TMigrations
         foreach ($records as $busquedaComponente) {
             $idbusquedaComponente = $busquedaComponente['idbusqueda_componente'];
             $this->connection->delete('busqueda_componente', [
-                'idbusqueda_componente' => $idbusquedaComponente
+                'idbusqueda_componente' => $idbusquedaComponente,
             ]);
 
             $this->connection->delete('busqueda_condicion', [
-                'fk_busqueda_componente' => $idbusquedaComponente
+                'fk_busqueda_componente' => $idbusquedaComponente,
             ]);
         }
-
     }
 
     protected function deleteFormat(string $formatName, Schema $schema): void
@@ -200,15 +198,15 @@ trait TMigrations
         $this->connection->delete(
             'campos_formato',
             [
-                'formato_idformato' => $idformato
-            ]
+                'formato_idformato' => $idformato,
+            ],
         );
 
         $this->connection->delete(
             'formato',
             [
-                'idformato' => $idformato
-            ]
+                'idformato' => $idformato,
+            ],
         );
 
         $table = "ft_$formatName";

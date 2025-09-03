@@ -132,7 +132,8 @@ class PqrController extends AbstractController
             ]);
 
             if (!$PqrFormField || !$PqrFormField->fk_campos_formato) {
-                throw new RuntimeException("No esta habilitado el campo dependencia");
+                $trans = GlobalContainer::getTranslator()->trans("no_esta_habilitado_campo_dependencia");
+                throw new RuntimeException($trans);
             }
 
             $allDependency = Dependencia::findAllByAttributes();

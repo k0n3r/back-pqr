@@ -10,8 +10,9 @@ use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\services\correo\EmailSaia;
 use App\services\correo\SendEmailSaia;
 use App\services\documento\DocumentoExpuestoService;
-use App\Exception\SaiaException;
+use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
+use RuntimeException;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\DistributionService;
 use Saia\controllers\documento\Transfer;
@@ -403,7 +404,11 @@ class FtPqrRespuestaService extends ModelService
                 );
 
                 if (!$save) {
-                    throw new SaiaException("No fue posible cambiar el estado de la tarea, ID:".$Tarea->getPK());
+                    $trans = GlobalContainer::getTranslator()->trans(
+                        "no_fue_posible_cambiar_estado_tarea",
+                        ['%taskId%' => $Tarea->getPK()],
+                    );
+                    throw new RuntimeException($trans);
                 }
             }
         }

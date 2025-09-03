@@ -3,7 +3,8 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\PqrService;
-use App\Exception\SaiaException;
+use App\services\GlobalContainer;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Bundles\pqr\Services\models\PqrFormField;
@@ -26,7 +27,8 @@ class ComponentsController extends AbstractController
             if (!$PqrFormField = PqrFormField::findByAttributes([
                 'name' => $request->get('name'),
             ])) {
-                throw new SaiaException("Falta el nombre del campo", 1);
+                $trans = GlobalContainer::getTranslator()->trans("falta_nombre_campo");
+                throw new BadRequestException($trans);
             }
             $data = $PqrFormField->getService()->getListDataForAutocomplete($request->get('data'));
         } catch (Throwable $th) {

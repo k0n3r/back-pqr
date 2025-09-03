@@ -3,8 +3,8 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Exception\SaiaException;
 use App\services\response\ISaiaResponse;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,9 +21,8 @@ class FtPqrRespuestaController extends AbstractController
         try {
             $FtPqrRespuestaService = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($idft)->getService();
             if (!$FtPqrRespuestaService->requestSurvey()) {
-                throw new SaiaException(
+                throw new RuntimeException(
                     $FtPqrRespuestaService->getErrorManager()->getMessage(),
-                    $FtPqrRespuestaService->getErrorManager()->getCode(),
                 );
             }
 

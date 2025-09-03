@@ -20,22 +20,25 @@ class PqrFormField extends Model
 
     protected function defineAttributes(): void
     {
+        $integer = [
+            'required',
+            'anonymous',
+            'show_report',
+            'required_anonymous',
+            'fk_pqr_html_field',
+            'fk_pqr_form',
+            'fk_campos_formato',
+            'is_system',
+            'orden',
+            'active',
+        ];
         $this->dbAttributes = (object)[
-            'safe'    => [
+            'safe'    => array_merge($integer, [
                 'name',
                 'label',
-                'required',
-                'anonymous',
-                'show_report',
-                'required_anonymous',
                 'setting',
-                'fk_pqr_html_field',
-                'fk_pqr_form',
-                'fk_campos_formato',
-                'is_system',
-                'orden',
-                'active',
-            ],
+            ]),
+            'integer' => $integer,
             'primary' => 'id',
             'table'   => 'pqr_form_fields',
         ];

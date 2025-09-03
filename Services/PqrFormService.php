@@ -4,7 +4,6 @@ namespace App\Bundles\pqr\Services;
 
 use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
-use InvalidArgumentException;
 use RuntimeException;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\formatos\Formato;
@@ -246,7 +245,8 @@ class PqrFormService extends ModelService
         ]);
 
         if (!$ModuloPadre) {
-            throw new RuntimeException("No se encontro el modulo del Reporte");
+            $trans = GlobalContainer::getTranslator()->trans("no_se_encontro_modulo_reporte");
+            throw new RuntimeException($trans);
         }
 
         $BusquedaComponente = BusquedaComponente::findByAttributes([
@@ -270,7 +270,9 @@ class PqrFormService extends ModelService
 
         $ModuloService = (new Modulo())->getService();
         if (!$ModuloService->save($data)) {
-            throw new InvalidArgumentException("No fue posible registrar el reporte de PQR por Dependencia");
+            $trans = GlobalContainer::getTranslator()->trans("no_fue_posible_registrar_reporte_pqr");
+
+            throw new RuntimeException($trans);
         }
     }
 
@@ -534,7 +536,8 @@ class PqrFormService extends ModelService
         $codeFunction = "<?php \n\n".implode("\n", $fieldCode);
 
         if (!file_put_contents($file, $codeFunction)) {
-            throw new RuntimeException("No fue posible crear las funciones del formulario");
+            $trans = GlobalContainer::getTranslator()->trans("no_fue_posible_crear_funciones_formulario");
+            throw new RuntimeException($trans);
         }
     }
 

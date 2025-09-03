@@ -4,7 +4,8 @@ namespace App\Bundles\pqr\Services;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\services\correo\SendEmailCallback;
-use App\Exception\SaiaException;
+use App\services\GlobalContainer;
+use RuntimeException;
 
 class FtPqrRespuestaEmailCallback implements SendEmailCallback
 {
@@ -18,7 +19,8 @@ class FtPqrRespuestaEmailCallback implements SendEmailCallback
                 $FtPqrRespuesta = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($params['idft']);
 
                 if (!$FtPqrRespuesta->getService()->saveHistory($params['descripcion'], $params['tipo'])) {
-                    throw new SaiaException("No fue posible guardar en el historial.");
+                    $trans = GlobalContainer::getTranslator()->trans("no_fue_posible_guardar_historial");
+                    throw new RuntimeException($trans);
                 }
                 break;
         }

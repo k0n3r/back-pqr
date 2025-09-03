@@ -4,10 +4,11 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
-use App\Exception\SaiaException;
+use App\services\GlobalContainer;
 use App\services\response\ISaiaResponse;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -69,7 +70,8 @@ class PqrResponseTimeController extends AbstractController
         $Connection->beginTransaction();
         try {
             if (!$id = $Request->get('fk_field_time', 0)) {
-                throw new SaiaException("Falta el identificador del campo de los tiempos de respuesta");
+                $trans = GlobalContainer::getTranslator()->trans("falta_identificador_tiempo_respuesta");
+                throw new BadRequestException($trans);
             }
 
             $PqrForm = PqrForm::getInstance();

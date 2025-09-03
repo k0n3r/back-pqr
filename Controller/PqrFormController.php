@@ -3,13 +3,16 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\FtPqrService;
-use App\Exception\SaiaException;
+use App\Helper\Exception\ExceptionHelper;
+use App\services\GlobalContainer;
 use Doctrine\DBAL\Connection;
 use Exception;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
+use RuntimeException;
 use Saia\models\funcion\Funcion;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,6 +24,7 @@ use Throwable;
 #[Route('/form', name: 'form_')]
 class PqrFormController extends AbstractController
 {
+    use ExceptionHelper;
 
     #[Route('/textFields', name: 'getTextFields', methods: ['GET'])]
     public function getTextFields(
@@ -28,10 +32,12 @@ class PqrFormController extends AbstractController
     ): Response {
         try {
             $saiaResponse->replaceData(PqrService::getTextFields());
-            $saiaResponse->setSuccess(1);
         } catch (Throwable $th) {
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -63,10 +69,12 @@ class PqrFormController extends AbstractController
                 ->getResponseConfiguration(true) ?? [];
 
             $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
         } catch (Throwable $th) {
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -81,9 +89,8 @@ class PqrFormController extends AbstractController
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->publish()) {
-                throw new SaiaException(
+                throw new RuntimeException(
                     $PqrFormService->getErrorManager()->getMessage(),
-                    $PqrFormService->getErrorManager()->getCode(),
                 );
             }
 
@@ -145,7 +152,6 @@ class PqrFormController extends AbstractController
             if (!$PqrFormService->updateSetting($request->get('data'))) {
                 throw new Exception(
                     $PqrFormService->getErrorManager()->getMessage(),
-                    $PqrFormService->getErrorManager()->getCode(),
                 );
             }
 
@@ -177,7 +183,6 @@ class PqrFormController extends AbstractController
             if (!$PqrFormService->updateResponseSetting($request->get('data'))) {
                 throw new Exception(
                     $PqrFormService->getErrorManager()->getMessage(),
-                    $PqrFormService->getErrorManager()->getCode(),
                 );
             }
 
@@ -252,7 +257,7 @@ class PqrFormController extends AbstractController
                 'show_empty' => $Request->get('show_empty', 1),
             ]);
             if (!$success) {
-                throw new SaiaException($PqrFormService->getErrorManager()->getMessage());
+                throw new RuntimeException($PqrFormService->getErrorManager()->getMessage());
             }
 
             $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
@@ -289,7 +294,8 @@ class PqrFormController extends AbstractController
             $PqrFormService = $PqrForm->getService();
 
             if ($status && !$PqrForm->getRow('sys_dependencia')) {
-                throw new SaiaException("Debe agregar al formulario el componente de Dependencia");
+                $trans = GlobalContainer::getTranslator()->trans("agregar_componente_dependencia");
+                throw new BadRequestException($trans);
             }
 
             $this->editOrCreateFunction(FtPqrService::FUNCTION_ADMIN_PQR, $status);
@@ -301,7 +307,7 @@ class PqrFormController extends AbstractController
             ]);
 
             if (!$success) {
-                throw new SaiaException($PqrFormService->getErrorManager()->getMessage());
+                throw new RuntimeException($PqrFormService->getErrorManager()->getMessage());
             }
 
             $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
@@ -342,7 +348,7 @@ class PqrFormController extends AbstractController
             ]);
 
             if (!$success) {
-                throw new SaiaException($PqrFormService->getErrorManager()->getMessage());
+                throw new RuntimeException($PqrFormService->getErrorManager()->getMessage());
             }
 
             $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
@@ -377,13 +383,13 @@ class PqrFormController extends AbstractController
             $fieldId = $Request->get('fieldId');
 
             if (!$fieldId) {
-                throw new SaiaException("Debe indicar el identificador del campo descripción");
+                throw new BadRequestException("indicar_identificador_campo_descripcion");
             }
 
             $PqrFormsService = (PqrForm::getInstance())->getService();
 
             if (!$PqrFormsService->updateFieldDescription((int)$fieldId)) {
-                throw new SaiaException($PqrFormsService->getErrorManager()->getMessage());
+                throw new RuntimeException($PqrFormsService->getErrorManager()->getMessage());
             }
 
             $saiaResponse->setSuccess(1);
@@ -415,7 +421,8 @@ class PqrFormController extends AbstractController
             $channels = $Request->get('channels', []);
 
             if (!$channels) {
-                throw new SaiaException("Debe indicar los canales de recepción");
+                $trans = GlobalContainer::getTranslator()->trans("indicar_canales_recepcion");
+                throw new BadRequestException($trans);
             }
 
             $PqrFormsService = (PqrForm::getInstance())->getService();
@@ -423,7 +430,7 @@ class PqrFormController extends AbstractController
             if (!$PqrFormsService->save([
                 'canal_recepcion' => json_encode($channels),
             ])) {
-                throw new SaiaException($PqrFormsService->getErrorManager()->getMessage());
+                throw new RuntimeException($PqrFormsService->getErrorManager()->getMessage());
             }
 
             $saiaResponse->setSuccess(1);

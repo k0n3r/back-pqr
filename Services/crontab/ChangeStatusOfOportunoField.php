@@ -4,9 +4,9 @@ namespace App\Bundles\pqr\Services\crontab;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\ArrayParameterType;
+use RuntimeException;
 use Saia\models\crontab\ICrontab;
 use Throwable;
 
@@ -40,7 +40,7 @@ class ChangeStatusOfOportunoField implements ICrontab
                 $FtPqr = UtilitiesPqr::getInstanceForFtId($record['idft']);
                 $Service = $FtPqr->getService();
                 if (!$Service->updateSysOportuno()) {
-                    throw new SaiaException($Service->getErrorManager()->getMessage());
+                    throw new RuntimeException($Service->getErrorManager()->getMessage());
                 }
                 $Connection->commit();
             } catch (Throwable $th) {

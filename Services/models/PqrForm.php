@@ -3,7 +3,8 @@
 namespace App\Bundles\pqr\Services\models;
 
 use App\Bundles\pqr\Services\controllers\WebservicePqr;
-use App\Exception\SaiaException;
+use App\services\GlobalContainer;
+use RuntimeException;
 use Saia\controllers\generator\webservice\IWsHtml;
 use Saia\core\model\Model;
 use Saia\models\formatos\CamposFormato;
@@ -30,24 +31,27 @@ class PqrForm extends Model
 
     protected function defineAttributes(): void
     {
+        $integer = [
+            'fk_formato',
+            'fk_contador',
+            'show_anonymous',
+            'show_label',
+            'show_empty',
+            'active',
+            'fk_field_time', //Campos Formato
+            'enable_filter_dep',
+            'description_field',
+            'enable_balancer',
+            'fk_field_balancer',  //Campos Formato,
+        ];
         $this->dbAttributes = (object)[
-            'safe'    => [
-                'fk_formato',
-                'fk_contador',
+            'safe'    => array_merge($integer, [
                 'label',
                 'name',
-                'show_anonymous',
-                'show_label',
-                'show_empty',
-                'active',
                 'response_configuration',
-                'fk_field_time', //Campos Formato
-                'enable_filter_dep',
-                'description_field',
-                'enable_balancer',
-                'fk_field_balancer',  //Campos Formato,
                 'canal_recepcion',    // Json
-            ],
+            ]),
+            'integer' => $integer,
             'primary' => 'id',
             'table'   => 'pqr_forms',
         ];
@@ -129,7 +133,8 @@ class PqrForm extends Model
         if (!self::$PqrForm) {
             $rows = PqrForm::findAllByAttributes(['active' => 1]);
             if (count($rows) != 1) {
-                throw new SaiaException("No se encontro un formulario activo");
+                $trans = GlobalContainer::getTranslator()->trans("no_se_encontro_formulario_activo");
+                throw new RuntimeException($trans);
             }
             self::$PqrForm = $rows[0];
         }

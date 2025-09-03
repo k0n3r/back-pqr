@@ -14,13 +14,15 @@ class PqrResponseTime extends Model
 
     protected function defineAttributes(): void
     {
+        $integer = [
+            'fk_campo_opciones',
+            'fk_sys_tipo',
+            'number_days',
+            'active',
+        ];
         $this->dbAttributes = (object)[
-            'safe'    => [
-                'fk_campo_opciones',
-                'fk_sys_tipo',
-                'number_days',
-                'active',
-            ],
+            'safe'    => $integer,
+            'integer' => $integer,
             'primary' => 'id',
             'table'   => 'pqr_response_times',
         ];

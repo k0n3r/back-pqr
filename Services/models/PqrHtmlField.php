@@ -13,14 +13,17 @@ class PqrHtmlField extends Model
 
     protected function defineAttributes(): void
     {
+        $integer = [
+            'uniq',
+            'active',
+        ];
         $this->dbAttributes = (object)[
-            'safe'    => [
+            'safe'    => array_merge($integer, [
                 'label',
                 'type',
                 'type_saia',
-                'uniq',
-                'active',
-            ],
+            ]),
+            'integer' => $integer,
             'primary' => 'id',
             'table'   => 'pqr_html_fields',
         ];

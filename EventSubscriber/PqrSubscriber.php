@@ -9,9 +9,10 @@ use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Event\tarea\TaskCreatedEvent;
 use App\Event\tarea\TaskDeletedEvent;
 use App\Event\tarea\TaskStatusCreatedEvent;
-use App\Exception\SaiaException;
+use App\services\GlobalContainer;
 use App\services\models\tareas\TareaService;
 use Exception;
+use RuntimeException;
 use Saia\models\documento\Documento;
 use Saia\models\tarea\Tarea;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -110,14 +111,14 @@ class PqrSubscriber implements EventSubscriberInterface
 
                 $PqrHistoryService = (new PqrHistory())->getService();
                 if (!$PqrHistoryService->save($history)) {
-                    throw new SaiaException(
+                    throw new RuntimeException(
                         $PqrHistoryService->getErrorManager()->getMessage(),
-                        $PqrHistoryService->getErrorManager()->getCode(),
                     );
                 }
 
                 if (!$this->updateEstado($Documento)) {
-                    throw new SaiaException("No fue posible actualizar el estado de la solicitud", 200);
+                    $trans = GlobalContainer::getTranslator()->trans("no_fue_posible_actualizar_estado_solicitud");
+                    throw new RuntimeException($trans);
                 }
             }
         }

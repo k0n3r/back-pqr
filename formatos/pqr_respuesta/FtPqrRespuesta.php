@@ -4,9 +4,9 @@ namespace App\Bundles\pqr\formatos\pqr_respuesta;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
-use App\Exception\SaiaException;
 use DateTime;
 use IntlDateFormatter;
+use RuntimeException;
 use Saia\controllers\localidad\MunicipioService;
 use Saia\models\anexos\Anexos;
 use Saia\models\Tercero;
@@ -88,9 +88,8 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     {
         if ($this->getService()->sendByEmail()) {
             if (!$this->getService()->validEmails()) {
-                throw new SaiaException(
+                throw new RuntimeException(
                     $this->getService()->getErrorManager()->getMessage(),
-                    $this->getService()->getErrorManager()->getCode(),
                 );
             }
         }
@@ -105,9 +104,8 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     {
         if ($this->getService()->sendByEmail()) {
             if (!$this->getService()->validEmails()) {
-                throw new SaiaException(
+                throw new RuntimeException(
                     $this->getService()->getErrorManager()->getMessage(),
-                    $this->getService()->getErrorManager()->getCode(),
                 );
             }
         }
@@ -128,9 +126,8 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
             !$this->getService()->saveDistribution() ||
             !$this->getService()->notifyEmail()
         ) {
-            throw new SaiaException(
+            throw new RuntimeException(
                 $this->getService()->getErrorManager()->getMessage(),
-                $this->getService()->getErrorManager()->getCode(),
             );
         }
 

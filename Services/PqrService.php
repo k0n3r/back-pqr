@@ -2,9 +2,9 @@
 
 namespace App\Bundles\pqr\Services;
 
-use App\Exception\SaiaException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\ParameterType;
+use RuntimeException;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\grafico\PantallaGrafico;
 use App\Bundles\pqr\Services\models\PqrForm;
@@ -310,7 +310,6 @@ class PqrService
      * Activa los indicadores preestablecidos
      *
      * @return void
-     * @throws SaiaException
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -319,7 +318,8 @@ class PqrService
         if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO,
         ])) {
-            throw new SaiaException("No se encuentra la pantalla de los grafico");
+            $trans = GlobalContainer::getTranslator()->trans("no_se_encuentra_pantalla_grafico");
+            throw new RuntimeException($trans);
         }
 
         $Qb = GlobalContainer::getConnection()

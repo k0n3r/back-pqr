@@ -14,13 +14,15 @@ class PqrNotification extends Model
 
     protected function defineAttributes(): void
     {
+        $integer = [
+            'fk_funcionario',
+            'fk_pqr_form',
+            'email',
+            'notify',
+        ];
         $this->dbAttributes = (object)[
-            'safe'    => [
-                'fk_funcionario',
-                'fk_pqr_form',
-                'email',
-                'notify',
-            ],
+            'safe'    => $integer,
+            'integer' => $integer,
             'primary' => 'id',
             'table'   => 'pqr_notifications',
         ];

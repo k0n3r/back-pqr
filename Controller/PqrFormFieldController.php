@@ -30,7 +30,6 @@ class PqrFormFieldController extends AbstractController
             if (!$PqrFormFieldService->save($request->get('data'))) {
                 throw new RuntimeException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
-                    $PqrFormFieldService->getErrorManager()->getCode(),
                 );
             }
 
@@ -62,7 +61,6 @@ class PqrFormFieldController extends AbstractController
             if (!$PqrFormFieldService->save($request->get('data'))) {
                 throw new RuntimeException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
-                    $PqrFormFieldService->getErrorManager()->getCode(),
                 );
             }
 
@@ -108,7 +106,6 @@ class PqrFormFieldController extends AbstractController
             if (!$PqrFormFieldService->updateActive($status)) {
                 throw new RuntimeException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
-                    $PqrFormFieldService->getErrorManager()->getCode(),
                 );
             }
 
@@ -138,7 +135,6 @@ class PqrFormFieldController extends AbstractController
             if (!$PqrFormFieldService->delete()) {
                 throw new RuntimeException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
-                    $PqrFormFieldService->getErrorManager()->getCode(),
                 );
             }
 

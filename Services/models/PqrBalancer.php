@@ -14,13 +14,15 @@ class PqrBalancer extends Model
 
     protected function defineAttributes(): void
     {
+        $integer = [
+            'fk_campo_opciones',
+            'fk_sys_tipo',
+            'fk_grupo',
+            'active',
+        ];
         $this->dbAttributes = (object)[
-            'safe'    => [
-                'fk_campo_opciones',
-                'fk_sys_tipo',
-                'fk_grupo',
-                'active',
-            ],
+            'safe'    => $integer,
+            'integer' => $integer,
             'primary' => 'id',
             'table'   => 'pqr_balancer',
         ];

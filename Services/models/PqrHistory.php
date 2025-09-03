@@ -24,15 +24,18 @@ class PqrHistory extends Model
 
     protected function defineAttributes(): void
     {
+        $integer = [
+            'idft',
+            'fk_funcionario',
+            'tipo',
+            'idfk',
+        ];
         $this->dbAttributes = (object)[
-            'safe'    => [
+            'safe'    => array_merge($integer, [
                 'fecha',
-                'fk_funcionario',
                 'descripcion',
-                'idft',
-                'tipo',
-                'idfk',
-            ],
+            ]),
+            'integer' => $integer,
             'date'    => [
                 'fecha',
             ],
