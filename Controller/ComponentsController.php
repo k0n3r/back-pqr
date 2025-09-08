@@ -3,8 +3,8 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\PqrService;
+use App\Exception\MissingParameterException;
 use App\services\GlobalContainer;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Bundles\pqr\Services\models\PqrFormField;
@@ -28,7 +28,7 @@ class ComponentsController extends AbstractController
                 'name' => $request->get('name'),
             ])) {
                 $trans = GlobalContainer::getTranslator()->trans("falta_nombre_campo");
-                throw new BadRequestException($trans);
+                throw new MissingParameterException($trans);
             }
             $data = $PqrFormField->getService()->getListDataForAutocomplete($request->get('data'));
         } catch (Throwable $th) {

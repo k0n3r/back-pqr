@@ -4,9 +4,9 @@ namespace App\Bundles\pqr\formatos\pqr;
 
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\Services\models\PqrForm;
+use App\Exception\ValidationFailedException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\ParameterType;
-use RuntimeException;
 use Saia\controllers\generator\component\Distribution;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\CamposFormato;
@@ -188,7 +188,7 @@ class FtPqr extends FtPqrProperties
     {
         $this->setDefaultValues();
         if (!$this->getService()->validSysEmail()) {
-            throw new RuntimeException($this->getService()->getErrorManager()->getMessage());
+            throw new ValidationFailedException($this->getService()->getErrorManager()->getMessage());
         }
 
         return true;
@@ -200,7 +200,7 @@ class FtPqr extends FtPqrProperties
     public function afterEdit(): bool
     {
         if (!$this->getService()->validSysEmail()) {
-            throw new RuntimeException($this->getService()->getErrorManager()->getMessage());
+            throw new ValidationFailedException($this->getService()->getErrorManager()->getMessage());
         }
 
         if ($this->getDocument()->isStarted()) {
@@ -242,7 +242,7 @@ class FtPqr extends FtPqrProperties
             !$this->getService()->updateFechaVencimiento() ||
             !$this->getService()->createTercero()
         ) {
-            throw new RuntimeException($this->getService()->getErrorManager()->getMessage());
+            throw new ValidationFailedException($this->getService()->getErrorManager()->getMessage());
         }
 
         return true;

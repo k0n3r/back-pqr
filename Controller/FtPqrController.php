@@ -5,15 +5,15 @@ namespace App\Bundles\pqr\Controller;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Exception\MissingParameterException;
+use App\Exception\ValidationFailedException;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Connection;
-use RuntimeException;
 use Saia\controllers\DateController;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use Saia\controllers\functions\CoreFunctions;
 use Saia\models\Tercero;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -201,7 +201,7 @@ class FtPqrController extends AbstractController
         try {
             if (!$request->get('sys_tercero')) {
                 $trans = GlobalContainer::getTranslator()->trans("no_fue_posible_actualizar_tercero");
-                throw new BadRequestException($trans);
+                throw new MissingParameterException($trans);
             }
 
             $Tercero = new Tercero($request->get('sys_tercero'));
@@ -243,7 +243,7 @@ class FtPqrController extends AbstractController
                     'descripcion'    => 'Se actualizo el tercero: '.implode(', ', $modified),
                 ];
                 if (!$PqrHistoryService->save($history)) {
-                    throw new RuntimeException(
+                    throw new ValidationFailedException(
                         $PqrHistoryService->getErrorManager()->getMessage(),
                     );
                 }
@@ -282,7 +282,7 @@ class FtPqrController extends AbstractController
         try {
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
             if (!$FtPqrService->updateType($request->get('data'))) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $FtPqrService->getErrorManager()->getMessage(),
                 );
             }
@@ -316,7 +316,7 @@ class FtPqrController extends AbstractController
 
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
             if (!$FtPqrService->finish($request->get('observaciones'))) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $FtPqrService->getErrorManager()->getMessage(),
                 );
             }

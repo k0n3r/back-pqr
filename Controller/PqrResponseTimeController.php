@@ -4,11 +4,12 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
+use App\Exception\MissingParameterException;
+use App\Helper\Exception\ExceptionHelper;
 use App\services\GlobalContainer;
 use App\services\response\ISaiaResponse;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,6 +18,8 @@ use Throwable;
 #[Route('/responseTimes', name: 'responseTimes_')]
 class PqrResponseTimeController extends AbstractController
 {
+    use ExceptionHelper;
+
     #[Route('/field/{id}', name: 'timesForField', methods: ['GET'])]
     public function timesForField(
         int $id,
@@ -53,10 +56,12 @@ class PqrResponseTimeController extends AbstractController
             }
 
             $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
         } catch (Throwable $th) {
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -71,7 +76,7 @@ class PqrResponseTimeController extends AbstractController
         try {
             if (!$id = $Request->get('fk_field_time', 0)) {
                 $trans = GlobalContainer::getTranslator()->trans("falta_identificador_tiempo_respuesta");
-                throw new BadRequestException($trans);
+                throw new MissingParameterException($trans);
             }
 
             $PqrForm = PqrForm::getInstance();
@@ -93,12 +98,14 @@ class PqrResponseTimeController extends AbstractController
                 $i++;
             }
 
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }

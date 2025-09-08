@@ -3,8 +3,8 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Exception\ValidationFailedException;
 use App\services\response\ISaiaResponse;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,7 +21,7 @@ class FtPqrRespuestaController extends AbstractController
         try {
             $FtPqrRespuestaService = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($idft)->getService();
             if (!$FtPqrRespuestaService->requestSurvey()) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $FtPqrRespuestaService->getErrorManager()->getMessage(),
                 );
             }

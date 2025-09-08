@@ -3,16 +3,15 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\FtPqrService;
+use App\Exception\MissingParameterException;
+use App\Exception\ValidationFailedException;
 use App\Helper\Exception\ExceptionHelper;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\Connection;
-use Exception;
 use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
-use RuntimeException;
 use Saia\models\funcion\Funcion;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -52,10 +51,12 @@ class PqrFormController extends AbstractController
                 ->getSetting();
 
             $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
         } catch (Throwable $th) {
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -89,7 +90,7 @@ class PqrFormController extends AbstractController
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->publish()) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
                 );
             }
@@ -100,13 +101,14 @@ class PqrFormController extends AbstractController
             ];
 
             $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
-
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -126,17 +128,18 @@ class PqrFormController extends AbstractController
                 ]);
 
                 if (!$status) {
-                    throw new Exception("No fue posible actualizar el orden", 1);
+                    throw new ValidationFailedException("No fue posible actualizar el orden");
                 }
             }
 
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
-
+        $saiaResponse->deleteProperty('success');
         return $saiaResponse->getResponse();
     }
 
@@ -150,7 +153,7 @@ class PqrFormController extends AbstractController
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateSetting($request->get('data'))) {
-                throw new Exception(
+                throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
                 );
             }
@@ -161,12 +164,14 @@ class PqrFormController extends AbstractController
             ];
 
             $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -180,18 +185,20 @@ class PqrFormController extends AbstractController
         $Connection->beginTransaction();
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
-            if (!$PqrFormService->updateResponseSetting($request->get('data'))) {
-                throw new Exception(
+            if (!$PqrFormService->updateResponseSetting($request->get('data', []))) {
+                throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
                 );
             }
 
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -215,7 +222,7 @@ class PqrFormController extends AbstractController
                     if (!$PqrFormFieldService->save([
                         'show_report' => 1,
                     ])) {
-                        throw new Exception("No fue posible actualizar", 200);
+                        throw new ValidationFailedException("No fue posible actualizar");
                     }
                 }
             }
@@ -225,12 +232,14 @@ class PqrFormController extends AbstractController
             $data = $PqrFormService->getDataPqrFormFields();
 
             $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -257,16 +266,18 @@ class PqrFormController extends AbstractController
                 'show_empty' => $Request->get('show_empty', 1),
             ]);
             if (!$success) {
-                throw new RuntimeException($PqrFormService->getErrorManager()->getMessage());
+                throw new ValidationFailedException($PqrFormService->getErrorManager()->getMessage());
             }
 
             $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -295,7 +306,7 @@ class PqrFormController extends AbstractController
 
             if ($status && !$PqrForm->getRow('sys_dependencia')) {
                 $trans = GlobalContainer::getTranslator()->trans("agregar_componente_dependencia");
-                throw new BadRequestException($trans);
+                throw new ValidationFailedException($trans);
             }
 
             $this->editOrCreateFunction(FtPqrService::FUNCTION_ADMIN_PQR, $status);
@@ -307,16 +318,18 @@ class PqrFormController extends AbstractController
             ]);
 
             if (!$success) {
-                throw new RuntimeException($PqrFormService->getErrorManager()->getMessage());
+                throw new ValidationFailedException($PqrFormService->getErrorManager()->getMessage());
             }
 
             $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -348,16 +361,18 @@ class PqrFormController extends AbstractController
             ]);
 
             if (!$success) {
-                throw new RuntimeException($PqrFormService->getErrorManager()->getMessage());
+                throw new ValidationFailedException($PqrFormService->getErrorManager()->getMessage());
             }
 
             $saiaResponse->replaceData($PqrFormService->getDataPqrForm());
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -383,21 +398,23 @@ class PqrFormController extends AbstractController
             $fieldId = $Request->get('fieldId');
 
             if (!$fieldId) {
-                throw new BadRequestException("indicar_identificador_campo_descripcion");
+                throw new MissingParameterException("indicar_identificador_campo_descripcion");
             }
 
             $PqrFormsService = (PqrForm::getInstance())->getService();
 
             if (!$PqrFormsService->updateFieldDescription((int)$fieldId)) {
-                throw new RuntimeException($PqrFormsService->getErrorManager()->getMessage());
+                throw new ValidationFailedException($PqrFormsService->getErrorManager()->getMessage());
             }
 
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -422,7 +439,7 @@ class PqrFormController extends AbstractController
 
             if (!$channels) {
                 $trans = GlobalContainer::getTranslator()->trans("indicar_canales_recepcion");
-                throw new BadRequestException($trans);
+                throw new MissingParameterException($trans);
             }
 
             $PqrFormsService = (PqrForm::getInstance())->getService();
@@ -430,15 +447,17 @@ class PqrFormController extends AbstractController
             if (!$PqrFormsService->save([
                 'canal_recepcion' => json_encode($channels),
             ])) {
-                throw new RuntimeException($PqrFormsService->getErrorManager()->getMessage());
+                throw new ValidationFailedException($PqrFormsService->getErrorManager()->getMessage());
             }
 
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }

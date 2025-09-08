@@ -3,6 +3,7 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\PqrService;
+use App\Helper\Exception\ExceptionHelper;
 use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,6 +14,7 @@ use Throwable;
 #[Route('/structure', name: 'structure_')]
 class StructureController extends AbstractController
 {
+    use ExceptionHelper;
 
     #[Route('/dataViewIndex', name: 'dataViewIndex', methods: ['GET'])]
     public function getDataViewIndex(
@@ -28,10 +30,12 @@ class StructureController extends AbstractController
             ];
 
             $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
         } catch (Throwable $th) {
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }

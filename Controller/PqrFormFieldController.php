@@ -2,11 +2,12 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Exception\ValidationFailedException;
+use App\Helper\Exception\ExceptionHelper;
 use App\services\GlobalContainer;
 use App\services\response\SaiaResponse;
 use Doctrine\DBAL\Connection;
 use App\services\response\ISaiaResponse;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,6 +18,8 @@ use Throwable;
 #[Route('/formField', name: 'formField_')]
 class PqrFormFieldController extends AbstractController
 {
+    use ExceptionHelper;
+
     #[Route('', name: 'store', methods: ['POST'])]
     public function store(
         Request $request,
@@ -28,21 +31,23 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField())->getService();
             if (!$PqrFormFieldService->save($request->get('data'))) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                 );
             }
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
 
-            $saiaResponse->setSuccess(1);
             $saiaResponse->replaceData($data);
 
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -59,21 +64,22 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->save($request->get('data'))) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                 );
             }
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
 
-            $saiaResponse->setSuccess(1);
             $saiaResponse->replaceData($data);
-
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -104,20 +110,22 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->updateActive($status)) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                 );
             }
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
 
-            $saiaResponse->setSuccess(1);
             $saiaResponse->replaceData($data);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -133,17 +141,19 @@ class PqrFormFieldController extends AbstractController
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
             if (!$PqrFormFieldService->delete()) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                 );
             }
 
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }

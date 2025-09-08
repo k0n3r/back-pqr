@@ -2,9 +2,10 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Exception\ValidationFailedException;
+use App\Helper\Exception\ExceptionHelper;
 use Doctrine\DBAL\Connection;
 use App\services\response\ISaiaResponse;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,6 +16,7 @@ use Throwable;
 #[Route('/notification', name: 'notification_')]
 class PqrNotificationController extends AbstractController
 {
+    use ExceptionHelper;
     #[Route('', name: 'store', methods: ['POST'])]
     public function store(
         Request $request,
@@ -28,21 +30,22 @@ class PqrNotificationController extends AbstractController
             if (!$PqrNotificationService->create([
                 'fk_funcionario' => $request->get('id'),
             ])) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
                 );
             }
 
             $data = $PqrNotificationService->getModel()->getDataAttributes();
 
-            $saiaResponse->setSuccess(1);
             $saiaResponse->replaceData($data);
-
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -59,21 +62,23 @@ class PqrNotificationController extends AbstractController
 
             $PqrNotificationService = (new PqrNotification($id))->getService();
             if (!$PqrNotificationService->update($request->get('data'))) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
                 );
             }
 
             $data = $PqrNotificationService->getModel()->getDataAttributes();
 
-            $saiaResponse->setSuccess(1);
             $saiaResponse->replaceData($data);
 
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
@@ -89,17 +94,19 @@ class PqrNotificationController extends AbstractController
 
             $PqrNotificationService = (new PqrNotification($id))->getService();
             if (!$PqrNotificationService->delete()) {
-                throw new RuntimeException(
+                throw new ValidationFailedException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
                 );
             }
 
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
         } catch (Throwable $th) {
             $Connection->rollBack();
+            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
             $saiaResponse->setMessage($th->getMessage());
+            $saiaResponse->deleteProperty('data');
         }
+        $saiaResponse->deleteProperty('success');
 
         return $saiaResponse->getResponse();
     }
