@@ -197,7 +197,7 @@ class PqrFormController extends AbstractController
         try {
 
             $PqrFormService = (PqrForm::getInstance())->getService();
-            if (!$PqrFormService->updateResponseSetting($request->get('data'))) {
+            if (!$PqrFormService->updateResponseSetting($request->get('data',[]))) {
                 throw new Exception(
                     $PqrFormService->getErrorManager()->getMessage(),
                     $PqrFormService->getErrorManager()->getCode(),
