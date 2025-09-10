@@ -180,7 +180,7 @@ class PqrFormController extends AbstractController
         $Connection->beginTransaction();
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
-            if (!$PqrFormService->updateResponseSetting($request->get('data'))) {
+            if (!$PqrFormService->updateResponseSetting($request->get('data',[]))) {
                 throw new Exception(
                     $PqrFormService->getErrorManager()->getMessage(),
                 );
