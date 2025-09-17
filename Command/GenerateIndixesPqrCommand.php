@@ -18,8 +18,24 @@ class GenerateIndixesPqrCommand extends GenerateIndixesCommand
                 'documento_iddocumento',
                 'sys_estado',
                 'sys_tipo',
-                'sys_dependencia',
                 'sys_oportuno',
+                'sys_dependencia',
+                [
+                    'documento_iddocumento',
+                    'sys_estado',
+                ],
+                [
+                    'documento_iddocumento',
+                    'sys_oportuno',
+                ],
+                [
+                    'documento_iddocumento',
+                    'sys_tipo',
+                ],
+                [
+                    'documento_iddocumento',
+                    'sys_dependencia',
+                ],
             ],
             'ft_pqr_calificacion' => [
                 'documento_iddocumento',
@@ -64,22 +80,6 @@ class GenerateIndixesPqrCommand extends GenerateIndixesCommand
             'pqr_response_times'  => [
                 'fk_campo_opciones',
                 'fk_sys_tipo',
-            ],
-            'tarea'               => [
-                'relacion',
-                'relacion_id',
-            ],
-            'tarea_funcionario'   => [
-                'fk_tarea',
-                'tipo',
-                'externo',
-                'usuario',
-            ],
-            'tarea_estado'        => [
-                'fk_funcionario',
-                'fk_tarea',
-                'valor',
-                'estado',
             ],
         ];
     }
