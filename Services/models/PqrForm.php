@@ -13,8 +13,8 @@ use App\Bundles\pqr\Services\PqrFormService;
 
 class PqrForm extends Model
 {
-    private ?Formato $Formato = null;
     use TModels;
+    private ?Formato $Formato = null;
 
     public const string NOMBRE_REPORTE_PENDIENTE = 'rep_pendientes_pqr';
     public const string NOMBRE_REPORTE_PROCESO = 'rep_proceso_pqr';

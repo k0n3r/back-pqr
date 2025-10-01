@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Bundles\pqr\Services\models;
-
 
 use App\Bundles\pqr\Services\PqrResponseTimeService;
 use Saia\core\model\Model;

@@ -23,7 +23,6 @@ use Throwable;
 
 class PqrController extends AbstractController
 {
-
     use ExceptionHelper;
 
     #[Route('/searchByNumber', name: 'search', methods: ['GET'])]

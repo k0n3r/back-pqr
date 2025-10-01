@@ -17,10 +17,8 @@ use Saia\models\documento\Documento;
 use Saia\models\tarea\Tarea;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-
 class PqrSubscriber implements EventSubscriberInterface
 {
-
     public static function getSubscribedEvents(): array
     {
         return [

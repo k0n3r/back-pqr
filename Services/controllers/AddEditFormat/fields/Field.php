@@ -3,7 +3,6 @@
 namespace App\Bundles\pqr\Services\controllers\AddEditFormat\fields;
 
 use App\Bundles\pqr\Services\models\PqrFormField;
-
 use Saia\models\formatos\CamposFormato;
 
 abstract class Field

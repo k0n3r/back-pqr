@@ -16,7 +16,7 @@ class PqrBackup extends Model
             'fk_pqr',
         ];
         $this->dbAttributes = (object)[
-            'safe'    => array_merge($integer,[
+            'safe'    => array_merge($integer, [
                 'data_json',
             ]),
             'integer' => $integer,

@@ -9,7 +9,6 @@ use RuntimeException;
 
 class FtPqrRespuestaEmailCallback implements SendEmailCallback
 {
-
     public function execute(array $params): void
     {
         switch ($params['option']) {

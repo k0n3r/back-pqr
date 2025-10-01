@@ -201,8 +201,8 @@ class FtPqrService extends ModelService
             case 'Date':
                 $data[$label] = $this->getModel()->getFieldValue($fieldName);
                 break;
-            case 'AutocompleteD';
-            case 'AutocompleteM';
+            case 'AutocompleteD':
+            case 'AutocompleteM':
                 $value = null;
                 if ($this->getModel()->$fieldName) {
                     $value = $PqrFormField->getService()->getListDataForAutocomplete(
@@ -1176,9 +1176,9 @@ class FtPqrService extends ModelService
 
         switch ($option) {
             case FtPqrRespuesta::DISTRIBUCION_RECOGIDA_ENTREGA:
-//                $recogida = DistributionService::ESTADO_RECOGIDA;
-//                $estado = DistributionService::DISTRIBUCION_POR_RECEPCIONAR;
-//                break;
+                //                $recogida = DistributionService::ESTADO_RECOGIDA;
+                //                $estado = DistributionService::DISTRIBUCION_POR_RECEPCIONAR;
+                //                break;
 
             case FtPqrRespuesta::DISTRIBUCION_SOLO_ENTREGA:
                 $recogida = DistributionService::ESTADO_ENTREGA;

@@ -9,7 +9,6 @@ use Saia\models\formatos\CampoOpciones;
 
 class PqrCustomizable implements Customizable
 {
-
     /**
      * @param string $methodName
      * @param array $params

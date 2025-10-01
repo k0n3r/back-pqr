@@ -12,7 +12,6 @@ use Saia\core\model\ModelFormat;
 use Saia\models\formatos\Formato;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\documento\Documento;
-
 use Throwable;
 
 class UtilitiesPqr

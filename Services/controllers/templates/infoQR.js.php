@@ -1,4 +1,5 @@
 <?php
+
 $code = <<<JAVASCRIPT
 $(function () {
     const d = getVariableFromUrl('data');

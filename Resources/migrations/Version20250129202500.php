@@ -35,8 +35,10 @@ final class Version20250129202500 extends AbstractMigration
                 $delete = "DELETE FROM migrations WHERE version LIKE '%pqr%$migration'";
                 $this->connection->executeStatement($delete);
             } else {
-                $this->abortIf(true,
-                    "si es una instalacion nueva de PQR haga un return al inicio, de lo contrario debe correr las migraciones en la rama master");
+                $this->abortIf(
+                    true,
+                    "si es una instalacion nueva de PQR haga un return al inicio, de lo contrario debe correr las migraciones en la rama master"
+                );
             }
         }
 

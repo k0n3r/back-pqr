@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Throwable;
 
-
 #[Route('/balancer', name: 'responseTimes_')]
 class PqrBalancerController extends AbstractController
 {

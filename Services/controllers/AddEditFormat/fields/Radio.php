@@ -4,7 +4,6 @@ namespace App\Bundles\pqr\Services\controllers\AddEditFormat\fields;
 
 class Radio extends Field implements IField
 {
-
     use TField;
 
     /**

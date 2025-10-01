@@ -21,7 +21,6 @@ use Saia\models\formatos\CampoOpciones;
 
 class PqrFormFieldService extends ModelService
 {
-
     /**
      * Bandera que indica el numero minimo donde empezara el orden de los campos
      */

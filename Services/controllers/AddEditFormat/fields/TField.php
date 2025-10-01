@@ -6,7 +6,6 @@ use ReflectionClass;
 
 trait TField
 {
-
     /**
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28

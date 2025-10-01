@@ -6,7 +6,6 @@ use Stringy\Stringy;
 
 trait TModels
 {
-
     /**
      * obtiene los datos de las atributos
      *

@@ -9,7 +9,6 @@ use App\Bundles\pqr\Services\models\PqrNotyMessage;
 
 class PqrNotyMessageService extends ModelService
 {
-
     /**
      * @inheritDoc
      */

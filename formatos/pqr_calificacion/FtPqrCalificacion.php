@@ -4,7 +4,6 @@ namespace App\Bundles\pqr\formatos\pqr_calificacion;
 
 class FtPqrCalificacion extends FtPqrCalificacionProperties
 {
-
     public function showCalification(): string
     {
         $fields = $this->getFormat()->getFields();

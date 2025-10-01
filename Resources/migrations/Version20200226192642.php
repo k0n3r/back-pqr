@@ -10,7 +10,6 @@ use Doctrine\DBAL\Schema\Schema;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use Doctrine\Migrations\AbstractMigration;
 
-
 /**
  * Auto-generated Migration: Please modify to your needs!
  */

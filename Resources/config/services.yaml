@@ -1,0 +1,22 @@
+# Este archivo es el punto de entrada de la configuración de servicios del módulo.
+# https://symfony.com/doc/current/service_container.html
+
+services:
+  # Configuración por defecto para los servicios en este módulo
+  _defaults:
+    autowire: true      # Inyecta dependencias automáticamente
+    autoconfigure: true # Registra servicios como comandos, suscriptores de eventos, etc.
+
+  # Hace que las clases de este namespace estén disponibles como servicios.
+  App\Bundles\pqr\:
+    resource: '../../*'
+    exclude:
+      - '../../Resources/'
+      - '../../templates/'
+      - '../../translations/'
+      - '../../formatos/'
+      - '../../helpers/'
+      - '../../Services/'
+
+imports:
+  - { resource: "./migrations.yaml" }

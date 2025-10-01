@@ -7,7 +7,6 @@ use Saia\controllers\generator\webservice\IWsFields;
 
 class Tratamiento implements IWsFields
 {
-
     /**
      * Instancia de PqrFormField
      *
