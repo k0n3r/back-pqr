@@ -2,16 +2,14 @@
 
 namespace App\Bundles\pqr\helpers;
 
-use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
-use App\services\correo\EmailSaia;
-use App\services\correo\SendEmailSaia;
-use App\services\GlobalContainer;
-use Saia\controllers\anexos\FileJson;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
+use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+use App\Service\LegacyServiceLocator;
+use Saia\controllers\anexos\FileJson;
 use Saia\core\model\ModelFormat;
+use Saia\models\documento\Documento;
 use Saia\models\formatos\Formato;
 use Saia\models\tarea\TareaEstado;
-use Saia\models\documento\Documento;
 use Throwable;
 
 class UtilitiesPqr
@@ -83,19 +81,6 @@ class UtilitiesPqr
         return new $className($idft);
     }
 
-    public static function notifyAdministrator(string $message, array $log = []): void
-    {
-        $Logger = GlobalContainer::getLogger();
-        $Logger->error($message, $log);
-
-        $EmailSaia = (new EmailSaia())
-            ->subject("Error en el modulo de PQR")
-            ->htmlWithTemplate($message)
-            ->to("soporte@cerok.com", "andres.agudelo@cerok.com");
-
-        (new SendEmailSaia($EmailSaia))->send();
-    }
-
     /**
      * Obtiene la cantidad de tareas y cantidad de tareas finalizadas
      * del documento
@@ -165,12 +150,11 @@ class UtilitiesPqr
 
             return $_SERVER['APP_DOMAIN'].$FileTemporal->getRouteFromRoot();
         } catch (Throwable $th) {
-            $log = [
-                'errorMessage' => $th->getMessage(),
-                'iddocumento'  => $Documento->getPK(),
-            ];
-            $message = "No se ha podido generar el pdf del documento con radicado: $Documento->numero (ID:{$Documento->getPK()})";
-            self::notifyAdministrator($message, $log);
+            $legacyService = LegacyServiceLocator::getInstance();
+            $legacyService->getLogger()->error($th->getMessage(), [
+                'documentId' => $Documento->getPK(),
+                'trace'      => $th->getTraceAsString(),
+            ]);
         }
 
         return '#';

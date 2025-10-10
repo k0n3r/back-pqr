@@ -6,13 +6,13 @@ use App\Bundles\pqr\Services\models\PqrBalancer;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Exception\MissingParameterException;
 use App\Helper\Exception\ExceptionHelper;
-use App\services\GlobalContainer;
 use App\services\response\ISaiaResponse;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 #[Route('/balancer', name: 'responseTimes_')]
@@ -67,11 +67,12 @@ class PqrBalancerController extends AbstractController
         Request $Request,
         ISaiaResponse $saiaResponse,
         Connection $Connection,
+        TranslatorInterface $translator,
     ): Response {
         $Connection->beginTransaction();
         try {
             if (!$id = $Request->get('fk_field_balancer', 0)) {
-                $trans = GlobalContainer::getTranslator()->trans("falta_identificador_tiempo_respuesta");
+                $trans = $translator->trans("falta_identificador_tiempo_respuesta");
                 throw new MissingParameterException($trans);
             }
 

@@ -4,21 +4,36 @@ namespace App\Bundles\pqr\EventSubscriber;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\Services\FtPqrRespuestaService;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Event\tarea\TaskCreatedEvent;
 use App\Event\tarea\TaskDeletedEvent;
 use App\Event\tarea\TaskStatusCreatedEvent;
-use App\services\GlobalContainer;
+use App\EventSubscriber\Mailer\ExtractInfoEmailTrait;
 use App\services\models\tareas\TareaService;
 use Exception;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Saia\models\documento\Documento;
 use Saia\models\tarea\Tarea;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Mailer\Event\SentMessageEvent;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
-class PqrSubscriber implements EventSubscriberInterface
+readonly class PqrSubscriber implements EventSubscriberInterface
 {
+    use ExtractInfoEmailTrait;
+
+
+    public function __construct(
+        private LoggerInterface $logger,
+        private TranslatorInterface $translator,
+    ) {
+    }
+
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -31,6 +46,7 @@ class PqrSubscriber implements EventSubscriberInterface
             TaskStatusCreatedEvent::class => [
                 ['onTaskStatusCreatedEvent', -1],
             ],
+            SentMessageEvent::class       => ['onSent', -1],
         ];
     }
 
@@ -115,7 +131,7 @@ class PqrSubscriber implements EventSubscriberInterface
                 }
 
                 if (!$this->updateEstado($Documento)) {
-                    $trans = GlobalContainer::getTranslator()->trans("no_fue_posible_actualizar_estado_solicitud");
+                    $trans = $this->translator->trans("no_fue_posible_actualizar_estado_solicitud");
                     throw new RuntimeException($trans);
                 }
             }
@@ -157,5 +173,42 @@ class PqrSubscriber implements EventSubscriberInterface
         }
 
         return $Ft->getService()->changeStatus($estado);
+    }
+
+    public function onSent(SentMessageEvent $event): void
+    {
+        try {
+            $message = $event->getMessage()->getOriginalMessage();
+            $params = $this->extractDataFromHeaders($message->getHeaders());
+            $isPqr = $params['isRespuetaPqr'] ?? null;
+
+            if (!$isPqr) {
+                return;
+            }
+
+            switch ($params['option']) {
+                case FtPqrRespuestaService::OPTION_EMAIL_RESPUESTA:
+                case FtPqrRespuestaService::OPTION_EMAIL_CALIFICACION:
+
+                    $FtPqrRespuesta = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($params['idft']);
+
+                    if (!$FtPqrRespuesta->getService()->saveHistory($params['descripcion'], $params['tipo'])) {
+                        $trans = $this->translator->trans("no_fue_posible_guardar_historial");
+                        throw new RuntimeException($trans);
+                    }
+                    break;
+            }
+
+            $this->logger->info("[PQR] Email sent successfully", [
+                'subject'    => $message->getSubject() ?? '(sin asunto)',
+                'documentId' => $params['documentId'] ?? 0,
+                'messageId'  => $event->getMessage()->getMessageId(),
+            ]);
+        } catch (Throwable $e) {
+            $this->logger->error("[PQR] Error processing sent email", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
     }
 }

@@ -2,23 +2,24 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
 use App\Helper\Exception\ExceptionHelper;
-use App\services\GlobalContainer;
+use App\services\response\ISaiaResponse;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
+use Saia\controllers\CryptController;
 use Saia\controllers\DateController;
 use Saia\models\Dependencia;
 use Saia\models\documento\Documento;
-use Saia\controllers\CryptController;
-use App\Bundles\pqr\formatos\pqr\FtPqr;
-use App\services\response\ISaiaResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 class PqrController extends AbstractController
@@ -29,14 +30,13 @@ class PqrController extends AbstractController
     public function search(
         Request $request,
         ISaiaResponse $saiaResponse,
+        Connection $Connection,
     ): Response {
         try {
             if (empty($request->get('numero'))) {
                 throw new MissingParameterException("Se debe indicar el numero de radicado");
             }
             $email = trim($request->get('sys_email'));
-
-            $Connection = GlobalContainer::getConnection();
 
             $Qb = $Connection
                 ->createQueryBuilder()
@@ -122,6 +122,7 @@ class PqrController extends AbstractController
     #[Route('/contentDependencia', name: 'contentDependencia', methods: ['GET'])]
     public function contentDependencia(
         ISaiaResponse $saiaResponse,
+        TranslatorInterface $translator,
     ): Response {
         try {
             $field = PqrFormField::FIELD_NAME_SYS_DEPENDENCIA;
@@ -130,7 +131,7 @@ class PqrController extends AbstractController
             ]);
 
             if (!$PqrFormField || !$PqrFormField->fk_campos_formato) {
-                $trans = GlobalContainer::getTranslator()->trans("no_esta_habilitado_campo_dependencia");
+                $trans = $translator->trans("no_esta_habilitado_campo_dependencia");
                 throw new ValidationFailedException($trans);
             }
 
@@ -147,7 +148,7 @@ class PqrController extends AbstractController
                     <label $i18n>$PqrFormField->label</label>
                     <div class='form-group'>
                         <select class='full-width' name='bqCampo_$field' id='$field'>
-                           $options 
+                           $options
                         </select>
                         <input type="hidden" value="=" name="bqCondicional_$field">
                         <input type="hidden" value="1" name="bqNumerico_$field">

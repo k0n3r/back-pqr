@@ -3,17 +3,17 @@
 namespace App\Bundles\pqr\Services\models;
 
 use App\Bundles\pqr\Services\controllers\WebservicePqr;
-use App\services\GlobalContainer;
+use App\Bundles\pqr\Services\PqrFormService;
 use RuntimeException;
 use Saia\controllers\generator\webservice\IWsHtml;
 use Saia\core\model\Model;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
-use App\Bundles\pqr\Services\PqrFormService;
 
 class PqrForm extends Model
 {
     use TModels;
+
     private ?Formato $Formato = null;
 
     public const string NOMBRE_REPORTE_PENDIENTE = 'rep_pendientes_pqr';
@@ -133,8 +133,7 @@ class PqrForm extends Model
         if (!self::$PqrForm) {
             $rows = PqrForm::findAllByAttributes(['active' => 1]);
             if (count($rows) != 1) {
-                $trans = GlobalContainer::getTranslator()->trans("no_se_encontro_formulario_activo");
-                throw new RuntimeException($trans);
+                throw new RuntimeException('No active form was found');
             }
             self::$PqrForm = $rows[0];
         }

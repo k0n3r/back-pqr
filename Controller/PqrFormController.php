@@ -3,21 +3,21 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\FtPqrService;
+use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Services\PqrFormFieldService;
+use App\Bundles\pqr\Services\PqrService;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
 use App\Helper\Exception\ExceptionHelper;
-use App\services\GlobalContainer;
-use Doctrine\DBAL\Connection;
-use App\Bundles\pqr\Services\PqrService;
 use App\services\response\ISaiaResponse;
-use App\Bundles\pqr\Services\models\PqrForm;
+use Doctrine\DBAL\Connection;
 use Saia\models\funcion\Funcion;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\PqrFormFieldService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 #[Route('/form', name: 'form_')]
@@ -140,6 +140,7 @@ class PqrFormController extends AbstractController
             $saiaResponse->deleteProperty('data');
         }
         $saiaResponse->deleteProperty('success');
+
         return $saiaResponse->getResponse();
     }
 
@@ -288,6 +289,7 @@ class PqrFormController extends AbstractController
      * @param Request $Request
      * @param ISaiaResponse $saiaResponse
      * @param Connection $Connection
+     * @param TranslatorInterface $translator
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
      */
@@ -296,6 +298,7 @@ class PqrFormController extends AbstractController
         Request $Request,
         ISaiaResponse $saiaResponse,
         Connection $Connection,
+        TranslatorInterface $translator,
     ): Response {
         $Connection->beginTransaction();
         try {
@@ -305,7 +308,7 @@ class PqrFormController extends AbstractController
             $PqrFormService = $PqrForm->getService();
 
             if ($status && !$PqrForm->getRow('sys_dependencia')) {
-                $trans = GlobalContainer::getTranslator()->trans("agregar_componente_dependencia");
+                $trans = $translator->trans("agregar_componente_dependencia");
                 throw new ValidationFailedException($trans);
             }
 
@@ -377,15 +380,6 @@ class PqrFormController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * Actualiza el campo que quedara como descripcion de la pqr adicional al tipo.
-     *
-     * @param ISaiaResponse $saiaResponse
-     * @param Request $Request
-     * @param Connection $Connection
-     * @return Response
-     * @author Julian Otalvaro <julian.otalvaro@cerok.com> 2023-10-11
-     */
     #[Route('/descriptionField', name: 'descriptionField', methods: ['PUT'])]
     public function descriptionField(
         ISaiaResponse $saiaResponse,
@@ -419,18 +413,12 @@ class PqrFormController extends AbstractController
         return $saiaResponse->getResponse();
     }
 
-    /**
-     * @param ISaiaResponse $saiaResponse
-     * @param Request $Request
-     * @param Connection $Connection
-     * @return Response
-     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-09-03
-     */
     #[Route('/receivingchannels', name: 'receivingchannels', methods: ['PUT'])]
     public function receivingchannels(
         ISaiaResponse $saiaResponse,
         Request $Request,
         Connection $Connection,
+        TranslatorInterface $translator,
     ): Response {
         $Connection->beginTransaction();
 
@@ -438,7 +426,7 @@ class PqrFormController extends AbstractController
             $channels = $Request->get('channels', []);
 
             if (!$channels) {
-                $trans = GlobalContainer::getTranslator()->trans("indicar_canales_recepcion");
+                $trans = $translator->trans("indicar_canales_recepcion");
                 throw new MissingParameterException($trans);
             }
 

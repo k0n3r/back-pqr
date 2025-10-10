@@ -2,15 +2,17 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\Bundles\pqr\formatos\pqr\FtPqr;
+use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrBackup;
 use App\Bundles\pqr\Services\models\PqrBalancer;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
 use App\services\correo\EmailSaia;
-use App\services\correo\SendEmailSaia;
-use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use DateInterval;
 use DateTime;
@@ -18,19 +20,15 @@ use Doctrine\DBAL\ParameterType;
 use InvalidArgumentException;
 use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
+use Saia\controllers\DateController;
 use Saia\controllers\DistributionService;
+use Saia\controllers\documento\SaveFt;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\functions\CoreFunctions;
 use Saia\controllers\generator\component\Distribution;
 use Saia\controllers\TerceroService;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\Formato;
-use Saia\controllers\DateController;
-use Saia\controllers\documento\SaveFt;
-use App\Bundles\pqr\formatos\pqr\FtPqr;
-use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Bundles\pqr\Services\models\PqrHistory;
-use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use Saia\models\grupo\Grupo;
 use Saia\models\tarea\Tarea;
 use Saia\models\Tercero;
@@ -1380,7 +1378,8 @@ class FtPqrService extends ModelService
      */
     protected function getUserForGroup(Grupo $Grupo): array
     {
-        return GlobalContainer::getConnection()
+        return $this->legacyService
+            ->getConnection()
             ->createQueryBuilder()
             ->select('dc.funcionario_idfuncionario as idfuncionario,gf.fk_dependencia_cargo')
             ->from('grupo_funcionario', 'gf')
@@ -1402,7 +1401,8 @@ class FtPqrService extends ModelService
      */
     protected function getTaskForUser(int $idfuncionario): int
     {
-        return (int)GlobalContainer::getConnection()
+        return (int)$this->legacyService
+            ->getConnection()
             ->createQueryBuilder()
             ->select('cant_task')
             ->from('vpqr_tareas')

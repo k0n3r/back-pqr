@@ -8,7 +8,6 @@ use App\EventSubscriber\middlewares\IHasCaptcha;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
 use App\Helper\Exception\ExceptionHelper;
-use App\services\GlobalContainer;
 use App\services\response\ISaiaResponse;
 use Doctrine\DBAL\Connection;
 use Saia\controllers\SaveDocument;
@@ -18,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 #[Route('/captcha', name: 'captcha_')]
@@ -29,6 +29,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
      * @param Request $Request
      * @param ISaiaResponse $saiaResponse
      * @param Connection $Connection
+     * @param TranslatorInterface $translator
      * @return Response
      */
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
@@ -36,35 +37,36 @@ class CaptchaController extends AbstractController implements IHasCaptcha
         Request $Request,
         ISaiaResponse $saiaResponse,
         Connection $Connection,
+        TranslatorInterface $translator,
     ): Response {
         $Connection->beginTransaction();
         try {
             if (empty($Request->get('formatId'))) {
-                $trans = GlobalContainer::getTranslator()->trans('indicar_formato');
+                $trans = $translator->trans('indicar_formato');
                 throw new MissingParameterException($trans);
             }
 
             if (empty($Request->get('dependencia'))) {
-                $trans = GlobalContainer::getTranslator()->trans('indicar_rol_creador');
+                $trans = $translator->trans('indicar_rol_creador');
                 throw new MissingParameterException($trans);
             }
 
             $VfuncionarioDc = VfuncionarioDc::findByRole($Request->get('dependencia'));
             if (!$VfuncionarioDc) {
-                $trans = GlobalContainer::getTranslator()->trans('rol_creador_incorrecto');
+                $trans = $translator->trans('rol_creador_incorrecto');
                 throw new MissingParameterException($trans);
             }
 
             $Request->request->set('webservice', 1);
             $Formato = new Formato($Request->get('formatId'));
             if ($Formato->isRequiredGeolocation() && empty($Request->get('geolocalizacion'))) {
-                $trans = GlobalContainer::getTranslator()->trans('debe_permitir_geolocalizacion');
+                $trans = $translator->trans('debe_permitir_geolocalizacion');
                 throw new ValidationFailedException($trans);
             }
 
             $SaveDocument = new SaveDocument($Formato, $VfuncionarioDc);
             if (!$SaveDocument->create($Request->request->all())) {
-                $trans = GlobalContainer::getTranslator()->trans('no_fue_posible_generar_documento');
+                $trans = $translator->trans('no_fue_posible_generar_documento');
                 throw new ValidationFailedException($trans);
             }
 

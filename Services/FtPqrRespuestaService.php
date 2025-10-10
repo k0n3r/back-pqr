@@ -7,13 +7,11 @@ use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
-use App\services\correo\EmailSaia;
-use App\services\correo\SendEmailSaia;
+use App\EventSubscriber\Mailer\MailSubscriber;
 use App\services\documento\DocumentoExpuestoService;
-use App\services\GlobalContainer;
+use App\services\Gaufrette\Gaufrette\FilesystemForJson;
 use App\services\models\ModelService\ModelService;
 use RuntimeException;
-use Saia\controllers\anexos\FileJson;
 use Saia\controllers\DistributionService;
 use Saia\controllers\documento\Transfer;
 use Saia\controllers\functions\CoreFunctions;
@@ -22,6 +20,8 @@ use Saia\models\documento\DocumentoExpuesto;
 use Saia\models\formatos\Formato;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\Tercero;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 
 class FtPqrRespuestaService extends ModelService
 {
@@ -228,27 +228,28 @@ class FtPqrRespuestaService extends ModelService
             $message .= "Califica nuestro servicio haciendo clic en el siguiente enlace: <a href='$url'>Calificar el servicio</a> .<br/><br/>";
         }
 
+        $email = (new Email());
+
         $DocumentoRespuesta = $FtPqrRespuesta->getDocument();
-        $anexos[] = new FileJson($DocumentoRespuesta->getPdfJson());
+        $file = FilesystemForJson::getFileJson($DocumentoRespuesta->getPdfJson());
+        $email->attach($file->getContent());
 
         $DocumentoService = $DocumentoRespuesta->getService();
         if ($records = $DocumentoService->getAllFilesAnexos(true)) {
             foreach ($records as $Anexos) {
-                $anexos[] = new FileJson($Anexos->ruta);
+                $file = FilesystemForJson::getFileJson($Anexos->ruta);
+                $email->attach($file->getContent());
             }
         }
 
-        $EmailSaia = (new EmailSaia())
+        $email
             ->subject($subject)
-            ->htmlWithTemplate($message)
-            ->to($FtPqrRespuesta->getTercero()->getEmail())
-            ->addAttachments($anexos)
-            ->saveShipmentTraceability($DocumentoRespuesta->getPK())
-            ->defineCallbackClassName(FtPqrRespuestaEmailCallback::class);
+            ->html($message)
+            ->to(new Address($FtPqrRespuesta->getTercero()->getEmail(), $FtPqrRespuesta->getTercero()->getName()));
 
         $emailCopy = $this->getCopyEmail();
         if ($emailCopy) {
-            $EmailSaia->cc(...$emailCopy);
+            $email->cc(...$emailCopy);
         }
 
         $description = "Se le notificó a: {$FtPqrRespuesta->getTercero()->getEmail()}";
@@ -257,14 +258,21 @@ class FtPqrRespuestaService extends ModelService
             $description .= " con copia a: ($texCopia)";
         }
 
-        $EmailSaia->defineParamsCallbackClassName([
-            'option'      => self::OPTION_EMAIL_RESPUESTA,
-            'idft'        => $this->getModel()->getPK(),
-            'descripcion' => $description,
-            'tipo'        => PqrHistory::TIPO_NOTIFICACION,
-        ]);
+        $params = [
+            'isRespuetaPqr' => 1,
+            'documentId'    => $DocumentoRespuesta->getPK(),
+            'option'        => self::OPTION_EMAIL_RESPUESTA,
+            'idft'          => $this->getModel()->getPK(),
+            'descripcion'   => $description,
+            'tipo'          => PqrHistory::TIPO_NOTIFICACION,
+        ];
 
-        (new SendEmailSaia($EmailSaia))->send();
+        $email->getHeaders()->addTextHeader(
+            MailSubscriber::HEADER_METADATA,
+            json_encode($params),
+        );
+
+        $this->legacyService->getMailerService()->send($email, 'pqr.respuesta.respuesta');
 
         return true;
     }
@@ -321,13 +329,13 @@ class FtPqrRespuestaService extends ModelService
      */
     public function requestSurvey(): bool
     {
-        $email = $this->getModel()->getTercero()->getEmail();
+        $tercero = $this->getModel()->getTercero();
+        $email = $tercero->getEmail();
         if (!CoreFunctions::isEmailValid($email)) {
             $this->getErrorManager()->setMessage("El email ($email) NO es valido");
 
             return false;
         }
-
 
         $DocumentoPqr = $this->getModel()->getFtPqr()->getDocument();
 
@@ -338,20 +346,27 @@ class FtPqrRespuestaService extends ModelService
         $nameFormat = $this->getModel()->getFormat()->etiqueta;
         $description = "Se solicita la calificación de la ($nameFormat) # {$this->getModel()->getDocument()->numero} al e-mail: ($email)";
 
-        $EmailSaia = (new EmailSaia())
+        $EmailSaia = (new Email())
             ->subject("Queremos conocer tu opinión! (Solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero)")
-            ->htmlWithTemplate($message)
-            ->to($email)
-            ->saveShipmentTraceability($this->getModel()->getDocument()->getPK())
-            ->defineCallbackClassName(FtPqrRespuestaEmailCallback::class)
-            ->defineParamsCallbackClassName([
-                'option'      => self::OPTION_EMAIL_CALIFICACION,
-                'idft'        => $this->getModel()->getPK(),
-                'descripcion' => $description,
-                'tipo'        => PqrHistory::TIPO_CALIFICACION,
-            ]);
+            ->html($message)
+            ->to(new Address($tercero->getEmail(), $tercero->getName()));
 
-        (new SendEmailSaia($EmailSaia))->send();
+        $params = [
+            'isRespuetaPqr' => 1,
+            'documentId'    => $this->getModel()->getDocument()->getPK(),
+            'option'        => self::OPTION_EMAIL_CALIFICACION,
+            'idft'          => $this->getModel()->getPK(),
+            'descripcion'   => $description,
+            'tipo'          => PqrHistory::TIPO_CALIFICACION,
+        ];
+
+        $EmailSaia->getHeaders()->addTextHeader(
+            MailSubscriber::HEADER_METADATA,
+            json_encode($params),
+        );
+
+        $this->legacyService->getMailerService()->send($EmailSaia, 'pqr.respuesta.encuesta');
+
 
         return true;
     }
@@ -404,7 +419,7 @@ class FtPqrRespuestaService extends ModelService
                 );
 
                 if (!$save) {
-                    $trans = GlobalContainer::getTranslator()->trans(
+                    $trans = $this->legacyService->getTranslator()->trans(
                         "no_fue_posible_cambiar_estado_tarea",
                         ['%taskId%' => $Tarea->getPK()],
                     );

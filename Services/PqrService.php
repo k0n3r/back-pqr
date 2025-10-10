@@ -2,14 +2,15 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Services\models\PqrHtmlField;
+use App\Service\LegacyServiceLocator;
 use App\services\GlobalContainer;
 use Doctrine\DBAL\ParameterType;
 use RuntimeException;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\grafico\PantallaGrafico;
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\models\PqrHtmlField;
 
 class PqrService
 {
@@ -18,10 +19,12 @@ class PqrService
     private ?bool $subTypeExist = null;
     private ?bool $dependencyExist = null;
     private PqrForm $PqrForm;
+    private LegacyServiceLocator $legacyService;
 
     public function __construct()
     {
         $this->PqrForm = PqrForm::getInstance();
+        $this->legacyService = LegacyServiceLocator::getInstance();
     }
 
     public function getPqrForm(): PqrForm
@@ -102,7 +105,8 @@ class PqrService
      */
     private function getListPais(array $data): array
     {
-        $Qb = GlobalContainer::getConnection()
+        $Qb = $this->legacyService
+            ->getConnection()
             ->createQueryBuilder()
             ->select('idpais as id,nombre')
             ->from('pais')
@@ -130,7 +134,8 @@ class PqrService
      */
     private function getListDepartamento(array $data): array
     {
-        $Qb = GlobalContainer::getConnection()
+        $Qb = $this->legacyService
+            ->getConnection()
             ->createQueryBuilder()
             ->select('iddepartamento as id,nombre')
             ->from('departamento')
@@ -264,7 +269,9 @@ class PqrService
      */
     public static function getTextFields(): array
     {
-        $Qb = GlobalContainer::getConnection()
+        $legacyService = LegacyServiceLocator::getInstance();
+        $Qb = $legacyService
+            ->getConnection()
             ->createQueryBuilder()
             ->select('ff.*')
             ->from('pqr_form_fields', 'ff')
@@ -315,14 +322,16 @@ class PqrService
      */
     public static function activeGraphics(): void
     {
+        $legacyService = LegacyServiceLocator::getInstance();
         if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO,
         ])) {
-            $trans = GlobalContainer::getTranslator()->trans("no_se_encuentra_pantalla_grafico");
+            $trans = $legacyService->getTranslator()->trans("no_se_encuentra_pantalla_grafico");
             throw new RuntimeException($trans);
         }
 
-        $Qb = GlobalContainer::getConnection()
+        $Qb = $legacyService
+            ->getConnection()
             ->createQueryBuilder()
             ->update('grafico')
             ->where('fk_pantalla_grafico=:idpantalla')

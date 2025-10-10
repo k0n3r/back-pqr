@@ -2,32 +2,31 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\PqrService;
 use App\Exception\MissingParameterException;
-use App\services\GlobalContainer;
+use App\Service\JsonResponseService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Bundles\pqr\Services\models\PqrFormField;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 #[Route('/components', name: 'components_')]
 class ComponentsController extends AbstractController
 {
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     #[Route('/autocomplete/list', name: 'getListDataForAutocomplete', methods: ['GET'])]
     public function getListDataForAutocomplete(
         Request $request,
+        TranslatorInterface $translator,
+        JsonResponseService $json,
     ): JsonResponse {
         try {
             if (!$PqrFormField = PqrFormField::findByAttributes([
                 'name' => $request->get('name'),
             ])) {
-                $trans = GlobalContainer::getTranslator()->trans("falta_nombre_campo");
+                $trans = $translator->trans("falta_nombre_campo");
                 throw new MissingParameterException($trans);
             }
             $data = $PqrFormField->getService()->getListDataForAutocomplete($request->get('data'));
@@ -35,18 +34,15 @@ class ComponentsController extends AbstractController
             $data = [];
         }
 
-        return new JsonResponse([
+        return $json->success([
             'results' => $data,
         ]);
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     #[Route('/autocomplete/find', name: 'findDataForAutocomplete', methods: ['GET'])]
     public function findDataForAutocomplete(
         Request $request,
+        jsonResponseService $json,
     ): JsonResponse {
         try {
             $data = (new PqrService())
@@ -55,7 +51,7 @@ class ComponentsController extends AbstractController
             $data = [];
         }
 
-        return new JsonResponse([
+        return $json->success([
             'results' => $data,
         ]);
     }

@@ -3,19 +3,18 @@
 namespace App\Bundles\pqr\formatos\pqr;
 
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
+use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
+use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\Services\FtPqrService;
+use App\Bundles\pqr\Services\models\PqrBackup;
 use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Exception\ValidationFailedException;
-use App\services\GlobalContainer;
 use Doctrine\DBAL\ParameterType;
 use Saia\controllers\generator\component\Distribution;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\Tercero;
-use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Bundles\pqr\Services\FtPqrService;
-use App\Bundles\pqr\Services\models\PqrBackup;
-use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use Saia\models\vistas\VfuncionarioDc;
 
 class FtPqr extends FtPqrProperties
@@ -150,7 +149,8 @@ class FtPqr extends FtPqrProperties
     public function getLastCalificacion(): ?FtPqrCalificacion
     {
         if (!$this->lastFtPqrCalificacion) {
-            $Qb = GlobalContainer::getConnection()
+            $Qb = $this->legacyService
+                ->getConnection()
                 ->createQueryBuilder()
                 ->select('ft.*')
                 ->from('vpqr_calificacion', 'v')
@@ -340,10 +340,10 @@ class FtPqr extends FtPqrProperties
      */
     protected function getTableRows(): array
     {
-        if (!$this->getPqrBackup()) {
+        $data = $this->getJsonFromPqrBackup();
+        if (!$data) {
             return [];
         }
-        $data = $this->getJsonFromPqrBackup();
 
         $showEmpty = $this->getService()->getPqrForm()->show_empty ?? 1;
 
@@ -442,12 +442,12 @@ class FtPqr extends FtPqrProperties
     /**
      * Obtiene el json de los datos a mostrar en la PQR
      *
-     * @return object
+     * @return object|null
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-08-14
      */
-    protected function getJsonFromPqrBackup(): object
+    protected function getJsonFromPqrBackup(): ?object
     {
-        return $this->getPqrBackup()->getDataJson();
+        return $this->getPqrBackup()?->getDataJson() ?? null;
     }
 
     /**

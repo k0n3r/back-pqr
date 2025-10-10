@@ -6,15 +6,14 @@ use App\Bundles\pqr\Event\PqrFormFieldCreatedEvent;
 use App\Bundles\pqr\Event\PqrFormFieldDeleteEvent;
 use App\Bundles\pqr\Event\PqrFormFieldUpdateEvent;
 use App\Bundles\pqr\Services\models\PqrBalancer;
+use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Services\models\PqrHtmlField;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
-use App\services\GlobalContainer;
 use App\services\models\ModelService\ModelService;
 use App\services\ServiceEventDispatcher;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\models\PqrHtmlField;
 use Saia\controllers\generator\component\Distribution;
 use Saia\controllers\generator\component\Rad;
 use Saia\models\formatos\CampoOpciones;
@@ -253,7 +252,7 @@ class PqrFormFieldService extends ModelService
      */
     private function columnExistsDB(string $name): bool
     {
-        $connection = GlobalContainer::getConnection();
+        $connection = $this->legacyService->getConnection();
         $schemaManager = $connection->createSchemaManager();
         $table = $schemaManager->introspectTable('ft_pqr');
 
@@ -299,7 +298,8 @@ class PqrFormFieldService extends ModelService
      */
     private function getDependencys(object $ObjSettings, array $data = []): array
     {
-        $Qb = GlobalContainer::getConnection()
+        $Qb = $this->legacyService
+            ->getConnection()
             ->createQueryBuilder()
             ->select('iddependencia as id,nombre as text')
             ->from('dependencia');
@@ -354,7 +354,8 @@ class PqrFormFieldService extends ModelService
      */
     private function getListLocalidad(object $ObjSettings, array $data = []): array
     {
-        $Qb = GlobalContainer::getConnection()
+        $Qb = $this->legacyService
+            ->getConnection()
             ->createQueryBuilder()
             ->select(
                 "CONCAT(a.nombre,
@@ -364,7 +365,7 @@ class PqrFormFieldService extends ModelService
                     b.nombre,
                     CONCAT(
                         ' - ',
-                        c.nombre   
+                        c.nombre
                     )
                 )
             )

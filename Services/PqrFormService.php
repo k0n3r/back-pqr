@@ -2,15 +2,14 @@
 
 namespace App\Bundles\pqr\Services;
 
-use App\services\GlobalContainer;
+use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
+use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\models\PqrFormField;
 use App\services\models\ModelService\ModelService;
 use RuntimeException;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
-use Saia\models\formatos\Formato;
-use App\Bundles\pqr\Services\models\PqrForm;
 use Saia\models\busqueda\BusquedaComponente;
-use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
+use Saia\models\formatos\Formato;
 use Saia\models\grupo\Grupo;
 use Saia\models\Modulo;
 use Saia\models\tarea\Tarea;
@@ -58,7 +57,8 @@ class PqrFormService extends ModelService
             return false;
         }
 
-        GlobalContainer::getConnection()
+        $this->legacyService
+            ->getConnection()
             ->createQueryBuilder()
             ->update('pqr_form_fields')
             ->set('anonymous', 0)
@@ -245,7 +245,7 @@ class PqrFormService extends ModelService
         ]);
 
         if (!$ModuloPadre) {
-            $trans = GlobalContainer::getTranslator()->trans("no_se_encontro_modulo_reporte");
+            $trans = $this->legacyService->getTranslator()->trans("no_se_encontro_modulo_reporte");
             throw new RuntimeException($trans);
         }
 
@@ -270,7 +270,7 @@ class PqrFormService extends ModelService
 
         $ModuloService = (new Modulo())->getService();
         if (!$ModuloService->save($data)) {
-            $trans = GlobalContainer::getTranslator()->trans("no_fue_posible_registrar_reporte_pqr");
+            $trans = $this->legacyService->getTranslator()->trans("no_fue_posible_registrar_reporte_pqr");
 
             throw new RuntimeException($trans);
         }
@@ -536,7 +536,7 @@ class PqrFormService extends ModelService
         $codeFunction = "<?php \n\n".implode("\n", $fieldCode);
 
         if (!file_put_contents($file, $codeFunction)) {
-            $trans = GlobalContainer::getTranslator()->trans("no_fue_posible_crear_funciones_formulario");
+            $trans = $this->legacyService->getTranslator()->trans("no_fue_posible_crear_funciones_formulario");
             throw new RuntimeException($trans);
         }
     }

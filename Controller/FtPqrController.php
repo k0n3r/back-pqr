@@ -5,20 +5,20 @@ namespace App\Bundles\pqr\Controller;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Bundles\pqr\Services\PqrService;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
-use App\services\GlobalContainer;
+use App\services\response\ISaiaResponse;
 use Doctrine\DBAL\Connection;
 use Saia\controllers\DateController;
-use App\Bundles\pqr\Services\PqrService;
-use App\services\response\ISaiaResponse;
 use Saia\controllers\functions\CoreFunctions;
 use Saia\models\Tercero;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 #[Route('/{idft}', name: 'FtPqr_')]
@@ -182,25 +182,18 @@ class FtPqrController extends AbstractController
         return new JsonResponse($data);
     }
 
-
-    /**
-     * @param int $idft
-     * @param Request $request
-     * @param ISaiaResponse $saiaResponse
-     * @param Connection $Connection
-     * @return Response
-     */
     #[Route('/externalUser', name: 'setExternalUser', methods: ['POST'])]
     public function setExternalUser(
         int $idft,
         Request $request,
         ISaiaResponse $saiaResponse,
         Connection $Connection,
+        TranslatorInterface $translator,
     ): Response {
         $Connection->beginTransaction();
         try {
             if (!$request->get('sys_tercero')) {
-                $trans = GlobalContainer::getTranslator()->trans("no_fue_posible_actualizar_tercero");
+                $trans = $translator->trans("no_fue_posible_actualizar_tercero");
                 throw new MissingParameterException($trans);
             }
 

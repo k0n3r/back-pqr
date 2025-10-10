@@ -1,22 +1,22 @@
 <?php
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
+use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrService;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Service\LegacyServiceLocator;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\QueryBuilder;
-use Saia\controllers\SessionController;
-use Saia\models\busqueda\BusquedaFiltroTemp;
-use Saia\models\tarea\TareaEstado;
-use App\Bundles\pqr\helpers\UtilitiesPqr;
 use Saia\controllers\DateController;
-use Saia\models\documento\Documento;
+use Saia\controllers\SessionController;
 use Saia\models\busqueda\BusquedaComponente;
-use Saia\models\formatos\CampoSeleccionados;
+use Saia\models\busqueda\BusquedaFiltroTemp;
 use Saia\models\Dependencia;
-use App\services\GlobalContainer;
+use Saia\models\documento\Documento;
+use Saia\models\formatos\CampoSeleccionados;
+use Saia\models\tarea\TareaEstado;
 use Saia\models\vistas\VfuncionarioDc;
 
 include_once $_SERVER['ROOT_PATH'].'src/Bundles/pqr/formatos/reporteFuncionesGenerales.php';
@@ -359,7 +359,10 @@ function QbDependencia(): QueryBuilder
 {
     $Dependencia = getDependencia();
 
-    return GlobalContainer::getConnection()->createQueryBuilder()
+    $legacyService = LegacyServiceLocator::getInstance();
+
+    return $legacyService
+        ->getConnection()->createQueryBuilder()
         ->select('count(sys_dependencia) as cant')
         ->from('vpqr', 'v')
         ->where('sys_dependencia = :dependencyId')
