@@ -2,23 +2,20 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\PqrService;
-use App\Helper\Exception\ExceptionHelper;
-use App\services\response\ISaiaResponse;
 use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\PqrService;
+use App\Service\JsonResponseService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
 #[Route('/structure', name: 'structure_')]
 class StructureController extends AbstractController
 {
-    use ExceptionHelper;
-
     #[Route('/dataViewIndex', name: 'dataViewIndex', methods: ['GET'])]
     public function getDataViewIndex(
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
     ): Response {
         try {
             $PqrFormService = PqrForm::getInstance()->getService();
@@ -29,30 +26,22 @@ class StructureController extends AbstractController
                 'pqrHtmlFields' => PqrService::getDataHtmlFields(),
             ];
 
-            $saiaResponse->replaceData($data);
+            return $json->success($data);
         } catch (Throwable $th) {
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
+            return $json->exception($th);
         }
-        $saiaResponse->deleteProperty('success');
-
-        return $saiaResponse->getResponse();
     }
 
     #[Route('/dataModalViewEditType', name: 'getDataEditType', methods: ['GET'])]
     public function getDataEditType(
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
     ): Response {
         try {
             $data = (new PqrService())->getDataForEditTypes();
 
-            $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
+            return $json->success($data);
         } catch (Throwable $th) {
-            $saiaResponse->setMessage($th->getMessage());
+            return $json->exception($th);
         }
-
-        return $saiaResponse->getResponse();
     }
 }

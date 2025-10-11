@@ -8,7 +8,7 @@ use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\PqrService;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
-use App\services\response\ISaiaResponse;
+use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Saia\controllers\DateController;
 use Saia\controllers\functions\CoreFunctions;
@@ -26,13 +26,13 @@ class FtPqrController extends AbstractController
 {
     /**
      * @param int $idft
-     * @param ISaiaResponse $saiaResponse
+     * @param JsonResponseService $json
      * @return Response
      */
     #[Route('/externalUser', name: 'getExternalUser', methods: ['GET'])]
     public function getExternalUser(
         int $idft,
-        ISaiaResponse $saiaResponse,
+        JsonResponseService $json,
     ): Response {
         try {
             $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
@@ -41,14 +41,10 @@ class FtPqrController extends AbstractController
                 'fieldId'     => $this->getFieldIdSysTercero($FtPqr),
             ];
 
-            $saiaResponse->replaceData($data);
-
-            $saiaResponse->setSuccess(1);
+            return $json->success($data);
         } catch (Throwable $th) {
-            $saiaResponse->setMessage($th->getMessage());
+            return $json->exception($th);
         }
-
-        return $saiaResponse->getResponse();
     }
 
     private function getFieldIdSysTercero(FtPqr $FtPqr): int
@@ -62,36 +58,33 @@ class FtPqrController extends AbstractController
 
     /**
      * @param int $idft
-     * @param ISaiaResponse $saiaResponse
+     * @param JsonResponseService $json
      * @return Response
      */
     #[Route('/dataToLoadResponse', name: 'getDataToLoadResponse', methods: ['GET'])]
     public function getDataToLoadResponse(
         int $idft,
-        ISaiaResponse $saiaResponse,
+        JsonResponseService $json,
     ): Response {
         try {
             $data = (UtilitiesPqr::getInstanceForFtId($idft))->getService()->getDataToLoadResponse();
-            $saiaResponse->replaceData($data);
 
-            $saiaResponse->setSuccess(1);
+            return $json->success($data);
         } catch (Throwable $th) {
-            $saiaResponse->setMessage($th->getMessage());
+            return $json->exception($th);
         }
-
-        return $saiaResponse->getResponse();
     }
 
     /**
      * @param int $idft
-     * @param ISaiaResponse $saiaResponse
+     * @param JsonResponseService $json
      * @param Request $request
      * @return Response
      */
     #[Route('/dateForType', name: 'getDateForType', methods: ['GET'])]
     public function getDateForType(
         int $idft,
-        ISaiaResponse $saiaResponse,
+        JsonResponseService $json,
         Request $request,
     ): Response {
         try {
@@ -103,26 +96,21 @@ class FtPqrController extends AbstractController
                 'Y-m-d H:i:s',
             );
 
-            $saiaResponse->replaceData([
-                'date' => $date,
-            ]);
-            $saiaResponse->setSuccess(1);
+            return $json->success(['date' => $date]);
         } catch (Throwable $th) {
-            $saiaResponse->setMessage($th->getMessage());
+            return $json->exception($th);
         }
-
-        return $saiaResponse->getResponse();
     }
 
     /**
      * @param int $idft
-     * @param ISaiaResponse $saiaResponse
+     * @param JsonResponseService $json
      * @return Response
      */
     #[Route('/valuesForType', name: 'getValuesForType', methods: ['GET'])]
     public function getValuesForType(
         int $idft,
-        ISaiaResponse $saiaResponse,
+        JsonResponseService $json,
     ): Response {
         try {
             $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
@@ -148,22 +136,21 @@ class FtPqrController extends AbstractController
                 'sys_severidad'         => (int)$FtPqr->sys_severidad,
             ];
 
-            $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
+            return $json->success($data);
         } catch (Throwable $th) {
-            $saiaResponse->setMessage($th->getMessage());
+            return $json->exception($th);
         }
-
-        return $saiaResponse->getResponse();
     }
 
     /**
      * @param int $idft
+     * @param JsonResponseService $json
      * @return JsonResponse
      */
     #[Route('/history', name: 'getHistory', methods: ['GET'])]
     public function getHistory(
         int $idft,
+        jsonResponseService $json,
     ): JsonResponse {
         try {
             $records = (UtilitiesPqr::getInstanceForFtId($idft))->getService()->getRecordsHistory();
@@ -179,14 +166,14 @@ class FtPqrController extends AbstractController
             ];
         }
 
-        return new JsonResponse($data);
+        return $json->success($data);
     }
 
     #[Route('/externalUser', name: 'setExternalUser', methods: ['POST'])]
     public function setExternalUser(
         int $idft,
         Request $request,
-        ISaiaResponse $saiaResponse,
+        JsonResponseService $json,
         Connection $Connection,
         TranslatorInterface $translator,
     ): Response {
@@ -246,21 +233,20 @@ class FtPqrController extends AbstractController
                 'correo' => (bool)$Tercero->getEmail(),
             ];
 
-            $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
+
+            return $json->success($data);
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setMessage($th->getMessage());
-        }
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 
     /**
      * @param int $idft
      * @param Request $request
-     * @param ISaiaResponse $saiaResponse
+     * @param JsonResponseService $json
      * @param Connection $Connection
      * @return Response
      */
@@ -268,7 +254,7 @@ class FtPqrController extends AbstractController
     public function updateType(
         int $idft,
         Request $request,
-        ISaiaResponse $saiaResponse,
+        JsonResponseService $json,
         Connection $Connection,
     ): Response {
         $Connection->beginTransaction();
@@ -280,20 +266,20 @@ class FtPqrController extends AbstractController
                 );
             }
 
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
+
+            return $json->success();
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setMessage($th->getMessage());
-        }
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 
     /**
      * @param int $idft
      * @param Request $request
-     * @param ISaiaResponse $saiaResponse
+     * @param JsonResponseService $json
      * @param Connection $Connection
      * @return Response
      */
@@ -301,7 +287,7 @@ class FtPqrController extends AbstractController
     public function finish(
         int $idft,
         Request $request,
-        ISaiaResponse $saiaResponse,
+        JsonResponseService $json,
         Connection $Connection,
     ): Response {
         try {
@@ -314,13 +300,13 @@ class FtPqrController extends AbstractController
                 );
             }
 
-            $saiaResponse->setSuccess(1);
             $Connection->commit();
+
+            return $json->success();
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setMessage($th->getMessage());
-        }
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 }

@@ -5,8 +5,7 @@ namespace App\Bundles\pqr\Controller;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
 use App\Exception\MissingParameterException;
-use App\Helper\Exception\ExceptionHelper;
-use App\services\response\ISaiaResponse;
+use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,12 +17,10 @@ use Throwable;
 #[Route('/responseTimes', name: 'responseTimes_')]
 class PqrResponseTimeController extends AbstractController
 {
-    use ExceptionHelper;
-
     #[Route('/field/{id}', name: 'timesForField', methods: ['GET'])]
     public function timesForField(
         int $id,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
     ): Response {
         try {
             $record = PqrResponseTime::findAllByAttributes([
@@ -55,21 +52,16 @@ class PqrResponseTimeController extends AbstractController
                 ];
             }
 
-            $saiaResponse->replaceData($data);
+            return $json->success($data);
         } catch (Throwable $th) {
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
+            return $json->exception($th);
         }
-        $saiaResponse->deleteProperty('success');
-
-        return $saiaResponse->getResponse();
     }
 
     #[Route('', name: 'updateTimes', methods: ['PUT'])]
     public function updateTimes(
         Request $Request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
         TranslatorInterface $translator,
     ): Response {
@@ -100,14 +92,12 @@ class PqrResponseTimeController extends AbstractController
             }
 
             $Connection->commit();
+
+            return $json->success();
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
-        }
-        $saiaResponse->deleteProperty('success');
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 }

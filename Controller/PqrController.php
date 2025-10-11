@@ -7,8 +7,7 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
-use App\Helper\Exception\ExceptionHelper;
-use App\services\response\ISaiaResponse;
+use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
 use Saia\controllers\CryptController;
@@ -24,12 +23,10 @@ use Throwable;
 
 class PqrController extends AbstractController
 {
-    use ExceptionHelper;
-
     #[Route('/searchByNumber', name: 'search', methods: ['GET'])]
     public function search(
         Request $request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
     ): Response {
         try {
@@ -61,21 +58,16 @@ class PqrController extends AbstractController
                 }
             }
 
-            $saiaResponse->replaceData($data);
+            return $json->success($data);
         } catch (Throwable $th) {
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
+            return $json->exception($th);
         }
-        $saiaResponse->deleteProperty('success');
-
-        return $saiaResponse->getResponse();
     }
 
     #[Route('/historyForTimeline', name: 'getHistoryForTimeline', methods: ['GET'])]
     public function getHistoryForTimeline(
         Request $request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
     ): Response {
         try {
             $data = json_decode(CryptController::decrypt($request->get('infoCryp')));
@@ -87,21 +79,16 @@ class PqrController extends AbstractController
 
             $data = $FtPqr->getService()->getHistoryForTimeline();
 
-            $saiaResponse->replaceData($data);
+            return $json->success($data);
         } catch (Throwable $th) {
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
+            return $json->exception($th);
         }
-        $saiaResponse->deleteProperty('success');
-
-        return $saiaResponse->getResponse();
     }
 
     #[Route('/decrypt', name: 'decrypt', methods: ['GET'])]
     public function decrypt(
         Request $request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
     ): Response {
         try {
             if (!$request->get('dataCrypt')) {
@@ -110,18 +97,15 @@ class PqrController extends AbstractController
 
             $data = json_decode(CryptController::decrypt($request->get('dataCrypt')), true);
 
-            $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
+            return $json->success($data);
         } catch (Throwable $th) {
-            $saiaResponse->setMessage($th->getMessage());
+            return $json->exception($th);
         }
-
-        return $saiaResponse->getResponse();
     }
 
     #[Route('/contentDependencia', name: 'contentDependencia', methods: ['GET'])]
     public function contentDependencia(
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         TranslatorInterface $translator,
     ): Response {
         try {
@@ -160,12 +144,10 @@ class PqrController extends AbstractController
             $data = [
                 'content' => $html,
             ];
-            $saiaResponse->replaceData($data);
-            $saiaResponse->setSuccess(1);
-        } catch (Throwable $th) {
-            $saiaResponse->setMessage($th->getMessage());
-        }
 
-        return $saiaResponse->getResponse();
+            return $json->success($data);
+        } catch (Throwable $th) {
+            return $json->exception($th);
+        }
     }
 }

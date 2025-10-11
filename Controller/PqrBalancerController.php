@@ -5,8 +5,7 @@ namespace App\Bundles\pqr\Controller;
 use App\Bundles\pqr\Services\models\PqrBalancer;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Exception\MissingParameterException;
-use App\Helper\Exception\ExceptionHelper;
-use App\services\response\ISaiaResponse;
+use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,12 +17,10 @@ use Throwable;
 #[Route('/balancer', name: 'responseTimes_')]
 class PqrBalancerController extends AbstractController
 {
-    use ExceptionHelper;
-
     #[Route('/field/{id}', name: 'groupsForField', methods: ['GET'])]
     public function groupsForField(
         int $id,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
     ): Response {
         try {
             $record = PqrBalancer::findAllByAttributes([
@@ -51,21 +48,16 @@ class PqrBalancerController extends AbstractController
                 $defaultOrder++;
             }
 
-            $saiaResponse->replaceData($data);
+            return $json->success($data);
         } catch (Throwable $th) {
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
+            return $json->exception($th);
         }
-        $saiaResponse->deleteProperty('success');
-
-        return $saiaResponse->getResponse();
     }
 
     #[Route('', name: 'updateGroupsBalancer', methods: ['PUT'])]
     public function updateGroupsBalancer(
         Request $Request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
         TranslatorInterface $translator,
     ): Response {
@@ -90,14 +82,12 @@ class PqrBalancerController extends AbstractController
             }
 
             $Connection->commit();
+
+            return $json->success();
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
-        }
-        $saiaResponse->deleteProperty('success');
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 }

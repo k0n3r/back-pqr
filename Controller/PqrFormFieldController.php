@@ -4,9 +4,7 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Exception\ValidationFailedException;
-use App\Helper\Exception\ExceptionHelper;
-use App\services\response\ISaiaResponse;
-use App\services\response\SaiaResponse;
+use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,12 +15,10 @@ use Throwable;
 #[Route('/formField', name: 'formField_')]
 class PqrFormFieldController extends AbstractController
 {
-    use ExceptionHelper;
-
     #[Route('', name: 'store', methods: ['POST'])]
     public function store(
         Request $request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
     ): Response {
         try {
@@ -37,25 +33,21 @@ class PqrFormFieldController extends AbstractController
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
 
-            $saiaResponse->replaceData($data);
-
             $Connection->commit();
+
+            return $json->success($data);
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
-        }
-        $saiaResponse->deleteProperty('success');
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(
         int $id,
         Request $request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
     ): Response {
         try {
@@ -70,42 +62,40 @@ class PqrFormFieldController extends AbstractController
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
 
-            $saiaResponse->replaceData($data);
             $Connection->commit();
+
+            return $json->success($data);
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
-        }
-        $saiaResponse->deleteProperty('success');
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 
     #[Route('/{id}/active', name: 'active', methods: ['PUT'])]
     public function active(
         int $id,
         Connection $connection,
+        jsonResponseService $json,
     ): Response {
-        return $this->activeInactive($id, PqrFormField::ACTIVE, $connection);
+        return $this->activeInactive($id, PqrFormField::ACTIVE, $connection, $json);
     }
 
     #[Route('/{id}/inactive', name: 'inactive', methods: ['PUT'])]
     public function inactive(
         int $id,
         Connection $connection,
+        jsonResponseService $json,
     ): Response {
-        return $this->activeInactive($id, PqrFormField::INACTIVE, $connection);
+        return $this->activeInactive($id, PqrFormField::INACTIVE, $connection, $json);
     }
 
     private function activeInactive(
         int $id,
         int $status,
         Connection $Connection,
+        JsonResponseService $json,
     ): Response {
-        $saiaResponse = new SaiaResponse();
-
         try {
             $Connection->beginTransaction();
 
@@ -118,23 +108,20 @@ class PqrFormFieldController extends AbstractController
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
 
-            $saiaResponse->replaceData($data);
             $Connection->commit();
+
+            return $json->success($data);
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
-        }
-        $saiaResponse->deleteProperty('success');
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 
     #[Route('/{id}', name: 'destroy', methods: ['DELETE'])]
     public function destroy(
         int $id,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
     ): Response {
         try {
@@ -148,14 +135,12 @@ class PqrFormFieldController extends AbstractController
             }
 
             $Connection->commit();
+
+            return $json->success();
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
-        }
-        $saiaResponse->deleteProperty('success');
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 }

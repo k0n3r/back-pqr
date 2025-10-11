@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Services\crontab;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\services\GlobalContainer;
+use App\Service\LegacyServiceLocator;
 use Doctrine\DBAL\ArrayParameterType;
 use RuntimeException;
 use Saia\models\crontab\ICrontab;
@@ -14,8 +14,9 @@ class ChangeStatusOfOportunoField implements ICrontab
 {
     public function execute(): bool
     {
-        $Connection = GlobalContainer::getConnection();
-        $Logger = GlobalContainer::getLogger();
+        $legacyService = LegacyServiceLocator::getInstance();
+        $Connection = $legacyService->getConnection();
+        $Logger = $legacyService->getLogger();
         $response = true;
 
         $statusOportuno = [

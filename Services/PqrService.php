@@ -6,7 +6,6 @@ use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrHtmlField;
 use App\Service\LegacyServiceLocator;
-use App\services\GlobalContainer;
 use Doctrine\DBAL\ParameterType;
 use RuntimeException;
 use Saia\models\formatos\CamposFormato;
@@ -77,7 +76,9 @@ class PqrService
      */
     private function getListDependency(array $data): array
     {
-        $Qb = GlobalContainer::getConnection()
+        $legacyService = LegacyServiceLocator::getInstance();
+        $Qb = $legacyService
+            ->getConnection()
             ->createQueryBuilder()
             ->select('iddependencia as id,nombre')
             ->from('dependencia')

@@ -2,32 +2,29 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use App\services\response\ISaiaResponse;
+use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/webservice', name: 'webservice_')]
 class WebserviceController extends AbstractController
 {
-    /**
-     * @param Request $Request
-     * @param ISaiaResponse $saiaResponse
-     * @param Connection $Connection
-     * @return Response
-     */
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
     public function saveDocument(
         Request $Request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
+        TranslatorInterface $translator,
     ): Response {
         return (new CaptchaController())->saveDocument(
             $Request,
-            $saiaResponse,
+            $json,
             $Connection,
+            $translator,
         );
     }
 }

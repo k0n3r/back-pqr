@@ -12,13 +12,13 @@ use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\Bundles\pqr\Services\models\PqrResponseTime;
-use App\services\correo\EmailSaia;
+use App\EventSubscriber\Mailer\MailSubscriber;
+use App\services\Gaufrette\Gaufrette\FilesystemForJson;
 use App\services\models\ModelService\ModelService;
 use DateInterval;
 use DateTime;
 use Doctrine\DBAL\ParameterType;
 use InvalidArgumentException;
-use Saia\controllers\anexos\FileJson;
 use Saia\controllers\CryptController;
 use Saia\controllers\DateController;
 use Saia\controllers\DistributionService;
@@ -33,6 +33,7 @@ use Saia\models\grupo\Grupo;
 use Saia\models\tarea\Tarea;
 use Saia\models\Tercero;
 use Saia\models\vistas\VfuncionarioDc;
+use Symfony\Component\Mime\Email;
 
 class FtPqrService extends ModelService
 {
@@ -520,21 +521,33 @@ class FtPqrService extends ModelService
             $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $this->getModel());
         }
 
+        $email = (new Email());
+
         $Documento = $this->getDocument();
-        $files[] = new FileJson($Documento->getPdfJson());
+        $file = FilesystemForJson::getFileJson($Documento->getPdfJson());
+        $email->attach($file->getContent());
+
         $records = $Documento->getService()->getAllFilesAnexos(true);
         foreach ($records as $Anexos) {
-            $files[] = new FileJson($Anexos->ruta);
+            $file = FilesystemForJson::getFileJson($Anexos->ruta);
+            $email->attach($file->getContent());
         }
 
-        $EmailSaia = (new EmailSaia())
+        $email
             ->subject($subject)
-            ->htmlWithTemplate($message)
-            ->to($this->getModel()->sys_email)
-            ->addAttachments($files)
-            ->saveShipmentTraceability($Documento->getPK());
+            ->html($message)
+            ->to($this->getModel()->sys_email);
 
-        (new SendEmailSaia($EmailSaia))->send();
+        $params = [
+            'documentId' => $Documento->getPK(),
+        ];
+
+        $email->getHeaders()->addTextHeader(
+            MailSubscriber::HEADER_METADATA,
+            json_encode($params),
+        );
+
+        $this->legacyService->getMailerService()->send($email, 'pqr.radicado.solicitante');
 
         return true;
     }
@@ -610,17 +623,24 @@ class FtPqrService extends ModelService
         if ($emails) {
             $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->getPqrForm()->label} con radicado {$Documento->getService()->getFilingReferenceNumber()}.<br/><br/>
             El seguimiento lo puede realizar escaneando el código QR o consultando con el número de consecutivo asignado";
-
-            $files[] = new FileJson($Documento->getPdfJson());
-
-            $EmailSaia = (new EmailSaia())
+            $email = (new Email())
                 ->subject("Notificación de {$this->getPqrForm()->label} # $Documento->numero")
-                ->htmlWithTemplate($message)
-                ->to(...$emails)
-                ->addAttachments($files)
-                ->saveShipmentTraceability($Documento->getPK());
+                ->html($message)
+                ->to(...$emails);
 
-            (new SendEmailSaia($EmailSaia))->send();
+            $file = FilesystemForJson::getFileJson($Documento->getPdfJson());
+            $email->attach($file->getContent());
+
+            $params = [
+                'documentId' => $Documento->getPK(),
+            ];
+
+            $email->getHeaders()->addTextHeader(
+                MailSubscriber::HEADER_METADATA,
+                json_encode($params),
+            );
+
+            $this->legacyService->getMailerService()->send($email, 'pqr.radicado.configurados');
         }
 
         return true;

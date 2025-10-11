@@ -4,10 +4,10 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Exception\ValidationFailedException;
-use App\services\response\ISaiaResponse;
+use App\Service\JsonResponseService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
 #[Route('/answers/{idft}', name: 'FtPqrRespuesta_')]
@@ -16,7 +16,7 @@ class FtPqrRespuestaController extends AbstractController
     #[Route('/requestSurveyByEmail', name: 'requestSurveyByEmail', methods: ['GET'])]
     public function requestSurvey(
         int $idft,
-        ISaiaResponse $saiaResponse,
+        JsonResponseService $json,
     ): Response {
         try {
             $FtPqrRespuestaService = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($idft)->getService();
@@ -26,11 +26,9 @@ class FtPqrRespuestaController extends AbstractController
                 );
             }
 
-            $saiaResponse->setSuccess(1);
+            return $json->success();
         } catch (Throwable $th) {
-            $saiaResponse->setMessage($th->getMessage());
+            return $json->exception($th);
         }
-
-        return $saiaResponse->getResponse();
     }
 }

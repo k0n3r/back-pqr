@@ -7,8 +7,7 @@ use App\Bundles\pqr\Services\PqrNotyMessageService;
 use App\EventSubscriber\middlewares\IHasCaptcha;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
-use App\Helper\Exception\ExceptionHelper;
-use App\services\response\ISaiaResponse;
+use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Saia\controllers\SaveDocument;
 use Saia\models\formatos\Formato;
@@ -23,11 +22,9 @@ use Throwable;
 #[Route('/captcha', name: 'captcha_')]
 class CaptchaController extends AbstractController implements IHasCaptcha
 {
-    use ExceptionHelper;
-
     /**
      * @param Request $Request
-     * @param ISaiaResponse $saiaResponse
+     * @param jsonResponseService $json
      * @param Connection $Connection
      * @param TranslatorInterface $translator
      * @return Response
@@ -35,7 +32,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
     public function saveDocument(
         Request $Request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
         TranslatorInterface $translator,
     ): Response {
@@ -84,16 +81,13 @@ class CaptchaController extends AbstractController implements IHasCaptcha
                 'number'      => $Documento->numero,
             ];
 
-            $saiaResponse->replaceData($attributes);
             $Connection->commit();
+
+            return $json->success($attributes);
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
-        }
-        $saiaResponse->deleteProperty('success');
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 }

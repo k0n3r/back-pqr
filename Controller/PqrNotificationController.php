@@ -2,25 +2,23 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\Services\models\PqrNotification;
 use App\Exception\ValidationFailedException;
-use App\Helper\Exception\ExceptionHelper;
+use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
-use App\services\response\ISaiaResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Bundles\pqr\Services\models\PqrNotification;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Throwable;
 
 #[Route('/notification', name: 'notification_')]
 class PqrNotificationController extends AbstractController
 {
-    use ExceptionHelper;
     #[Route('', name: 'store', methods: ['POST'])]
     public function store(
         Request $request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
     ): Response {
         try {
@@ -37,24 +35,21 @@ class PqrNotificationController extends AbstractController
 
             $data = $PqrNotificationService->getModel()->getDataAttributes();
 
-            $saiaResponse->replaceData($data);
             $Connection->commit();
+
+            return $json->success($data);
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
-        }
-        $saiaResponse->deleteProperty('success');
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(
         int $id,
         Request $request,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
     ): Response {
         try {
@@ -69,24 +64,20 @@ class PqrNotificationController extends AbstractController
 
             $data = $PqrNotificationService->getModel()->getDataAttributes();
 
-            $saiaResponse->replaceData($data);
-
             $Connection->commit();
+
+            return $json->success($data);
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
-        }
-        $saiaResponse->deleteProperty('success');
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 
     #[Route('/{id}', name: 'destroy', methods: ['DELETE'])]
     public function destroy(
         int $id,
-        ISaiaResponse $saiaResponse,
+        jsonResponseService $json,
         Connection $Connection,
     ): Response {
         try {
@@ -100,14 +91,12 @@ class PqrNotificationController extends AbstractController
             }
 
             $Connection->commit();
+
+            return $json->success();
         } catch (Throwable $th) {
             $Connection->rollBack();
-            $saiaResponse->setResponseStatus($this->getExceptionStatusCode($th));
-            $saiaResponse->setMessage($th->getMessage());
-            $saiaResponse->deleteProperty('data');
-        }
-        $saiaResponse->deleteProperty('success');
 
-        return $saiaResponse->getResponse();
+            return $json->exception($th);
+        }
     }
 }
