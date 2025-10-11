@@ -144,13 +144,11 @@ class FtPqrController extends AbstractController
 
     /**
      * @param int $idft
-     * @param JsonResponseService $json
      * @return JsonResponse
      */
     #[Route('/history', name: 'getHistory', methods: ['GET'])]
     public function getHistory(
         int $idft,
-        jsonResponseService $json,
     ): JsonResponse {
         try {
             $records = (UtilitiesPqr::getInstanceForFtId($idft))->getService()->getRecordsHistory();
@@ -166,7 +164,7 @@ class FtPqrController extends AbstractController
             ];
         }
 
-        return $json->success($data);
+        return new JsonResponse($data);
     }
 
     #[Route('/externalUser', name: 'setExternalUser', methods: ['POST'])]
