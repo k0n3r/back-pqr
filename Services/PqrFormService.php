@@ -57,7 +57,7 @@ class PqrFormService extends ModelService
             return false;
         }
 
-        $this->legacyService
+        $this->serviceLocator
             ->getConnection()
             ->createQueryBuilder()
             ->update('pqr_form_fields')
@@ -245,7 +245,7 @@ class PqrFormService extends ModelService
         ]);
 
         if (!$ModuloPadre) {
-            $trans = $this->legacyService->getTranslator()->trans("no_se_encontro_modulo_reporte");
+            $trans = $this->serviceLocator->getTranslator()->trans("no_se_encontro_modulo_reporte");
             throw new RuntimeException($trans);
         }
 
@@ -270,7 +270,7 @@ class PqrFormService extends ModelService
 
         $ModuloService = (new Modulo())->getService();
         if (!$ModuloService->save($data)) {
-            $trans = $this->legacyService->getTranslator()->trans("no_fue_posible_registrar_reporte_pqr");
+            $trans = $this->serviceLocator->getTranslator()->trans("no_fue_posible_registrar_reporte_pqr");
 
             throw new RuntimeException($trans);
         }
@@ -536,7 +536,7 @@ class PqrFormService extends ModelService
         $codeFunction = "<?php \n\n".implode("\n", $fieldCode);
 
         if (!file_put_contents($file, $codeFunction)) {
-            $trans = $this->legacyService->getTranslator()->trans("no_fue_posible_crear_funciones_formulario");
+            $trans = $this->serviceLocator->getTranslator()->trans("no_fue_posible_crear_funciones_formulario");
             throw new RuntimeException($trans);
         }
     }

@@ -150,8 +150,8 @@ class UtilitiesPqr
 
             return $_SERVER['APP_DOMAIN'].$FileTemporal->getRouteFromRoot();
         } catch (Throwable $th) {
-            $legacyService = LegacyServiceLocator::getInstance();
-            $legacyService->getLogger()->error($th->getMessage(), [
+            $serviceLocator = LegacyServiceLocator::getInstance();
+            $serviceLocator->getLogger()->error($th->getMessage(), [
                 'documentId' => $Documento->getPK(),
                 'trace'      => $th->getTraceAsString(),
             ]);

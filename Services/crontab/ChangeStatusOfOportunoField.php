@@ -14,9 +14,9 @@ class ChangeStatusOfOportunoField implements ICrontab
 {
     public function execute(): bool
     {
-        $legacyService = LegacyServiceLocator::getInstance();
-        $Connection = $legacyService->getConnection();
-        $Logger = $legacyService->getLogger();
+        $serviceLocator = LegacyServiceLocator::getInstance();
+        $Connection = $serviceLocator->getConnection();
+        $Logger = $serviceLocator->getLogger();
         $response = true;
 
         $statusOportuno = [

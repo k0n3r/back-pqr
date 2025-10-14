@@ -272,7 +272,7 @@ class FtPqrRespuestaService extends ModelService
             json_encode($params),
         );
 
-        $this->legacyService->getMailerService()->send($email, 'pqr.respuesta.respuesta');
+        $this->serviceLocator->getMailerService()->send($email, 'pqr.respuesta.respuesta');
 
         return true;
     }
@@ -365,7 +365,7 @@ class FtPqrRespuestaService extends ModelService
             json_encode($params),
         );
 
-        $this->legacyService->getMailerService()->send($EmailSaia, 'pqr.respuesta.encuesta');
+        $this->serviceLocator->getMailerService()->send($EmailSaia, 'pqr.respuesta.encuesta');
 
 
         return true;
@@ -419,7 +419,7 @@ class FtPqrRespuestaService extends ModelService
                 );
 
                 if (!$save) {
-                    $trans = $this->legacyService->getTranslator()->trans(
+                    $trans = $this->serviceLocator->getTranslator()->trans(
                         "no_fue_posible_cambiar_estado_tarea",
                         ['%taskId%' => $Tarea->getPK()],
                     );

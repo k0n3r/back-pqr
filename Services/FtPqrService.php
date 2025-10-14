@@ -547,7 +547,7 @@ class FtPqrService extends ModelService
             json_encode($params),
         );
 
-        $this->legacyService->getMailerService()->send($email, 'pqr.radicado.solicitante');
+        $this->serviceLocator->getMailerService()->send($email, 'pqr.radicado.solicitante');
 
         return true;
     }
@@ -640,7 +640,7 @@ class FtPqrService extends ModelService
                 json_encode($params),
             );
 
-            $this->legacyService->getMailerService()->send($email, 'pqr.radicado.configurados');
+            $this->serviceLocator->getMailerService()->send($email, 'pqr.radicado.configurados');
         }
 
         return true;
@@ -1398,7 +1398,7 @@ class FtPqrService extends ModelService
      */
     protected function getUserForGroup(Grupo $Grupo): array
     {
-        return $this->legacyService
+        return $this->serviceLocator
             ->getConnection()
             ->createQueryBuilder()
             ->select('dc.funcionario_idfuncionario as idfuncionario,gf.fk_dependencia_cargo')
@@ -1421,7 +1421,7 @@ class FtPqrService extends ModelService
      */
     protected function getTaskForUser(int $idfuncionario): int
     {
-        return (int)$this->legacyService
+        return (int)$this->serviceLocator
             ->getConnection()
             ->createQueryBuilder()
             ->select('cant_task')

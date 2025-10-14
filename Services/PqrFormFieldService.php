@@ -252,7 +252,7 @@ class PqrFormFieldService extends ModelService
      */
     private function columnExistsDB(string $name): bool
     {
-        $connection = $this->legacyService->getConnection();
+        $connection = $this->serviceLocator->getConnection();
         $schemaManager = $connection->createSchemaManager();
         $table = $schemaManager->introspectTable('ft_pqr');
 
@@ -298,7 +298,7 @@ class PqrFormFieldService extends ModelService
      */
     private function getDependencys(object $ObjSettings, array $data = []): array
     {
-        $Qb = $this->legacyService
+        $Qb = $this->serviceLocator
             ->getConnection()
             ->createQueryBuilder()
             ->select('iddependencia as id,nombre as text')
@@ -354,7 +354,7 @@ class PqrFormFieldService extends ModelService
      */
     private function getListLocalidad(object $ObjSettings, array $data = []): array
     {
-        $Qb = $this->legacyService
+        $Qb = $this->serviceLocator
             ->getConnection()
             ->createQueryBuilder()
             ->select(

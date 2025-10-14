@@ -359,9 +359,9 @@ function QbDependencia(): QueryBuilder
 {
     $Dependencia = getDependencia();
 
-    $legacyService = LegacyServiceLocator::getInstance();
+    $serviceLocator = LegacyServiceLocator::getInstance();
 
-    return $legacyService
+    return $serviceLocator
         ->getConnection()->createQueryBuilder()
         ->select('count(sys_dependencia) as cant')
         ->from('vpqr', 'v')

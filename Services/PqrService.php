@@ -18,12 +18,12 @@ class PqrService
     private ?bool $subTypeExist = null;
     private ?bool $dependencyExist = null;
     private PqrForm $PqrForm;
-    private LegacyServiceLocator $legacyService;
+    private LegacyServiceLocator $serviceLocator;
 
     public function __construct()
     {
         $this->PqrForm = PqrForm::getInstance();
-        $this->legacyService = LegacyServiceLocator::getInstance();
+        $this->serviceLocator = LegacyServiceLocator::getInstance();
     }
 
     public function getPqrForm(): PqrForm
@@ -76,8 +76,8 @@ class PqrService
      */
     private function getListDependency(array $data): array
     {
-        $legacyService = LegacyServiceLocator::getInstance();
-        $Qb = $legacyService
+        $serviceLocator = LegacyServiceLocator::getInstance();
+        $Qb = $serviceLocator
             ->getConnection()
             ->createQueryBuilder()
             ->select('iddependencia as id,nombre')
@@ -106,7 +106,7 @@ class PqrService
      */
     private function getListPais(array $data): array
     {
-        $Qb = $this->legacyService
+        $Qb = $this->serviceLocator
             ->getConnection()
             ->createQueryBuilder()
             ->select('idpais as id,nombre')
@@ -135,7 +135,7 @@ class PqrService
      */
     private function getListDepartamento(array $data): array
     {
-        $Qb = $this->legacyService
+        $Qb = $this->serviceLocator
             ->getConnection()
             ->createQueryBuilder()
             ->select('iddepartamento as id,nombre')
@@ -270,8 +270,8 @@ class PqrService
      */
     public static function getTextFields(): array
     {
-        $legacyService = LegacyServiceLocator::getInstance();
-        $Qb = $legacyService
+        $serviceLocator = LegacyServiceLocator::getInstance();
+        $Qb = $serviceLocator
             ->getConnection()
             ->createQueryBuilder()
             ->select('ff.*')
@@ -323,15 +323,15 @@ class PqrService
      */
     public static function activeGraphics(): void
     {
-        $legacyService = LegacyServiceLocator::getInstance();
+        $serviceLocator = LegacyServiceLocator::getInstance();
         if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO,
         ])) {
-            $trans = $legacyService->getTranslator()->trans("no_se_encuentra_pantalla_grafico");
+            $trans = $serviceLocator->getTranslator()->trans("no_se_encuentra_pantalla_grafico");
             throw new RuntimeException($trans);
         }
 
-        $Qb = $legacyService
+        $Qb = $serviceLocator
             ->getConnection()
             ->createQueryBuilder()
             ->update('grafico')

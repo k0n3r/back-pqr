@@ -149,7 +149,7 @@ class FtPqr extends FtPqrProperties
     public function getLastCalificacion(): ?FtPqrCalificacion
     {
         if (!$this->lastFtPqrCalificacion) {
-            $Qb = $this->legacyService
+            $Qb = $this->serviceLocator
                 ->getConnection()
                 ->createQueryBuilder()
                 ->select('ft.*')
