@@ -525,12 +525,12 @@ class FtPqrService extends ModelService
 
         $Documento = $this->getDocument();
         $file = FilesystemForJson::getFileJson($Documento->getPdfJson());
-        $email->attach($file->getContent());
+        $email->attach($file->getContent(), basename($file->getName()));
 
         $records = $Documento->getService()->getAllFilesAnexos(true);
         foreach ($records as $Anexos) {
             $file = FilesystemForJson::getFileJson($Anexos->ruta);
-            $email->attach($file->getContent());
+            $email->attach($file->getContent(), basename($file->getName()));
         }
 
         $email
@@ -629,7 +629,7 @@ class FtPqrService extends ModelService
                 ->to(...$emails);
 
             $file = FilesystemForJson::getFileJson($Documento->getPdfJson());
-            $email->attach($file->getContent());
+            $email->attach($file->getContent(), basename($file->getName()));
 
             $params = [
                 'documentId' => $Documento->getPK(),

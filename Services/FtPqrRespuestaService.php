@@ -232,13 +232,13 @@ class FtPqrRespuestaService extends ModelService
 
         $DocumentoRespuesta = $FtPqrRespuesta->getDocument();
         $file = FilesystemForJson::getFileJson($DocumentoRespuesta->getPdfJson());
-        $email->attach($file->getContent());
+        $email->attach($file->getContent(), basename($file->getName()));
 
         $DocumentoService = $DocumentoRespuesta->getService();
         if ($records = $DocumentoService->getAllFilesAnexos(true)) {
             foreach ($records as $Anexos) {
                 $file = FilesystemForJson::getFileJson($Anexos->ruta);
-                $email->attach($file->getContent());
+                $email->attach($file->getContent(), basename($file->getName()));
             }
         }
 
