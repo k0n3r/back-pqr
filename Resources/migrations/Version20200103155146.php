@@ -189,11 +189,12 @@ final class Version20200103155146 extends AbstractMigration
         $table->addColumn('enable_filter_dep', 'boolean', ['default' => 0]);
 
         $table->addColumn('description_field', 'integer', [
-            'length' => 11,
+            'length'  => 11,
             'default' => 0,
         ]);
 
         $table->addColumn('enable_balancer', 'boolean', ['default' => 0]);
+        $table->addColumn('enable_con_days', 'boolean', ['default' => 0]);
         $table->addColumn('fk_field_balancer', 'integer', [
             'default' => 0,
             'comment' => 'idcampos_formato',

@@ -42,6 +42,7 @@ class PqrForm extends Model
             'enable_filter_dep',
             'description_field',
             'enable_balancer',
+            'enable_con_days',
             'fk_field_balancer',  //Campos Formato,
         ];
         $this->dbAttributes = (object)[
@@ -227,6 +228,15 @@ class PqrForm extends Model
     public function isEnableBalancer(): bool
     {
         return (bool)$this->enable_balancer;
+    }
+
+    /**
+     * @return bool
+     * @author Andres Agudelo <andres.agudelo@cerok.com> 2024-02-20
+     */
+    public function isEnabledCalendarDays(): bool
+    {
+        return (bool)$this->enable_con_days ?? false;
     }
 
     /**

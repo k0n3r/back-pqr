@@ -241,11 +241,16 @@ class FtPqrService extends ModelService
      */
     public function getDateForType(bool $instance = false, ?int $days = null): DateTime|string
     {
+        $days = is_null($days) ? $this->getDays() : $days;
         $Created = DateController::getDateTimeFromDataBase($this->getDocument()->fecha);
-        $DateTime = (DateController::addBusinessDays(
-            $Created,
-            is_null($days) ? $this->getDays() : $days,
-        ));
+        if ($this->isEnabledCalendarDays()) {
+            $DateTime = clone $Created;
+            $interval = sprintf("P%sD", $days);
+            $DateTime->add(new DateInterval($interval));
+        } else {
+            $DateTime = (DateController::addBusinessDays($Created, $days));
+        }
+
         $DateTime->setTime(
             $Created->format('H'),
             $Created->format('i'),
@@ -253,6 +258,17 @@ class FtPqrService extends ModelService
         );
 
         return $instance ? $DateTime : $DateTime->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * Valida si los dias se cuentan de corrido o tiene en cuenta los festivos
+     *
+     * @return bool
+     * @author Andres Agudelo <andres.agudelo@saiasoftware.com> 2025-10-28
+     */
+    protected function isEnabledCalendarDays(): bool
+    {
+        return $this->getPqrForm()->isEnabledCalendarDays();
     }
 
     /**

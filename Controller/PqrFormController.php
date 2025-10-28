@@ -65,9 +65,9 @@ class PqrFormController extends AbstractController
     #[Route('/publish', name: 'publish', methods: ['PUT'])]
     public function publish(
         jsonResponseService $json,
-        Connection $Connection,
+        Connection $connection,
     ): Response {
-        $Connection->beginTransaction();
+        $connection->beginTransaction();
 
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
@@ -82,11 +82,11 @@ class PqrFormController extends AbstractController
                 'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
             ];
 
-            $Connection->commit();
+            $connection->commit();
 
             return $json->success($data);
         } catch (Throwable $th) {
-            $Connection->rollBack();
+            $connection->rollBack();
 
             return $json->exception($th);
         }
@@ -96,9 +96,9 @@ class PqrFormController extends AbstractController
     public function sortFields(
         Request $request,
         jsonResponseService $json,
-        Connection $Connection,
+        Connection $connection,
     ): Response {
-        $Connection->beginTransaction();
+        $connection->beginTransaction();
         try {
             foreach ($request->get('fieldOrder') as $record) {
                 $PqrFormFieldService = (new PqrFormField($record['id']))->getService();
@@ -111,11 +111,11 @@ class PqrFormController extends AbstractController
                 }
             }
 
-            $Connection->commit();
+            $connection->commit();
 
             return $json->success();
         } catch (Throwable $th) {
-            $Connection->rollBack();
+            $connection->rollBack();
 
             return $json->exception($th);
         }
@@ -125,9 +125,9 @@ class PqrFormController extends AbstractController
     public function updateSetting(
         Request $request,
         jsonResponseService $json,
-        Connection $Connection,
+        Connection $connection,
     ): Response {
-        $Connection->beginTransaction();
+        $connection->beginTransaction();
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateSetting($request->get('data'))) {
@@ -141,11 +141,11 @@ class PqrFormController extends AbstractController
                 'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
             ];
 
-            $Connection->commit();
+            $connection->commit();
 
             return $json->success($data);
         } catch (Throwable $th) {
-            $Connection->rollBack();
+            $connection->rollBack();
 
             return $json->exception($th);
         }
@@ -155,9 +155,9 @@ class PqrFormController extends AbstractController
     public function updateResponseSetting(
         Request $request,
         jsonResponseService $json,
-        Connection $Connection,
+        Connection $connection,
     ): Response {
-        $Connection->beginTransaction();
+        $connection->beginTransaction();
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateResponseSetting($request->get('data', []))) {
@@ -166,11 +166,11 @@ class PqrFormController extends AbstractController
                 );
             }
 
-            $Connection->commit();
+            $connection->commit();
 
             return $json->success();
         } catch (Throwable $th) {
-            $Connection->rollBack();
+            $connection->rollBack();
 
             return $json->exception($th);
         }
@@ -180,11 +180,11 @@ class PqrFormController extends AbstractController
     public function updateShowReport(
         Request $request,
         jsonResponseService $json,
-        Connection $Connection,
+        Connection $connection,
     ): Response {
-        $Connection->beginTransaction();
+        $connection->beginTransaction();
         try {
-            $Connection
+            $connection
                 ->createQueryBuilder()
                 ->update('pqr_form_fields')
                 ->set('show_report', 0)->executeStatement();
@@ -204,11 +204,11 @@ class PqrFormController extends AbstractController
             $PqrFormService->generaReport();
             $data = $PqrFormService->getDataPqrFormFields();
 
-            $Connection->commit();
+            $connection->commit();
 
             return $json->success($data);
         } catch (Throwable $th) {
-            $Connection->rollBack();
+            $connection->rollBack();
 
             return $json->exception($th);
         }
@@ -219,7 +219,7 @@ class PqrFormController extends AbstractController
      *
      * @param Request $Request
      * @param jsonResponseService $json
-     * @param Connection $Connection
+     * @param Connection $connection
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
@@ -227,9 +227,9 @@ class PqrFormController extends AbstractController
     public function updateShowEmpty(
         Request $Request,
         jsonResponseService $json,
-        Connection $Connection,
+        Connection $connection,
     ): Response {
-        $Connection->beginTransaction();
+        $connection->beginTransaction();
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
             $success = $PqrFormService->save([
@@ -240,11 +240,11 @@ class PqrFormController extends AbstractController
             }
 
             $data = $PqrFormService->getDataPqrForm();
-            $Connection->commit();
+            $connection->commit();
 
             return $json->success($data);
         } catch (Throwable $th) {
-            $Connection->rollBack();
+            $connection->rollBack();
 
             return $json->exception($th);
         }
@@ -255,7 +255,7 @@ class PqrFormController extends AbstractController
      *
      * @param Request $Request
      * @param jsonResponseService $json
-     * @param Connection $Connection
+     * @param Connection $connection
      * @param TranslatorInterface $translator
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
@@ -264,10 +264,10 @@ class PqrFormController extends AbstractController
     public function updateEnableFilterDep(
         Request $Request,
         jsonResponseService $json,
-        Connection $Connection,
+        Connection $connection,
         TranslatorInterface $translator,
     ): Response {
-        $Connection->beginTransaction();
+        $connection->beginTransaction();
         try {
             $status = $Request->get('enable_filter_dep', 0);
 
@@ -292,11 +292,11 @@ class PqrFormController extends AbstractController
             }
 
             $data = $PqrFormService->getDataPqrForm();
-            $Connection->commit();
+            $connection->commit();
 
             return $json->success($data);
         } catch (Throwable $th) {
-            $Connection->rollBack();
+            $connection->rollBack();
 
             return $json->exception($th);
         }
@@ -307,7 +307,7 @@ class PqrFormController extends AbstractController
      *
      * @param Request $Request
      * @param jsonResponseService $json
-     * @param Connection $Connection
+     * @param Connection $connection
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
      */
@@ -315,9 +315,9 @@ class PqrFormController extends AbstractController
     public function updateEnableBalancer(
         Request $Request,
         jsonResponseService $json,
-        Connection $Connection,
+        Connection $connection,
     ): Response {
-        $Connection->beginTransaction();
+        $connection->beginTransaction();
         try {
             $status = $Request->get('enable_balancer', 0);
 
@@ -333,11 +333,43 @@ class PqrFormController extends AbstractController
             }
 
             $data = $PqrFormService->getDataPqrForm();
-            $Connection->commit();
+            $connection->commit();
 
             return $json->success($data);
         } catch (Throwable $th) {
-            $Connection->rollBack();
+            $connection->rollBack();
+
+            return $json->exception($th);
+        }
+    }
+
+    #[Route('/consecutiveDays', name: 'updateEnableConsecutiveDays', methods: ['PUT'])]
+    public function updateEnableConsecutiveDays(
+        Request $Request,
+        jsonResponseService $json,
+        Connection $connection,
+    ): Response {
+        $connection->beginTransaction();
+        try {
+            $status = $Request->get('enable_con_days', 0);
+
+            $PqrForm = PqrForm::getInstance();
+            $PqrFormService = $PqrForm->getService();
+
+            $success = $PqrFormService->save([
+                'enable_con_days' => $status,
+            ]);
+
+            if (!$success) {
+                throw new ValidationFailedException($PqrFormService->getErrorManager()->getMessage());
+            }
+
+            $data = $PqrFormService->getDataPqrForm();
+            $connection->commit();
+
+            return $json->success($data);
+        } catch (Throwable $th) {
+            $connection->rollBack();
 
             return $json->exception($th);
         }
@@ -347,10 +379,10 @@ class PqrFormController extends AbstractController
     public function descriptionField(
         jsonResponseService $json,
         Request $Request,
-        Connection $Connection,
+        Connection $connection,
         TranslatorInterface $translator,
     ): Response {
-        $Connection->beginTransaction();
+        $connection->beginTransaction();
 
         try {
             $fieldId = $Request->get('fieldId');
@@ -366,11 +398,11 @@ class PqrFormController extends AbstractController
                 throw new ValidationFailedException($PqrFormsService->getErrorManager()->getMessage());
             }
 
-            $Connection->commit();
+            $connection->commit();
 
             return $json->success();
         } catch (Throwable $th) {
-            $Connection->rollBack();
+            $connection->rollBack();
 
             return $json->exception($th);
         }
@@ -380,10 +412,10 @@ class PqrFormController extends AbstractController
     public function receivingchannels(
         jsonResponseService $json,
         Request $Request,
-        Connection $Connection,
+        Connection $connection,
         TranslatorInterface $translator,
     ): Response {
-        $Connection->beginTransaction();
+        $connection->beginTransaction();
 
         try {
             $channels = $Request->get('channels', []);
@@ -401,11 +433,11 @@ class PqrFormController extends AbstractController
                 throw new ValidationFailedException($PqrFormsService->getErrorManager()->getMessage());
             }
 
-            $Connection->commit();
+            $connection->commit();
 
             return $json->success();
         } catch (Throwable $th) {
-            $Connection->rollBack();
+            $connection->rollBack();
 
             return $json->exception($th);
         }
