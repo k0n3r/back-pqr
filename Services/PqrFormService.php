@@ -5,6 +5,8 @@ namespace App\Bundles\pqr\Services;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Entity\EmailConfiguration;
+use App\Repository\EmailConfigurationRepository;
 use App\services\models\ModelService\ModelService;
 use RuntimeException;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
@@ -136,7 +138,17 @@ class PqrFormService extends ModelService
             'groupOptions'        => $this->getGroupsForBalancer(),
             'descriptionField'    => $this->getdescriptionField(),
             'receivingChannel'    => $this->getModel()->getCanalRecepcion(),
+            'emailsConfig'        => $this->getEmailsConfig(),
         ];
+    }
+
+    private function getEmailsConfig(): array
+    {
+        /** @var EmailConfigurationRepository $repository */
+        $repository = $this->serviceLocator->getRepository(EmailConfiguration::class);
+        $emailsConfiguration = $repository->findByPqrModule();
+
+        return array_map(fn ($config) => $config->toArray(), $emailsConfiguration);
     }
 
     private function getGroupsForBalancer(): array
