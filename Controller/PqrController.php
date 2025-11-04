@@ -115,8 +115,8 @@ class PqrController extends AbstractController
             ]);
 
             if (!$PqrFormField || !$PqrFormField->fk_campos_formato) {
-                $trans = $translator->trans("no_esta_habilitado_campo_dependencia");
-                throw new ValidationFailedException($trans);
+                $message = $translator->trans("no_esta_habilitado_campo_dependencia");
+                return $json->success(['enabled' => 0], $message);
             }
 
             $allDependency = Dependencia::findAllByAttributes();
@@ -142,6 +142,7 @@ class PqrController extends AbstractController
 
 
             $data = [
+                'enabled' => 1,
                 'content' => $html,
             ];
 
