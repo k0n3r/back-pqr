@@ -4,8 +4,10 @@
 services:
   # Configuración por defecto para los servicios en este módulo
   _defaults:
-    autowire: true      # Inyecta dependencias automáticamente
-    autoconfigure: true # Registra servicios como comandos, suscriptores de eventos, etc.
+    autowire: true # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    bind:
+      $projectDir: '%kernel.project_dir%'
 
   # Hace que las clases de este namespace estén disponibles como servicios.
   App\Bundles\pqr\:
