@@ -5,7 +5,6 @@ namespace App\Bundles\pqr\Controller;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\PqrService;
 use App\Exception\MissingParameterException;
-use App\Service\JsonResponseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +19,6 @@ class ComponentsController extends AbstractController
     public function getListDataForAutocomplete(
         Request $request,
         TranslatorInterface $translator,
-        JsonResponseService $json,
     ): JsonResponse {
         try {
             if (!$PqrFormField = PqrFormField::findByAttributes([
@@ -34,7 +32,7 @@ class ComponentsController extends AbstractController
             $data = [];
         }
 
-        return $json->success([
+        return new JsonResponse([
             'results' => $data,
         ]);
     }
@@ -42,7 +40,6 @@ class ComponentsController extends AbstractController
     #[Route('/autocomplete/find', name: 'findDataForAutocomplete', methods: ['GET'])]
     public function findDataForAutocomplete(
         Request $request,
-        jsonResponseService $json,
     ): JsonResponse {
         try {
             $data = (new PqrService())
@@ -51,7 +48,7 @@ class ComponentsController extends AbstractController
             $data = [];
         }
 
-        return $json->success([
+        return new JsonResponse([
             'results' => $data,
         ]);
     }
