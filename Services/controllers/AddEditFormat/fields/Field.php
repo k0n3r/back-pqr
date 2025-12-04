@@ -35,8 +35,16 @@ abstract class Field
             CamposFormato::ACTION_EDIT,
         ];
 
+        $isDescription = false;
         if ($this->PqrFormField->required) {
             if (in_array($this->PqrFormField->name, self::FIELDS_DESCRIPTION)) {
+                $actions[] = CamposFormato::ACTION_DESCRIPTION;
+                $isDescription = true;
+            }
+        }
+
+        if (!$isDescription) {
+            if ($this->PqrFormField->getPqrForm()->description_field == $this->PqrFormField->getPK()) {
                 $actions[] = CamposFormato::ACTION_DESCRIPTION;
             }
         }

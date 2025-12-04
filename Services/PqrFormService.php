@@ -11,6 +11,7 @@ use App\services\models\ModelService\ModelService;
 use RuntimeException;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\busqueda\BusquedaComponente;
+use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
 use Saia\models\grupo\Grupo;
 use Saia\models\Modulo;
@@ -929,41 +930,34 @@ class PqrFormService extends ModelService
             return true;
         }
 
+        $isDescription = false;
         $CamposFormato = (new PqrFormField($fieldId))->getCamposFormato();
         if ($CamposFormato->isDescriptionField()) {
-            return true;
+            $isDescription = true;
+            if ($fieldId == $PqrForms->description_field) {
+                return true;
+            }
         }
 
-        $actionList = explode(',', $CamposFormato->acciones);
-        $actionList[] = 'p';
+        if (!$isDescription) {
+            $actionList = explode(',', $CamposFormato->acciones);
+            $actionList[] = CamposFormato::ACTION_DESCRIPTION;
 
-        $CamposFormatoService = $CamposFormato->getService();
-        $success = $CamposFormato->getService()->save([
-            'acciones' => implode(',', array_filter($actionList)),
-        ]);
-
-        if (!$success) {
-            $this->setErrorManager($CamposFormatoService->getErrorManager());
-
-            return false;
+            $CamposFormato->getService()->save([
+                'acciones' => implode(',', array_filter($actionList)),
+            ]);
         }
 
         $PqrFormFieldDes = $PqrForms->getPqrFormFieldDescription();
         if ($PqrFormFieldDes) {
             $CamposFormatoOld = $PqrFormFieldDes->getCamposFormato();
 
-            $actionListOld = array_diff(explode(',', $CamposFormatoOld->acciones), ['p']);
+            $actionListOld = array_diff(explode(',', $CamposFormatoOld->acciones), [CamposFormato::ACTION_DESCRIPTION]);
 
             $CamposFormatoServiceOld = $CamposFormatoOld->getService();
-            $success = $CamposFormatoServiceOld->save([
+            $CamposFormatoServiceOld->save([
                 'acciones' => implode(',', array_filter($actionListOld)),
             ]);
-
-            if (!$success) {
-                $this->setErrorManager($CamposFormatoService->getErrorManager());
-
-                return false;
-            }
         }
 
         return $PqrForms->getService()->save([

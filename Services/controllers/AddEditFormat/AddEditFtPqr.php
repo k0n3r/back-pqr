@@ -2,18 +2,18 @@
 
 namespace App\Bundles\pqr\Services\controllers\AddEditFormat;
 
-use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
+use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\models\PqrFormField;
+use Doctrine\DBAL\Types\Types;
 use RuntimeException;
 use Saia\controllers\generator\component\Distribution;
 use Saia\controllers\generator\component\Hidden;
 use Saia\controllers\generator\component\Rad;
-use Saia\models\formatos\CampoOpciones;
-use Saia\models\formatos\Formato;
-use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\controllers\SessionController;
+use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
-use Doctrine\DBAL\Types\Types;
+use Saia\models\formatos\Formato;
 
 class AddEditFtPqr implements IAddEditFormat
 {
@@ -134,7 +134,6 @@ class AddEditFtPqr implements IAddEditFormat
         ];
 
         if ($edit) {
-            //            unset($data['info_ws']);
             unset($data['contador_idcontador']);
             unset($data['encabezado']);
             unset($data['pie_pagina']);
