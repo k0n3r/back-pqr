@@ -46,7 +46,21 @@ class FtPqr extends FtPqrProperties
     protected function defineMoreAttributes(): array
     {
         return [
-            'labels' => [
+            'integer' => [
+                'documento_iddocumento',
+                'encabezado',
+                'firma',
+                'idft_pqr',
+                'sys_tercero',
+                'sys_severidad',
+                'sys_impacto',
+                'sys_frecuencia',
+                'sys_anonimo',
+                'dependencia',
+                'sys_tipo',
+                'sys_dependencia',
+            ],
+            'labels'  => [
                 'sys_frecuencia' => [
                     'label'  => 'Frecuencia',
                     'values' => [
