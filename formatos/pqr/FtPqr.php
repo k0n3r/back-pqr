@@ -13,6 +13,7 @@ use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Exception\ValidationFailedException;
 use Doctrine\DBAL\ParameterType;
 use Saia\controllers\generator\component\Distribution;
+use Saia\models\Dependencia;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\Tercero;
@@ -40,6 +41,8 @@ class FtPqr extends FtPqrProperties
     protected ?FtPqrService $FtPqrService = null;
     private ?FtPqrCalificacion $lastFtPqrCalificacion = null;
     private ?VfuncionarioDc $FuncionarioDestinoInterno = null;
+
+    private ?Dependencia $sysDependencia = null;
 
     /**
      * @inheritDoc
@@ -486,6 +489,23 @@ class FtPqr extends FtPqrProperties
         }
 
         return true;
+    }
+
+    public function getSysDependencia(): ?Dependencia
+    {
+        if (!$this->sys_dependencia) {
+            return null;
+        }
+
+        if (!is_null($this->sysDependencia)) {
+            return $this->sysDependencia;
+        }
+
+        $this->sysDependencia = Dependencia::findByAttributes([
+            'iddependencia' => $this->sys_dependencia,
+        ]);
+
+        return $this->sysDependencia;
     }
 
     /**
