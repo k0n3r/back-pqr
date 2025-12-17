@@ -55,10 +55,7 @@ class PqrDataJsonForIA extends JsonForIA
     {
         $fields = $this->formato->getFields();
 
-        $excludedFields = array_merge(
-            $this->formato->getSystemFields(),
-            self::EXCLUDED_FIELDS,
-        );
+        $excludedFields = $this->getFieldsToExclude();
         $excludedHTMLTypes = $this->getexcludeHTMLTypes();
         $metadataFields = array_keys(self::METADATA_FIELD_MAP);
 
@@ -91,6 +88,14 @@ class PqrDataJsonForIA extends JsonForIA
         }
 
         return $data;
+    }
+
+    protected function getFieldsToExclude(): array
+    {
+        return array_merge(
+            parent::getFieldsToExclude(),
+            self::EXCLUDED_FIELDS,
+        );
     }
 
     private function shouldExcludeField(
