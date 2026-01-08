@@ -409,7 +409,7 @@ function getPendientes(): string
 {
     $Qb = QbDependencia()
         ->andWhere('sys_estado IN (:estado)')
-        ->setParameter('estado', [FtPqr::ESTADO_PROCESO, FtPqr::ESTADO_PENDIENTE], ArrayParameterType::INTEGER);
+        ->setParameter('estado', [FtPqr::ESTADO_PROCESO, FtPqr::ESTADO_PENDIENTE], ArrayParameterType::STRING);
 
     if ($where = filterByFiltroTemp()) {
         $Qb->andWhere($where);
