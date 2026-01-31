@@ -2,18 +2,16 @@
 
 namespace App\Bundles\pqr\Service;
 
-use App\Bundles\IA\Services\JsonForIA;
+use App\Bundles\ia\Services\JsonForIA;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Saia\controllers\generator\component\Method;
 use Saia\core\model\ModelFormat;
 use Saia\models\formatos\CamposFormato;
 
-class PqrDataJsonForIA extends JsonForIA
+class PqrJsonForIA extends JsonForIA
 {
     protected ModelFormat|FtPqr $ft;
-
-    protected array $otherMetadata = [];
 
     protected const array SPECIAL_FIELDS = [
         'sys_tercero',
@@ -24,21 +22,11 @@ class PqrDataJsonForIA extends JsonForIA
         'sys_dependencia',
     ];
 
-    protected const array METADATA_FIELD_MAP = [
-        'sys_estado' => 'pqrStatus',
-        'sys_tipo'   => 'pqrType',
-    ];
-
     protected const array EXCLUDED_FIELDS = [
         'destino_interno',
         'select_mensajeria',
         'colilla',
     ];
-
-    protected function getMetadataAttributes(): array
-    {
-        return array_merge(parent::getMetadataAttributes(), $this->otherMetadata);
-    }
 
     protected function getexcludeHTMLTypes(): array
     {
@@ -51,13 +39,12 @@ class PqrDataJsonForIA extends JsonForIA
         return $data;
     }
 
-    protected function getFormatFields(): array
+    public function getFormatFields(): array
     {
         $fields = $this->formato->getFields();
 
         $excludedFields = $this->getFieldsToExclude();
         $excludedHTMLTypes = $this->getexcludeHTMLTypes();
-        $metadataFields = array_keys(self::METADATA_FIELD_MAP);
 
         $data = [];
 
@@ -81,10 +68,6 @@ class PqrDataJsonForIA extends JsonForIA
                 'label'       => $camposFormato->etiqueta ?? '',
                 'value'       => $value,
             ];
-
-            if (in_array($nameDb, $metadataFields, true)) {
-                $this->otherMetadata[self::METADATA_FIELD_MAP[$nameDb]] = $value;
-            }
         }
 
         return $data;
@@ -148,13 +131,5 @@ class PqrDataJsonForIA extends JsonForIA
         $email = $tercero->getEmail() ?? 'N/A';
 
         return sprintf('%s (%s)', $tercero->getLabel(), $email);
-    }
-
-    protected function getSecurityAccessDepartments(): array
-    {
-        $dataParent = parent::getSecurityAccessDepartments();
-        $dataParent[] = $this->ft->getSysDependencia()?->getName() ?? '';
-
-        return $dataParent;
     }
 }

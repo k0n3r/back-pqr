@@ -41,6 +41,7 @@ final class Version20191224165528 extends AbstractMigration
     private function convertDate(string $date): string
     {
         $DateTime = DateTime::createFromFormat('Y-m-d H:i:s', $date);
+
         return $DateTime->format($this->connection->getDatabasePlatform()->getDateTimeFormatString());
     }
 
@@ -86,7 +87,7 @@ final class Version20191224165528 extends AbstractMigration
                                 'etiqueta'         => 'Respuestas PQRSF',
                                 'enlace'           => 'views/modules/pqr/dist/respuestaPqr/index.html',
                                 'orden'            => 1,
-                                'tiene_hijos'      => 0
+                                'tiene_hijos'      => 0,
                             ],
                             'conf_formulario_pqr' => [
                                 'pertenece_nucleo' => 0,
@@ -97,8 +98,8 @@ final class Version20191224165528 extends AbstractMigration
                                 'enlace'           => 'views/modules/pqr/dist/configuracionPqr/index.html',
                                 'orden'            => 1,
                                 'tiene_hijos'      => 0,
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
                     'reporte_pqr'       => [
                         'pertenece_nucleo' => 0,
@@ -139,8 +140,8 @@ final class Version20191224165528 extends AbstractMigration
                                 'enlace'           => null,
                                 'orden'            => 3,
                                 'tiene_hijos'      => 0,
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
                     'indicadores_pqr'   => [
                         'pertenece_nucleo' => 0,
@@ -151,10 +152,10 @@ final class Version20191224165528 extends AbstractMigration
                         'enlace'           => null,
                         'orden'            => 4,
                         'tiene_hijos'      => 0,
-                        'children'         => []
-                    ]
-                ]
-            ]
+                        'children'         => [],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -162,17 +163,14 @@ final class Version20191224165528 extends AbstractMigration
     {
         if ($data) {
             foreach ($data as $name => $dataModule) {
-                if (isset($dataModule['children'])) {
-                    $child = $dataModule['children'];
-                    unset($dataModule['children']);
-                }
+                $children = $dataModule['children'] ?? null;
+                unset($dataModule['children']);
 
-                $idmodulo = $this->createModulo(
-                    array_merge($dataModule, ['cod_padre' => $id]),
-                    $name
-                );
-                if (isset($child)) {
-                    $this->generateModules($child, $idmodulo);
+                $dataM = array_merge($dataModule, ['cod_padre' => $id]);
+                $idmodulo = $this->createModulo($dataM, $name);
+
+                if ($children) {
+                    $this->generateModules($children, $idmodulo);
                 }
             }
         }
@@ -181,7 +179,7 @@ final class Version20191224165528 extends AbstractMigration
     private function createIndicators(): void
     {
         $this->connection->insert('pantalla_grafico', [
-            'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO
+            'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO,
         ]);
         $id = $this->connection->lastInsertId('pantalla_grafico');
 
@@ -196,7 +194,7 @@ final class Version20191224165528 extends AbstractMigration
             'email_notifica'   => 'soporte@cerok.com',
             'estado'           => 1,
             'pertenece_nucleo' => 0,
-            'orden'            => 8
+            'orden'            => 8,
         ]);
     }
 
@@ -222,24 +220,24 @@ final class Version20191224165528 extends AbstractMigration
                     [
                         'fk_grafico' => 0,
                         'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia GROUP BY d.nombre,sys_dependencia',
-                        'etiqueta'   => 'Total'
+                        'etiqueta'   => 'Total',
                     ],
                     [
                         'fk_grafico' => 0,
                         'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'PENDIENTE\' GROUP BY d.nombre,sys_dependencia',
-                        'etiqueta'   => 'Pendiente'
+                        'etiqueta'   => 'Pendiente',
                     ],
                     [
                         'fk_grafico' => 0,
                         'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'PROCESO\' GROUP BY d.nombre,sys_dependencia',
-                        'etiqueta'   => 'Proceso'
+                        'etiqueta'   => 'Proceso',
                     ],
                     [
                         'fk_grafico' => 0,
                         'query'      => 'SELECT d.nombre,count(sys_dependencia) AS cantidad FROM vpqr v,dependencia d WHERE v.sys_dependencia=d.iddependencia AND sys_estado=\'TERMINADO\' GROUP BY d.nombre,sys_dependencia',
-                        'etiqueta'   => 'Terminado'
-                    ]
-                ]
+                        'etiqueta'   => 'Terminado',
+                    ],
+                ],
             ],
             [
                 'fk_busqueda_componente' => null,
@@ -260,9 +258,9 @@ final class Version20191224165528 extends AbstractMigration
                     [
                         'fk_grafico' => 0,
                         'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr v,campo_opciones c WHERE v.sys_tipo=c.idcampo_opciones GROUP BY c.valor',
-                        'etiqueta'   => 'Tipo'
-                    ]
-                ]
+                        'etiqueta'   => 'Tipo',
+                    ],
+                ],
             ],
             [
                 'fk_busqueda_componente' => null,
@@ -283,9 +281,9 @@ final class Version20191224165528 extends AbstractMigration
                     [
                         'fk_grafico' => 0,
                         'query'      => 'SELECT sys_estado,count(sys_estado) AS cantidad FROM vpqr v GROUP BY sys_estado',
-                        'etiqueta'   => 'Estado'
-                    ]
-                ]
+                        'etiqueta'   => 'Estado',
+                    ],
+                ],
             ],
             [
                 'fk_busqueda_componente' => null,
@@ -306,9 +304,9 @@ final class Version20191224165528 extends AbstractMigration
                     [
                         'fk_grafico' => 0,
                         'query'      => 'SELECT sys_oportuno,count(sys_oportuno) AS cantidad FROM vpqr v GROUP BY sys_oportuno',
-                        'etiqueta'   => 'Estado'
-                    ]
-                ]
+                        'etiqueta'   => 'Estado',
+                    ],
+                ],
             ],
             [
                 'fk_busqueda_componente' => null,
@@ -330,8 +328,8 @@ final class Version20191224165528 extends AbstractMigration
                         'fk_grafico' => 0,
                         'query'      => 'SELECT canal_recepcion,count(canal_recepcion) AS cantidad FROM vpqr v GROUP BY canal_recepcion',
                         'etiqueta'   => 'Canal recepción',
-                    ]
-                ]
+                    ],
+                ],
             ],
             [
                 'fk_busqueda_componente' => null,
@@ -353,8 +351,8 @@ final class Version20191224165528 extends AbstractMigration
                         'fk_grafico' => 0,
                         'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr_calificacion v,campo_opciones c WHERE v.experiencia_gestion=c.idcampo_opciones GROUP BY c.valor',
                         'etiqueta'   => 'Calificación',
-                    ]
-                ]
+                    ],
+                ],
             ],
             [
                 'fk_busqueda_componente' => null,
@@ -376,9 +374,9 @@ final class Version20191224165528 extends AbstractMigration
                         'fk_grafico' => 0,
                         'query'      => 'SELECT c.valor,count(c.valor) AS cantidad FROM vpqr_calificacion v,campo_opciones c WHERE v.experiencia_servicio=c.idcampo_opciones GROUP BY c.valor',
                         'etiqueta'   => 'Calificación',
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
         $this->insertGraphics($graphics);
@@ -403,7 +401,7 @@ final class Version20191224165528 extends AbstractMigration
             $this->connection->insert('cargo', [
                 'nombre'           => 'Radicador Web',
                 'estado'           => 1,
-                'pertenece_nucleo' => 1
+                'pertenece_nucleo' => 1,
             ]);
             $idcargo = $this->connection->lastInsertId('cargo');
         }
@@ -436,9 +434,9 @@ final class Version20191224165528 extends AbstractMigration
         if ($iddependencia_cargo) {
             $this->connection->update('dependencia_cargo', [
                 'fecha_final' => $this->convertDate(date('Y-12-31 23:59:59')),
-                'estado'      => 1
+                'estado'      => 1,
             ], [
-                'iddependencia_cargo' => $iddependencia_cargo
+                'iddependencia_cargo' => $iddependencia_cargo,
             ]);
         } else {
             $sqlDependencia = "SELECT iddependencia FROM dependencia WHERE cod_padre=0 OR cod_padre IS NULL";
@@ -452,7 +450,7 @@ final class Version20191224165528 extends AbstractMigration
                 'estado'                    => 1,
                 'fecha_ingreso'             => $this->convertDate(date('Y-m-d H:i:s')),
                 'fecha_inicial'             => $this->convertDate(date('Y-m-d H:i:s')),
-                'fecha_final'               => $this->convertDate(date('Y-12-31 23:59:59'))
+                'fecha_final'               => $this->convertDate(date('Y-12-31 23:59:59')),
             ]);
         }
     }
@@ -471,7 +469,6 @@ final class Version20191224165528 extends AbstractMigration
         $OtherQueriesForPlatform->dropViewIfExist('vpqr_respuesta');
         $OtherQueriesForPlatform->dropViewIfExist('vpqr_calificacion');
         $OtherQueriesForPlatform->dropViewIfExist('vpqr_tareas');
-
     }
 
     private function delOtherModules(): void
@@ -479,7 +476,7 @@ final class Version20191224165528 extends AbstractMigration
         $nameModules = [
             'crear_pqr',
             'crear_pqr_respuesta',
-            'crear_pqr_calificacion'
+            'crear_pqr_calificacion',
         ];
         foreach ($nameModules as $name) {
             $this->deleteModulo($name);
@@ -500,7 +497,7 @@ final class Version20191224165528 extends AbstractMigration
     private function delGraphic(): void
     {
         $screen = [
-            PqrForm::NOMBRE_PANTALLA_GRAFICO
+            PqrForm::NOMBRE_PANTALLA_GRAFICO,
         ];
 
         foreach ($screen as $name) {
@@ -512,7 +509,7 @@ final class Version20191224165528 extends AbstractMigration
             }
 
             $this->connection->delete('pantalla_grafico', [
-                'idpantalla_grafico' => $id
+                'idpantalla_grafico' => $id,
             ]);
 
             $sql = "SELECT idgrafico FROM grafico WHERE fk_pantalla_grafico=$id";
@@ -520,14 +517,13 @@ final class Version20191224165528 extends AbstractMigration
 
             foreach ($records as $graphic) {
                 $this->connection->delete('grafico_serie', [
-                    'fk_grafico' => $graphic['idgrafico']
+                    'fk_grafico' => $graphic['idgrafico'],
                 ]);
             }
 
             $this->connection->delete('grafico', [
-                'fk_pantalla_grafico' => $id
+                'fk_pantalla_grafico' => $id,
             ]);
         }
-
     }
 }

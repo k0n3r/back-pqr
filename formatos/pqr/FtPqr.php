@@ -5,7 +5,7 @@ namespace App\Bundles\pqr\formatos\pqr;
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Bundles\pqr\Service\PqrDataJsonForIA;
+use App\Bundles\pqr\Service\PqrJsonForIA;
 use App\Bundles\pqr\Services\FtPqrService;
 use App\Bundles\pqr\Services\models\PqrBackup;
 use App\Bundles\pqr\Services\models\PqrForm;
@@ -515,6 +515,6 @@ class FtPqr extends FtPqrProperties
      */
     public function getClassNameJsonForIA(): string
     {
-        return PqrDataJsonForIA::class;
+        return PqrJsonForIA::class;
     }
 }
