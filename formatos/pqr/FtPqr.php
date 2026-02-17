@@ -5,6 +5,7 @@ namespace App\Bundles\pqr\formatos\pqr;
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\Service\PqrCustomParameterForIA;
 use App\Bundles\pqr\Service\PqrJsonForIA;
 use App\Bundles\pqr\Services\FtPqrService;
 use App\Bundles\pqr\Services\models\PqrBackup;
@@ -12,6 +13,7 @@ use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Exception\ValidationFailedException;
 use Doctrine\DBAL\ParameterType;
+use Saia\controllers\documento\DocumentoService;
 use Saia\controllers\generator\component\Distribution;
 use Saia\models\Dependencia;
 use Saia\models\documento\Documento;
@@ -511,10 +513,20 @@ class FtPqr extends FtPqrProperties
     /**
      * Metodo para generar datos para la IA
      *
-     * @return string
+     * @param DocumentoService $documentoService
+     * @return PqrJsonForIA
      */
-    public function getClassNameJsonForIA(): string
+    public function getIAJsonGenerator(DocumentoService $documentoService): PqrJsonForIA
     {
-        return PqrJsonForIA::class;
+        return new PqrJsonForIA($documentoService);
+    }
+
+    /**
+     * @return PqrCustomParameterForIA
+     * @author Andres Agudelo <andres.agudelo@saiasoftware.com> 2026-02-09
+     */
+    public function getCustomParametsFromDocumentForIA(): PqrCustomParameterForIA
+    {
+        return new PqrCustomParameterForIA();
     }
 }

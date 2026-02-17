@@ -8,9 +8,11 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Service\PqrRespuestaDataJsonForIA;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
 use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Service\IA\DataJsonForIAInterface;
 use DateTime;
 use IntlDateFormatter;
 use RuntimeException;
+use Saia\controllers\documento\DocumentoService;
 use Saia\controllers\functions\CoreFunctions;
 use Saia\controllers\localidad\MunicipioService;
 use Saia\models\anexos\Anexos;
@@ -204,7 +206,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
                 <div class='radio radio-success input-group'>
                     <input type='radio' name='$CamposFormato->nombre' id='{$CamposFormato->nombre}1' value='1' $checked1>
                     <label for='{$CamposFormato->nombre}1' class='me-3 label-without-focus'> SI </label>
-
+            
                     <input type='radio' name='$CamposFormato->nombre' id='{$CamposFormato->nombre}0' value='0' $checked0>
                     <label for='{$CamposFormato->nombre}0' class='me-3 label-without-focus'> NO </label>
                 </div>
@@ -233,7 +235,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
                     <tr>
                         <td colspan="2">{$this->getFechaCiudad()}</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
@@ -243,34 +245,34 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
-
+            
                     <tr>
                         <td>{$this->getFieldValue('destino')}</td>
                         <td style="text-align:center">$Qr<br/>No.{$this->getRadicado()}</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">ASUNTO: $this->asunto</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">Cordial saludo:</td>
                     </tr>
-
+            
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
@@ -439,11 +441,11 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     /**
      * Metodo para generar datos para la IA
      *
-     * @return string
+     * @return PqrRespuestaDataJsonForIA
      */
-    public function getClassNameJsonForIA(): string
+    public function getClassNameJsonForIA(DocumentoService $documentoService): DataJsonForIAInterface
     {
-        return PqrRespuestaDataJsonForIA::class;
+        return new PqrRespuestaDataJsonForIA($documentoService);
     }
 
 }

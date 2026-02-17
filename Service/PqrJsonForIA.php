@@ -2,9 +2,9 @@
 
 namespace App\Bundles\pqr\Service;
 
-use App\Bundles\ia\Services\JsonForIA;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Service\IA\JsonForIA;
 use Saia\controllers\generator\component\Method;
 use Saia\core\model\ModelFormat;
 use Saia\models\formatos\CamposFormato;
@@ -61,13 +61,19 @@ class PqrJsonForIA extends JsonForIA
             }
 
             $value = $this->resolveFieldValue($nameDb, $camposFormato);
+            $valueDB = $this->ft->$nameDb ?? '';
 
-            $data[] = [
+            $dataI = [
                 'name_in_db'  => $nameDb,
-                'value_in_db' => $this->ft->$nameDb ?? '',
-                'label'       => $camposFormato->etiqueta ?? '',
+                'value_in_db' => $valueDB,
+                'label'       => $camposFormato->etiqueta,
                 'value'       => $value,
             ];
+
+            if ($this->isString($camposFormato->etiqueta_html) || $valueDB == $value) {
+                unset($dataI['value_in_db']);
+            }
+            $data[] = $dataI;
         }
 
         return $data;

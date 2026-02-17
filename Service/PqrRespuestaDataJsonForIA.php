@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Service;
 
-use App\Bundles\ia\Services\JsonForIA;
+use App\Service\IA\JsonForIA;
 
 class PqrRespuestaDataJsonForIA extends JsonForIA
 {

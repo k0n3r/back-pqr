@@ -421,7 +421,7 @@ class FtPqrRespuestaService extends ModelService
                 if (!$save) {
                     $trans = $this->serviceLocator->getTranslator()->trans(
                         "no_fue_posible_cambiar_estado_tarea",
-                        ['%taskId%' => $Tarea->getPK()],
+                        ['taskId' => $Tarea->getPK()],
                     );
                     throw new RuntimeException($trans);
                 }
