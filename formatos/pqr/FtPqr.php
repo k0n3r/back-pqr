@@ -374,7 +374,7 @@ class FtPqr extends FtPqrProperties
 
             $tr[$key] = '<tr>
                 <td style="width:50%"><strong>'.mb_strtoupper($key, 'UTF-8').'</strong></td>
-                <td style="width:50%">'.$value.'</td>
+                <td style="width:50%">'.htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8').'</td>
             </tr>';
         }
 
