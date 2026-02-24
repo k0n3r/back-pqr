@@ -73,7 +73,7 @@ class PqrBalancerController extends AbstractController
                 'fk_field_balancer' => $id,
             ]);
 
-            $options = $Request->request->get('options');
+            $options = $Request->request->all('options');
             foreach ($options as $option) {
                 $PqrBalancerService = (new PqrBalancer($option['id']))->getService();
                 $PqrBalancerService->save([

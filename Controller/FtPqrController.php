@@ -258,7 +258,7 @@ class FtPqrController extends AbstractController
         $Connection->beginTransaction();
         try {
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
-            if (!$FtPqrService->updateType($request->request->get('data'))) {
+            if (!$FtPqrService->updateType($request->request->all('data'))) {
                 throw new ValidationFailedException(
                     $FtPqrService->getErrorManager()->getMessage(),
                 );

@@ -56,7 +56,7 @@ class PqrNotificationController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrNotificationService = (new PqrNotification($id))->getService();
-            if (!$PqrNotificationService->update($request->request->get('data'))) {
+            if (!$PqrNotificationService->update($request->request->all('data'))) {
                 throw new ValidationFailedException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
                 );

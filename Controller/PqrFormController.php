@@ -100,7 +100,7 @@ class PqrFormController extends AbstractController
     ): Response {
         $connection->beginTransaction();
         try {
-            foreach ($request->request->get('fieldOrder') as $record) {
+            foreach ($request->request->all('fieldOrder') as $record) {
                 $PqrFormFieldService = (new PqrFormField($record['id']))->getService();
                 $status = $PqrFormFieldService->save([
                     'orden' => $record['order'] + PqrFormFieldService::INITIAL_ORDER,
@@ -130,7 +130,7 @@ class PqrFormController extends AbstractController
         $connection->beginTransaction();
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
-            if (!$PqrFormService->updateSetting($request->request->get('data'))) {
+            if (!$PqrFormService->updateSetting($request->request->all('data'))) {
                 throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
                 );
@@ -160,7 +160,7 @@ class PqrFormController extends AbstractController
         $connection->beginTransaction();
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
-            if (!$PqrFormService->updateResponseSetting($request->request->all('data', []))) {
+            if (!$PqrFormService->updateResponseSetting($request->request->all('data'))) {
                 throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
                 );
