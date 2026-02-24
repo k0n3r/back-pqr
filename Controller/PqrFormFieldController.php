@@ -25,7 +25,7 @@ class PqrFormFieldController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrFormFieldService = (new PqrFormField())->getService();
-            if (!$PqrFormFieldService->save($request->request->get('data'))) {
+            if (!$PqrFormFieldService->save($request->request->all('data'))) {
                 throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                 );
