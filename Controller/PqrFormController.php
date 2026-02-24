@@ -160,7 +160,7 @@ class PqrFormController extends AbstractController
         $connection->beginTransaction();
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
-            if (!$PqrFormService->updateResponseSetting($request->request->get('data', []))) {
+            if (!$PqrFormService->updateResponseSetting($request->request->all('data', []))) {
                 throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
                 );
@@ -189,8 +189,8 @@ class PqrFormController extends AbstractController
                 ->update('pqr_form_fields')
                 ->set('show_report', 0)->executeStatement();
 
-            if ($request->request->get('ids')) {
-                foreach ($request->request->get('ids') as $id) {
+            if ($request->request->all('ids')) {
+                foreach ($request->request->all('ids') as $id) {
                     $PqrFormFieldService = (new PqrFormField($id))->getService();
                     if (!$PqrFormFieldService->save([
                         'show_report' => 1,
@@ -418,7 +418,7 @@ class PqrFormController extends AbstractController
         $connection->beginTransaction();
 
         try {
-            $channels = $Request->request->get('channels', []);
+            $channels = $Request->request->all('channels', []);
 
             if (!$channels) {
                 $trans = $translator->trans("indicar_canales_recepcion");

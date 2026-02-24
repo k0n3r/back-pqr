@@ -77,7 +77,7 @@ class PqrResponseTimeController extends AbstractController
                 'fk_field_time' => $id,
             ]);
 
-            $options = $Request->request->get('options');
+            $options = $Request->request->all('options');
             $i = 1;
             foreach ($options as $option) {
                 $PqrResponseTimeService = (new PqrResponseTime($option['id']))->getService();

@@ -27,7 +27,7 @@ class PqrNotyMessageController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrNotyMessageService = (new PqrNotyMessage($id))->getService();
-            if (!$PqrNotyMessageService->save($request->request->get('data'))) {
+            if (!$PqrNotyMessageService->save($request->request->all('data'))) {
                 throw new ValidationFailedException(
                     $PqrNotyMessageService->getErrorManager()->getMessage(),
                 );
