@@ -15,7 +15,7 @@ use Saia\models\funcion\Funcion;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
@@ -100,7 +100,7 @@ class PqrFormController extends AbstractController
     ): Response {
         $connection->beginTransaction();
         try {
-            foreach ($request->get('fieldOrder') as $record) {
+            foreach ($request->request->get('fieldOrder') as $record) {
                 $PqrFormFieldService = (new PqrFormField($record['id']))->getService();
                 $status = $PqrFormFieldService->save([
                     'orden' => $record['order'] + PqrFormFieldService::INITIAL_ORDER,
@@ -130,7 +130,7 @@ class PqrFormController extends AbstractController
         $connection->beginTransaction();
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
-            if (!$PqrFormService->updateSetting($request->get('data'))) {
+            if (!$PqrFormService->updateSetting($request->request->get('data'))) {
                 throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
                 );
@@ -160,7 +160,7 @@ class PqrFormController extends AbstractController
         $connection->beginTransaction();
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
-            if (!$PqrFormService->updateResponseSetting($request->get('data', []))) {
+            if (!$PqrFormService->updateResponseSetting($request->request->get('data', []))) {
                 throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
                 );
@@ -189,8 +189,8 @@ class PqrFormController extends AbstractController
                 ->update('pqr_form_fields')
                 ->set('show_report', 0)->executeStatement();
 
-            if ($request->get('ids')) {
-                foreach ($request->get('ids') as $id) {
+            if ($request->request->get('ids')) {
+                foreach ($request->request->get('ids') as $id) {
                     $PqrFormFieldService = (new PqrFormField($id))->getService();
                     if (!$PqrFormFieldService->save([
                         'show_report' => 1,
@@ -233,7 +233,7 @@ class PqrFormController extends AbstractController
         try {
             $PqrFormService = (PqrForm::getInstance())->getService();
             $success = $PqrFormService->save([
-                'show_empty' => $Request->get('show_empty', 1),
+                'show_empty' => $Request->request->get('show_empty', 1),
             ]);
             if (!$success) {
                 throw new ValidationFailedException($PqrFormService->getErrorManager()->getMessage());
@@ -269,7 +269,7 @@ class PqrFormController extends AbstractController
     ): Response {
         $connection->beginTransaction();
         try {
-            $status = $Request->get('enable_filter_dep', 0);
+            $status = $Request->request->get('enable_filter_dep', 0);
 
             $PqrForm = PqrForm::getInstance();
             $PqrFormService = $PqrForm->getService();
@@ -319,7 +319,7 @@ class PqrFormController extends AbstractController
     ): Response {
         $connection->beginTransaction();
         try {
-            $status = $Request->get('enable_balancer', 0);
+            $status = $Request->request->get('enable_balancer', 0);
 
             $PqrForm = PqrForm::getInstance();
             $PqrFormService = $PqrForm->getService();
@@ -351,7 +351,7 @@ class PqrFormController extends AbstractController
     ): Response {
         $connection->beginTransaction();
         try {
-            $status = $Request->get('enable_con_days', 0);
+            $status = $Request->request->get('enable_con_days', 0);
 
             $PqrForm = PqrForm::getInstance();
             $PqrFormService = $PqrForm->getService();
@@ -385,7 +385,7 @@ class PqrFormController extends AbstractController
         $connection->beginTransaction();
 
         try {
-            $fieldId = $Request->get('fieldId');
+            $fieldId = $Request->request->get('fieldId');
 
             if (!$fieldId) {
                 $message = $translator->trans('indicar_identificador_campo_descripcion');
@@ -418,7 +418,7 @@ class PqrFormController extends AbstractController
         $connection->beginTransaction();
 
         try {
-            $channels = $Request->get('channels', []);
+            $channels = $Request->request->get('channels', []);
 
             if (!$channels) {
                 $trans = $translator->trans("indicar_canales_recepcion");

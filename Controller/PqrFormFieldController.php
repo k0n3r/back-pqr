@@ -9,7 +9,7 @@ use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Throwable;
 
 #[Route('/formField', name: 'formField_')]
@@ -25,7 +25,7 @@ class PqrFormFieldController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrFormFieldService = (new PqrFormField())->getService();
-            if (!$PqrFormFieldService->save($request->get('data'))) {
+            if (!$PqrFormFieldService->save($request->request->get('data'))) {
                 throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                 );
@@ -54,7 +54,7 @@ class PqrFormFieldController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrFormFieldService = (new PqrFormField($id))->getService();
-            if (!$PqrFormFieldService->save($request->get('data'))) {
+            if (!$PqrFormFieldService->save($request->request->get('data'))) {
                 throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
                 );

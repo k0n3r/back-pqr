@@ -22,12 +22,12 @@ class ComponentsController extends AbstractController
     ): JsonResponse {
         try {
             if (!$PqrFormField = PqrFormField::findByAttributes([
-                'name' => $request->get('name'),
+                'name' => $request->query->get('name'),
             ])) {
                 $trans = $translator->trans("falta_nombre_campo");
                 throw new MissingParameterException($trans);
             }
-            $data = $PqrFormField->getService()->getListDataForAutocomplete($request->get('data'));
+            $data = $PqrFormField->getService()->getListDataForAutocomplete($request->query->get('data'));
         } catch (Throwable $th) {
             $data = [];
         }
@@ -43,7 +43,7 @@ class ComponentsController extends AbstractController
     ): JsonResponse {
         try {
             $data = (new PqrService())
-                ->findDataForAutocomplete($request->get('type'), $request->get('data'));
+                ->findDataForAutocomplete($request->query->get('type'), $request->query->get('data'));
         } catch (Throwable $th) {
             $data = [];
         }

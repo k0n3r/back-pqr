@@ -15,7 +15,7 @@ use Saia\models\vistas\VfuncionarioDc;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
@@ -38,25 +38,25 @@ class CaptchaController extends AbstractController implements IHasCaptcha
     ): Response {
         $Connection->beginTransaction();
         try {
-            if (empty($Request->get('formatId'))) {
+            if (empty($Request->request->get('formatId'))) {
                 $trans = $translator->trans('indicar_formato');
                 throw new MissingParameterException($trans);
             }
 
-            if (empty($Request->get('dependencia'))) {
+            if (empty($Request->request->get('dependencia'))) {
                 $trans = $translator->trans('indicar_rol_creador');
                 throw new MissingParameterException($trans);
             }
 
-            $VfuncionarioDc = VfuncionarioDc::findByRole($Request->get('dependencia'));
+            $VfuncionarioDc = VfuncionarioDc::findByRole($Request->request->get('dependencia'));
             if (!$VfuncionarioDc) {
                 $trans = $translator->trans('rol_creador_incorrecto');
                 throw new MissingParameterException($trans);
             }
 
             $Request->request->set('webservice', 1);
-            $Formato = new Formato($Request->get('formatId'));
-            if ($Formato->isRequiredGeolocation() && empty($Request->get('geolocalizacion'))) {
+            $Formato = new Formato($Request->request->get('formatId'));
+            if ($Formato->isRequiredGeolocation() && empty($Request->request->get('geolocalizacion'))) {
                 $trans = $translator->trans('debe_permitir_geolocalizacion');
                 throw new ValidationFailedException($trans);
             }

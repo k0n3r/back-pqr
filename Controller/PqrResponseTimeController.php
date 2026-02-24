@@ -10,7 +10,7 @@ use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
@@ -67,7 +67,7 @@ class PqrResponseTimeController extends AbstractController
     ): Response {
         $Connection->beginTransaction();
         try {
-            if (!$id = $Request->get('fk_field_time', 0)) {
+            if (!$id = $Request->request->get('fk_field_time', 0)) {
                 $trans = $translator->trans("falta_identificador_tiempo_respuesta");
                 throw new MissingParameterException($trans);
             }
@@ -77,7 +77,7 @@ class PqrResponseTimeController extends AbstractController
                 'fk_field_time' => $id,
             ]);
 
-            $options = $Request->get('options');
+            $options = $Request->request->get('options');
             $i = 1;
             foreach ($options as $option) {
                 $PqrResponseTimeService = (new PqrResponseTime($option['id']))->getService();

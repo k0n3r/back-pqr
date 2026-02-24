@@ -17,7 +17,7 @@ use Saia\models\documento\Documento;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
@@ -30,10 +30,10 @@ class PqrController extends AbstractController
         Connection $Connection,
     ): Response {
         try {
-            if (empty($request->get('numero'))) {
+            if (empty($request->query->get('numero'))) {
                 throw new MissingParameterException("Se debe indicar el numero de radicado");
             }
-            $email = trim($request->get('sys_email'));
+            $email = trim($request->query->get('sys_email'));
 
             $Qb = $Connection
                 ->createQueryBuilder()
@@ -43,7 +43,7 @@ class PqrController extends AbstractController
                 ->where('d.estado<>:estado')
                 ->setParameter('estado', Documento::ELIMINADO)
                 ->andWhere('d.numero = :numero')
-                ->setParameter('numero', $request->get('numero'), ParameterType::INTEGER);
+                ->setParameter('numero', $request->query->get('numero'), ParameterType::INTEGER);
 
             $records = FtPqr::findByQueryBuilder($Qb);
 
@@ -70,7 +70,7 @@ class PqrController extends AbstractController
         jsonResponseService $json,
     ): Response {
         try {
-            $data = json_decode(CryptController::decrypt($request->get('infoCryp')));
+            $data = json_decode(CryptController::decrypt($request->query->get('infoCryp')));
             $FtPqr = UtilitiesPqr::getInstanceForDocumentId($data->documentId);
 
             if ($FtPqr->getPK() != $data->id) {
@@ -91,11 +91,11 @@ class PqrController extends AbstractController
         jsonResponseService $json,
     ): Response {
         try {
-            if (!$request->get('dataCrypt')) {
+            if (!$request->query->get('dataCrypt')) {
                 throw new MissingParameterException("Faltan parametros");
             }
 
-            $data = json_decode(CryptController::decrypt($request->get('dataCrypt')), true);
+            $data = json_decode(CryptController::decrypt($request->query->get('dataCrypt')), true);
 
             return $json->success($data);
         } catch (Throwable $th) {
@@ -116,6 +116,7 @@ class PqrController extends AbstractController
 
             if (!$PqrFormField || !$PqrFormField->fk_campos_formato) {
                 $message = $translator->trans("no_esta_habilitado_campo_dependencia");
+
                 return $json->success(['enabled' => 0], $message);
             }
 

@@ -9,7 +9,7 @@ use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Throwable;
 
 #[Route('/notification', name: 'notification_')]
@@ -26,7 +26,7 @@ class PqrNotificationController extends AbstractController
 
             $PqrNotificationService = (new PqrNotification())->getService();
             if (!$PqrNotificationService->create([
-                'fk_funcionario' => $request->get('id'),
+                'fk_funcionario' => $request->request->get('id'),
             ])) {
                 throw new ValidationFailedException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
@@ -56,7 +56,7 @@ class PqrNotificationController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrNotificationService = (new PqrNotification($id))->getService();
-            if (!$PqrNotificationService->update($request->get('data'))) {
+            if (!$PqrNotificationService->update($request->request->get('data'))) {
                 throw new ValidationFailedException(
                     $PqrNotificationService->getErrorManager()->getMessage(),
                 );

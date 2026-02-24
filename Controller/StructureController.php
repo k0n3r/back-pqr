@@ -7,7 +7,7 @@ use App\Bundles\pqr\Services\PqrService;
 use App\Service\JsonResponseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Throwable;
 
 #[Route('/structure', name: 'structure_')]

@@ -17,7 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
@@ -89,7 +89,7 @@ class FtPqrController extends AbstractController
     ): Response {
         try {
             $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
-            $FtPqr->sys_tipo = $request->get('type');
+            $FtPqr->sys_tipo = $request->query->get('type');
             $date = DateController::convertDate(
                 $FtPqr->getService()->getDateForType(),
                 'Y-m-d',
@@ -177,12 +177,12 @@ class FtPqrController extends AbstractController
     ): Response {
         $Connection->beginTransaction();
         try {
-            if (!$request->get('sys_tercero')) {
+            if (!$request->request->get('sys_tercero')) {
                 $trans = $translator->trans("no_fue_posible_actualizar_tercero");
                 throw new MissingParameterException($trans);
             }
 
-            $Tercero = new Tercero($request->get('sys_tercero'));
+            $Tercero = new Tercero($request->request->get('sys_tercero'));
             $attributesNew = $Tercero->getAttributes(true);
 
             $FtPqr = new FtPqr($idft);
@@ -258,7 +258,7 @@ class FtPqrController extends AbstractController
         $Connection->beginTransaction();
         try {
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
-            if (!$FtPqrService->updateType($request->get('data'))) {
+            if (!$FtPqrService->updateType($request->request->get('data'))) {
                 throw new ValidationFailedException(
                     $FtPqrService->getErrorManager()->getMessage(),
                 );
@@ -292,7 +292,7 @@ class FtPqrController extends AbstractController
             $Connection->beginTransaction();
 
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
-            if (!$FtPqrService->finish($request->get('observaciones'))) {
+            if (!$FtPqrService->finish($request->request->get('observaciones'))) {
                 throw new ValidationFailedException(
                     $FtPqrService->getErrorManager()->getMessage(),
                 );
