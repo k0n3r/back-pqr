@@ -19,6 +19,8 @@ services:
       - '../../formatos/'
       - '../../helpers/'
       - '../../Services/'
+      - '../../IA/'
 
 imports:
   - { resource: "./migrations.yaml" }
+  - { resource: "./ia_services.php" }

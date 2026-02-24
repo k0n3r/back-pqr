@@ -3,3 +3,7 @@ app_attributes:
   prefix: /api/pqr
   name_prefix: "pqr_"
   type: attribute
+
+app_ia_attributes:
+  resource: "./ia_routes.php"
+  type: php

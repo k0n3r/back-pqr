@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Bundles\pqr\Service;
+namespace App\Bundles\pqr\IA\Service;
 
-use App\Service\IA\JsonForIA;
+use App\Bundles\ia\Services\JsonForIA;
 
 class PqrRespuestaDataJsonForIA extends JsonForIA
 {

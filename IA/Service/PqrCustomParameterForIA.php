@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Bundles\pqr\Service;
+namespace App\Bundles\pqr\IA\Service;
 
-use App\Service\IA\CustomParameterForDocumentInterface;
+use App\Bundles\ia\Services\CustomParameterForDocumentInterface;
 
 class PqrCustomParameterForIA implements CustomParameterForDocumentInterface
 {
@@ -10,7 +10,7 @@ class PqrCustomParameterForIA implements CustomParameterForDocumentInterface
     {
         return [
             'Resume esta PQR',
-            'Genere una respuesta a la PQR',
+            'Genera la respuesta a la PQR',
         ];
     }
 
@@ -30,6 +30,6 @@ class PqrCustomParameterForIA implements CustomParameterForDocumentInterface
 
     public function getApiUrlChatUser(): string
     {
-        return '/api/ia/chat/user';
+        return '/api/pqr/ia/chat';
     }
 }

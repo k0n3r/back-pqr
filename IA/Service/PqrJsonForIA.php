@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Bundles\pqr\Service;
+namespace App\Bundles\pqr\IA\Service;
 
+use App\Bundles\ia\Services\JsonForIA;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Service\IA\JsonForIA;
 use Saia\controllers\generator\component\Method;
 use Saia\core\model\ModelFormat;
 use Saia\models\formatos\CamposFormato;
