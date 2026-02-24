@@ -27,7 +27,7 @@ class ComponentsController extends AbstractController
                 $trans = $translator->trans("falta_nombre_campo");
                 throw new MissingParameterException($trans);
             }
-            $data = $PqrFormField->getService()->getListDataForAutocomplete($request->query->get('data'));
+            $data = $PqrFormField->getService()->getListDataForAutocomplete($request->query->all('data'));
         } catch (Throwable $th) {
             $data = [];
         }
