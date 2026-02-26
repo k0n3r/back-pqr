@@ -6,7 +6,7 @@ function view(int $iddocumento, $numero): string
 {
     return <<<HTML
         <div class='kenlace_saia'
-        data-enlace='views/documento/index_acordeon.php?documentId=$iddocumento' 
+        data-enlace='views/documento/index_acordeon.html?documentId=$iddocumento' 
         title='No Registro $numero'>
             <button class='btn btn-complete' style='margin:auto'>$numero</button>
         </div>
