@@ -20,7 +20,7 @@ use Throwable;
 
 #[AsTool(
     name: 'create_response_pqr',
-    description: 'Permite generar una respuesta a la PQR. Primero presenta el contenido al usuario para su confirmación. Solo crea el documento cuando el usuario haya confirmado explícitamente.',
+    description: 'Registra una respuesta oficial a una PQR en el sistema. Parámetros requeridos: documentId, contentAnswers (texto completo de la respuesta), subject (asunto).',
     method: 'createResponsePQR',
 )]
 readonly class PqrTool
@@ -31,8 +31,7 @@ readonly class PqrTool
         private Security $security,
         #[Autowire(service: 'cache.app')]
         private CacheItemPoolInterface $cache,
-    ) {
-    }
+    ) {}
 
     /**
      * @param int $documentId ID del documento PQR al que se responde

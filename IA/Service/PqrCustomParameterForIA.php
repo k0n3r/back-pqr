@@ -10,7 +10,7 @@ class PqrCustomParameterForIA implements CustomParameterForDocumentInterface
     {
         return [
             'Resume esta PQR',
-            'Genera la respuesta a la PQR',
+            'Redacta un borrador de respuesta a esta PQR',
         ];
     }
 
