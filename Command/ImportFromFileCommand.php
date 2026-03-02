@@ -140,12 +140,14 @@ class ImportFromFileCommand extends Command
                     $record = array_combine($headers, array_slice($values, 0, count($headers)));
 
                     // ── Procesar registro ────────────────────────────────────
+                    $this->connection->beginTransaction();
                     try {
                         $this->processRow($record, $rowNumber);
                         $processed++;
-
+                        $this->connection->commit();
                         $this->logger->info("Fila #$rowNumber procesada correctamente.");
                     } catch (Throwable $e) {
+                        $this->connection->rollback();
                         $errors++;
                         $this->io->writeln("  <fg=red>✗ Fila #$rowNumber:</> {$e->getMessage()}");
                         $this->logger->error("Error en fila #$rowNumber.", [
@@ -292,23 +294,24 @@ class ImportFromFileCommand extends Command
     {
         $data = [
             // ── Campos del CSV ───────────────────────────────────────────
-            'sys_tipo'        => $this->mapTipoPqr($row['tipo_pqr'] ?? ''),
-            'fecha_del_event' => $row['fecha_evento'] ?? '',
-            'nombre'          => $row['nombre_completo'] ?? '',
-            'n_mero_de_ident' => (string)($row['numero_identificacion'] ?? ''),
-            'sys_email'       => $this->sanitizeEmail($row['email'] ?? ''),
-            'ciudad'          => $this->resolveMunicipio($row['ciudad'] ?? ''),
-            'edad'            => (string)($row['edad'] ?? ''),
-            'ciudad_1'        => $row['institucion_educativa'] ?? '',
-            'descripcion_1'   => $row['descripcion'] ?? '',
-            'nivel_de_urgenc' => $this->mapNivelUrgencia($row['nivel_urgencia'] ?? ''),
-            'sys_folios'      => (string)($row['numero_folios'] ?? '1'),
-            'sys_anexos'      => $row['anexo'] ?? '',
+            'sys_tipo'          => $this->mapTipoPqr($row['tipo_pqr'] ?? ''),
+            'fecha_del_event'   => $row['fecha_evento'] ?? '',
+            'nombre'            => $row['nombre_completo'] ?? '',
+            'n_mero_de_ident'   => (string)($row['numero_identificacion'] ?? ''),
+            'sys_email'         => $this->sanitizeEmail($row['email'] ?? ''),
+            'ciudad'            => $this->resolveMunicipio($row['ciudad'] ?? ''),
+            'edad'              => (string)($row['edad'] ?? ''),
+            'ciudad_1'          => $row['institucion_educativa'] ?? '',
+            'descripcion_1'     => $row['descripcion'] ?? '',
+            'nivel_de_urgenc'   => $this->mapNivelUrgencia($row['nivel_urgencia'] ?? ''),
+            'sys_folios'        => (string)($row['numero_folios'] ?? '1'),
+            'sys_anexos'        => $row['anexo'] ?? '',
             // ── Campos fijos ─────────────────────────────────────────────
-            'sys_tratamiento' => 1,
-            'formatId'        => 24,
-            'webservice'      => 1,
-            'dependencia'     => 3,
+            'radicacion_rapida' => 0,
+            'sys_tratamiento'   => 1,
+            'formatId'          => 24,
+            'webservice'        => 1,
+            'dependencia'       => 3,
         ];
 
         $VfuncionarioDc = VfuncionarioDc::findByRole($data['dependencia']);
@@ -341,7 +344,10 @@ class ImportFromFileCommand extends Command
             );
 
             if (!$id) {
-                $this->logger->warning("Ciudad no encontrada, se asigna valor por defecto 15358.", ['ciudad' => $nombre]);
+                $this->logger->warning(
+                    "Ciudad no encontrada, se asigna valor por defecto 15358.",
+                    ['ciudad' => $nombre],
+                );
                 $id = 15358;
             }
 
