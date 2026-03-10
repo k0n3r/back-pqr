@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\EventSubscriber;
 
+use App\Bundles\ia\Repository\IADocumentRepository;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
@@ -18,7 +19,11 @@ use RuntimeException;
 use Saia\models\documento\Documento;
 use Saia\models\tarea\Tarea;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Mailer\Event\SentMessageEvent;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
@@ -26,17 +31,25 @@ readonly class PqrSubscriber implements EventSubscriberInterface
 {
     use ExtractInfoEmailTrait;
 
+    /**
+     * Prefijo de clave para el cache de tipo de documento PQR.
+     * Sin TTL: el tipo de formato de un documento no cambia en el tiempo.
+     */
+    private const string DOC_TYPE_CACHE_PREFIX = 'pqr_doc_type_';
 
     public function __construct(
         private LoggerInterface $logger,
         private TranslatorInterface $translator,
-    ) {
-    }
+        private CacheInterface $cache,
+        private IADocumentRepository $iaDocumentRepository,
+    ) {}
 
 
     public static function getSubscribedEvents(): array
     {
         return [
+            // Prioridad 10: corre después del RouterListener (32) pero antes del controller
+            KernelEvents::REQUEST         => ['onChatDocumentParams', 10],
             TaskCreatedEvent::class       => [
                 ['onTaskCreated', -1],
             ],
@@ -48,6 +61,58 @@ readonly class PqrSubscriber implements EventSubscriberInterface
             ],
             SentMessageEvent::class       => ['onSent', -1],
         ];
+    }
+
+    /**
+     * Intercepta la ruta chat_document_params y reemplaza el documentId si el documento
+     * pertenece al proceso PQR
+     */
+    public function onChatDocumentParams(RequestEvent $event): void
+    {
+        $request = $event->getRequest();
+
+        if ($request->attributes->get('_route') !== 'ia_chat_document_params') {
+            return;
+        }
+
+        $documentId = (int)$request->attributes->get('documentId');
+
+        if (!$documentId) {
+            return;
+        }
+
+        try {
+            $cacheKey = self::DOC_TYPE_CACHE_PREFIX.$documentId;
+
+            $result = $this->cache->get(
+                $cacheKey,
+                function (ItemInterface $item) use ($documentId): array {
+                    $item->expiresAfter(24 * 60 * 60);
+                    $iaDocument = $this->iaDocumentRepository->findPqrDocument($documentId);
+                    if ($iaDocument === null) {
+                        return ['isPqr' => false, 'resolvedDocumentId' => $documentId];
+                    }
+
+                    $metadata = $iaDocument->getMetadataJson();
+                    $rootDocumentId = isset($metadata['metadataAttributes']['_rootDocumentId'])
+                        ? (int)$metadata['metadataAttributes']['_rootDocumentId']
+                        : $documentId;
+
+                    return ['isPqr' => true, 'resolvedDocumentId' => $rootDocumentId];
+                },
+            );
+
+            if (!$result['isPqr']) {
+                return;
+            }
+
+            $request->attributes->set('documentId', $result['resolvedDocumentId']);
+        } catch (Throwable $e) {
+            $this->logger->error('[PQR] Error al resolver documentId para chat params', [
+                'documentId' => $documentId,
+                'error'      => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

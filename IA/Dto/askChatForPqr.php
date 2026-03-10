@@ -18,18 +18,6 @@ use App\Bundles\ia\Dto\askChatForUser;
  */
 readonly class askChatForPqr extends askChatForUser
 {
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            message: $data['message'],
-            sessionId: $data['sessionId'] ?? null,
-            userId: $data['userId'],
-            documentId: $data['documentId'],
-            processId: $data['processId'],
-            otherParams: $data['otherParams'] ?? [],
-        );
-    }
-
     /**
      * Herramientas disponibles cuando el documento SÍ está indexado en la KB.
      *

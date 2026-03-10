@@ -19,15 +19,6 @@ class PqrCustomParameterForIA implements CustomParameterForDocumentInterface
         return [];
     }
 
-    public function getContext(string $defaultContext, bool $isIndexed): string
-    {
-        if ($isIndexed) {
-            return '';
-        }
-
-        return $defaultContext;
-    }
-
     public function getApiUrlChatUser(): string
     {
         return '/api/pqr/ia/chat';
