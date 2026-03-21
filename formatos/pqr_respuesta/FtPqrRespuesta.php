@@ -448,4 +448,12 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         return new PqrRespuestaDataJsonForIA($documentoService);
     }
 
+    public function getMoreData(): array
+    {
+        $pqrDocumentId = $this->getFtPqr()->documento_iddocumento;
+
+        return [
+            'pqrDocumentId' => $pqrDocumentId,
+        ];
+    }
 }

@@ -55,7 +55,7 @@ readonly class askChatForPqr extends askChatForUser
         $documentId = $this->getDocumentId();
 
         $consultaContenido = $withKbSearch
-            ? '1. Si no conoces el contenido completo de la PQR, revisa <informacion>. Si no es suficiente, usa `knowledge_base_search` UNA sola vez con `documentId: '.$documentId.'`'
+            ? '1. Si no conoces el contenido completo de la PQR, revisa <informacion>. Si no es suficiente, usa `knowledge_base_search` UNA sola vez con `rootDocumentId: '.$documentId.'`'
             : 'Si no conoces el contenido completo de la PQR, revisa exclusivamente <informacion>. No uses herramientas de búsqueda externas.';
 
         return <<<TEXT

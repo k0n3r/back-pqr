@@ -64,7 +64,7 @@ readonly class PqrTool
             ]);
 
             $SaveDocument = new SaveDocument($format, $vfuncionarioDc);
-            $SaveDocument->create($data);
+            $SaveDocument->createOrUpdateDocument($data);
             $documentIdAnswer = $SaveDocument->getDocument()->getPK();
 
             return "La respuesta ha sido creada exitosamente. [open_document:$documentIdAnswer]";
