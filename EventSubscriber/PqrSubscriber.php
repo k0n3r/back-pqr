@@ -2,7 +2,6 @@
 
 namespace App\Bundles\pqr\EventSubscriber;
 
-use App\Bundles\ia\Repository\IADocumentRepository;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
@@ -28,17 +27,10 @@ readonly class PqrSubscriber implements EventSubscriberInterface
 {
     use ExtractInfoEmailTrait;
 
-    /**
-     * Prefijo de clave para el cache de tipo de documento PQR.
-     * Sin TTL: el tipo de formato de un documento no cambia en el tiempo.
-     */
-    private const string DOC_TYPE_CACHE_PREFIX = 'pqr_doc_type_';
-
     public function __construct(
         private LoggerInterface $logger,
         private TranslatorInterface $translator,
         private CacheInterface $cache,
-        private IADocumentRepository $iaDocumentRepository,
     ) {}
 
 
