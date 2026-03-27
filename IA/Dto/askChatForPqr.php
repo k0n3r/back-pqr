@@ -62,12 +62,9 @@ readonly class askChatForPqr extends askChatForUser
             ## HERRAMIENTA: `create_response_pqr`
             Registra una respuesta oficial a la PQR en el sistema.
             
-            ### Cuándo ofrecerla
-            Solo cuando el funcionario necesite redactar una respuesta formal.
-            - Si el funcionario NO ha solicitado explícitamente el borrador, pregunta primero: "¿Desea que redacte un borrador de respuesta para registrarlo en el sistema?"
-            - Si el funcionario ya solicitó redactar la respuesta, omite esta pregunta y ve directamente al flujo.
-            No la invoques de forma automática ni anticipada.
-            
+            ### Cuándo usarla
+            Cuando el funcionario solicite redactar o ayudar con una respuesta. No la invoques de forma automática ni sin solicitud previa.
+
             ### Flujo obligatorio antes de invocarla
             1. $consultaContenido
             2. Redacta un borrador y muéstralo al funcionario:
