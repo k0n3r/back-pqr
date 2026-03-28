@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\IA\Service\Tools;
 
+use App\Bundles\ia\Services\Tools\AdminToolProviderInterface;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\IA\Service\PqrIaGuard;
 use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
@@ -23,7 +25,7 @@ use Throwable;
     description: 'Registra una respuesta oficial a una PQR en el sistema. Parámetros requeridos: documentId, contentAnswers (texto completo de la respuesta), subject (asunto).',
     method: 'createResponsePQR',
 )]
-readonly class PqrTool
+readonly class PqrTool implements AdminToolProviderInterface
 {
     public function __construct(
         #[Autowire(service: 'monolog.logger.ia')]
@@ -31,6 +33,7 @@ readonly class PqrTool
         private Security $security,
         #[Autowire(service: 'cache.app')]
         private CacheItemPoolInterface $cache,
+        private PqrIaGuard $guard,
     ) {}
 
     /**
@@ -43,6 +46,10 @@ readonly class PqrTool
         string $contentAnswers,
         string $subject,
     ): string {
+        if (!$this->guard->isPqrEnabled()) {
+            return 'El módulo PQR no está registrado como proceso de IA.';
+        }
+
         try {
             $format = $this->getFormatAnswer();
             $ftPqr = UtilitiesPqr::getInstanceForDocumentId($documentId);
@@ -53,7 +60,7 @@ readonly class PqrTool
 
             $data = array_merge($this->getDefaultData(), [
                 'asunto'            => $subject,
-                'contenido'         => $contentAnswers,
+                'contenido'         => $this->toHtml($contentAnswers),
                 'formatId'          => $format->getPK(),
                 'tipo_radicado'     => $format->getCounter()->getPK(),
                 'ft_pqr'            => $ftPqr->getPK(),
@@ -90,6 +97,19 @@ readonly class PqrTool
             'canal_recepcion' => 'FÍSICO',
 
         ];
+    }
+
+    private function toHtml(string $text): string
+    {
+        $text = trim($text);
+        $paragraphs = preg_split('/\n{2,}/', $text);
+        $html = '';
+        foreach ($paragraphs as $paragraph) {
+            $paragraph = nl2br(htmlspecialchars($paragraph, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
+            $html .= "<p>$paragraph</p>";
+        }
+
+        return $html;
     }
 
     private function getDefaultCiudad(): int
@@ -146,6 +166,54 @@ readonly class PqrTool
         $this->cache->save($item->set($value));
 
         return $value;
+    }
+
+    // === AdminToolProviderInterface ===
+
+    public function getAdminToolSection(?int $processId): string
+    {
+        $searchHint = $processId !== null
+            ? "1. Busca con `knowledge_base_search` usando `processId: $processId` y los filtros disponibles"
+            : "1. Busca con `knowledge_base_search` usando los filtros disponibles";
+
+        return <<<TEXT
+            ## HERRAMIENTA: `create_response_pqr`
+            Registra una respuesta oficial a una PQR en el sistema.
+            
+            ### Cuándo usarla
+            Cuando el administrador solicite redactar o registrar una respuesta a una PQR. No la invoques sin solicitud explícita.
+            
+            ### Estructura de la base de conocimiento (KB) para PQR
+            Cada chunk de la KB expone estos metadatos:
+            - `Documento ID` (`_documentId`): ID del documento que generó ese chunk. Puede ser la PQR original, una respuesta a ella, o un anexo.
+            - `Documento Raíz ID` (`_rootDocumentId`): ID de la PQR original. Todas las respuestas y anexos asociados comparten este mismo valor.
+            
+            **Regla clave**: el `documentId` que debes pasar a `create_response_pqr` es siempre el `Documento Raíz ID` (`_rootDocumentId`). Nunca uses el `Documento ID` de una respuesta o anexo.
+            
+            ### Flujo para redactar y registrar una respuesta
+            - Si ya tienes en el contexto de la conversación la información de la PQR (porque el usuario hizo consultas previas), úsala directamente para redactar el borrador sin volver a buscar.
+            - Si el usuario pide responder una PQR específica sin que haya contexto previo (ej. "genera una respuesta a la PQR 2024-001"):
+              $searchHint
+              2. Si los resultados traen varias PQR distintas (distintos `Documento Raíz ID`), lista las encontradas con su radicado/consecutivo y pregunta cuál responder.
+              3. Con el `Documento Raíz ID` identificado, haz una segunda búsqueda con `rootDocumentId: <Documento Raíz ID>` para obtener el contexto completo del caso.
+            - Redacta el borrador con la información disponible:
+              - Sin saludo inicial.
+              - Sin despedida.
+              - Solo el contenido sustantivo de la respuesta.
+            - Solicita confirmación explícita: "¿Confirmas que deseas registrar esta respuesta en el sistema?"
+            - Si el administrador pide cambios: ajusta, muestra la versión actualizada y vuelve a pedir confirmación.
+            - Solo tras confirmación: invoca `create_response_pqr` directamente, sin volver a mostrar el borrador.
+            
+            ### Parámetros obligatorios
+            | Parámetro | Valor |
+            |-----------|-------|
+            | `documentId` | Valor numérico de `Documento Raíz ID` que aparece en los resultados de `knowledge_base_search`. **NUNCA uses el número con el que el usuario identificó la PQR** (consecutivo, radicado, etc.) — ese es solo un criterio de búsqueda, no el ID interno del sistema. |
+            | `contentAnswers` | Texto completo aprobado por el administrador |
+            | `subject` | Asunto de la respuesta |
+            
+            ### Manejo del resultado
+            Cuando la herramienta retorne un texto que contenga `[open_document:N]`, inclúyelo exactamente como aparece, sin modificaciones.
+            TEXT;
     }
 
 }

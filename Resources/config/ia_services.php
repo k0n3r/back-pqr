@@ -9,6 +9,7 @@
  */
 
 use App\Bundles\ia\Controller\AbstractModuleChatController;
+use App\Bundles\pqr\IA\Service\Tools\PqrStatsTool;
 use App\Bundles\pqr\IA\Service\Tools\PqrTool;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -30,6 +31,7 @@ return static function (ContainerConfigurator $container): void {
             'ia' => [
                 'tools' => [
                     ['service' => PqrTool::class],
+                    ['service' => PqrStatsTool::class],
                 ],
             ],
         ],

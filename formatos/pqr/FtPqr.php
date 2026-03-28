@@ -339,7 +339,7 @@ class FtPqr extends FtPqrProperties
         $tr = implode('', $this->getTableRows());
 
         return <<<HTML
-            <table class="table table-borderless" style="width:100%">';
+            <table class="table table-borderless" style="width:100%">
                 <tr>
                     <td style="width:50%;">
                         <p>Hemos recibido su $labelPQR <br/><br/>
