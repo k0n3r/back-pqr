@@ -4,6 +4,7 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\PqrService;
 use App\Exception\MissingParameterException;
@@ -121,19 +122,20 @@ class FtPqrController extends AbstractController
             if ($idDependencia) {
                 $options = [
                     'id'   => $idDependencia,
-                    'text' => $FtPqr->getService()->getValueForReport('sys_dependencia'),
+                    'text' => $FtPqr->getService()->getValueForReport(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA),
                 ];
             }
 
             $data = [
-                'sys_tipo'              => (int)$FtPqr->sys_tipo,
-                'sys_subtipo'           => (new PqrService())->subTypeExist() ? (int)$FtPqr->sys_subtipo : 0,
-                'sys_fecha_vencimiento' => $DateTime->format('Y-m-d'),
-                'sys_dependencia'       => $idDependencia,
-                'optionsDependency'     => $options,
-                'sys_frecuencia'        => (int)$FtPqr->sys_frecuencia,
-                'sys_impacto'           => (int)$FtPqr->sys_impacto,
-                'sys_severidad'         => (int)$FtPqr->sys_severidad,
+                'sys_tipo'                               => (int)$FtPqr->sys_tipo,
+                'sys_subtipo'                            => (new PqrService())->subTypeExist(
+                ) ? (int)$FtPqr->sys_subtipo : 0,
+                'sys_fecha_vencimiento'                  => $DateTime->format('Y-m-d'),
+                PqrFormField::FIELD_NAME_SYS_DEPENDENCIA => $idDependencia,
+                'optionsDependency'                      => $options,
+                'sys_frecuencia'                         => (int)$FtPqr->sys_frecuencia,
+                'sys_impacto'                            => (int)$FtPqr->sys_impacto,
+                'sys_severidad'                          => (int)$FtPqr->sys_severidad,
             ];
 
             return $json->success($data);

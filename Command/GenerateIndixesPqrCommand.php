@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Command;
 
+use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Command\GenerateIndexesCommand;
 use Symfony\Component\Console\Attribute\AsCommand;
 
@@ -19,7 +20,7 @@ class GenerateIndixesPqrCommand extends GenerateIndexesCommand
                 'sys_estado',
                 'sys_tipo',
                 'sys_oportuno',
-                'sys_dependencia',
+                PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
                 [
                     'documento_iddocumento',
                     'sys_estado',
@@ -34,7 +35,7 @@ class GenerateIndixesPqrCommand extends GenerateIndexesCommand
                 ],
                 [
                     'documento_iddocumento',
-                    'sys_dependencia',
+                    PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
                 ],
             ],
             'ft_pqr_calificacion' => [

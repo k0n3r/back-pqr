@@ -140,7 +140,7 @@ class PqrFormFieldService extends ModelService
 
         if (
             $this->getModel()->name != 'sys_subtipo'
-            && $this->getModel()->name != 'sys_dependencia'
+            && $this->getModel()->name != PqrFormField::FIELD_NAME_SYS_DEPENDENCIA
         ) {
             $attributes['show_report'] = 0;
         }

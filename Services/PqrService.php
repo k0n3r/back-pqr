@@ -255,7 +255,7 @@ class PqrService
             return $this->dependencyExist;
         }
 
-        $this->dependencyExist = (bool)$this->getPqrForm()->getRow('sys_dependencia');
+        $this->dependencyExist = (bool)$this->getPqrForm()->getRow(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA);
 
         return $this->dependencyExist;
     }
@@ -343,7 +343,7 @@ class PqrService
         $Qb->set('estado', 1)->executeStatement();
 
         $PqrFormField = PqrFormField::findByAttributes([
-            'name' => 'sys_dependencia',
+            'name' => PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
         ]);
 
         if (!$PqrFormField) {

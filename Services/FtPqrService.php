@@ -778,11 +778,11 @@ class FtPqrService extends ModelService
 
         if ($this->getPqrService()->dependencyExist()) {
             if ($data['dependency'] != $this->getModel()->sys_dependencia) {
-                $oldDependency = $this->getValueForReport('sys_dependencia');
+                $oldDependency = $this->getValueForReport(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA);
                 if (!$oldDependency) {
                     $oldDependency = '-';
                 }
-                $newAttributes['sys_dependencia'] = $data['dependency'];
+                $newAttributes[PqrFormField::FIELD_NAME_SYS_DEPENDENCIA] = $data['dependency'];
                 $textField[] = "dependencia de $oldDependency a {newDependency}";
             }
         }
@@ -837,7 +837,9 @@ class FtPqrService extends ModelService
         $text = "Se actualiza: ".implode(', ', $textField);
         $newType = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
         $newSubType = $this->getPqrService()->subTypeExist() ? $this->getModel()->getFieldValue('sys_subtipo') : '';
-        $newDependency = $this->getPqrService()->dependencyExist() ? $this->getValueForReport('sys_dependencia') : '';
+        $newDependency = $this->getPqrService()->dependencyExist() ? $this->getValueForReport(
+            PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
+        ) : '';
 
         $text = str_replace([
             '{newType}',

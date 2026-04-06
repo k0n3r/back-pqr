@@ -274,7 +274,7 @@ class PqrFormController extends AbstractController
             $PqrForm = PqrForm::getInstance();
             $PqrFormService = $PqrForm->getService();
 
-            if ($status && !$PqrForm->getRow('sys_dependencia')) {
+            if ($status && !$PqrForm->getRow(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA)) {
                 $trans = $translator->trans("agregar_componente_dependencia");
                 throw new ValidationFailedException($trans);
             }

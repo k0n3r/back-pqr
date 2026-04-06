@@ -19,7 +19,7 @@ class PqrJsonForIA extends JsonForIA
         'sys_impacto',
         'sys_frecuencia',
         'sys_anonimo',
-        'sys_dependencia',
+        PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
     ];
 
     protected const array EXCLUDED_FIELDS = [
@@ -125,7 +125,7 @@ class PqrJsonForIA extends JsonForIA
         return match ($nameDb) {
             'sys_tercero' => $this->getTerceroValue(),
             'sys_severidad', 'sys_impacto', 'sys_frecuencia' => $this->ft->getValueLabel($nameDb) ?: '',
-            'sys_dependencia' => $this->ft->getSysDependencia()?->getName() ?? '',
+            PqrFormField::FIELD_NAME_SYS_DEPENDENCIA => $this->ft->getSysDependencia()?->getName() ?? '',
             'sys_anonimo' => $this->ft->sys_anonimo ? 'SI' : 'NO',
             default => '',
         };

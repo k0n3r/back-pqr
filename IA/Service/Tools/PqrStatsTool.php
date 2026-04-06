@@ -6,6 +6,7 @@ namespace App\Bundles\pqr\IA\Service\Tools;
 
 use App\Bundles\ia\Services\Tools\AdminToolProviderInterface;
 use App\Bundles\pqr\IA\Service\PqrIaGuard;
+use App\Bundles\pqr\Services\models\PqrFormField;
 use Doctrine\DBAL\Connection;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
@@ -55,32 +56,32 @@ readonly class PqrStatsTool implements AdminToolProviderInterface
     private const string VIEW = 'vpqr';
     private const int GROUP_BY_LIMIT = 50;
     private const array ALLOWED_COLUMNS = [
-        'fecha'                 => [
+        'fecha'                                  => [
             'type'        => 'datetime',
             'description' => 'Fecha de radicación de la PQR',
             'options'     => null,
         ],
-        'canal_recepcion'       => [
+        'canal_recepcion'                        => [
             'type'        => 'varchar',
             'description' => 'Medio por el que se recibió la PQR',
             'options'     => ['WEB', 'EMAIL', 'FÍSICO', 'TELEFÓNICO'],
         ],
-        'sys_estado'            => [
+        'sys_estado'                             => [
             'type'        => 'varchar',
             'description' => 'Estado actual de la PQR',
             'options'     => ['PENDIENTE', 'PROCESO', 'TERMINADO'],
         ],
-        'sys_fecha_vencimiento' => [
+        'sys_fecha_vencimiento'                  => [
             'type'        => 'datetime',
             'description' => 'Fecha de vencimiento de la PQR',
             'options'     => null,
         ],
-        'sys_fecha_terminado'   => [
+        'sys_fecha_terminado'                    => [
             'type'        => 'datetime',
             'description' => 'Fecha en que se dio por resuelta la PQR',
             'options'     => null,
         ],
-        'sys_oportuno'          => [
+        'sys_oportuno'                           => [
             'type'        => 'varchar',
             'description' => 'Oportunidad de la respuesta según fecha al cierre',
             'options'     => [
@@ -90,22 +91,22 @@ readonly class PqrStatsTool implements AdminToolProviderInterface
                 'CERRADAS FUERA DE TERMINO',
             ],
         ],
-        'sys_email'             => [
+        'sys_email'                              => [
             'type'        => 'varchar',
             'description' => 'Email del solicitante/remitente de la PQR',
             'options'     => null,
         ],
-        'sys_folios'            => [
+        'sys_folios'                             => [
             'type'        => 'integer',
             'description' => 'Número de folios registrados por el solicitante/remitente de la PQR',
             'options'     => null,
         ],
-        'sys_dependencia'       => [
+        PqrFormField::FIELD_NAME_SYS_DEPENDENCIA => [
             'type'        => 'integer',
             'description' => 'Dependencia interna responsable de atender la PQR (NO es el tercero o remitente que la envió)',
             'options'     => 'dynamic',
         ],
-        'sys_tipo'              => [
+        'sys_tipo'                               => [
             'type'        => 'integer',
             'description' => 'Tipo de PQR',
             'options'     => 'dynamic',
@@ -162,7 +163,7 @@ readonly class PqrStatsTool implements AdminToolProviderInterface
             return 'El módulo PQR no está registrado como proceso de IA.';
         }
 
-        if (!in_array($column, ['sys_dependencia', 'sys_tipo'], true)) {
+        if (!in_array($column, [PqrFormField::FIELD_NAME_SYS_DEPENDENCIA, PqrFormField::FIELD_NAME_SYS_TIPO], true)) {
             return "El campo '$column' no tiene opciones dinámicas. Solo sys_dependencia y sys_tipo admiten esta consulta.";
         }
 
@@ -173,7 +174,7 @@ readonly class PqrStatsTool implements AdminToolProviderInterface
                 return $item->get();
             }
 
-            $result = $column === 'sys_dependencia'
+            $result = $column === PqrFormField::FIELD_NAME_SYS_DEPENDENCIA
                 ? $this->queryDependenciaOptions()
                 : $this->queryTipoOptions();
 
