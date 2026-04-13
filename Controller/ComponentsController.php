@@ -43,7 +43,7 @@ class ComponentsController extends AbstractController
     ): JsonResponse {
         try {
             $data = (new PqrService())
-                ->findDataForAutocomplete($request->query->get('type'), $request->query->get('data'));
+                ->findDataForAutocomplete($request->query->get('type'), $request->query->all('data'));
         } catch (Throwable $th) {
             $data = [];
         }
