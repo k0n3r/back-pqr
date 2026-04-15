@@ -1,0 +1,9 @@
+ai:
+  agent:
+    ia_pqr:
+      platform: 'ai.platform.bedrock.ia'
+      model: '%pqr_ia_model%'
+      tools:
+        - service: 'App\Bundles\ia\Services\Tools\KnowledgeBaseSearchTool'
+        - service: 'App\Bundles\pqr\IA\Service\Tools\PqrTool'
+        - service: 'App\Bundles\pqr\IA\Service\Tools\PqrStatsTool'

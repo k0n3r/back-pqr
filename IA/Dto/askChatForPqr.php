@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\IA\Dto;
 
 use App\Bundles\ia\Dto\askChatForUser;
+use App\Bundles\ia\Dto\ModuleFormatAwareChat;
 
 /**
  * DTO para el chat IA sobre una PQR.
@@ -16,8 +17,13 @@ use App\Bundles\ia\Dto\askChatForUser;
  * - Con KB:    extraToolsSections()           → incluye referencia a `knowledge_base_search` en el flujo.
  * - Sin KB:    extraToolsSectionsNotIndexed() → el flujo trabaja solo con <informacion>.
  */
-readonly class askChatForPqr extends askChatForUser
+readonly class askChatForPqr extends askChatForUser implements ModuleFormatAwareChat
 {
+    public function getModuleFormatName(): string
+    {
+        return 'ft_pqr';
+    }
+
     /**
      * Herramientas disponibles cuando el documento SÍ está indexado en la KB.
      *

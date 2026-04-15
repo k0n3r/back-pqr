@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\IA\Service\Tools;
 
-use App\Bundles\ia\Services\Tools\AdminToolProviderInterface;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\IA\Service\PqrIaGuard;
 use InvalidArgumentException;
@@ -25,7 +24,7 @@ use Throwable;
     description: 'Registra una respuesta oficial a una PQR en el sistema. Parámetros requeridos: documentId, contentAnswers (texto completo de la respuesta), subject (asunto).',
     method: 'createResponsePQR',
 )]
-readonly class PqrTool implements AdminToolProviderInterface
+readonly class PqrTool
 {
     public function __construct(
         #[Autowire(service: 'monolog.logger.ia')]
@@ -167,8 +166,6 @@ readonly class PqrTool implements AdminToolProviderInterface
 
         return $value;
     }
-
-    // === AdminToolProviderInterface ===
 
     public function getAdminToolSection(?int $processId): string
     {

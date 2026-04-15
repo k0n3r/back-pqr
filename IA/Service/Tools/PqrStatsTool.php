@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\IA\Service\Tools;
 
-use App\Bundles\ia\Services\Tools\AdminToolProviderInterface;
 use App\Bundles\pqr\IA\Service\PqrIaGuard;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use Doctrine\DBAL\Connection;
@@ -51,7 +50,7 @@ use Throwable;
         DESC,
     method: 'countPqr',
 )]
-readonly class PqrStatsTool implements AdminToolProviderInterface
+readonly class PqrStatsTool
 {
     private const string VIEW = 'vpqr';
     private const int GROUP_BY_LIMIT = 50;
@@ -338,8 +337,6 @@ readonly class PqrStatsTool implements AdminToolProviderInterface
 
         return "Tipos de PQR disponibles (etiqueta: id):\n".implode("\n", $lines);
     }
-
-    // === AdminToolProviderInterface ===
 
     public function getAdminToolSection(?int $processId): string
     {
