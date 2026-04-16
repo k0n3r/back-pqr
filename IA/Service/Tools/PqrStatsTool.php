@@ -47,6 +47,18 @@ use Throwable;
         Ejemplo: "sys_estado" para obtener el total por cada estado.
         
         Si filtersJson está vacío ([]) y groupBy es null, retorna el total general de PQRs.
+        
+        ### Regla para preguntas de tipo "¿cuántas?"
+        Siempre invocar ambos tools en paralelo:
+        1. `count_pqr` — si el criterio corresponde a un campo disponible, para obtener el total exacto en tiempo real. Si el criterio no está en los campos disponibles (ej. datos del tercero/remitente, contenido del documento), omite este tool.
+        2. `knowledge_base_search` — siempre, para traer ejemplos concretos de PQRs que cumplan el criterio.
+        
+        Al presentar la respuesta, incluir esta nota al final SOLO si ambos tools retornaron datos:
+        "_Nota: el conteo es en tiempo real; los ejemplos provienen de la base de conocimiento, que puede tener un desfase respecto a su última sincronización._"
+        
+        ### Distinción clave: dependencia vs tercero/remitente
+        - `sys_dependencia` = dependencia interna responsable de atender la PQR.
+        - El tercero o remitente que envió la PQR es un dato externo — no está en `count_pqr`; buscarlo solo con `knowledge_base_search`.
         DESC,
     method: 'countPqr',
 )]
@@ -326,7 +338,7 @@ readonly class PqrStatsTool
              JOIN formato f ON f.idformato = cf.formato_idformato
              WHERE f.nombre = :format AND cf.nombre = :campo
              ORDER BY co.llave',
-            ['format' => 'pqr', 'campo' => 'sys_tipo'],
+            ['format' => PqrIaGuard::FORMAT_NAME, 'campo' => 'sys_tipo'],
         );
 
         if (empty($rows)) {
@@ -338,29 +350,4 @@ readonly class PqrStatsTool
         return "Tipos de PQR disponibles (etiqueta: id):\n".implode("\n", $lines);
     }
 
-    public function getAdminToolSection(?int $processId): string
-    {
-        return <<<TEXT
-            ## HERRAMIENTAS DE ESTADÍSTICAS PQR
-            
-            ### Regla para preguntas de tipo "¿cuántas?"
-            
-            **Siempre invocar ambos tools en paralelo**:
-            1. **`count_pqr`** — si el criterio corresponde a un campo disponible, úsalo para obtener el total exacto en tiempo real. Si el criterio no está en los campos disponibles (ej. datos del tercero/remitente, contenido del documento), omite este tool.
-            2. **`knowledge_base_search`** — siempre, para traer ejemplos concretos de PQRs que cumplan el criterio y enriquecer la respuesta.
-            
-            Al presentar la respuesta:
-            - Muestra el conteo en tiempo real (si aplica) y los ejemplos encontrados en la base de conocimiento.
-            - Incluye esta nota al final **solo si ambos tools retornaron datos**: "_Nota: el conteo es en tiempo real; los ejemplos provienen de la base de conocimiento, que puede tener un desfase respecto a su última sincronización._"
-            
-            ### Distinción clave: dependencia vs tercero/remitente
-            - `sys_dependencia` = dependencia **interna** responsable de atender la PQR.
-            - El tercero o remitente que **envió** la PQR es un dato externo — no está en `count_pqr`; buscarlo solo con `knowledge_base_search`.
-            
-            ### Herramientas disponibles
-            - **`get_pqr_available_filters`**: lista los campos filtrables con sus opciones válidas.
-            - **`get_pqr_filter_options`**: obtiene los IDs correctos para `sys_dependencia` y `sys_tipo` cuando el usuario los menciona por nombre.
-            - **`count_pqr`**: cuenta PQRs por los campos disponibles en tiempo real.
-            TEXT;
-    }
 }

@@ -14,7 +14,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  */
 readonly class PqrIaGuard
 {
-    private const string CACHE_KEY = 'pqr_ia.is_enabled';
+    public const string FORMAT_NAME = 'pqr';
+
+    private const string CACHE_KEY_PROCESS = 'pqr_ia.process_id';
 
     public function __construct(
         private Connection $connection,
@@ -24,22 +26,29 @@ readonly class PqrIaGuard
 
     public function isPqrEnabled(): bool
     {
-        $item = $this->cache->getItem(self::CACHE_KEY);
+        return $this->getPqrProcessId() !== null;
+    }
+
+    public function getPqrProcessId(): ?int
+    {
+        $item = $this->cache->getItem(self::CACHE_KEY_PROCESS);
 
         if ($item->isHit()) {
             return $item->get();
         }
 
-        $enabled = (bool) $this->connection->fetchOne(
-            'SELECT COUNT(*)
+        $id = $this->connection->fetchOne(
+            'SELECT ip.id
              FROM ia_process ip
              JOIN formato f ON f.idformato = ip.main_format_id
-             WHERE f.nombre = :nombre',
-            ['nombre' => 'pqr'],
+             WHERE f.nombre = :nombre
+             LIMIT 1',
+            ['nombre' => self::FORMAT_NAME],
         );
 
-        $this->cache->save($item->set($enabled));
+        $processId = $id !== false ? (int)$id : null;
+        $this->cache->save($item->set($processId));
 
-        return $enabled;
+        return $processId;
     }
 }

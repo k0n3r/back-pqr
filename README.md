@@ -120,7 +120,7 @@ src/Bundles/pqr/
 ├── EventSubscriber/
 │   └── PqrSubscriber.php                   # Escucha tareas y emails relacionados con PQRs
 │
-├── IA/                                     # Integración con bundle ia (ver sección 9)
+├── IA/                                     # Integración con bundle ia (ver sección 11)
 │   ├── Controller/
 │   │   └── PqrChatController.php           # POST /api/pqr/ia/chat
 │   ├── Dto/
@@ -128,15 +128,17 @@ src/Bundles/pqr/
 │   ├── Mcp/
 │   │   └── PqrMcpFormatProvider.php        # Registra formato PQR en servidor MCP
 │   └── Service/
+│       ├── PqrAgentProvider.php            # Expone ia_pqr al ModuleAgentRegistry
 │       ├── PqrCustomParameterForIA.php     # Parámetros de contexto para el modelo IA
 │       ├── PqrDocumentProcessor.php        # Procesador de documentos PQR
 │       ├── PqrFormatoJsonProcessor.php     # Personaliza JSON de estructura del formato
-│       ├── PqrIaGuard.php                  # Verifica si IA está habilitada para PQR
+│       ├── PqrIaGuard.php                  # Verifica si IA está habilitada; FORMAT_NAME='pqr'
 │       ├── PqrJsonForIA.php                # Serializa PQR a JSON para knowledge base
 │       ├── PqrRespuestaDataJsonForIA.php   # Serializa respuestas para knowledge base
 │       └── Tools/
+│           ├── PqrKnowledgeBaseSearchTool.php # Wrapper de KnowledgeBaseSearchTool pre-configurado para PQR
 │           ├── PqrStatsTool.php            # Tool IA: estadísticas y conteos
-│           └── PqrTool.php                 # Tool IA: búsqueda y gestión de PQRs
+│           └── PqrTool.php                 # Tool IA: crear respuestas oficiales
 │
 ├── Resources/
 │   ├── config/
@@ -588,24 +590,28 @@ condicional están en `Resources/config/ia_routes.php` e `ia_services.php`.
 ### 11.2 Agente dedicado `ia_pqr`
 
 PQR tiene su **propio agente IA** (`ia_pqr`) con herramientas exclusivas. Estas herramientas **no están disponibles** en
-el agente genérico `ia`, evitando que aparezcan en conversaciones no relacionadas con PQR.
+el agente genérico `ia_orchestrator`, evitando que aparezcan en conversaciones no relacionadas con PQR.
 
 ```
 Agente 'ia_pqr'
-├── KnowledgeBaseSearchTool   (búsqueda semántica)
-├── PqrTool                   (create_response_pqr)
-└── PqrStatsTool              (count_pqr, get_pqr_available_filters, get_pqr_filter_options)
+├── PqrKnowledgeBaseSearchTool  (knowledge_base_search — wrapper con processId PQR auto-inyectado)
+├── PqrTool                     (create_response_pqr)
+└── PqrStatsTool                (count_pqr, get_pqr_available_filters, get_pqr_filter_options)
 ```
+
+El agente `ia_pqr` también queda registrado como subagente del orquestador (`ia_orchestrator`) — accesible como tool
+`pqr_agent` cuando el usuario opera en modo "todos los procesos" (`processId=0`).
 
 El agente se activa automáticamente en dos contextos:
 
 | Contexto                                | Cómo se activa                                                                               |
 |-----------------------------------------|----------------------------------------------------------------------------------------------|
 | Chat usuario (`POST /api/pqr/ia/chat`)  | `askChatForPqr` implementa `ModuleFormatAwareChat` → `getModuleFormatName() = 'ft_pqr'`      |
-| Chat admin con proceso PQR seleccionado | `IAProcess.mainFormat.nombre = 'ft_pqr'` → `ModuleAgentRegistry` resuelve `PqrAgentProvider` |
+| Chat admin con proceso PQR seleccionado | `IAProcess.mainFormat.nombre = 'pqr'` → `ModuleAgentRegistry` resuelve `PqrAgentProvider` |
 
 `PqrAgentProvider` implementa `ModuleAgentProviderInterface` del bundle `ia` y expone el agente `ia_pqr` al sistema de
-resolución.
+resolución. Solo requiere el agente (`#[Target('ia_pqr')]`) y el parámetro de modelo — las herramientas se registran
+directamente en `ia.yaml` y su guía de uso está en los atributos `#[AsTool]` de cada tool.
 
 ### 11.3 Chat IA
 
@@ -627,9 +633,15 @@ Requiere que el proceso IA esté habilitado para el formato PQR (`PqrIaGuard`).
 
 ### 11.4 Herramientas del agente `ia_pqr`
 
+**`PqrKnowledgeBaseSearchTool`** (`knowledge_base_search`) — wrapper de `KnowledgeBaseSearchTool` pre-configurado para
+PQR. Inyecta automáticamente el `processId` del proceso PQR en cada búsqueda, de modo que el agente nunca filtra por
+proceso incorrecto. Si PQR no está configurado como proceso IA (`PqrIaGuard::getPqrProcessId() = null`), retorna error
+en lugar de buscar sin filtro (evita exponer documentos de otros procesos).
+
 **`PqrTool`** (`create_response_pqr`) — registra una respuesta oficial a una PQR. Recibe `documentId` (ID raíz de la
 PQR), `subject` y `contentAnswers`. Crea el documento de respuesta con los datos del funcionario activo, tipo de
-distribución y despedida por defecto.
+distribución y despedida por defecto. La guía de flujo completo (cuándo usarla, cómo buscar la PQR, confirmación,
+manejo del resultado) está en el atributo `#[AsTool]` de la clase.
 
 **`PqrStatsTool`** — estadísticas en tiempo real sobre la vista `vpqr`:
 
@@ -639,9 +651,22 @@ distribución y despedida por defecto.
 | `get_pqr_filter_options`    | Opciones de `sys_dependencia` y `sys_tipo` por nombre                                                                                                            |
 | `count_pqr`                 | Cuenta PQRs con filtros y/o agrupación (`fecha`, `canal_recepcion`, `sys_estado`, `sys_fecha_vencimiento`, `sys_fecha_terminado`, `sys_tipo`, `sys_dependencia`) |
 
+La descripción de `count_pqr` incluye la regla de invocación paralela con `knowledge_base_search` y la distinción
+dependencia interna vs. tercero/remitente.
+
 Todas las herramientas verifican `PqrIaGuard::isPqrEnabled()` antes de ejecutarse.
 
-### 11.5 Servidor MCP
+### 11.5 `PqrIaGuard` — fuente de verdad del módulo
+
+`PqrIaGuard` centraliza la verificación de si el módulo PQR está configurado como proceso IA:
+
+- `isPqrEnabled(): bool` — si existe al menos un `ia_process` vinculado al formato `pqr`.
+- `getPqrProcessId(): ?int` — retorna el ID del proceso o `null` si no está configurado.
+- `FORMAT_NAME = 'pqr'` — constante pública con el nombre del formato. Usada por `PqrAgentProvider`,
+  `PqrFormatoJsonProcessor`, `PqrDocumentProcessor`, `PqrStatsTool` y `PqrIaGuard` mismo para evitar literales
+  dispersos.
+
+### 11.6 Servidor MCP
 
 **`PqrMcpFormatProvider`** implementa `McpFormatProviderInterface` y registra el formato PQR en el servidor MCP. Permite
 que agentes externos (Claude Desktop, Cursor, AWS AgentCore) radiquen PQRs autónomamente:
@@ -653,7 +678,7 @@ search_field_options  → resuelve lookups (ciudad, dependencia, localidad)
 create_document       → radica la PQR
 ```
 
-### 11.6 Procesador de formato para IA (`PqrFormatoJsonProcessor`)
+### 11.7 Procesador de formato para IA (`PqrFormatoJsonProcessor`)
 
 Personaliza el JSON de estructura del formato PQR entregado al agente (`FormatoJsonProcessorInterface`):
 
@@ -668,7 +693,7 @@ Para invalidar el caché tras modificar campos del formulario:
 php bin/console cache:pool:delete cache.app pqr_ia_lookup_fields
 ```
 
-### 11.7 Serialización para Knowledge Base
+### 11.8 Serialización para Knowledge Base
 
 `PqrJsonForIA` y `PqrRespuestaDataJsonForIA` convierten documentos PQR y sus respuestas a JSON/Markdown para indexarlos
 en AWS Bedrock Knowledge Base mediante `app:ia:full-sync`.
@@ -740,4 +765,4 @@ Propietaria — [SAIA Software](https://www.saiasoftware.com/)
 
 ---
 
-*Última actualización: 2026-04-06 — revisión completa de flujos, características y correcciones*
+*Última actualización: 2026-04-15 — arquitectura IA: PqrKnowledgeBaseSearchTool wrapper, PqrIaGuard::FORMAT_NAME, guía de tools en #[AsTool] descriptions, PqrAgentProvider simplificado*

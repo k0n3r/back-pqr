@@ -39,6 +39,26 @@ return static function (ContainerConfigurator $container): void {
     $container->parameters()->set('pqr_ia_model', '%env(default:pqr_ia_df_model:IA_PQR_MODEL)%');
 
     // Define el agente 'ia_pqr' con las herramientas exclusivas del módulo PQR.
-    // El agente genérico 'ia' NO recibe estas herramientas.
     $container->import('ia.yaml');
+
+    // Registra ia_pqr como subagente del orquestador.
+    // El LLM del orquestador decide cuándo delegar según la descripción.
+    $container->extension('ai', [
+        'agent' => [
+            'ia_orchestrator' => [
+                'tools' => [[
+                    'agent'       => 'ia_pqr',
+                    'name'        => 'pqr_agent',
+                    'description' => <<<'DESC'
+                        Agente especializado en PQR (Peticiones, Quejas, Reclamos y Sugerencias).
+                        Invocar cuando el usuario necesite:
+                        - Crear o redactar respuestas oficiales a PQRs
+                        - Estadísticas de PQR (conteos por estado, dependencia, tipo, etc.)
+                        - Acciones sobre el ciclo de vida de una PQR
+                        NO invocar para búsquedas informativas simples — usar knowledge_base_search directamente.
+                        DESC,
+                ]],
+            ],
+        ],
+    ]);
 };

@@ -20,7 +20,7 @@ class PqrFormatoJsonProcessor implements FormatoJsonProcessorInterface
 
     public function getFormatName(): string
     {
-        return 'pqr';
+        return PqrIaGuard::FORMAT_NAME;
     }
 
     /**

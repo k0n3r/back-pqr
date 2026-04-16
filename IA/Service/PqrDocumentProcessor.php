@@ -20,7 +20,7 @@ readonly class PqrDocumentProcessor implements FormatoDocumentProcessorInterface
      */
     public function getFormatName(): string
     {
-        return 'pqr';
+        return PqrIaGuard::FORMAT_NAME;
     }
 
     /**

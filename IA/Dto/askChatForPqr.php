@@ -6,98 +6,63 @@ namespace App\Bundles\pqr\IA\Dto;
 
 use App\Bundles\ia\Dto\askChatForUser;
 use App\Bundles\ia\Dto\ModuleFormatAwareChat;
+use App\Bundles\pqr\IA\Service\PqrIaGuard;
 
 /**
- * DTO para el chat IA sobre una PQR.
+ * DTO para el chat IA sobre una PQR específica (chat de usuario/funcionario).
  *
- * Extiende el núcleo agregando:
- * - La herramienta `create_response_pqr` con su flujo de confirmación obligatorio.
+ * Inyecta en el system prompt el contexto dinámico de la PQR activa:
+ * - El documentId fijo (no puede inferirse del #[AsTool] estático).
+ * - Si el documento está o no indexado en la KB (condiciona el uso de knowledge_base_search).
  *
- * El comportamiento varía según si el documento está indexado en la KB:
- * - Con KB:    extraToolsSections()           → incluye referencia a `knowledge_base_search` en el flujo.
- * - Sin KB:    extraToolsSectionsNotIndexed() → el flujo trabaja solo con <informacion>.
+ * El flujo de confirmación y la guía de uso de create_response_pqr están en el
+ * atributo #[AsTool] de PqrTool — no se duplican aquí.
  */
 readonly class askChatForPqr extends askChatForUser implements ModuleFormatAwareChat
 {
     public function getModuleFormatName(): string
     {
-        return 'ft_pqr';
+        return PqrIaGuard::FORMAT_NAME;
     }
 
     /**
-     * Herramientas disponibles cuando el documento SÍ está indexado en la KB.
+     * Contexto cuando el documento SÍ está indexado en la KB.
      *
      * @return string[]
      */
     protected function extraToolsSections(): array
     {
-        return [
-            $this->buildToolCreateResponsePqr(withKbSearch: true),
-        ];
+        return [$this->buildPqrContext(withKbSearch: true)];
     }
 
     /**
-     * Herramientas disponibles cuando el documento NO está indexado en la KB.
+     * Contexto cuando el documento NO está indexado en la KB.
      *
      * @return string[]
      */
     protected function extraToolsSectionsNotIndexed(): array
     {
-        return [
-            $this->buildToolCreateResponsePqr(withKbSearch: false),
-        ];
+        return [$this->buildPqrContext(withKbSearch: false)];
     }
 
     /**
-     * Instrucciones para el uso de la herramienta `create_response_pqr`.
+     * Inyecta el documentId fijo y la disponibilidad de KB en el system prompt.
      *
-     * El flujo de confirmación está aquí (en el system prompt) y NO en el #[AsTool] description,
-     * que debe mantenerse como una descripción funcional breve.
-     *
-     * @param bool $withKbSearch Indica si `knowledge_base_search` está disponible en este contexto.
+     * Solo incluye lo que es dinámico por request. La guía de uso de
+     * create_response_pqr está en el #[AsTool] description de PqrTool.
      */
-    private function buildToolCreateResponsePqr(bool $withKbSearch): string
+    private function buildPqrContext(bool $withKbSearch): string
     {
         $documentId = $this->getDocumentId();
 
-        $consultaContenido = $withKbSearch
-            ? '1. Si no conoces el contenido completo de la PQR, revisa <informacion>. Si no es suficiente, usa `knowledge_base_search` UNA sola vez con `rootDocumentId: '.$documentId.'`'
-            : 'Si no conoces el contenido completo de la PQR, revisa exclusivamente <informacion>. No uses herramientas de búsqueda externas.';
+        $kbLine = $withKbSearch
+            ? "`knowledge_base_search` disponible — si necesitas más contexto usa `rootDocumentId: $documentId`."
+            : "`knowledge_base_search` NO disponible — usa solo <informacion> para conocer el contenido de la PQR.";
 
         return <<<TEXT
-            ## HERRAMIENTA: `create_response_pqr`
-            Registra una respuesta oficial a la PQR en el sistema.
-            
-            ### Cuándo usarla
-            Cuando el funcionario solicite redactar o ayudar con una respuesta. No la invoques de forma automática ni sin solicitud previa.
-
-            ### Flujo obligatorio antes de invocarla
-            1. $consultaContenido
-            2. Redacta un borrador y muéstralo al funcionario:
-               - Sin saludo inicial.
-               - Sin despedida.
-               - Solo el contenido sustantivo de la respuesta.
-            3. Pregunta de forma explícita:
-               "¿Confirmas que deseas registrar esta respuesta en el sistema?"
-            4. Si el funcionario solicita cambios:
-               - Ajusta el borrador.
-               - Vuelve a mostrar la versión actualizada.
-               - Solicita confirmación nuevamente.
-            5. Solo tras confirmación clara y explícita del funcionario:
-               - No vuelvas a mostrar el texto del borrador.
-               - Invoca directamente `create_response_pqr`.
-            
-            ### Parámetros obligatorios
-            | Parámetro | Valor |
-            |-----------|-------|
-            | `documentId` | $documentId (fijo, no modificable) |
-            | `contentAnswers` | Texto completo aprobado por el funcionario |
-            | `subject` | Asunto de la respuesta |
-            
-            ### Manejo del resultado
-            Cuando la herramienta retorne un texto que contenga `[open_document:N]`:
-            - Incluye ese fragmento exactamente como aparece, sin modificaciones.
-            - No lo expliques ni lo sustituyas por otras palabras.
+            ## CONTEXTO DE LA PQR ACTIVA
+            - `documentId` para `create_response_pqr`: **$documentId** (fijo — no busques otro ID).
+            - $kbLine
             TEXT;
     }
 }
