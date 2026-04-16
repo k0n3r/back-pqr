@@ -606,12 +606,16 @@ El agente se activa automáticamente en dos contextos:
 
 | Contexto                                | Cómo se activa                                                                               |
 |-----------------------------------------|----------------------------------------------------------------------------------------------|
-| Chat usuario (`POST /api/pqr/ia/chat`)  | `askChatForPqr` implementa `ModuleFormatAwareChat` → `getModuleFormatName() = 'ft_pqr'`      |
+| Chat usuario (`POST /api/pqr/ia/chat`)  | `askChatForPqr` implementa `ModuleFormatAwareChat` → `getModuleFormatName() = 'pqr'`         |
 | Chat admin con proceso PQR seleccionado | `IAProcess.mainFormat.nombre = 'pqr'` → `ModuleAgentRegistry` resuelve `PqrAgentProvider` |
 
 `PqrAgentProvider` implementa `ModuleAgentProviderInterface` del bundle `ia` y expone el agente `ia_pqr` al sistema de
 resolución. Solo requiere el agente (`#[Target('ia_pqr')]`) y el parámetro de modelo — las herramientas se registran
 directamente en `ia.yaml` y su guía de uso está en los atributos `#[AsTool]` de cada tool.
+
+**Nota sobre admin chat**: cuando el administrador selecciona el proceso PQR, el system prompt se adapta automáticamente:
+no incluye `processId` en las instrucciones (el wrapper `PqrKnowledgeBaseSearchTool` lo inyecta internamente). Si
+`fullAccess=false`, sí incluye `userId` para restringir la búsqueda a documentos del usuario.
 
 ### 11.3 Chat IA
 
