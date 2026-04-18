@@ -45,6 +45,19 @@ readonly class askChatForPqr extends askChatForUser implements ModuleFormatAware
         return [$this->buildPqrContext(withKbSearch: false)];
     }
 
+    protected function buildScope(): string
+    {
+        return <<<TEXT
+            ## LÍMITE DE ALCANCE
+            Eres un asistente exclusivo para PQR (Peticiones, Quejas y Reclamos).
+            Solo puedes responder preguntas relacionadas con esta PQR y su gestión:
+            contenido, estado, historial, tiempos de respuesta, respuestas registradas y acciones disponibles.
+            Si el usuario solicita chistes, conocimiento general, programación, entretenimiento
+            u cualquier tema ajeno a la PQR o al sistema SAIA, responde únicamente con:
+            "Solo puedo ayudarte con consultas sobre PQR y su gestión. ¿En qué puedo asistirte?"
+            TEXT;
+    }
+
     /**
      * Inyecta el documentId fijo y la disponibilidad de KB en el system prompt.
      *
