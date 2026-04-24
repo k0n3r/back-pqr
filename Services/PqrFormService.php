@@ -149,7 +149,7 @@ class PqrFormService extends ModelService
         $repository = $this->serviceLocator->getRepository(EmailConfiguration::class);
         $emailsConfiguration = $repository->findByPqrModule();
 
-        return array_map(fn($config) => $config->toArray(), $emailsConfiguration);
+        return array_map(fn ($config) => $config->toArray(), $emailsConfiguration);
     }
 
     private function getGroupsForBalancer(): array
@@ -267,7 +267,7 @@ class PqrFormService extends ModelService
         ]);
 
         $enlace = 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector":"iframe","url": "views/buzones/grilla.php?idbusqueda_componente='.$BusquedaComponente->getPK(
-            ).'"}]';
+        ).'"}]';
         $data = [
             'pertenece_nucleo' => 0,
             'nombre'           => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,

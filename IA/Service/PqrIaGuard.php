@@ -22,7 +22,8 @@ readonly class PqrIaGuard
         private Connection $connection,
         #[Autowire(service: 'cache.app')]
         private CacheItemPoolInterface $cache,
-    ) {}
+    ) {
+    }
 
     public function isPqrEnabled(): bool
     {

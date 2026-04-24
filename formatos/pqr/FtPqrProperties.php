@@ -28,16 +28,17 @@ class FtPqrProperties extends ModelFormat
                 'sys_severidad',
                 'sys_oportuno',
                 'sys_impacto',
-                'radicacion',
                 'sys_frecuencia',
+                'radicacion',
                 'sys_fecha_vencimiento',
-                'sys_anonimo',
                 'sys_fecha_terminado',
+                'sys_anonimo',
                 'sys_estado',
                 'dependencia',
                 'sys_tipo',
                 'sys_email',
                 'sys_folios',
+                'descripcion_1',
                 'sys_anexos',
                 'distribucion',
                 'destino_interno',
@@ -60,10 +61,8 @@ class FtPqrProperties extends ModelFormat
         $this->createTaskFromDataTemp();
         if (!$this->radicacion_rapida) {
             $this->postDocumentRad();
-            if (!$this->getDocument()->belongsToPackage()) {
-                if (!$this->sendDocumentsByEmail()) {
-                    throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
-                }
+            if (!$this->sendDocumentsByEmail()) {
+                throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
             }
         }
 

@@ -41,7 +41,8 @@ readonly class PqrKnowledgeBaseSearchTool
     public function __construct(
         private KnowledgeBaseSearchTool $inner,
         private PqrIaGuard $guard,
-    ) {}
+    ) {
+    }
 
     /**
      * @param string $query Consulta en lenguaje natural

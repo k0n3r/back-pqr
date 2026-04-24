@@ -21,7 +21,7 @@ class DependenciaPqrMcpFieldLookupResolver implements McpFieldLookupResolverInte
         $results = $PqrFormField->getService()->getListDataForAutocomplete(['term' => $query]);
 
         return array_map(
-            fn(array $row)
+            fn (array $row)
                 => [
                 'id'    => (int)$row['id'],
                 'label' => $row['text'],

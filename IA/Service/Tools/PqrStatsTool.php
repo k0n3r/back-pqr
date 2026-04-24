@@ -131,7 +131,8 @@ readonly class PqrStatsTool
         #[Autowire(service: 'monolog.logger.ia')]
         private LoggerInterface $logger,
         private PqrIaGuard $guard,
-    ) {}
+    ) {
+    }
 
     /**
      * Retorna los campos disponibles para filtrar o agrupar PQRs.
@@ -272,7 +273,7 @@ readonly class PqrStatsTool
 
         $desc = empty($filters)
             ? 'sin filtros'
-            : implode(', ', array_map(fn($f) => "{$f['column']} = '{$f['value']}'", $filters));
+            : implode(', ', array_map(fn ($f) => "{$f['column']} = '{$f['value']}'", $filters));
 
         $this->logger->info('PqrStatsTool::countPqr', ['sql' => $sql, 'params' => $params]);
 
@@ -303,7 +304,7 @@ readonly class PqrStatsTool
             $rows = array_slice($rows, 0, self::GROUP_BY_LIMIT);
         }
 
-        $lines = array_map(fn($row) => sprintf('- %s: %d', $row[$groupBy] ?? '(vacío)', $row['total']), $rows);
+        $lines = array_map(fn ($row) => sprintf('- %s: %d', $row[$groupBy] ?? '(vacío)', $row['total']), $rows);
 
         $output = "PQRs agrupadas por $groupBy:\n".implode("\n", $lines);
 
@@ -324,7 +325,7 @@ readonly class PqrStatsTool
             return 'No se encontraron dependencias disponibles.';
         }
 
-        $lines = array_map(fn($row) => sprintf('- %s: %d', $row['etiqueta'], $row['id']), $rows);
+        $lines = array_map(fn ($row) => sprintf('- %s: %d', $row['etiqueta'], $row['id']), $rows);
 
         return "Dependencias disponibles (etiqueta: id):\n".implode("\n", $lines);
     }
@@ -345,7 +346,7 @@ readonly class PqrStatsTool
             return 'No se encontraron tipos de PQR disponibles.';
         }
 
-        $lines = array_map(fn($row) => sprintf('- %s: %d', $row['etiqueta'], $row['id']), $rows);
+        $lines = array_map(fn ($row) => sprintf('- %s: %d', $row['etiqueta'], $row['id']), $rows);
 
         return "Tipos de PQR disponibles (etiqueta: id):\n".implode("\n", $lines);
     }

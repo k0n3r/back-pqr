@@ -31,7 +31,8 @@ readonly class PqrSubscriber implements EventSubscriberInterface
         private LoggerInterface $logger,
         private TranslatorInterface $translator,
         private CacheInterface $cache,
-    ) {}
+    ) {
+    }
 
 
     public static function getSubscribedEvents(): array

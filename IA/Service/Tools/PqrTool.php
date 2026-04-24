@@ -64,7 +64,8 @@ readonly class PqrTool
         #[Autowire(service: 'cache.app')]
         private CacheItemPoolInterface $cache,
         private PqrIaGuard $guard,
-    ) {}
+    ) {
+    }
 
     /**
      * @param int $documentId ID del documento PQR al que se responde

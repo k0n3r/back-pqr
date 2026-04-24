@@ -26,7 +26,8 @@ readonly class PqrAgentProvider implements ModuleAgentProviderInterface
         private AgentInterface $pqrAgent,
         #[Autowire('%pqr_ia_model%')]
         private string $modelId,
-    ) {}
+    ) {
+    }
 
     public function getMainFormatName(): string
     {

@@ -13,7 +13,8 @@ readonly class PqrDocumentProcessor implements FormatoDocumentProcessorInterface
 {
     public function __construct(
         private Security $security,
-    ) {}
+    ) {
+    }
 
     /**
      * @inheritDoc
