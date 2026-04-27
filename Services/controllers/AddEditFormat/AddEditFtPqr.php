@@ -24,6 +24,7 @@ class AddEditFtPqr implements IAddEditFormat
 
     /**
      * @param PqrForm $PqrForm
+     *
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -86,6 +87,7 @@ class AddEditFtPqr implements IAddEditFormat
      * Obtiene los datos por defecto para la creacion del registro en Formato
      *
      * @param bool $edit
+     *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -114,7 +116,7 @@ class AddEditFtPqr implements IAddEditFormat
             'tipo_edicion'              => 0,
             'item'                      => 0,
             'font_size'                 => 11,
-            'banderas'                  => 'e', //Aprobacion automatica
+            'banderas'                  => 'e,asunto_padre', //Aprobacion automatica
             'mostrar_pdf'               => 1,
             'orden'                     => 0,
             'fk_categoria_formato'      => '3',
@@ -125,6 +127,7 @@ class AddEditFtPqr implements IAddEditFormat
             'module'                    => 'pqr',
             'publicar'                  => 1,
             'formato_fecha_radicado'    => 'Ymd',
+            'cache_pdf'                 => 1,
             'info_ws'                   => [
                 'habilita_webservice'  => 1,
                 'habilita_consulta'    => 1,
@@ -190,7 +193,7 @@ class AddEditFtPqr implements IAddEditFormat
      */
     private function updateRecordInFormat(): self
     {
-        $Formato = new Formato($this->PqrForm->fk_formato);
+        $Formato        = new Formato($this->PqrForm->fk_formato);
         $FormatoService = $Formato->getService();
         $FormatoService->save(array_merge($Formato->getAttributes(), $this->getFormatDefaultData(true)));
 
@@ -230,6 +233,7 @@ class AddEditFtPqr implements IAddEditFormat
      * etiqueta html del campo
      *
      * @param String $fieldType
+     *
      * @return string|null
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -248,6 +252,7 @@ class AddEditFtPqr implements IAddEditFormat
      * Obtiene los datos por defecto para la creacion o actualizacion de un campo del formulario
      *
      * @param PqrFormField $PqrFormField
+     *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -268,6 +273,7 @@ class AddEditFtPqr implements IAddEditFormat
      * Crea un nuevo campo del formulario
      *
      * @param PqrFormField $PqrFormField
+     *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -553,14 +559,15 @@ class AddEditFtPqr implements IAddEditFormat
 
     /**
      * @param array $options
-     * @param int $fieldId
+     * @param int   $fieldId
+     *
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-10-19
      */
     public function createOrUpdateOptions(array $options, int $fieldId): void
     {
         foreach ($options as $option) {
             $option['fk_campos_formato'] = $fieldId;
-            $CampoOpciones = CampoOpciones::findByAttributes([
+            $CampoOpciones               = CampoOpciones::findByAttributes([
                 'llave'             => $option['llave'],
                 'fk_campos_formato' => $fieldId,
             ]);
@@ -579,6 +586,7 @@ class AddEditFtPqr implements IAddEditFormat
      * Actualiza un campo del formulario
      *
      * @param PqrFormField $PqrFormField
+     *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
