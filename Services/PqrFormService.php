@@ -2,12 +2,15 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
+use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Entity\EmailConfiguration;
 use App\Repository\EmailConfigurationRepository;
 use App\services\models\ModelService\ModelService;
+use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\busqueda\BusquedaComponente;
@@ -183,7 +186,8 @@ class PqrFormService extends ModelService
         $this->getModel()->getFormatoFk()->getService()->generate();
 
         if (!$this->getModel()->fk_field_time) {
-            $this->editFieldTime(PqrFormField::getSysTipoField()->fk_campos_formato);
+            $sysTipoField = $this->getPqrFormFieldRepository()->findSysTipo();
+            $this->editFieldTime($sysTipoField ? $sysTipoField->getFkCamposFormato() : 0);
         }
 
         if (!$FormatoR = Formato::findByAttributes([
@@ -239,9 +243,7 @@ class PqrFormService extends ModelService
      */
     private function activeInfoForDependency(): void
     {
-        $PqrFormField = PqrFormField::findByAttributes([
-            'name' => PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
-        ]);
+        $PqrFormField = $this->getPqrFormFieldRepository()->findByName(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA);
 
         if (!$PqrFormField) {
             return;
@@ -454,10 +456,10 @@ class PqrFormService extends ModelService
         $data = [];
 
         if ($pqrFormId) {
-            $PqrFormField = new PqrFormField($pqrFormId);
+            $pqrFormFieldEntity = $this->getPqrFormFieldRepository()->find($pqrFormId);
             $data = [
                 "id"   => $pqrFormId,
-                "name" => $PqrFormField->label,
+                "name" => $pqrFormFieldEntity?->getLabel() ?? '',
             ];
         }
 
@@ -963,5 +965,15 @@ class PqrFormService extends ModelService
         return $PqrForms->getService()->save([
             'description_field' => $fieldId,
         ]);
+    }
+
+    private function getEntityManager(): EntityManagerInterface
+    {
+        return $this->serviceLocator->getEntityManager();
+    }
+
+    private function getPqrFormFieldRepository(): PqrFormFieldRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrFormFieldEntity::class);
     }
 }
