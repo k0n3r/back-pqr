@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\models\PqrNotification;
+use App\Bundles\pqr\Repository\PqrNotificationRepository;
+use App\Bundles\pqr\Services\PqrNotificationService;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
@@ -18,29 +21,22 @@ class PqrNotificationController extends AbstractController
     #[Route('', name: 'store', methods: ['POST'])]
     public function store(
         Request $request,
-        jsonResponseService $json,
-        Connection $Connection,
+        JsonResponseService $json,
+        Connection $connection,
+        PqrNotificationService $service,
     ): Response {
         try {
-            $Connection->beginTransaction();
+            $connection->beginTransaction();
 
-            $PqrNotificationService = (new PqrNotification())->getService();
-            if (!$PqrNotificationService->create([
+            $entity = $service->create([
                 'fk_funcionario' => $request->request->get('id'),
-            ])) {
-                throw new ValidationFailedException(
-                    $PqrNotificationService->getErrorManager()->getMessage(),
-                );
-            }
+            ]);
 
-            $data = $PqrNotificationService->getModel()->getDataAttributes();
+            $connection->commit();
 
-            $Connection->commit();
-
-            return $json->success($data);
+            return $json->success($service->toArray($entity));
         } catch (Throwable $th) {
-            $Connection->rollBack();
-
+            $connection->rollBack();
             return $json->exception($th);
         }
     }
@@ -49,27 +45,26 @@ class PqrNotificationController extends AbstractController
     public function update(
         int $id,
         Request $request,
-        jsonResponseService $json,
-        Connection $Connection,
+        JsonResponseService $json,
+        Connection $connection,
+        PqrNotificationService $service,
+        PqrNotificationRepository $repository,
     ): Response {
         try {
-            $Connection->beginTransaction();
+            $connection->beginTransaction();
 
-            $PqrNotificationService = (new PqrNotification($id))->getService();
-            if (!$PqrNotificationService->update($request->request->all('data'))) {
-                throw new ValidationFailedException(
-                    $PqrNotificationService->getErrorManager()->getMessage(),
-                );
+            $entity = $repository->find($id);
+            if (!$entity) {
+                throw new ValidationFailedException("Notificación no encontrada");
             }
 
-            $data = $PqrNotificationService->getModel()->getDataAttributes();
+            $service->update($entity, $request->request->all('data'));
 
-            $Connection->commit();
+            $connection->commit();
 
-            return $json->success($data);
+            return $json->success($service->toArray($entity));
         } catch (Throwable $th) {
-            $Connection->rollBack();
-
+            $connection->rollBack();
             return $json->exception($th);
         }
     }
@@ -77,25 +72,26 @@ class PqrNotificationController extends AbstractController
     #[Route('/{id}', name: 'destroy', methods: ['DELETE'])]
     public function destroy(
         int $id,
-        jsonResponseService $json,
-        Connection $Connection,
+        JsonResponseService $json,
+        Connection $connection,
+        PqrNotificationService $service,
+        PqrNotificationRepository $repository,
     ): Response {
         try {
-            $Connection->beginTransaction();
+            $connection->beginTransaction();
 
-            $PqrNotificationService = (new PqrNotification($id))->getService();
-            if (!$PqrNotificationService->delete()) {
-                throw new ValidationFailedException(
-                    $PqrNotificationService->getErrorManager()->getMessage(),
-                );
+            $entity = $repository->find($id);
+            if (!$entity) {
+                throw new ValidationFailedException("Notificación no encontrada");
             }
 
-            $Connection->commit();
+            $service->delete($entity);
+
+            $connection->commit();
 
             return $json->success();
         } catch (Throwable $th) {
-            $Connection->rollBack();
-
+            $connection->rollBack();
             return $json->exception($th);
         }
     }

@@ -18,7 +18,10 @@ services:
       - '../../translations/'
       - '../../formatos/'
       - '../../helpers/'
-      - '../../Services/'
+      - '../../Services/models/'
+      - '../../Services/controllers/'
+      - '../../Services/Customizable/'
+      - '../../Services/crontab/'
       - '../../IA/'
 
 imports:

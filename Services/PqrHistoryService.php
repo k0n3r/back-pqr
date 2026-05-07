@@ -1,49 +1,64 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Bundles\pqr\Services;
 
-use App\services\models\ModelService\ModelService;
-use Saia\models\Dependencia;
-use Saia\models\Configuracion;
-use Saia\controllers\anexos\FileJson;
+use App\Bundles\pqr\Entity\PqrHistory;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Bundles\pqr\Repository\PqrHistoryRepository;
+use Saia\controllers\anexos\FileJson;
+use Saia\models\Configuracion;
+use Saia\models\Dependencia;
+use Saia\models\Funcionario;
 
-class PqrHistoryService extends ModelService
+class PqrHistoryService
 {
     private ?string $logo = null;
     private ?string $customerName = null;
 
+    public function __construct(
+        private readonly PqrHistoryRepository $repository,
+    ) {
+    }
 
-    /**
-     * @inheritDoc
-     */
-    public function getModel(): PqrHistory
+    public function getRepository(): PqrHistoryRepository
     {
-        return $this->Model;
+        return $this->repository;
+    }
+
+    public function create(array $attributes): PqrHistory
+    {
+        $entity = new PqrHistory();
+        $entity->setIdft((int)$attributes['idft']);
+        $entity->setFkFuncionario((int)$attributes['fk_funcionario']);
+        $entity->setTipo((int)$attributes['tipo']);
+        $entity->setIdfk((int)($attributes['idfk'] ?? 0));
+        $entity->setDescripcion((string)$attributes['descripcion']);
+        $entity->setFecha($attributes['fecha'] ?? new \DateTimeImmutable());
+        $this->repository->create($entity);
+
+        return $entity;
     }
 
     /**
      * Obtiene los datos de historial para pintar el timeline
-     *
-     * @return array|null
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
      */
-    public function getHistoryForTimeline(): ?array
+    public function getHistoryForTimeline(PqrHistory $history): ?array
     {
+        $funcionario = new Funcionario($history->getFkFuncionario());
         $data = [
             'header'      => true,
             'imgRoute'    => $this->getLogo(),
-            'userName'    => $this->getModel()->getFuncionario()->getName(),
+            'userName'    => $funcionario->getName(),
             'business'    => $this->getCustomerName(),
-            'date'        => $this->getModel()->getFecha(),
-            'description' => $this->getModel()->descripcion,
+            'date'        => $history->getFecha()->format('Y-m-d H:i:s'),
+            'description' => $history->getDescripcion(),
         ];
 
-        switch ($this->getModel()->tipo) {
+        switch ($history->getTipo()) {
             case PqrHistory::TIPO_RESPUESTA:
-                $FtPqrRespuesta = $this->getModel()->getRespuestaPqr();
+                $FtPqrRespuesta = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($history->getIdfk());
                 $data = array_merge($data, [
                     'iconPoint'      => 'fa fa-envelope-o',
                     'iconPointColor' => 'warning',
@@ -52,7 +67,7 @@ class PqrHistoryService extends ModelService
                 break;
 
             case PqrHistory::TIPO_CALIFICACION:
-                $FtPqrRespuesta = $this->getModel()->getRespuestaPqr();
+                $FtPqrRespuesta = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($history->getIdfk());
                 $data = array_merge($data, [
                     'iconPoint'      => 'fa fa-comment',
                     'iconPointColor' => 'danger',
@@ -74,42 +89,25 @@ class PqrHistoryService extends ModelService
         return $data;
     }
 
-    /**
-     * Obtiene el logo de la empresa
-     *
-     * @return string|null
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
     private function getLogo(): ?string
     {
-        if (!$this->logo) {
-            $Configuracion = Configuracion::findByAttributes([
-                'nombre' => 'logo',
-            ]);
-
-            if (!$Configuracion->getValue()) {
-                return null;
-            }
-
-            $FileJson = new FileJson($Configuracion->getValue());
-            $FileTemporal = $FileJson->convertToFileTemporal();
-            $this->logo = $_SERVER['APP_DOMAIN'].$FileTemporal->getRouteFromRoot();
+        if ($this->logo !== null) {
+            return $this->logo;
         }
+        $Configuracion = Configuracion::findByAttributes(['nombre' => 'logo']);
+        if (!$Configuracion->getValue()) {
+            return null;
+        }
+        $FileJson = new FileJson($Configuracion->getValue());
+        $FileTemporal = $FileJson->convertToFileTemporal();
+        $this->logo = $_SERVER['APP_DOMAIN'] . $FileTemporal->getRouteFromRoot();
 
         return $this->logo;
     }
 
-    /**
-     * Obtiene el nombre del cliente
-     *
-     * @return string|null
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
     private function getCustomerName(): ?string
     {
-        if (!$this->customerName) {
+        if ($this->customerName === null) {
             $Dependencia = Dependencia::findByAttributes(['cod_padre' => 0]);
             if ($Dependencia) {
                 $this->customerName = $Dependencia->nombre;

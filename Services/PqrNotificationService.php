@@ -1,71 +1,69 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Bundles\pqr\Services;
 
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrNotification;
-use App\services\models\ModelService\ModelService;
+use App\Bundles\pqr\Entity\PqrNotification;
+use App\Bundles\pqr\Repository\PqrNotificationRepository;
+use App\Bundles\pqr\Service\PqrFormProvider;
 
-class PqrNotificationService extends ModelService
+class PqrNotificationService
 {
-    /**
-     * Obtiene la instancia de PqrNotification actualizada
-     *
-     * @return PqrNotification
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    public function getModel(): PqrNotification
-    {
-        return $this->Model;
+    public function __construct(
+        private readonly PqrNotificationRepository $repository,
+        private readonly PqrFormProvider $pqrFormProvider,
+    ) {
     }
 
-    /**
-     * Almacena una nueva persona a notificar
-     *
-     * @param array $attributes
-     * @return bool
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    public function create(array $attributes): bool
+    public function getRepository(): PqrNotificationRepository
     {
-        $defaultFields = [
-            'email'  => 0,
-            'notify' => 1,
-        ];
-        $attributes = array_merge($defaultFields, $attributes);
-
-        return $this->update($attributes);
+        return $this->repository;
     }
 
-    /**
-     * Actualiza un registro
-     *
-     * @param array $attributes
-     * @return bool
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2021
-     */
-    public function update(array $attributes): bool
+    public function create(array $attributes): PqrNotification
     {
-        if (!isset($attributes['fk_pqr_form'])) {
-            $attributes['fk_pqr_form'] = PqrForm::getInstance()->getPK();
+        $entity = new PqrNotification();
+        $entity->setFkPqrForm($attributes['fk_pqr_form'] ?? $this->pqrFormProvider->get()->getId());
+        $entity->setFkFuncionario((int)$attributes['fk_funcionario']);
+        $entity->setEmail((bool)($attributes['email'] ?? 0));
+        $entity->setNotify((bool)($attributes['notify'] ?? 1));
+        $this->repository->create($entity);
+
+        return $entity;
+    }
+
+    public function update(PqrNotification $entity, array $attributes): void
+    {
+        if (array_key_exists('fk_funcionario', $attributes)) {
+            $entity->setFkFuncionario((int)$attributes['fk_funcionario']);
         }
-        $this->getModel()->setAttributes($attributes);
-
-        return $this->getModel()->save();
+        if (array_key_exists('email', $attributes)) {
+            $entity->setEmail((bool)$attributes['email']);
+        }
+        if (array_key_exists('notify', $attributes)) {
+            $entity->setNotify((bool)$attributes['notify']);
+        }
+        if (array_key_exists('fk_pqr_form', $attributes)) {
+            $entity->setFkPqrForm((int)$attributes['fk_pqr_form']);
+        }
+        $this->repository->update();
     }
 
-    /**
-     * Elimina un campo del formulario
-     *
-     * @return bool
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    public function delete(): bool
+    public function delete(PqrNotification $entity): void
     {
-        return $this->getModel()->delete();
+        $this->repository->delete($entity);
+        $this->repository->flush();
+    }
+
+    public function toArray(PqrNotification $entity): array
+    {
+        return [
+            'id'             => $entity->getId(),
+            'fk_funcionario' => $entity->getFkFuncionario(),
+            'fk_pqr_form'    => $entity->getFkPqrForm(),
+            'email'          => $entity->isEmail() ? 1 : 0,
+            'notify'         => $entity->isNotify() ? 1 : 0,
+        ];
     }
 }
