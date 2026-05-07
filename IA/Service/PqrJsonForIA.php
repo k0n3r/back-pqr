@@ -3,8 +3,10 @@
 namespace App\Bundles\pqr\IA\Service;
 
 use App\Bundles\ia\Services\JsonForIA;
+use App\Bundles\pqr\Entity\PqrFormField;
+use App\Bundles\pqr\Entity\PqrHtmlField;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
-use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Service\LegacyServiceLocator;
 use Saia\controllers\generator\component\Method;
 use Saia\core\model\ModelFormat;
 use Saia\models\formatos\CamposFormato;
@@ -104,17 +106,45 @@ class PqrJsonForIA extends JsonForIA
         }
 
         if ($camposFormato->valor == '{*autocompleteM*}') {
-            $value = null;
             if ($this->ft->$nameDb) {
-                $PqrFormField = PqrFormField::findByAttributes([
-                    'fk_campos_formato' => $camposFormato->getPK(),
-                ]);
-                $value = $PqrFormField->getService()->getListDataForAutocomplete(
-                    ['id' => $this->ft->$nameDb],
-                );
+                $connection = LegacyServiceLocator::getInstance()->getConnection();
+                $type = $connection->createQueryBuilder()
+                    ->select('phf.type')
+                    ->from('pqr_form_fields', 'pff')
+                    ->join('pff', 'pqr_html_fields', 'phf', 'phf.id = pff.fk_pqr_html_field')
+                    ->where('pff.fk_campos_formato = :fk')
+                    ->setParameter('fk', $camposFormato->getPK())
+                    ->executeQuery()
+                    ->fetchOne();
+
+                if ($type === PqrHtmlField::TYPE_DEPENDENCIA) {
+                    $text = $connection->createQueryBuilder()
+                        ->select('nombre')
+                        ->from('dependencia')
+                        ->where('iddependencia = :id')
+                        ->setParameter('id', $this->ft->$nameDb)
+                        ->executeQuery()
+                        ->fetchOne();
+
+                    return $text ?: '';
+                }
+
+                if ($type === PqrHtmlField::TYPE_LOCALIDAD) {
+                    $text = $connection->createQueryBuilder()
+                        ->select("CONCAT(a.nombre, ' - ', b.nombre, ' - ', c.nombre)")
+                        ->from('municipio', 'a')
+                        ->join('a', 'departamento', 'b', 'a.departamento_iddepartamento = b.iddepartamento')
+                        ->join('b', 'pais', 'c', 'b.pais_idpais = c.idpais')
+                        ->where('a.idmunicipio = :id')
+                        ->setParameter('id', $this->ft->$nameDb)
+                        ->executeQuery()
+                        ->fetchOne();
+
+                    return $text ?: '';
+                }
             }
 
-            return $value ? $value[0]['text'] : '';
+            return '';
         }
 
         return $camposFormato->getComponentBuilder()->showValue($this->ft) ?? '';

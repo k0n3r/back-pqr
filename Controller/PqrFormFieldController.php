@@ -2,7 +2,8 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Entity\PqrFormField;
+use App\Bundles\pqr\Service\PqrFormFieldServiceFactory;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
@@ -20,11 +21,12 @@ class PqrFormFieldController extends AbstractController
         Request $request,
         jsonResponseService $json,
         Connection $Connection,
+        PqrFormFieldServiceFactory $factory,
     ): Response {
         try {
             $Connection->beginTransaction();
 
-            $PqrFormFieldService = (new PqrFormField())->getService();
+            $PqrFormFieldService = $factory->create();
             if (!$PqrFormFieldService->save($request->request->all('data'))) {
                 throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
@@ -49,11 +51,12 @@ class PqrFormFieldController extends AbstractController
         Request $request,
         jsonResponseService $json,
         Connection $Connection,
+        PqrFormFieldServiceFactory $factory,
     ): Response {
         try {
             $Connection->beginTransaction();
 
-            $PqrFormFieldService = (new PqrFormField($id))->getService();
+            $PqrFormFieldService = $factory->create($id);
             if (!$PqrFormFieldService->save($request->request->all('data'))) {
                 throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
@@ -77,8 +80,9 @@ class PqrFormFieldController extends AbstractController
         int $id,
         Connection $connection,
         jsonResponseService $json,
+        PqrFormFieldServiceFactory $factory,
     ): Response {
-        return $this->activeInactive($id, PqrFormField::ACTIVE, $connection, $json);
+        return $this->activeInactive($id, PqrFormField::ACTIVE, $connection, $json, $factory);
     }
 
     #[Route('/{id}/inactive', name: 'inactive', methods: ['PUT'])]
@@ -86,8 +90,9 @@ class PqrFormFieldController extends AbstractController
         int $id,
         Connection $connection,
         jsonResponseService $json,
+        PqrFormFieldServiceFactory $factory,
     ): Response {
-        return $this->activeInactive($id, PqrFormField::INACTIVE, $connection, $json);
+        return $this->activeInactive($id, PqrFormField::INACTIVE, $connection, $json, $factory);
     }
 
     private function activeInactive(
@@ -95,11 +100,12 @@ class PqrFormFieldController extends AbstractController
         int $status,
         Connection $Connection,
         JsonResponseService $json,
+        PqrFormFieldServiceFactory $factory,
     ): Response {
         try {
             $Connection->beginTransaction();
 
-            $PqrFormFieldService = (new PqrFormField($id))->getService();
+            $PqrFormFieldService = $factory->create($id);
             if (!$PqrFormFieldService->updateActive($status)) {
                 throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
@@ -123,11 +129,12 @@ class PqrFormFieldController extends AbstractController
         int $id,
         jsonResponseService $json,
         Connection $Connection,
+        PqrFormFieldServiceFactory $factory,
     ): Response {
         try {
             $Connection->beginTransaction();
 
-            $PqrFormFieldService = (new PqrFormField($id))->getService();
+            $PqrFormFieldService = $factory->create($id);
             if (!$PqrFormFieldService->delete()) {
                 throw new ValidationFailedException(
                     $PqrFormFieldService->getErrorManager()->getMessage(),
