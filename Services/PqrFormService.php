@@ -2,8 +2,10 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
 use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
+use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
@@ -305,14 +307,7 @@ class PqrFormService extends ModelService
      */
     public function getDataPqrFormFields(): array
     {
-        $data = [];
-        if ($records = $this->getModel()->getPqrFormFields()) {
-            foreach ($records as $PqrFormField) {
-                $data[] = $PqrFormField->getDataAttributes();
-            }
-        }
-
-        return $data;
+        return $this->getPqrFormFieldRepository()->getDataAttributesForForm($this->getModel()->getPK());
     }
 
     /**
@@ -324,7 +319,9 @@ class PqrFormService extends ModelService
      */
     public function getDataPqrForm(): array
     {
-        return $this->getModel()->getDataAttributes();
+        $pqrForm = $this->getPqrFormRepository()->find($this->getModel()->getPK());
+
+        return $pqrForm?->toArray() ?? $this->getModel()->getDataAttributes();
     }
 
     /**
@@ -980,5 +977,10 @@ class PqrFormService extends ModelService
     private function getPqrFormFieldRepository(): PqrFormFieldRepository
     {
         return $this->getEntityManager()->getRepository(PqrFormFieldEntity::class);
+    }
+
+    private function getPqrFormRepository(): PqrFormRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrFormEntity::class);
     }
 }

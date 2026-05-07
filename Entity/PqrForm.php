@@ -261,4 +261,30 @@ class PqrForm
         $this->canalRecepcion = $canalRecepcion;
         return $this;
     }
+
+    /**
+     * Retorna los datos en el mismo formato que el legacy PqrForm::getDataAttributes().
+     */
+    public function toArray(): array
+    {
+        return [
+            'id'                     => $this->id,
+            'fk_formato'             => $this->fkFormato,
+            'fk_contador'            => $this->fkContador,
+            'show_anonymous'         => (int)$this->showAnonymous,
+            'show_label'             => (int)$this->showLabel,
+            'show_empty'             => (int)$this->showEmpty,
+            'active'                 => (int)$this->active,
+            'fk_field_time'          => $this->fkFieldTime,
+            'enable_filter_dep'      => (int)$this->enableFilterDep,
+            'description_field'      => $this->descriptionField,
+            'enable_balancer'        => (int)$this->enableBalancer,
+            'enable_con_days'        => (int)$this->enableConDays,
+            'fk_field_balancer'      => $this->fkFieldBalancer,
+            'label'                  => $this->label,
+            'name'                   => $this->name,
+            'response_configuration' => $this->responseConfiguration,
+            'canal_recepcion'        => $this->canalRecepcion,
+        ];
+    }
 }
