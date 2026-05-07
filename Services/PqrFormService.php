@@ -4,8 +4,10 @@ namespace App\Bundles\pqr\Services;
 
 use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
 use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
+use App\Bundles\pqr\Entity\PqrNotification as PqrNotificationEntity;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrFormRepository;
+use App\Bundles\pqr\Repository\PqrNotificationRepository;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
@@ -333,14 +335,15 @@ class PqrFormService extends ModelService
      */
     public function getDataPqrNotifications(): array
     {
-        $data = [];
-        if ($records = $this->getModel()->getPqrNotifications()) {
-            foreach ($records as $PqrNotification) {
-                $data[] = $PqrNotification->getDataAttributes();
-            }
-        }
+        $notifications = $this->getPqrNotificationRepository()->findByPqrForm($this->getModel()->getPK());
 
-        return $data;
+        return array_map(static fn ($n) => [
+            'id'            => $n->getId(),
+            'fk_funcionario' => $n->getFkFuncionario(),
+            'fk_pqr_form'   => $n->getFkPqrForm(),
+            'email'         => (int)$n->isEmail(),
+            'notify'        => (int)$n->isNotify(),
+        ], $notifications);
     }
 
     /**
@@ -982,5 +985,10 @@ class PqrFormService extends ModelService
     private function getPqrFormRepository(): PqrFormRepository
     {
         return $this->getEntityManager()->getRepository(PqrFormEntity::class);
+    }
+
+    private function getPqrNotificationRepository(): PqrNotificationRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrNotificationEntity::class);
     }
 }
