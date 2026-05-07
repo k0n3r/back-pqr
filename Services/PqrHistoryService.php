@@ -20,7 +20,8 @@ class PqrHistoryService
 
     public function __construct(
         private readonly PqrHistoryRepository $repository,
-    ) {}
+    ) {
+    }
 
     public function getRepository(): PqrHistoryRepository
     {

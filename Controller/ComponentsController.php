@@ -4,7 +4,6 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Entity\PqrHtmlField;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
-use App\Bundles\pqr\Repository\PqrHtmlFieldRepository;
 use App\Bundles\pqr\Services\PqrService;
 use App\Exception\MissingParameterException;
 use Doctrine\DBAL\ArrayParameterType;
@@ -24,7 +23,6 @@ class ComponentsController extends AbstractController
         Request $request,
         TranslatorInterface $translator,
         PqrFormFieldRepository $pqrFormFieldRepository,
-        PqrHtmlFieldRepository $pqrHtmlFieldRepository,
         Connection $connection,
     ): JsonResponse {
         try {
@@ -33,7 +31,7 @@ class ComponentsController extends AbstractController
                 throw new MissingParameterException($translator->trans("falta_nombre_campo"));
             }
 
-            $pqrHtmlField = $pqrHtmlFieldRepository->find($pqrFormField->getFkPqrHtmlField());
+            $pqrHtmlField = $pqrFormField->getHtmlField();
             $setting = json_decode($pqrFormField->getSetting());
             $queryData = $request->query->all('data');
 

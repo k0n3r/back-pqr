@@ -77,7 +77,8 @@ class CaptchaController extends AbstractController implements IHasCaptcha
             $message        = "<br/>Su solicitud ha sido generada con el número de radicado <strong>$Documento->numero</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
             $pqrNotyMessage = $pqrNotyMessageRepository->findByName('ws_noty_radicado');
             if ($pqrNotyMessage) {
-                $message = PqrNotyMessageService::resolveVariables($pqrNotyMessage->getMessageBody() ?? '',
+                $message = PqrNotyMessageService::resolveVariables(
+                    $pqrNotyMessage->getMessageBody() ?? '',
                     $Documento->getFt(),
                 );
             }

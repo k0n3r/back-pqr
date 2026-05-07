@@ -12,7 +12,8 @@ readonly class PqrNotyMessageService
 {
     public function __construct(
         private PqrNotyMessageRepository $repository,
-    ) {}
+    ) {
+    }
 
     public function update(int $id, array $data): void
     {

@@ -5,7 +5,6 @@ namespace App\Bundles\pqr\IA\Service;
 use App\Bundles\ia\Services\FormatoJsonProcessorInterface;
 use App\Bundles\ia\Services\FormatoJsonService;
 use App\Bundles\pqr\Entity\PqrHtmlField;
-use App\Bundles\pqr\Repository\PqrHtmlFieldRepository;
 use App\Bundles\pqr\Service\PqrFormProvider;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -17,7 +16,6 @@ class PqrFormatoJsonProcessor implements FormatoJsonProcessorInterface
     public function __construct(
         private readonly CacheInterface $cache,
         private readonly PqrFormProvider $pqrFormProvider,
-        private readonly PqrHtmlFieldRepository $pqrHtmlFieldRepository,
     ) {
     }
 
@@ -47,7 +45,7 @@ class PqrFormatoJsonProcessor implements FormatoJsonProcessorInterface
 
             $result = [];
             foreach ($this->pqrFormProvider->getFields() as $field) {
-                $htmlField = $this->pqrHtmlFieldRepository->find($field->getFkPqrHtmlField());
+                $htmlField = $field->getHtmlField();
                 if ($htmlField && (
                     $htmlField->getType() === PqrHtmlField::TYPE_DEPENDENCIA ||
                     $htmlField->getType() === PqrHtmlField::TYPE_LOCALIDAD

@@ -13,7 +13,8 @@ readonly class PqrNotificationService
     public function __construct(
         private PqrNotificationRepository $repository,
         private PqrFormProvider $pqrFormProvider,
-    ) {}
+    ) {
+    }
 
     public function getRepository(): PqrNotificationRepository
     {

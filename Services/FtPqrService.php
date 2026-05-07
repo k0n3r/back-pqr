@@ -551,7 +551,8 @@ class FtPqrService extends ModelService
         $subject = "Solicitud de {$this->getPqrForm()->label} # {$this->getDocument()->numero}";
 
         if ($PqrNotyMessage = $this->getPqrNotyMessageRepository()->findByName('f1_email_solicitante')) {
-            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->getMessageBody() ?? '',
+            $message = PqrNotyMessageService::resolveVariables(
+                $PqrNotyMessage->getMessageBody() ?? '',
                 $this->getModel(),
             );
             $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->getSubject() ?? '', $this->getModel());

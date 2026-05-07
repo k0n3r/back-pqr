@@ -46,11 +46,13 @@ class PqrFormField
     #[ORM\Column(name: 'setting', type: 'text', nullable: false)]
     private string $setting;
 
-    #[ORM\Column(name: 'fk_pqr_html_field', type: 'integer', nullable: false)]
-    private int $fkPqrHtmlField;
+    #[ORM\ManyToOne(targetEntity: PqrHtmlField::class)]
+    #[ORM\JoinColumn(name: 'fk_pqr_html_field', referencedColumnName: 'id', nullable: false)]
+    private PqrHtmlField $htmlField;
 
-    #[ORM\Column(name: 'fk_pqr_form', type: 'integer', nullable: false)]
-    private int $fkPqrForm;
+    #[ORM\ManyToOne(targetEntity: PqrForm::class)]
+    #[ORM\JoinColumn(name: 'fk_pqr_form', referencedColumnName: 'id', nullable: false)]
+    private PqrForm $pqrForm;
 
     #[ORM\Column(name: 'fk_campos_formato', type: 'integer', nullable: true, options: ['default' => 0])]
     private ?int $fkCamposFormato = 0;
@@ -151,26 +153,36 @@ class PqrFormField
         return json_decode($this->setting);
     }
 
-    public function getFkPqrHtmlField(): int
+    public function getHtmlField(): PqrHtmlField
     {
-        return $this->fkPqrHtmlField;
+        return $this->htmlField;
     }
 
-    public function setFkPqrHtmlField(int $fkPqrHtmlField): self
+    public function setHtmlField(PqrHtmlField $htmlField): self
     {
-        $this->fkPqrHtmlField = $fkPqrHtmlField;
+        $this->htmlField = $htmlField;
+        return $this;
+    }
+
+    public function getFkPqrHtmlField(): int
+    {
+        return $this->htmlField->getId();
+    }
+
+    public function getPqrForm(): PqrForm
+    {
+        return $this->pqrForm;
+    }
+
+    public function setPqrForm(PqrForm $pqrForm): self
+    {
+        $this->pqrForm = $pqrForm;
         return $this;
     }
 
     public function getFkPqrForm(): int
     {
-        return $this->fkPqrForm;
-    }
-
-    public function setFkPqrForm(int $fkPqrForm): self
-    {
-        $this->fkPqrForm = $fkPqrForm;
-        return $this;
+        return $this->pqrForm->getId();
     }
 
     public function getFkCamposFormato(): int

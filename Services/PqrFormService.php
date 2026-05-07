@@ -10,9 +10,9 @@ use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrNotificationRepository;
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
+use App\Bundles\pqr\Service\PqrFormFieldServiceFactory;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Entity\EmailConfiguration;
 use App\Repository\EmailConfigurationRepository;
 use App\services\models\ModelService\ModelService;
@@ -94,7 +94,7 @@ class PqrFormService extends ModelService
                         }
                     }
 
-                    $PqrFormFieldService = (new PqrFormField($id))->getService();
+                    $PqrFormFieldService = $this->getPqrFormFieldServiceFactory()->create((int)$id);
                     if (!$PqrFormFieldService->update($attributes)) {
                         $this->getErrorManager()->setMessage("No fue posible actualizar");
 
@@ -372,15 +372,7 @@ class PqrFormService extends ModelService
      */
     private function getFieldsReport(): array
     {
-        $data = [];
-        $fields = $this->getModel()->getPqrFormFields();
-        foreach ($fields as $PqrFormField) {
-            if ($PqrFormField->show_report) {
-                $data[] = $PqrFormField;
-            }
-        }
-
-        return $data;
+        return $this->getPqrFormFieldRepository()->getReportFieldsData($this->getModel()->getPK());
     }
 
     /**
@@ -391,13 +383,10 @@ class PqrFormService extends ModelService
      */
     private function getFieldsView(): array
     {
-        $data = [];
-        $fields = $this->getModel()->getPqrFormFields();
-        foreach ($fields as $PqrFormField) {
-            $data[] = "ft.$PqrFormField->name";
-        }
-
-        return $data;
+        return array_map(
+            fn ($f) => "ft.{$f->getName()}",
+            $this->getPqrFormFieldRepository()->findByPqrFormOrdered($this->getModel()->getPK()),
+        );
     }
 
     /**
@@ -499,17 +488,17 @@ class PqrFormService extends ModelService
     private function generateFuncionReport(array $fields): void
     {
         $fieldCode = [];
-        foreach ($fields as $PqrFormField) {
+        foreach ($fields as $f) {
             $code = '';
-            switch ($PqrFormField->getPqrHtmlField()->type_saia) {
+            switch ($f['type_saia']) {
                 // case 'Textarea':
-                //     $code = "function get_{$PqrFormField->name}(int \$idft,\$value){
+                //     $code = "function get_{$f['name']}(int \$idft,\$value){
                 //         return substr(\$value, 0, 30).' ...';
                 //     }";
                 //     break;
                 case 'Select':
                 case 'Radio':
-                    $code = "function get_$PqrFormField->name(int \$idft,\$value){
+                    $code = "function get_{$f['name']}(int \$idft,\$value){
                         global \$FtPqr;
                         \$response = '';
                         if (\$valor = Saia\\models\\formatos\\CampoSeleccionados::findColumn('valor', [
@@ -522,11 +511,11 @@ class PqrFormService extends ModelService
                     }";
                     break;
                 case 'Checkbox':
-                    $code = "function get_$PqrFormField->name(int \$idft,\$value){
+                    $code = "function get_{$f['name']}(int \$idft,\$value){
                         global \$FtPqr;
                         \$response = '';
                         if (\$valor = Saia\\models\\formatos\\CampoSeleccionados::findColumn('valor', [
-                            'fk_campos_formato' => $PqrFormField->fk_campos_formato,
+                            'fk_campos_formato' => {$f['fk_campos_formato']},
                             'fk_documento' => \$FtPqr->documento_iddocumento
                         ])) {
                             \$response = implode(',',\$valor);
@@ -536,13 +525,13 @@ class PqrFormService extends ModelService
                     break;
                 case 'AutocompleteM':
                 case 'AutocompleteD':
-                    $code = "function get_$PqrFormField->name(int \$idft,\$value){
+                    $code = "function get_{$f['name']}(int \$idft,\$value){
                         global \$FtPqr;
-                        return \$FtPqr->getService()->getValueForReport('$PqrFormField->name');
+                        return \$FtPqr->getService()->getValueForReport('{$f['name']}');
                     }";
                     break;
                 case 'Date':
-                    $code = "function get_$PqrFormField->name(int \$idft,\$value){
+                    $code = "function get_{$f['name']}(int \$idft,\$value){
                           return \$value ? dateRadication(\$value) : '';
                     }";
                     break;

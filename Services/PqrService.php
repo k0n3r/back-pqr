@@ -190,8 +190,9 @@ class PqrService
 
     public function dependencyExist(): bool
     {
-        return $this->dependencyExist ??= $this->pqrFormProvider->getFieldByName(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
-            ) !== null;
+        return $this->dependencyExist ??= $this->pqrFormProvider->getFieldByName(
+            PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
+        ) !== null;
     }
 
     /**

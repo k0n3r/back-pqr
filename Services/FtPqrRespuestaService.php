@@ -354,7 +354,8 @@ class FtPqrRespuestaService extends ModelService
         $description = "Se solicita la calificación de la ($nameFormat) # {$this->getModel()->getDocument()->numero} al e-mail: ($email)";
 
         $EmailSaia = (new Email())
-            ->subject("Queremos conocer tu opinión! (Solicitud de {$this->getPqrFormEntity()->getLabel()} # $DocumentoPqr->numero)",
+            ->subject(
+                "Queremos conocer tu opinión! (Solicitud de {$this->getPqrFormEntity()->getLabel()} # $DocumentoPqr->numero)",
             )
             ->html($message)
             ->to(new Address($tercero->getEmail(), $tercero->getName()));

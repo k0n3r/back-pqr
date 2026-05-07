@@ -23,7 +23,7 @@ class PqrFormFieldRepository extends BaseRepository
      */
     public function findByPqrFormOrdered(int $pqrFormId): array
     {
-        return $this->findBy(['fkPqrForm' => $pqrFormId], ['orden' => 'ASC']);
+        return $this->findBy(['pqrForm' => $pqrFormId], ['orden' => 'ASC']);
     }
 
     public function findByName(string $name): ?PqrFormField
@@ -37,52 +37,70 @@ class PqrFormFieldRepository extends BaseRepository
     }
 
     /**
+     * Retorna los campos con show_report=1 de un formulario, con type_saia del campo HTML.
+     */
+    public function getReportFieldsData(int $pqrFormId): array
+    {
+        $fields = $this->createQueryBuilder('f')
+            ->join('f.htmlField', 'h')
+            ->addSelect('h')
+            ->where('f.pqrForm = :id')
+            ->andWhere('f.showReport = :show')
+            ->setParameter('id', $pqrFormId)
+            ->setParameter('show', true)
+            ->orderBy('f.orden', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return array_map(static fn (PqrFormField $f): array => [
+            'name'              => $f->getName(),
+            'label'             => $f->getLabel(),
+            'fk_campos_formato' => $f->getFkCamposFormato(),
+            'type_saia'         => $f->getHtmlField()->getTypeSaia(),
+        ], $fields);
+    }
+
+    /**
      * Retorna los campos de un formulario en el mismo formato que el legacy getDataAttributes():
      * array plano con fk_pqr_html_field expandido como sub-array.
      */
     public function getDataAttributesForForm(int $pqrFormId): array
     {
-        $rows = $this->getEntityManager()->getConnection()
-            ->createQueryBuilder()
-            ->select(
-                'f.id', 'f.required', 'f.anonymous', 'f.show_report', 'f.required_anonymous',
-                'f.fk_pqr_html_field', 'f.fk_pqr_form', 'f.fk_campos_formato',
-                'f.is_system', 'f.orden', 'f.active', 'f.name', 'f.label', 'f.setting',
-                'h.id as html_id', 'h.uniq', 'h.active as html_active',
-                'h.label as html_label', 'h.type', 'h.type_saia',
-            )
-            ->from('pqr_form_fields', 'f')
-            ->join('f', 'pqr_html_fields', 'h', 'h.id = f.fk_pqr_html_field')
-            ->where('f.fk_pqr_form = :id')
+        $fields = $this->createQueryBuilder('f')
+            ->join('f.htmlField', 'h')
+            ->addSelect('h')
+            ->where('f.pqrForm = :id')
             ->setParameter('id', $pqrFormId)
             ->orderBy('f.orden', 'ASC')
-            ->executeQuery()
-            ->fetchAllAssociative();
+            ->getQuery()
+            ->getResult();
 
-        return array_map(static function (array $row): array {
+        return array_map(static function (PqrFormField $f): array {
+            $h = $f->getHtmlField();
+
             return [
-                'id'                 => (int)$row['id'],
-                'required'           => (int)$row['required'],
-                'anonymous'          => (int)$row['anonymous'],
-                'show_report'        => (int)$row['show_report'],
-                'required_anonymous' => (int)$row['required_anonymous'],
+                'id'                 => $f->getId(),
+                'required'           => (int)$f->isRequired(),
+                'anonymous'          => (int)$f->isAnonymous(),
+                'show_report'        => (int)$f->isShowReport(),
+                'required_anonymous' => (int)$f->isRequiredAnonymous(),
                 'fk_pqr_html_field'  => [
-                    'id'        => (int)$row['html_id'],
-                    'uniq'      => (int)$row['uniq'],
-                    'active'    => (int)$row['html_active'],
-                    'label'     => $row['html_label'],
-                    'type'      => $row['type'],
-                    'type_saia' => $row['type_saia'],
+                    'id'        => $h->getId(),
+                    'uniq'      => (int)$h->isUniq(),
+                    'active'    => (int)$h->isActive(),
+                    'label'     => $h->getLabel(),
+                    'type'      => $h->getType(),
+                    'type_saia' => $h->getTypeSaia(),
                 ],
-                'fk_pqr_form'        => (int)$row['fk_pqr_form'],
-                'fk_campos_formato'  => (int)$row['fk_campos_formato'],
-                'is_system'          => (int)$row['is_system'],
-                'orden'              => (int)$row['orden'],
-                'active'             => (int)$row['active'],
-                'name'               => $row['name'],
-                'label'              => $row['label'],
-                'setting'            => $row['setting'],
+                'fk_pqr_form'        => $f->getFkPqrForm(),
+                'fk_campos_formato'  => $f->getFkCamposFormato(),
+                'is_system'          => (int)$f->isSystem(),
+                'orden'              => $f->getOrden(),
+                'active'             => (int)$f->isActive(),
+                'name'               => $f->getName(),
+                'label'              => $f->getLabel(),
+                'setting'            => $f->getSetting(),
             ];
-        }, $rows);
+        }, $fields);
     }
 }

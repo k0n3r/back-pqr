@@ -5,7 +5,6 @@ namespace App\Bundles\pqr\IA\Mcp\Resolver;
 use App\Bundles\ia\Mcp\McpFieldLookupResolverInterface;
 use App\Bundles\ia\Mcp\Traits\McpCiudadLookupTrait;
 use App\Bundles\pqr\Entity\PqrHtmlField;
-use App\Bundles\pqr\Repository\PqrHtmlFieldRepository;
 use App\Bundles\pqr\Service\PqrFormProvider;
 use Saia\models\formatos\CamposFormato;
 
@@ -15,7 +14,6 @@ class CiudadPqrMcpFieldLookupResolver implements McpFieldLookupResolverInterface
 
     public function __construct(
         private readonly PqrFormProvider $pqrFormProvider,
-        private readonly PqrHtmlFieldRepository $pqrHtmlFieldRepository,
     ) {
     }
 
@@ -36,7 +34,7 @@ class CiudadPqrMcpFieldLookupResolver implements McpFieldLookupResolverInterface
             return false;
         }
 
-        $htmlField = $this->pqrHtmlFieldRepository->find($field->getFkPqrHtmlField());
+        $htmlField = $field->getHtmlField();
 
         return $htmlField?->getType() === PqrHtmlField::TYPE_LOCALIDAD;
     }
