@@ -1,0 +1,11 @@
+doctrine:
+  orm:
+    entity_managers:
+      default:
+        mappings:
+          PqrBundle:
+            is_bundle: false
+            type: attribute
+            dir: "%kernel.project_dir%/src/Bundles/pqr/Entity"
+            prefix: 'App\Bundles\pqr\Entity'
+            alias: pqr
