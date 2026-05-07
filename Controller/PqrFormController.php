@@ -2,12 +2,14 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\Entity\PqrFormField;
+use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Service\PqrFormProvider;
 use App\Bundles\pqr\Services\FtPqrService;
-use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\PqrFormFieldService;
 use App\Bundles\pqr\Services\PqrFormService;
 use App\Bundles\pqr\Services\PqrService;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
@@ -98,19 +100,19 @@ class PqrFormController extends AbstractController
         Request $request,
         jsonResponseService $json,
         Connection $connection,
+        PqrFormFieldRepository $pqrFormFieldRepository,
+        EntityManagerInterface $em,
     ): Response {
         $connection->beginTransaction();
         try {
             foreach ($request->request->all('fieldOrder') as $record) {
-                $PqrFormFieldService = (new PqrFormField($record['id']))->getService();
-                $status = $PqrFormFieldService->save([
-                    'orden' => $record['order'] + PqrFormFieldService::INITIAL_ORDER,
-                ]);
-
-                if (!$status) {
+                $field = $pqrFormFieldRepository->find($record['id']);
+                if (!$field) {
                     throw new ValidationFailedException("No fue posible actualizar el orden");
                 }
+                $field->setOrden($record['order'] + PqrFormFieldService::INITIAL_ORDER);
             }
+            $em->flush();
 
             $connection->commit();
 
@@ -183,6 +185,8 @@ class PqrFormController extends AbstractController
         jsonResponseService $json,
         Connection $connection,
         PqrFormService $PqrFormService,
+        PqrFormFieldRepository $pqrFormFieldRepository,
+        EntityManagerInterface $em,
     ): Response {
         $connection->beginTransaction();
         try {
@@ -190,17 +194,15 @@ class PqrFormController extends AbstractController
                 ->createQueryBuilder()
                 ->update('pqr_form_fields')
                 ->set('show_report', 0)->executeStatement();
+            $em->clear();
 
-            if ($request->request->all('ids')) {
-                foreach ($request->request->all('ids') as $id) {
-                    $PqrFormFieldService = (new PqrFormField($id))->getService();
-                    if (!$PqrFormFieldService->save([
-                        'show_report' => 1,
-                    ])) {
-                        throw new ValidationFailedException("No fue posible actualizar");
-                    }
+            foreach ($request->request->all('ids') as $id) {
+                $field = $pqrFormFieldRepository->find($id);
+                if ($field) {
+                    $field->setShowReport(true);
                 }
             }
+            $em->flush();
 
             $PqrFormService->generaReport();
             $data = $PqrFormService->getDataPqrFormFields();

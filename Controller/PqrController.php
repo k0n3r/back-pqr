@@ -4,7 +4,9 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Entity\PqrFormField;
+use App\Bundles\pqr\Repository\PqrFormFieldRepository;
+use Saia\models\formatos\CamposFormato;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
@@ -107,19 +109,19 @@ class PqrController extends AbstractController
     public function contentDependencia(
         jsonResponseService $json,
         TranslatorInterface $translator,
+        PqrFormFieldRepository $pqrFormFieldRepository,
     ): Response {
         try {
             $field = PqrFormField::FIELD_NAME_SYS_DEPENDENCIA;
-            $PqrFormField = PqrFormField::findByAttributes([
-                'name' => $field,
-            ]);
+            $pqrFormField = $pqrFormFieldRepository->findOneBy(['name' => $field]);
 
-            if (!$PqrFormField || !$PqrFormField->fk_campos_formato) {
+            if (!$pqrFormField || !$pqrFormField->getFkCamposFormato()) {
                 $message = $translator->trans("no_esta_habilitado_campo_dependencia");
 
                 return $json->success(['enabled' => 0], $message);
             }
 
+            $camposFormato = new CamposFormato($pqrFormField->getFkCamposFormato());
             $allDependency = Dependencia::findAllByAttributes();
             $options[] = "<option value='' data-i18n='g.seleccione'>Por favor Seleccione ...</option>";
             foreach ($allDependency as $Dependencia) {
@@ -127,10 +129,10 @@ class PqrController extends AbstractController
             }
             $options = implode('', $options);
 
-            $i18n = "data-i18n='{$PqrFormField->getCamposFormato()->getFormat()->getKeyTranslatorAttribute()}.campos.{$PqrFormField->getCamposFormato()->nombre}'";
+            $i18n = "data-i18n='{$camposFormato->getFormat()->getKeyTranslatorAttribute()}.campos.{$camposFormato->nombre}'";
             $html = <<<HTML
                 <div class='form-group form-group-default form-group-default-select2'>
-                    <label $i18n>$PqrFormField->label</label>
+                    <label $i18n>{$pqrFormField->getLabel()}</label>
                     <div class='form-group'>
                         <select class='full-width' name='bqCampo_$field' id='$field'>
                            $options
