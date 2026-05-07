@@ -2,11 +2,13 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\models\PqrResponseTime;
+use App\Bundles\pqr\Repository\PqrResponseTimeRepository;
 use App\Bundles\pqr\Services\PqrFormService;
 use App\Exception\MissingParameterException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
+use Saia\models\formatos\CampoOpciones;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,18 +23,19 @@ class PqrResponseTimeController extends AbstractController
     public function timesForField(
         int $id,
         jsonResponseService $json,
+        PqrResponseTimeRepository $pqrResponseTimeRepository,
     ): Response {
         try {
-            $record = PqrResponseTime::findAllByAttributes([
-                'fk_campo_opciones' => $id,
-                'active'            => 1,
+            $records = $pqrResponseTimeRepository->findBy([
+                'fkCampoOpciones' => $id,
+                'active'          => true,
             ]);
 
             $data = [];
             $keys = [];
             $mayor = 0;
-            foreach ($record as $PqrResponseTime) {
-                $CampoOpcion = $PqrResponseTime->getCampoOpcionForSysTipo();
+            foreach ($records as $rt) {
+                $CampoOpcion = new CampoOpciones($rt->getFkSysTipo());
 
                 $key = (int)$CampoOpcion->orden;
                 $mayor = max($key, $mayor);
@@ -46,9 +49,9 @@ class PqrResponseTimeController extends AbstractController
                 }
 
                 $data[$orden] = [
-                    'id'   => $PqrResponseTime->getPK(),
+                    'id'   => $rt->getId(),
                     'text' => $CampoOpcion->valor,
-                    'dias' => (int)$PqrResponseTime->number_days ?: 1,
+                    'dias' => $rt->getNumberDays() ?: 1,
                 ];
             }
 
@@ -65,6 +68,8 @@ class PqrResponseTimeController extends AbstractController
         Connection $Connection,
         TranslatorInterface $translator,
         PqrFormService $pqrFormService,
+        PqrResponseTimeRepository $pqrResponseTimeRepository,
+        EntityManagerInterface $em,
     ): Response {
         $Connection->beginTransaction();
         try {
@@ -77,19 +82,17 @@ class PqrResponseTimeController extends AbstractController
                 'fk_field_time' => $id,
             ]);
 
-            $options = $Request->request->all('options');
             $i = 1;
-            foreach ($options as $option) {
-                $PqrResponseTimeService = (new PqrResponseTime($option['id']))->getService();
-                $PqrResponseTimeService->save([
-                    'number_days' => $option['dias'],
-                ]);
-                $CampoOpcionesService = $PqrResponseTimeService->getModel()->getCampoOpcionForSysTipo()->getService();
-                $CampoOpcionesService->save([
-                    'orden' => $i,
-                ]);
+            foreach ($Request->request->all('options') as $option) {
+                $rt = $pqrResponseTimeRepository->find($option['id']);
+                if ($rt) {
+                    $rt->setNumberDays((int)$option['dias']);
+                    $CampoOpcionesService = (new CampoOpciones($rt->getFkSysTipo()))->getService();
+                    $CampoOpcionesService->save(['orden' => $i]);
+                }
                 $i++;
             }
+            $em->flush();
 
             $Connection->commit();
 

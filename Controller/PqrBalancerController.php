@@ -2,11 +2,14 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\models\PqrBalancer;
+use App\Bundles\pqr\Entity\PqrBalancer as PqrBalancerEntity;
+use App\Bundles\pqr\Repository\PqrBalancerRepository;
 use App\Bundles\pqr\Services\PqrFormService;
 use App\Exception\MissingParameterException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
+use Saia\models\formatos\CampoOpciones;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,18 +24,19 @@ class PqrBalancerController extends AbstractController
     public function groupsForField(
         int $id,
         jsonResponseService $json,
+        PqrBalancerRepository $pqrBalancerRepository,
     ): Response {
         try {
-            $record = PqrBalancer::findAllByAttributes([
-                'fk_campo_opciones' => $id,
-                'active'            => 1,
+            $records = $pqrBalancerRepository->findBy([
+                'fkCampoOpciones' => $id,
+                'active'          => true,
             ]);
 
             $data = [];
             $defaultOrder = 0;
             $skipOrder = false;
-            foreach ($record as $PqrBalancer) {
-                $CampoOpcion = $PqrBalancer->getCampoOpcionForSysTipo();
+            foreach ($records as $pqrBalancer) {
+                $CampoOpcion = new CampoOpciones($pqrBalancer->getFkSysTipo());
 
                 if (!$defaultOrder) {
                     $skipOrder = is_null($CampoOpcion->orden);
@@ -41,9 +45,9 @@ class PqrBalancerController extends AbstractController
                 $order = $skipOrder ? $defaultOrder : (int)$CampoOpcion->orden;
 
                 $data[$order] = [
-                    'id'      => $PqrBalancer->getPK(),
+                    'id'      => $pqrBalancer->getId(),
                     'text'    => $CampoOpcion->valor,
-                    'groupId' => (int)$PqrBalancer->fk_grupo,
+                    'groupId' => $pqrBalancer->getFkGrupo(),
                 ];
                 $defaultOrder++;
             }
@@ -61,6 +65,8 @@ class PqrBalancerController extends AbstractController
         Connection $Connection,
         TranslatorInterface $translator,
         PqrFormService $pqrFormService,
+        PqrBalancerRepository $pqrBalancerRepository,
+        EntityManagerInterface $em,
     ): Response {
         $Connection->beginTransaction();
         try {
@@ -73,13 +79,13 @@ class PqrBalancerController extends AbstractController
                 'fk_field_balancer' => $id,
             ]);
 
-            $options = $Request->request->all('options');
-            foreach ($options as $option) {
-                $PqrBalancerService = (new PqrBalancer($option['id']))->getService();
-                $PqrBalancerService->save([
-                    'fk_grupo' => $option['groupId'],
-                ]);
+            foreach ($Request->request->all('options') as $option) {
+                $entity = $pqrBalancerRepository->find($option['id']);
+                if ($entity instanceof PqrBalancerEntity) {
+                    $entity->setFkGrupo((int)$option['groupId']);
+                }
             }
+            $em->flush();
 
             $Connection->commit();
 
