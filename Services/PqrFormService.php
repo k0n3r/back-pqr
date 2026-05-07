@@ -225,7 +225,7 @@ class PqrFormService extends ModelService
         $this->viewCalificacionPqr();
         $this->viewPqrTarea();
 
-        PqrService::activeGraphics();
+        (new PqrService())->activeGraphics();
         $this->activeInfoForDependency();
 
         return true;

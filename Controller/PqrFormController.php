@@ -24,10 +24,11 @@ class PqrFormController extends AbstractController
 {
     #[Route('/textFields', name: 'getTextFields', methods: ['GET'])]
     public function getTextFields(
-        jsonResponseService $json,
+        JsonResponseService $json,
+        PqrService $pqrService,
     ): Response {
         try {
-            return $json->success(PqrService::getTextFields());
+            return $json->success($pqrService->getTextFields());
         } catch (Throwable $th) {
             return $json->exception($th);
         }
