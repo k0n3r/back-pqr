@@ -2,7 +2,6 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\Bundles\pqr\Services\PqrNotyMessageService;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
@@ -22,18 +21,14 @@ class PqrNotyMessageController extends AbstractController
         Request $request,
         jsonResponseService $json,
         Connection $Connection,
+        PqrNotyMessageService $pqrNotyMessageService,
     ): Response {
         try {
             $Connection->beginTransaction();
 
-            $PqrNotyMessageService = (new PqrNotyMessage($id))->getService();
-            if (!$PqrNotyMessageService->save($request->request->all('data'))) {
-                throw new ValidationFailedException(
-                    $PqrNotyMessageService->getErrorManager()->getMessage(),
-                );
-            }
+            $pqrNotyMessageService->update($id, $request->request->all('data'));
 
-            $data = PqrNotyMessageService::getDataPqrNotyMessages();
+            $data = $pqrNotyMessageService->getDataPqrNotyMessages();
             $Connection->commit();
 
             return $json->success($data);

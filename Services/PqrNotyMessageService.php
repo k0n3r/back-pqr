@@ -15,6 +15,23 @@ class PqrNotyMessageService
     ) {
     }
 
+    public function update(int $id, array $data): void
+    {
+        $entity = $this->repository->find($id);
+        if (!$entity) {
+            return;
+        }
+
+        if (array_key_exists('subject', $data)) {
+            $entity->setSubject($data['subject']);
+        }
+        if (array_key_exists('message_body', $data)) {
+            $entity->setMessageBody($data['message_body']);
+        }
+
+        $this->repository->update();
+    }
+
     /**
      * Obtiene los registros para actualizar el cuerpo de las notificaciones
      *

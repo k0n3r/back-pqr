@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\models\PqrNotyMessage;
+use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
 use App\Bundles\pqr\Services\PqrNotyMessageService;
 use App\EventSubscriber\middlewares\IHasCaptcha;
 use App\Exception\MissingParameterException;
@@ -35,6 +35,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
         jsonResponseService $json,
         Connection $Connection,
         TranslatorInterface $translator,
+        PqrNotyMessageRepository $pqrNotyMessageRepository,
     ): Response {
         $Connection->beginTransaction();
         try {
@@ -70,10 +71,9 @@ class CaptchaController extends AbstractController implements IHasCaptcha
             $Documento = $SaveDocument->getDocument();
 
             $message = "<br/>Su solicitud ha sido generada con el número de radicado <strong>$Documento->numero</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
-            if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
-                'name' => 'ws_noty_radicado',
-            ])) {
-                $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $Documento->getFt());
+            $pqrNotyMessage = $pqrNotyMessageRepository->findByName('ws_noty_radicado');
+            if ($pqrNotyMessage) {
+                $message = PqrNotyMessageService::resolveVariables($pqrNotyMessage->getMessageBody() ?? '', $Documento->getFt());
             }
 
             $attributes = [
