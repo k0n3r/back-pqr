@@ -40,10 +40,13 @@ class ComponentsController extends AbstractController
     #[Route('/autocomplete/find', name: 'findDataForAutocomplete', methods: ['GET'])]
     public function findDataForAutocomplete(
         Request $request,
+        PqrService $pqrService,
     ): JsonResponse {
         try {
-            $data = (new PqrService())
-                ->findDataForAutocomplete($request->query->get('type'), $request->query->all('data'));
+            $data = $pqrService->findDataForAutocomplete(
+                $request->query->get('type'),
+                $request->query->all('data'),
+            );
         } catch (Throwable $th) {
             $data = [];
         }

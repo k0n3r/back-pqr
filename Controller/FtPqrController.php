@@ -112,6 +112,7 @@ class FtPqrController extends AbstractController
     public function getValuesForType(
         int $idft,
         JsonResponseService $json,
+        PqrService $pqrService,
     ): Response {
         try {
             $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
@@ -128,7 +129,7 @@ class FtPqrController extends AbstractController
 
             $data = [
                 'sys_tipo'                               => (int)$FtPqr->sys_tipo,
-                'sys_subtipo'                            => (new PqrService())->subTypeExist(
+                'sys_subtipo'                            => $pqrService->subTypeExist(
                 ) ? (int)$FtPqr->sys_subtipo : 0,
                 'sys_fecha_vencimiento'                  => $DateTime->format('Y-m-d'),
                 PqrFormField::FIELD_NAME_SYS_DEPENDENCIA => $idDependencia,

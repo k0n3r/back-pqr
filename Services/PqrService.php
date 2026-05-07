@@ -1,11 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Bundles\pqr\Services;
 
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\models\PqrHtmlField;
+use App\Bundles\pqr\Entity\PqrForm;
+use App\Bundles\pqr\Entity\PqrFormField;
+use App\Bundles\pqr\Entity\PqrHtmlField;
+use App\Bundles\pqr\Entity\PqrNotification;
+use App\Bundles\pqr\Repository\PqrFormFieldRepository;
+use App\Bundles\pqr\Repository\PqrFormRepository;
+use App\Bundles\pqr\Repository\PqrHtmlFieldRepository;
+use App\Bundles\pqr\Repository\PqrNotificationRepository;
+use App\Bundles\pqr\Service\PqrFormProvider;
 use App\Service\LegacyServiceLocator;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
 use RuntimeException;
 use Saia\models\formatos\CamposFormato;
@@ -17,69 +26,65 @@ class PqrService
 
     private ?bool $subTypeExist = null;
     private ?bool $dependencyExist = null;
-    private PqrForm $PqrForm;
-    private LegacyServiceLocator $serviceLocator;
 
-    public function __construct()
-    {
-        $this->PqrForm = PqrForm::getInstance();
-        $this->serviceLocator = LegacyServiceLocator::getInstance();
+    private readonly PqrFormProvider $pqrFormProvider;
+    private readonly PqrFormFieldRepository $pqrFormFieldRepository;
+    private readonly PqrHtmlFieldRepository $pqrHtmlFieldRepository;
+    private readonly Connection $connection;
+    private readonly LegacyServiceLocator $serviceLocator;
+
+    /**
+     * Acepta DI completo cuando es construido por el container Symfony.
+     * Si se construye con `new PqrService()` desde código legacy, resuelve sus
+     * dependencias vía LegacyServiceLocator. Eliminar el fallback cuando se
+     * complete el refactor de FtPqrService y desaparezca `new PqrService()`.
+     */
+    public function __construct(
+        ?PqrFormProvider $pqrFormProvider = null,
+        ?PqrFormFieldRepository $pqrFormFieldRepository = null,
+        ?PqrHtmlFieldRepository $pqrHtmlFieldRepository = null,
+        ?Connection $connection = null,
+        ?LegacyServiceLocator $serviceLocator = null,
+    ) {
+        $loc = $serviceLocator ?? LegacyServiceLocator::getInstance();
+        $em  = $loc->getEntityManager();
+
+        $this->pqrFormFieldRepository = $pqrFormFieldRepository ?? $em->getRepository(PqrFormField::class);
+        $this->pqrHtmlFieldRepository = $pqrHtmlFieldRepository ?? $em->getRepository(PqrHtmlField::class);
+        $this->connection             = $connection ?? $loc->getConnection();
+        $this->serviceLocator         = $loc;
+        $this->pqrFormProvider        = $pqrFormProvider ?? new PqrFormProvider(
+            $em->getRepository(PqrForm::class),
+            $this->pqrFormFieldRepository,
+            $em->getRepository(PqrNotification::class),
+        );
     }
 
     public function getPqrForm(): PqrForm
     {
-        return $this->PqrForm;
+        return $this->pqrFormProvider->get();
     }
 
-    /**
-     * Obtiene los datos
-     *
-     * @param string $type
-     * @param array $data
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2021
-     */
     public function findDataForAutocomplete(string $type, array $data): array
     {
-        $list = [];
-        $records = [];
-        switch ($type) {
-            case 'dependencia':
-                $records = $this->getListDependency($data);
-                break;
-            case 'pais':
-                $records = $this->getListPais($data);
-                break;
-            case 'departamento':
-                $records = $this->getListDepartamento($data);
-                break;
-        }
+        $records = match ($type) {
+            'dependencia' => $this->getListDependency($data),
+            'pais'        => $this->getListPais($data),
+            'departamento' => $this->getListDepartamento($data),
+            default       => [],
+        };
 
+        $list = [];
         foreach ($records as $row) {
-            $list[] = [
-                'id'   => $row['id'],
-                'text' => $row['nombre'],
-            ];
+            $list[] = ['id' => $row['id'], 'text' => $row['nombre']];
         }
 
         return $list;
     }
 
-    /**
-     * Obtiene una lista de dependencias
-     *
-     * @param array $data
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
     private function getListDependency(array $data): array
     {
-        $serviceLocator = LegacyServiceLocator::getInstance();
-        $Qb = $serviceLocator
-            ->getConnection()
-            ->createQueryBuilder()
+        $qb = $this->connection->createQueryBuilder()
             ->select('iddependencia as id,nombre')
             ->from('dependencia')
             ->where('estado=1')
@@ -87,28 +92,16 @@ class PqrService
             ->setFirstResult(0)
             ->setMaxResults(40);
 
-        if ($data['term']) {
-            $Qb
-                ->andWhere('nombre like :nombre')
-                ->setParameter('nombre', '%'.$data['term'].'%');
+        if ($data['term'] ?? null) {
+            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%' . $data['term'] . '%');
         }
 
-        return $Qb->executeQuery()->fetchAllAssociative();
+        return $qb->executeQuery()->fetchAllAssociative();
     }
 
-    /**
-     * Obtiene una lista de paises
-     *
-     * @param array $data
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
     private function getListPais(array $data): array
     {
-        $Qb = $this->serviceLocator
-            ->getConnection()
-            ->createQueryBuilder()
+        $qb = $this->connection->createQueryBuilder()
             ->select('idpais as id,nombre')
             ->from('pais')
             ->where('estado=1')
@@ -116,28 +109,16 @@ class PqrService
             ->setFirstResult(0)
             ->setMaxResults(40);
 
-        if ($data['term']) {
-            $Qb
-                ->andWhere('nombre like :nombre')
-                ->setParameter('nombre', '%'.$data['term'].'%');
+        if ($data['term'] ?? null) {
+            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%' . $data['term'] . '%');
         }
 
-        return $Qb->executeQuery()->fetchAllAssociative();
+        return $qb->executeQuery()->fetchAllAssociative();
     }
 
-    /**
-     * Obtiene una lista de departamentos
-     *
-     * @param array $data
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
     private function getListDepartamento(array $data): array
     {
-        $Qb = $this->serviceLocator
-            ->getConnection()
-            ->createQueryBuilder()
+        $qb = $this->connection->createQueryBuilder()
             ->select('iddepartamento as id,nombre')
             ->from('departamento')
             ->where('estado=1')
@@ -145,46 +126,29 @@ class PqrService
             ->setFirstResult(0)
             ->setMaxResults(40);
 
-        if ($data['idpais']) {
-            $Qb
-                ->andWhere('pais_idpais=:pais')
-                ->setParameter('pais', $data['idpais'], ParameterType::INTEGER);
+        if ($data['idpais'] ?? null) {
+            $qb->andWhere('pais_idpais=:pais')->setParameter('pais', $data['idpais'], ParameterType::INTEGER);
+        }
+        if ($data['term'] ?? null) {
+            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%' . $data['term'] . '%');
         }
 
-        if ($data['term']) {
-            $Qb
-                ->andWhere('nombre like :nombre')
-                ->setParameter('nombre', '%'.$data['term'].'%');
-        }
-
-        return $Qb->executeQuery()->fetchAllAssociative();
+        return $qb->executeQuery()->fetchAllAssociative();
     }
 
-
-    /**
-     * Obtiene los valores que se cargan en el modal
-     * de los tipos/subtipos/fecha vencimiento/dependencia
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
     public function getDataForEditTypes(): array
     {
         $subType = $this->getSubTypes();
 
         $records = (CamposFormato::findByAttributes([
             'nombre'            => PqrFormField::FIELD_NAME_SYS_TIPO,
-            'formato_idformato' => $this->getPqrForm()->fk_formato,
+            'formato_idformato' => $this->getPqrForm()->getFkFormato(),
         ]))->getCampoOpciones();
 
         $data = [];
         foreach ($records as $CampoOpciones) {
             if ($CampoOpciones->estado) {
-                $data[] = [
-                    'id'   => $CampoOpciones->getPK(),
-                    'text' => $CampoOpciones->valor,
-                ];
+                $data[] = ['id' => $CampoOpciones->getPK(), 'text' => $CampoOpciones->valor];
             }
         }
 
@@ -195,99 +159,54 @@ class PqrService
         ];
     }
 
-    /**
-     * Obtiene la informacion del subtype
-     *
-     * @return null|array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
     private function getSubTypes(): ?array
     {
         if (!$this->subTypeExist()) {
             return null;
         }
 
-        $PqrFormField = $this->getPqrForm()->getRow('sys_subtipo');
-        $records = $PqrFormField->getCamposFormato()->getCampoOpciones();
+        $field = $this->pqrFormProvider->getFieldByName('sys_subtipo');
+        if (!$field) {
+            return null;
+        }
+        $CamposFormato = new CamposFormato($field->getFkCamposFormato());
+        $records = $CamposFormato->getCampoOpciones();
 
         $data = [];
         foreach ($records as $CampoOpciones) {
             if ($CampoOpciones->estado) {
-                $data[] = [
-                    'id'   => $CampoOpciones->getPK(),
-                    'text' => $CampoOpciones->valor,
-                ];
+                $data[] = ['id' => $CampoOpciones->getPK(), 'text' => $CampoOpciones->valor];
             }
         }
 
         return $data;
     }
 
-    /**
-     * Verifica si el campo subtipo fue creado
-     *
-     * @return bool
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
     public function subTypeExist(): bool
     {
-        if ($this->subTypeExist !== null) {
-            return $this->subTypeExist;
-        }
-
-        $this->subTypeExist = (bool)$this->getPqrForm()->getRow('sys_subtipo');
-
-        return $this->subTypeExist;
+        return $this->subTypeExist ??= $this->pqrFormProvider->getFieldByName('sys_subtipo') !== null;
     }
 
-    /**
-     * Verifica si el campo dependencia fue creado
-     *
-     * @return bool
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
     public function dependencyExist(): bool
     {
-        if ($this->dependencyExist !== null) {
-            return $this->dependencyExist;
-        }
-
-        $this->dependencyExist = (bool)$this->getPqrForm()->getRow(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA);
-
-        return $this->dependencyExist;
+        return $this->dependencyExist ??= $this->pqrFormProvider->getFieldByName(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA) !== null;
     }
 
     /**
-     * Obtiene los campos que se podran utilizar para la
-     * carga automatica del destino de la respuesta
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
+     * Obtiene los campos Text disponibles para carga automática del destino de la respuesta
      */
-    public static function getTextFields(): array
+    public function getTextFields(): array
     {
-        $serviceLocator = LegacyServiceLocator::getInstance();
-        $Qb = $serviceLocator
-            ->getConnection()
-            ->createQueryBuilder()
-            ->select('ff.*')
-            ->from('pqr_form_fields', 'ff')
-            ->join('ff', 'pqr_html_fields', 'hf', 'ff.fk_pqr_html_field=hf.id')
-            ->where("hf.type_saia='Text' and ff.active=1")
-            ->orderBy('ff.orden');
+        $qb = $this->pqrFormFieldRepository->createQueryBuilder('ff')
+            ->innerJoin(\App\Bundles\pqr\Entity\PqrHtmlField::class, 'hf', 'WITH', 'ff.fkPqrHtmlField = hf.id')
+            ->where("hf.typeSaia = 'Text'")
+            ->andWhere('ff.active = true')
+            ->orderBy('ff.orden', 'ASC');
 
         $data = [];
-        if ($records = PqrFormField::findByQueryBuilder($Qb)) {
-            foreach ($records as $PqrFormField) {
-                $data[] = [
-                    'id'   => $PqrFormField->getPK(),
-                    'text' => $PqrFormField->label,
-                ];
-            }
+        foreach ($qb->getQuery()->getResult() as $field) {
+            /** @var PqrFormField $field */
+            $data[] = ['id' => $field->getId(), 'text' => $field->getLabel()];
         }
 
         return $data;
@@ -295,20 +214,19 @@ class PqrService
 
     /**
      * Obtiene los componentes para creacion del formato
-     *
-     * @return array
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
      */
-    public static function getDataHtmlFields(): array
+    public function getDataHtmlFields(): array
     {
         $data = [];
-
-        if ($records = PqrHtmlField::findAllByAttributes([
-            'active' => 1,
-        ])) {
-            foreach ($records as $PqrHtmlField) {
-                $data[] = $PqrHtmlField->getDataAttributes();
-            }
+        foreach ($this->pqrHtmlFieldRepository->findBy(['active' => true]) as $htmlField) {
+            $data[] = [
+                'id'        => $htmlField->getId(),
+                'label'     => $htmlField->getLabel(),
+                'type'      => $htmlField->getType(),
+                'type_saia' => $htmlField->getTypeSaia(),
+                'uniq'      => $htmlField->isUniq() ? 1 : 0,
+                'active'    => $htmlField->isActive() ? 1 : 0,
+            ];
         }
 
         return $data;
@@ -316,43 +234,33 @@ class PqrService
 
     /**
      * Activa los indicadores preestablecidos
-     *
-     * @return void
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
      */
-    public static function activeGraphics(): void
+    public function activeGraphics(): void
     {
-        $serviceLocator = LegacyServiceLocator::getInstance();
-        if (!$PantallaGrafico = PantallaGrafico::findByAttributes([
+        $PantallaGrafico = PantallaGrafico::findByAttributes([
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO,
-        ])) {
-            $trans = $serviceLocator->getTranslator()->trans("no_se_encuentra_pantalla_grafico");
+        ]);
+        if (!$PantallaGrafico) {
+            $trans = $this->serviceLocator->getTranslator()->trans('no_se_encuentra_pantalla_grafico');
             throw new RuntimeException($trans);
         }
 
-        $Qb = $serviceLocator
-            ->getConnection()
-            ->createQueryBuilder()
+        $qb = $this->connection->createQueryBuilder()
             ->update('grafico')
             ->where('fk_pantalla_grafico=:idpantalla')
             ->setParameter('idpantalla', $PantallaGrafico->getPK(), ParameterType::INTEGER);
 
-        $Qb2 = clone $Qb;
+        $qb2 = clone $qb;
+        $qb->set('estado', '1')->executeStatement();
 
-        $Qb->set('estado', 1)->executeStatement();
-
-        $PqrFormField = PqrFormField::findByAttributes([
+        $sysDep = $this->pqrFormFieldRepository->findOneBy([
             'name' => PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
         ]);
-
-        if (!$PqrFormField) {
-            $Qb2
-                ->set('estado', 0)
-                ->andWhere("nombre LIKE :graficoDependencia")
+        if (!$sysDep) {
+            $qb2->set('estado', '0')
+                ->andWhere('nombre LIKE :graficoDependencia')
                 ->setParameter('graficoDependencia', self::NAME_DEPENDENCY_GRAPH)
                 ->executeStatement();
         }
     }
-
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\models\PqrForm;
@@ -15,7 +17,8 @@ class StructureController extends AbstractController
 {
     #[Route('/dataViewIndex', name: 'dataViewIndex', methods: ['GET'])]
     public function getDataViewIndex(
-        jsonResponseService $json,
+        JsonResponseService $json,
+        PqrService $pqrService,
     ): Response {
         try {
             $PqrFormService = PqrForm::getInstance()->getService();
@@ -23,7 +26,7 @@ class StructureController extends AbstractController
             $data = [
                 'pqrForm'       => $PqrFormService->getDataPqrForm(),
                 'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),
-                'pqrHtmlFields' => PqrService::getDataHtmlFields(),
+                'pqrHtmlFields' => $pqrService->getDataHtmlFields(),
             ];
 
             return $json->success($data);
@@ -34,10 +37,11 @@ class StructureController extends AbstractController
 
     #[Route('/dataModalViewEditType', name: 'getDataEditType', methods: ['GET'])]
     public function getDataEditType(
-        jsonResponseService $json,
+        JsonResponseService $json,
+        PqrService $pqrService,
     ): Response {
         try {
-            $data = (new PqrService())->getDataForEditTypes();
+            $data = $pqrService->getDataForEditTypes();
 
             return $json->success($data);
         } catch (Throwable $th) {
