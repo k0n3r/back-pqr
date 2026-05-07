@@ -2,15 +2,19 @@
 
 namespace App\Bundles\pqr\Services;
 
+use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
+use App\Bundles\pqr\Entity\PqrHistory as PqrHistoryEntity;
+use App\Bundles\pqr\Entity\PqrNotyMessage as PqrNotyMessageEntity;
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrHistory;
-use App\Bundles\pqr\Services\models\PqrNotyMessage;
+use App\Bundles\pqr\Repository\PqrFormRepository;
+use App\Bundles\pqr\Repository\PqrHistoryRepository;
+use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
 use App\EventSubscriber\Mailer\MailSubscriber;
 use App\services\documento\DocumentoExpuestoService;
 use App\services\Gaufrette\Gaufrette\FilesystemForJson;
 use App\services\models\ModelService\ModelService;
+use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 use Saia\controllers\DistributionService;
 use Saia\controllers\documento\Transfer;
@@ -25,15 +29,12 @@ use Symfony\Component\Mime\Email;
 
 class FtPqrRespuestaService extends ModelService
 {
-    private PqrForm $PqrForm;
-
     public const int OPTION_EMAIL_RESPUESTA = 1;
     public const int OPTION_EMAIL_CALIFICACION = 2;
 
     public function __construct(FtPqrRespuesta $Ft)
     {
         parent::__construct($Ft);
-        $this->PqrForm = PqrForm::getInstance();
     }
 
     public function getModel(): FtPqrRespuesta
@@ -103,11 +104,17 @@ class FtPqrRespuestaService extends ModelService
             'descripcion'    => $description,
         ];
 
-        $PqrHistoryService = (new PqrHistory())->getService();
-        if (!$PqrHistoryService->save($history)) {
-            $this->getErrorManager()->setMessage(
-                $PqrHistoryService->getErrorManager()->getMessage(),
-            );
+        $entity = new PqrHistoryEntity();
+        $entity->setIdft((int)$history['idft']);
+        $entity->setFkFuncionario((int)$history['fk_funcionario']);
+        $entity->setTipo((int)$history['tipo']);
+        $entity->setIdfk((int)$history['idfk']);
+        $entity->setDescripcion((string)$history['descripcion']);
+
+        try {
+            $this->getPqrHistoryRepository()->create($entity);
+        } catch (\Throwable $e) {
+            $this->getErrorManager()->setMessage($e->getMessage());
 
             return false;
         }
@@ -213,14 +220,13 @@ class FtPqrRespuestaService extends ModelService
         $FtPqr = $FtPqrRespuesta->getFtPqr();
         $DocumentoPqr = $FtPqr->getDocument();
 
-        $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$FtPqrRespuesta->PqrForm->label} con número de radicado $DocumentoPqr->numero.<br/><br/>";
-        $subject = "Respuesta solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero";
+        $pqrFormLabel = $this->getPqrFormEntity()->getLabel();
+        $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$pqrFormLabel} con número de radicado $DocumentoPqr->numero.<br/><br/>";
+        $subject = "Respuesta solicitud de {$pqrFormLabel} # $DocumentoPqr->numero";
 
-        if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
-            'name' => 'f2_email_respuesta',
-        ])) {
-            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $FtPqr);
-            $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $FtPqr);
+        if ($notyMessage = $this->getPqrNotyMessageRepository()->findByName('f2_email_respuesta')) {
+            $message = PqrNotyMessageService::resolveVariables($notyMessage->getMessageBody() ?? '', $FtPqr);
+            $subject = PqrNotyMessageService::resolveVariables($notyMessage->getSubject() ?? '', $FtPqr);
         }
 
         if ($FtPqrRespuesta->sol_encuesta) {
@@ -264,7 +270,7 @@ class FtPqrRespuestaService extends ModelService
             'option'        => self::OPTION_EMAIL_RESPUESTA,
             'idft'          => $this->getModel()->getPK(),
             'descripcion'   => $description,
-            'tipo'          => PqrHistory::TIPO_NOTIFICACION,
+            'tipo'          => PqrHistoryEntity::TIPO_NOTIFICACION,
         ];
 
         $email->getHeaders()->addTextHeader(
@@ -347,7 +353,7 @@ class FtPqrRespuestaService extends ModelService
         $description = "Se solicita la calificación de la ($nameFormat) # {$this->getModel()->getDocument()->numero} al e-mail: ($email)";
 
         $EmailSaia = (new Email())
-            ->subject("Queremos conocer tu opinión! (Solicitud de {$this->PqrForm->label} # $DocumentoPqr->numero)")
+            ->subject("Queremos conocer tu opinión! (Solicitud de {$this->getPqrFormEntity()->getLabel()} # $DocumentoPqr->numero)")
             ->html($message)
             ->to(new Address($tercero->getEmail(), $tercero->getName()));
 
@@ -357,7 +363,7 @@ class FtPqrRespuestaService extends ModelService
             'option'        => self::OPTION_EMAIL_CALIFICACION,
             'idft'          => $this->getModel()->getPK(),
             'descripcion'   => $description,
-            'tipo'          => PqrHistory::TIPO_CALIFICACION,
+            'tipo'          => PqrHistoryEntity::TIPO_CALIFICACION,
         ];
 
         $EmailSaia->getHeaders()->addTextHeader(
@@ -427,6 +433,26 @@ class FtPqrRespuestaService extends ModelService
                 }
             }
         }
+    }
+
+    private function getEntityManager(): EntityManagerInterface
+    {
+        return $this->serviceLocator->getEntityManager();
+    }
+
+    private function getPqrFormEntity(): PqrFormEntity
+    {
+        return $this->getEntityManager()->getRepository(PqrFormEntity::class)->findActiveOrFail();
+    }
+
+    private function getPqrHistoryRepository(): PqrHistoryRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrHistoryEntity::class);
+    }
+
+    private function getPqrNotyMessageRepository(): PqrNotyMessageRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrNotyMessageEntity::class);
     }
 
 }
