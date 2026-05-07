@@ -5,9 +5,11 @@ namespace App\Bundles\pqr\Services;
 use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
 use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
 use App\Bundles\pqr\Entity\PqrNotification as PqrNotificationEntity;
+use App\Bundles\pqr\Entity\PqrNotyMessage as PqrNotyMessageEntity;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrNotificationRepository;
+use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
@@ -145,7 +147,7 @@ class PqrFormService extends ModelService
             'pqrForm'             => $this->getDataPqrForm(),
             'pqrFormFields'       => $this->getDataPqrFormFields(),
             'pqrNotifications'    => $this->getDataPqrNotifications(),
-            'optionsNotyMessages' => PqrNotyMessageService::getDataPqrNotyMessages(),
+            'optionsNotyMessages' => $this->getDataPqrNotyMessages(),
             'responseTimeOptions' => $options,
             'balancerOptions'     => $options,
             'groupOptions'        => $this->getGroupsForBalancer(),
@@ -990,5 +992,19 @@ class PqrFormService extends ModelService
     private function getPqrNotificationRepository(): PqrNotificationRepository
     {
         return $this->getEntityManager()->getRepository(PqrNotificationEntity::class);
+    }
+
+    private function getDataPqrNotyMessages(): array
+    {
+        return array_map(static fn ($msg) => [
+            'text'  => $msg->getLabel(),
+            'value' => [
+                'id'           => $msg->getId(),
+                'description'  => $msg->getDescription(),
+                'subject'      => $msg->getSubject(),
+                'message_body' => $msg->getMessageBody(),
+                'type'         => $msg->getType(),
+            ],
+        ], $this->getEntityManager()->getRepository(PqrNotyMessageEntity::class)->findBy(['active' => true]));
     }
 }
