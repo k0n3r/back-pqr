@@ -5,13 +5,22 @@ namespace App\Bundles\pqr\Services;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Bundles\pqr\Services\models\PqrBackup;
-use App\Bundles\pqr\Services\models\PqrBalancer;
+use App\Bundles\pqr\Entity\PqrBackup as PqrBackupEntity;
+use App\Bundles\pqr\Entity\PqrBalancer as PqrBalancerEntity;
+use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
+use App\Bundles\pqr\Entity\PqrHistory as PqrHistoryEntity;
+use App\Bundles\pqr\Entity\PqrNotyMessage as PqrNotyMessageEntity;
+use App\Bundles\pqr\Entity\PqrResponseTime as PqrResponseTimeEntity;
+use App\Bundles\pqr\Repository\PqrBackupRepository;
+use App\Bundles\pqr\Repository\PqrBalancerRepository;
+use App\Bundles\pqr\Repository\PqrFormFieldRepository;
+use App\Bundles\pqr\Repository\PqrHistoryRepository;
+use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
+use App\Bundles\pqr\Repository\PqrResponseTimeRepository;
 use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\models\PqrHistory;
-use App\Bundles\pqr\Services\models\PqrNotyMessage;
-use App\Bundles\pqr\Services\models\PqrResponseTime;
+use Doctrine\ORM\EntityManagerInterface;
+use Saia\models\Funcionario;
 use App\EventSubscriber\Mailer\MailSubscriber;
 use App\services\Gaufrette\Gaufrette\FilesystemForJson;
 use App\services\models\ModelService\ModelService;
@@ -86,7 +95,7 @@ class FtPqrService extends ModelService
      */
     public function getPqrForm(): PqrForm
     {
-        return $this->getPqrService()->getPqrForm();
+        return PqrForm::getInstance();
     }
 
     /**
@@ -120,23 +129,20 @@ class FtPqrService extends ModelService
      */
     public function createBackup(): bool
     {
-        $data = [
-            'fk_documento' => $this->getModel()->documento_iddocumento,
-            'fk_pqr'       => $this->getModel()->getPK(),
-            'data_json'    => json_encode($this->getDataRow()),
-        ];
-
-        $PqrBackup = PqrBackup::findByAttributes([
-            'fk_documento' => $this->getModel()->documento_iddocumento,
-            'fk_pqr'       => $this->getModel()->getPK(),
+        $backup = $this->getPqrBackupRepository()->findOneBy([
+            'fkDocumento' => (int)$this->getModel()->documento_iddocumento,
+            'fkPqr'       => (int)$this->getModel()->getPK(),
         ]);
 
-        $PqrBackupService = $PqrBackup ? $PqrBackup->getService() : (new PqrBackup())->getService();
-        if (!$PqrBackupService->save($data)) {
-            $this->getErrorManager()->setMessage("No fue posible registrar el backup");
-
-            return false;
+        if (!$backup) {
+            $backup = new PqrBackupEntity();
+            $backup->setFkDocumento((int)$this->getModel()->documento_iddocumento);
+            $backup->setFkPqr((int)$this->getModel()->getPK());
+            $this->getEntityManager()->persist($backup);
         }
+
+        $backup->setDataJson($this->getDataRow());
+        $this->getEntityManager()->flush();
 
         return true;
     }
@@ -279,15 +285,16 @@ class FtPqrService extends ModelService
      */
     protected function getDays(): int
     {
-        if ($PqrResponseTime = PqrResponseTime::findByAttributes([
-            'fk_campo_opciones' => $this->getIdFromResponseTimes(),
-            'fk_sys_tipo'       => $this->getModel()->sys_tipo,
-        ])) {
-            return $PqrResponseTime->number_days ?: 1;
+        $pqrRt = $this->getPqrResponseTimeRepository()->findOneBy([
+            'fkCampoOpciones' => $this->getIdFromResponseTimes(),
+            'fkSysTipo'       => $this->getModel()->sys_tipo,
+        ]);
+        if ($pqrRt) {
+            return $pqrRt->getNumberDays() ?: 1;
         }
 
         $history = [
-            'tipo'        => PqrHistory::TIPO_ERROR_DIAS_VENCIMIENTO,
+            'tipo'        => PqrHistoryEntity::TIPO_ERROR_DIAS_VENCIMIENTO,
             'descripcion' => "No se configuro dias de vencimiento para las opciones seleccionadas por el cliente",
         ];
 
@@ -298,12 +305,14 @@ class FtPqrService extends ModelService
 
     public function getFuncionarioFromBalacer(): ?VfuncionarioDc
     {
-        if ($PqrBalancer = PqrBalancer::findByAttributes([
-            'fk_campo_opciones' => $this->getIdFromBalancer(),
-            'fk_sys_tipo'       => $this->getModel()->sys_tipo,
-        ])) {
-            if ($Grupo = $PqrBalancer->getGrupo()) {
-                return $this->getFuncionarioFromGroup($Grupo);
+        $pqrBalancer = $this->getPqrBalancerRepository()->findOneBy([
+            'fkCampoOpciones' => $this->getIdFromBalancer(),
+            'fkSysTipo'       => $this->getModel()->sys_tipo,
+        ]);
+        if ($pqrBalancer) {
+            $fkGrupo = $pqrBalancer->getFkGrupo();
+            if ($fkGrupo > 0) {
+                return $this->getFuncionarioFromGroup(new Grupo($fkGrupo));
             }
         }
 
@@ -320,7 +329,8 @@ class FtPqrService extends ModelService
     protected function getIdFromResponseTimes(): int
     {
         $CamposFormato = $this->getPqrForm()->getCampoFormatoForFieldTime();
-        if ($CamposFormato->getPK() == PqrFormField::getSysTipoField()->fk_campos_formato) {
+        $sysTipoField = $this->getPqrFormFieldRepository()->findSysTipo();
+        if ($CamposFormato->getPK() == ($sysTipoField?->getFkCamposFormato() ?? 0)) {
             return -1;
         }
         $nameField = $CamposFormato->nombre;
@@ -331,7 +341,8 @@ class FtPqrService extends ModelService
     protected function getIdFromBalancer(): int
     {
         $CamposFormato = $this->getPqrForm()->getCampoFormatoForFieldBalancer();
-        if ($CamposFormato->getPK() == PqrFormField::getSysTipoField()->fk_campos_formato) {
+        $sysTipoField = $this->getPqrFormFieldRepository()->findSysTipo();
+        if ($CamposFormato->getPK() == ($sysTipoField?->getFkCamposFormato() ?? 0)) {
             return -1;
         }
         $nameField = $CamposFormato->nombre;
@@ -414,13 +425,17 @@ class FtPqrService extends ModelService
     {
         $rows = [];
 
-        foreach ($this->getHistory() as $PqrHistory) {
-            $rows[] = array_merge(
-                $PqrHistory->getDataAttributes(),
-                [
-                    'nombre_funcionario' => $PqrHistory->getFuncionario()->getName(),
-                ],
-            );
+        foreach ($this->getHistory() as $pqrHistory) {
+            $rows[] = [
+                'id'                 => $pqrHistory->getId(),
+                'fecha'              => $pqrHistory->getFecha()->format('Y-m-d H:i:s'),
+                'idft'               => $pqrHistory->getIdft(),
+                'fk_funcionario'     => $pqrHistory->getFkFuncionario(),
+                'tipo'               => $pqrHistory->getTipo(),
+                'idfk'               => $pqrHistory->getIdfk(),
+                'descripcion'        => $pqrHistory->getDescripcion(),
+                'nombre_funcionario' => (new Funcionario($pqrHistory->getFkFuncionario()))->getName(),
+            ];
         }
 
         return $rows;
@@ -444,7 +459,7 @@ class FtPqrService extends ModelService
         $rows[] = $this->getInitialRequestData();
 
         foreach ($records as $PqrHistory) {
-            $action = DateController::convertDate($PqrHistory->fecha, 'Y-m-d');
+            $action = $PqrHistory->getFecha()->format('Y-m-d');
             $actionDate = new DateTime($action);
 
             if ($actionDate > $expirationDate && !$addExpiration) {
@@ -452,7 +467,7 @@ class FtPqrService extends ModelService
                 $addExpiration = true;
             }
 
-            if ($row = $PqrHistory->getService()->getHistoryForTimeline()) {
+            if ($row = $this->getPqrHistoryService()->getHistoryForTimeline($PqrHistory)) {
                 $rows[] = $row;
             }
         }
@@ -530,11 +545,9 @@ class FtPqrService extends ModelService
         El seguimiento lo puede realizar escaneando el código QR o consultando con el número de consecutivo asignado";
         $subject = "Solicitud de {$this->getPqrForm()->label} # {$this->getDocument()->numero}";
 
-        if ($PqrNotyMessage = PqrNotyMessage::findByAttributes([
-            'name' => 'f1_email_solicitante',
-        ])) {
-            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->message_body, $this->getModel());
-            $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->subject, $this->getModel());
+        if ($PqrNotyMessage = $this->getPqrNotyMessageRepository()->findByName('f1_email_solicitante')) {
+            $message = PqrNotyMessageService::resolveVariables($PqrNotyMessage->getMessageBody() ?? '', $this->getModel());
+            $subject = PqrNotyMessageService::resolveVariables($PqrNotyMessage->getSubject() ?? '', $this->getModel());
         }
 
         $email = (new Email());
@@ -692,14 +705,10 @@ class FtPqrService extends ModelService
         foreach ($config['tercero'] as $row) {
             $value = [];
             foreach ($row['value'] as $idPqrFormField) {
-                $PqrFormField = PqrFormField::findByAttributes([
-                    'id' => $idPqrFormField,
-                ], [
-                    'name',
-                ]);
+                $pqrFormFieldEntity = $this->getPqrFormFieldRepository()->find($idPqrFormField);
 
-                if ($PqrFormField) {
-                    $name = $PqrFormField->name;
+                if ($pqrFormFieldEntity) {
+                    $name = $pqrFormFieldEntity->getName();
                     $value[] = trim($this->getModel()->$name);
                 }
             }
@@ -852,7 +861,7 @@ class FtPqrService extends ModelService
         ], $text);
 
         $history = [
-            'tipo'        => PqrHistory::TIPO_CAMBIO_ESTADO,
+            'tipo'        => PqrHistoryEntity::TIPO_CAMBIO_ESTADO,
             'descripcion' => $text,
         ];
 
@@ -873,7 +882,7 @@ class FtPqrService extends ModelService
         }
 
         $history = [
-            'tipo'        => PqrHistory::TIPO_CAMBIO_ESTADO,
+            'tipo'        => PqrHistoryEntity::TIPO_CAMBIO_ESTADO,
             'descripcion' => "Se actualiza la oportunidad en la respuesta de : $oldOportuno a $newOportuno",
         ];
 
@@ -1023,18 +1032,16 @@ class FtPqrService extends ModelService
     }
 
     /**
-     * Obtiene el historial de cambios de la PQR
-     *
-     * @param string $order
-     * @return PqrHistory[]
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
+     * @return PqrHistoryEntity[]
      */
     public function getHistory(string $order = 'id desc'): array
     {
-        return PqrHistory::findAllByAttributes([
-            'idft' => $this->getModel()->getPK(),
-        ], [], $order);
+        [$field, $dir] = array_pad(explode(' ', trim($order), 2), 2, 'DESC');
+
+        return $this->getPqrHistoryRepository()->findBy(
+            ['idft' => $this->getModel()->getPK()],
+            [$field => strtoupper($dir)],
+        );
     }
 
     /**
@@ -1086,19 +1093,10 @@ class FtPqrService extends ModelService
             }
             $this->getModel()->save();
 
-            $history = [
-                'fecha'          => date('Y-m-d H:i:s'),
-                'idft'           => $this->getModel()->getPK(),
-                'fk_funcionario' => $this->getFuncionario()->getPK(),
-                'tipo'           => PqrHistory::TIPO_CAMBIO_ESTADO,
-                'idfk'           => 0,
-                'descripcion'    => "Se actualiza el estado de la solicitud de $actualStatus a $newStatus. $observations",
-            ];
-
-            $PqrHistoryService = (new PqrHistory())->getService();
-            if (!$PqrHistoryService->save($history)) {
-                $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
-
+            if (!$this->saveHistory([
+                'tipo'        => PqrHistoryEntity::TIPO_CAMBIO_ESTADO,
+                'descripcion' => "Se actualiza el estado de la solicitud de $actualStatus a $newStatus. $observations",
+            ])) {
                 return false;
             }
         }
@@ -1174,20 +1172,11 @@ class FtPqrService extends ModelService
             $this->getDocument()->fecha_limite = $DateTimeForType->format('Y-m-d H:i:s');
             $this->getDocument()->save();
 
-            $history = [
-                'fecha'          => date('Y-m-d H:i:s'),
-                'idft'           => $this->getModel()->getPK(),
-                'fk_funcionario' => $this->getFuncionario()->getPK(),
-                'tipo'           => PqrHistory::TIPO_CAMBIO_VENCIMIENTO,
-                'idfk'           => 0,
-                'descripcion'    => "Se actualiza la fecha de vencimiento a ".
+            if (!$this->saveHistory([
+                'tipo'        => PqrHistoryEntity::TIPO_CAMBIO_VENCIMIENTO,
+                'descripcion' => "Se actualiza la fecha de vencimiento a " .
                     $DateTimeForType->format(DateController::PUBLIC_DATE_FORMAT),
-            ];
-
-            $PqrHistoryService = (new PqrHistory())->getService();
-            if (!$PqrHistoryService->save($history)) {
-                $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
-
+            ])) {
                 return false;
             }
         }
@@ -1361,15 +1350,15 @@ class FtPqrService extends ModelService
     protected function saveHistory(array $data): bool
     {
         $history = array_merge([
-            'fecha'          => date('Y-m-d H:i:s'),
             'idft'           => $this->getModel()->getPK(),
             'fk_funcionario' => $this->getFuncionario()->getPK(),
             'idfk'           => 0,
         ], $data);
 
-        $PqrHistoryService = (new PqrHistory())->getService();
-        if (!$PqrHistoryService->save($history)) {
-            $this->getErrorManager()->setMessage($PqrHistoryService->getErrorManager()->getMessage());
+        try {
+            $this->getPqrHistoryService()->create($history);
+        } catch (\Throwable $e) {
+            $this->getErrorManager()->setMessage($e->getMessage());
 
             return false;
         }
@@ -1447,6 +1436,46 @@ class FtPqrService extends ModelService
             ->where('idfuncionario=:idfuncionario')
             ->setParameter('idfuncionario', $idfuncionario, ParameterType::INTEGER)
             ->executeQuery()->fetchOne();
+    }
+
+    private function getEntityManager(): EntityManagerInterface
+    {
+        return $this->serviceLocator->getEntityManager();
+    }
+
+    private function getPqrBackupRepository(): PqrBackupRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrBackupEntity::class);
+    }
+
+    private function getPqrBalancerRepository(): PqrBalancerRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrBalancerEntity::class);
+    }
+
+    private function getPqrFormFieldRepository(): PqrFormFieldRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrFormFieldEntity::class);
+    }
+
+    private function getPqrHistoryRepository(): PqrHistoryRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrHistoryEntity::class);
+    }
+
+    private function getPqrNotyMessageRepository(): PqrNotyMessageRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrNotyMessageEntity::class);
+    }
+
+    private function getPqrResponseTimeRepository(): PqrResponseTimeRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrResponseTimeEntity::class);
+    }
+
+    private function getPqrHistoryService(): PqrHistoryService
+    {
+        return new PqrHistoryService($this->getPqrHistoryRepository());
     }
 
 }
