@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Command;
 
-use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Entity\PqrFormField;
 use App\Command\GenerateIndexesCommand;
 use Symfony\Component\Console\Attribute\AsCommand;
 

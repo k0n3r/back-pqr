@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\IA\Service\Tools;
 
 use App\Bundles\pqr\IA\Service\PqrIaGuard;
-use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Entity\PqrFormField;
 use Doctrine\DBAL\Connection;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
