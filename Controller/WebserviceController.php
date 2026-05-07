@@ -2,6 +2,7 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,12 +20,14 @@ class WebserviceController extends AbstractController
         jsonResponseService $json,
         Connection $Connection,
         TranslatorInterface $translator,
+        PqrNotyMessageRepository $pqrNotyMessageRepository,
     ): Response {
         return (new CaptchaController())->saveDocument(
             $Request,
             $json,
             $Connection,
             $translator,
+            $pqrNotyMessageRepository,
         );
     }
 }

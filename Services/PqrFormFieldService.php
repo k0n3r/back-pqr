@@ -31,7 +31,7 @@ class PqrFormFieldService extends ModelService
      * Bandera que indica el numero minimo donde empezara el orden de los campos
      */
     public const int INITIAL_ORDER = 2;
-    public const int DEFAULT_DAY = 15;
+    public const int DEFAULT_DAY   = 15;
 
     private array $CampoOpcionesSysTipo = [];
 
@@ -89,7 +89,7 @@ class PqrFormFieldService extends ModelService
             'orden'             => $fieldCount + self::INITIAL_ORDER,
             'active'            => 1,
         ];
-        $attributes = array_merge($defaultFields, $attributes);
+        $attributes    = array_merge($defaultFields, $attributes);
 
         if (isset($attributes['setting'])) {
             $attributes['setting'] = json_encode($attributes['setting']);
@@ -140,6 +140,7 @@ class PqrFormFieldService extends ModelService
      * Actualiza el estado(active) del campo
      *
      * @param int $status
+     *
      * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -179,7 +180,7 @@ class PqrFormFieldService extends ModelService
     private function isFieldTime(): bool
     {
         $idCampoFormato = $this->getModel()->fk_campos_formato;
-        $idField = $this->getModel()->getPqrForm()->fk_field_time;
+        $idField        = $this->getModel()->getPqrForm()->fk_field_time;
 
         return $idCampoFormato == $idField;
     }
@@ -188,7 +189,8 @@ class PqrFormFieldService extends ModelService
      * genera un nombre unico para el campo del formulario
      *
      * @param string $label
-     * @param int $pref
+     * @param int    $pref
+     *
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -222,6 +224,7 @@ class PqrFormFieldService extends ModelService
      * Palabras reservadas que no se deben usar
      *
      * @param string $label
+     *
      * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2021
@@ -259,15 +262,16 @@ class PqrFormFieldService extends ModelService
      * Valida si la columna existe en la DB
      *
      * @param string $name
+     *
      * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2021
      */
     private function columnExistsDB(string $name): bool
     {
-        $connection = $this->serviceLocator->getConnection();
+        $connection    = $this->serviceLocator->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $table = $schemaManager->introspectTable('ft_pqr');
+        $table         = $schemaManager->introspectTable('ft_pqr');
 
         return $table->hasColumn($name);
     }
@@ -277,6 +281,7 @@ class PqrFormFieldService extends ModelService
      * Retorna listado de valores para los campos autocompletar
      *
      * @param array $data
+     *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -304,7 +309,8 @@ class PqrFormFieldService extends ModelService
      * del campo
      *
      * @param object $ObjSettings
-     * @param array $data
+     * @param array  $data
+     *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -343,7 +349,7 @@ class PqrFormFieldService extends ModelService
 
         if (!$ObjSettings->allDependency) {
             $records = $ObjSettings->options;
-            $ids = [];
+            $ids     = [];
             foreach ($records as $row) {
                 $ids[] = $row->id;
             }
@@ -360,7 +366,8 @@ class PqrFormFieldService extends ModelService
      * del campo
      *
      * @param object $ObjSettings
-     * @param array $data
+     * @param array  $data
+     *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -423,7 +430,7 @@ class PqrFormFieldService extends ModelService
     {
         $PqrFormField = $this->getModel();
         $CampoFormato = $PqrFormField->getCamposFormato();
-        $llave = 0;
+        $llave        = 0;
         foreach ($CampoFormato->getCampoOpciones() as $CampoOpciones) {
             if ((int)$CampoOpciones->llave > $llave) {
                 $llave = (int)$CampoOpciones->llave;
@@ -448,7 +455,7 @@ class PqrFormFieldService extends ModelService
                 ]);
                 $id = $CampoOpcionesService->getModel()->llave;
             } else {
-                $id = $llave + 1;
+                $id    = $llave + 1;
                 $llave = $id;
 
                 $CampoOpcionesService = (new CampoOpciones())->getService();
@@ -460,7 +467,7 @@ class PqrFormFieldService extends ModelService
                 ]);
             }
 
-            $data[] = [
+            $data[]   = [
                 'llave' => $id,
                 'item'  => $option->text,
             ];
@@ -502,9 +509,10 @@ class PqrFormFieldService extends ModelService
     private function addEditPqrResponseTimesForSysTipo(): void
     {
         $sysTipoOptions = $this->getSysTipoOptions();
-        $em = $this->getEntityManager();
+        $em             = $this->getEntityManager();
 
-        $this->serviceLocator->getConnection()->createQueryBuilder()
+        $this->serviceLocator
+            ->getConnection()->createQueryBuilder()
             ->update('pqr_response_times')
             ->set('active', ':active')
             ->where('fk_campo_opciones = :fkCampoOpciones')
@@ -525,25 +533,25 @@ class PqrFormFieldService extends ModelService
 
             if ($pqrRt) {
                 $pqrRt->setActive(true);
-                $em->flush();
             } else {
                 $pqrRt = (new PqrResponseTimeEntity())
                     ->setFkCampoOpciones(-1)
-                    ->setFkSysTipo((int)$Option->getPK())
+                    ->setFkSysTipo($Option->getPK())
                     ->setNumberDays($this->getDaysForSystipo($Option->valor))
                     ->setActive(true);
                 $em->persist($pqrRt);
-                $em->flush();
             }
+            $em->flush();
         }
     }
 
     private function addEditPqrBalancerForSysTipo(): void
     {
         $sysTipoOptions = $this->getSysTipoOptions();
-        $em = $this->getEntityManager();
+        $em             = $this->getEntityManager();
 
-        $this->serviceLocator->getConnection()->createQueryBuilder()
+        $this->serviceLocator
+            ->getConnection()->createQueryBuilder()
             ->update('pqr_balancer')
             ->set('active', ':active')
             ->where('fk_campo_opciones = :fkCampoOpciones')
@@ -564,16 +572,15 @@ class PqrFormFieldService extends ModelService
 
             if ($pqrBalancer) {
                 $pqrBalancer->setActive(true);
-                $em->flush();
             } else {
                 $pqrBalancer = (new PqrBalancerEntity())
                     ->setFkCampoOpciones(-1)
-                    ->setFkSysTipo((int)$Option->getPK())
+                    ->setFkSysTipo($Option->getPK())
                     ->setFkGrupo(-1)
                     ->setActive(true);
                 $em->persist($pqrBalancer);
-                $em->flush();
             }
+            $em->flush();
         }
     }
 
@@ -586,16 +593,17 @@ class PqrFormFieldService extends ModelService
     private function addEditPqrResponseTimesForOtherFields(): void
     {
         $sysTipoOptions = $this->getSysTipoOptions();
-        $records = $this->getModel()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
-        $em = $this->getEntityManager();
+        $records        = $this->getModel()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
+        $em             = $this->getEntityManager();
 
         foreach ($records as $CampoOpciones) {
-            $this->serviceLocator->getConnection()->createQueryBuilder()
+            $this->serviceLocator
+                ->getConnection()->createQueryBuilder()
                 ->update('pqr_response_times')
                 ->set('active', ':active')
                 ->where('fk_campo_opciones = :fkCampoOpciones')
                 ->setParameter('active', 0, ParameterType::INTEGER)
-                ->setParameter('fkCampoOpciones', (int)$CampoOpciones->getPK(), ParameterType::INTEGER)
+                ->setParameter('fkCampoOpciones', $CampoOpciones->getPK(), ParameterType::INTEGER)
                 ->executeStatement();
             $em->clear();
 
@@ -609,22 +617,21 @@ class PqrFormFieldService extends ModelService
                 }
 
                 $pqrRt = $this->getPqrResponseTimeRepository()->findOneBy([
-                    'fkCampoOpciones' => (int)$CampoOpciones->getPK(),
+                    'fkCampoOpciones' => $CampoOpciones->getPK(),
                     'fkSysTipo'       => $Option->getPK(),
                 ]);
 
                 if ($pqrRt) {
                     $pqrRt->setActive(true);
-                    $em->flush();
                 } else {
                     $pqrRt = (new PqrResponseTimeEntity())
-                        ->setFkCampoOpciones((int)$CampoOpciones->getPK())
-                        ->setFkSysTipo((int)$Option->getPK())
+                        ->setFkCampoOpciones($CampoOpciones->getPK())
+                        ->setFkSysTipo($Option->getPK())
                         ->setNumberDays($this->getDaysForSystipo($Option->valor))
                         ->setActive(true);
                     $em->persist($pqrRt);
-                    $em->flush();
                 }
+                $em->flush();
             }
         }
     }
@@ -632,16 +639,17 @@ class PqrFormFieldService extends ModelService
     private function addEditPqrBalancerForOtherFields(): void
     {
         $sysTipoOptions = $this->getSysTipoOptions();
-        $records = $this->getModel()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
-        $em = $this->getEntityManager();
+        $records        = $this->getModel()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
+        $em             = $this->getEntityManager();
 
         foreach ($records as $CampoOpciones) {
-            $this->serviceLocator->getConnection()->createQueryBuilder()
+            $this->serviceLocator
+                ->getConnection()->createQueryBuilder()
                 ->update('pqr_balancer')
                 ->set('active', ':active')
                 ->where('fk_campo_opciones = :fkCampoOpciones')
                 ->setParameter('active', 0, ParameterType::INTEGER)
-                ->setParameter('fkCampoOpciones', (int)$CampoOpciones->getPK(), ParameterType::INTEGER)
+                ->setParameter('fkCampoOpciones', $CampoOpciones->getPK(), ParameterType::INTEGER)
                 ->executeStatement();
             $em->clear();
 
@@ -655,22 +663,21 @@ class PqrFormFieldService extends ModelService
                 }
 
                 $pqrBalancer = $this->getPqrBalancerRepository()->findOneBy([
-                    'fkCampoOpciones' => (int)$CampoOpciones->getPK(),
+                    'fkCampoOpciones' => $CampoOpciones->getPK(),
                     'fkSysTipo'       => $Option->getPK(),
                 ]);
 
                 if ($pqrBalancer) {
                     $pqrBalancer->setActive(true);
-                    $em->flush();
                 } else {
                     $pqrBalancer = (new PqrBalancerEntity())
-                        ->setFkCampoOpciones((int)$CampoOpciones->getPK())
-                        ->setFkSysTipo((int)$Option->getPK())
+                        ->setFkCampoOpciones($CampoOpciones->getPK())
+                        ->setFkSysTipo($Option->getPK())
                         ->setFkGrupo(-1)
                         ->setActive(true);
                     $em->persist($pqrBalancer);
-                    $em->flush();
                 }
+                $em->flush();
             }
         }
     }
@@ -680,6 +687,7 @@ class PqrFormFieldService extends ModelService
      * sys_tipo
      *
      * @param string $text
+     *
      * @return int
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-06
      */
@@ -708,7 +716,7 @@ class PqrFormFieldService extends ModelService
         if (!$this->CampoOpcionesSysTipo) {
             $sysTipoField = $this->getPqrFormFieldRepository()->findSysTipo();
             if ($sysTipoField) {
-                $camposFormato = new CamposFormato($sysTipoField->getFkCamposFormato());
+                $camposFormato              = new CamposFormato($sysTipoField->getFkCamposFormato());
                 $this->CampoOpcionesSysTipo = $camposFormato->getCampoOpciones(['estado' => 1]);
             }
         }

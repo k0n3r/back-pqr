@@ -8,13 +8,12 @@ use App\Bundles\pqr\Entity\PqrNotification;
 use App\Bundles\pqr\Repository\PqrNotificationRepository;
 use App\Bundles\pqr\Service\PqrFormProvider;
 
-class PqrNotificationService
+readonly class PqrNotificationService
 {
     public function __construct(
-        private readonly PqrNotificationRepository $repository,
-        private readonly PqrFormProvider $pqrFormProvider,
-    ) {
-    }
+        private PqrNotificationRepository $repository,
+        private PqrFormProvider $pqrFormProvider,
+    ) {}
 
     public function getRepository(): PqrNotificationRepository
     {

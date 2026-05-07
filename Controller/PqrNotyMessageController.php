@@ -3,7 +3,6 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\PqrNotyMessageService;
-use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

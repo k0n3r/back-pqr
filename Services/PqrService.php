@@ -9,9 +9,7 @@ use App\Bundles\pqr\Entity\PqrFormField;
 use App\Bundles\pqr\Entity\PqrHtmlField;
 use App\Bundles\pqr\Entity\PqrNotification;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
-use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrHtmlFieldRepository;
-use App\Bundles\pqr\Repository\PqrNotificationRepository;
 use App\Bundles\pqr\Service\PqrFormProvider;
 use App\Service\LegacyServiceLocator;
 use Doctrine\DBAL\Connection;
@@ -69,9 +67,9 @@ class PqrService
     {
         $records = match ($type) {
             'dependencia' => $this->getListDependency($data),
-            'pais'        => $this->getListPais($data),
+            'pais' => $this->getListPais($data),
             'departamento' => $this->getListDepartamento($data),
-            default       => [],
+            default => [],
         };
 
         $list = [];
@@ -84,7 +82,8 @@ class PqrService
 
     private function getListDependency(array $data): array
     {
-        $qb = $this->connection->createQueryBuilder()
+        $qb = $this->connection
+            ->createQueryBuilder()
             ->select('iddependencia as id,nombre')
             ->from('dependencia')
             ->where('estado=1')
@@ -93,7 +92,7 @@ class PqrService
             ->setMaxResults(40);
 
         if ($data['term'] ?? null) {
-            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%' . $data['term'] . '%');
+            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%'.$data['term'].'%');
         }
 
         return $qb->executeQuery()->fetchAllAssociative();
@@ -101,7 +100,8 @@ class PqrService
 
     private function getListPais(array $data): array
     {
-        $qb = $this->connection->createQueryBuilder()
+        $qb = $this->connection
+            ->createQueryBuilder()
             ->select('idpais as id,nombre')
             ->from('pais')
             ->where('estado=1')
@@ -110,7 +110,7 @@ class PqrService
             ->setMaxResults(40);
 
         if ($data['term'] ?? null) {
-            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%' . $data['term'] . '%');
+            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%'.$data['term'].'%');
         }
 
         return $qb->executeQuery()->fetchAllAssociative();
@@ -118,7 +118,8 @@ class PqrService
 
     private function getListDepartamento(array $data): array
     {
-        $qb = $this->connection->createQueryBuilder()
+        $qb = $this->connection
+            ->createQueryBuilder()
             ->select('iddepartamento as id,nombre')
             ->from('departamento')
             ->where('estado=1')
@@ -130,7 +131,7 @@ class PqrService
             $qb->andWhere('pais_idpais=:pais')->setParameter('pais', $data['idpais'], ParameterType::INTEGER);
         }
         if ($data['term'] ?? null) {
-            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%' . $data['term'] . '%');
+            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%'.$data['term'].'%');
         }
 
         return $qb->executeQuery()->fetchAllAssociative();
@@ -170,7 +171,7 @@ class PqrService
             return null;
         }
         $CamposFormato = new CamposFormato($field->getFkCamposFormato());
-        $records = $CamposFormato->getCampoOpciones();
+        $records       = $CamposFormato->getCampoOpciones();
 
         $data = [];
         foreach ($records as $CampoOpciones) {
@@ -189,7 +190,8 @@ class PqrService
 
     public function dependencyExist(): bool
     {
-        return $this->dependencyExist ??= $this->pqrFormProvider->getFieldByName(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA) !== null;
+        return $this->dependencyExist ??= $this->pqrFormProvider->getFieldByName(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
+            ) !== null;
     }
 
     /**
@@ -197,8 +199,9 @@ class PqrService
      */
     public function getTextFields(): array
     {
-        $qb = $this->pqrFormFieldRepository->createQueryBuilder('ff')
-            ->innerJoin(\App\Bundles\pqr\Entity\PqrHtmlField::class, 'hf', 'WITH', 'ff.fkPqrHtmlField = hf.id')
+        $qb = $this->pqrFormFieldRepository
+            ->createQueryBuilder('ff')
+            ->innerJoin(PqrHtmlField::class, 'hf', 'WITH', 'ff.fkPqrHtmlField = hf.id')
             ->where("hf.typeSaia = 'Text'")
             ->andWhere('ff.active = true')
             ->orderBy('ff.orden', 'ASC');
@@ -245,7 +248,8 @@ class PqrService
             throw new RuntimeException($trans);
         }
 
-        $qb = $this->connection->createQueryBuilder()
+        $qb = $this->connection
+            ->createQueryBuilder()
             ->update('grafico')
             ->where('fk_pantalla_grafico=:idpantalla')
             ->setParameter('idpantalla', $PantallaGrafico->getPK(), ParameterType::INTEGER);
@@ -257,7 +261,8 @@ class PqrService
             'name' => PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
         ]);
         if (!$sysDep) {
-            $qb2->set('estado', '0')
+            $qb2
+                ->set('estado', '0')
                 ->andWhere('nombre LIKE :graficoDependencia')
                 ->setParameter('graficoDependencia', self::NAME_DEPENDENCY_GRAPH)
                 ->executeStatement();

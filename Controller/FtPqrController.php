@@ -28,8 +28,9 @@ use Throwable;
 class FtPqrController extends AbstractController
 {
     /**
-     * @param int $idft
+     * @param int                 $idft
      * @param JsonResponseService $json
+     *
      * @return Response
      */
     #[Route('/externalUser', name: 'getExternalUser', methods: ['GET'])]
@@ -39,7 +40,7 @@ class FtPqrController extends AbstractController
     ): Response {
         try {
             $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
-            $data = [
+            $data  = [
                 'sys_tercero' => $FtPqr->sys_tercero,
                 'fieldId'     => $this->getFieldIdSysTercero($FtPqr),
             ];
@@ -60,8 +61,9 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @param int $idft
+     * @param int                 $idft
      * @param JsonResponseService $json
+     *
      * @return Response
      */
     #[Route('/dataToLoadResponse', name: 'getDataToLoadResponse', methods: ['GET'])]
@@ -79,9 +81,10 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @param int $idft
+     * @param int                 $idft
      * @param JsonResponseService $json
-     * @param Request $request
+     * @param Request             $request
+     *
      * @return Response
      */
     #[Route('/dateForType', name: 'getDateForType', methods: ['GET'])]
@@ -91,9 +94,9 @@ class FtPqrController extends AbstractController
         Request $request,
     ): Response {
         try {
-            $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
+            $FtPqr           = UtilitiesPqr::getInstanceForFtId($idft);
             $FtPqr->sys_tipo = $request->query->get('type');
-            $date = DateController::convertDate(
+            $date            = DateController::convertDate(
                 $FtPqr->getService()->getDateForType(),
                 'Y-m-d',
                 'Y-m-d H:i:s',
@@ -106,8 +109,10 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @param int $idft
+     * @param int                 $idft
      * @param JsonResponseService $json
+     * @param PqrService          $pqrService
+     *
      * @return Response
      */
     #[Route('/valuesForType', name: 'getValuesForType', methods: ['GET'])]
@@ -117,10 +122,10 @@ class FtPqrController extends AbstractController
         PqrService $pqrService,
     ): Response {
         try {
-            $FtPqr = UtilitiesPqr::getInstanceForFtId($idft);
+            $FtPqr    = UtilitiesPqr::getInstanceForFtId($idft);
             $DateTime = DateController::getDateTimeFromDataBase($FtPqr->sys_fecha_vencimiento);
 
-            $options = null;
+            $options       = null;
             $idDependencia = (int)$FtPqr->sys_dependencia;
             if ($idDependencia) {
                 $options = [
@@ -131,8 +136,7 @@ class FtPqrController extends AbstractController
 
             $data = [
                 'sys_tipo'                               => (int)$FtPqr->sys_tipo,
-                'sys_subtipo'                            => $pqrService->subTypeExist(
-                ) ? (int)$FtPqr->sys_subtipo : 0,
+                'sys_subtipo'                            => $pqrService->subTypeExist() ? (int)$FtPqr->sys_subtipo : 0,
                 'sys_fecha_vencimiento'                  => $DateTime->format('Y-m-d'),
                 PqrFormField::FIELD_NAME_SYS_DEPENDENCIA => $idDependencia,
                 'optionsDependency'                      => $options,
@@ -149,6 +153,7 @@ class FtPqrController extends AbstractController
 
     /**
      * @param int $idft
+     *
      * @return JsonResponse
      */
     #[Route('/history', name: 'getHistory', methods: ['GET'])]
@@ -188,17 +193,17 @@ class FtPqrController extends AbstractController
                 throw new MissingParameterException($trans);
             }
 
-            $Tercero = new Tercero($request->request->get('sys_tercero'));
+            $Tercero       = new Tercero($request->request->get('sys_tercero'));
             $attributesNew = $Tercero->getAttributes(true);
 
-            $FtPqr = new FtPqr($idft);
-            $attributesOld = ($FtPqr->getTercero())->getAttributes(true);
+            $FtPqr              = new FtPqr($idft);
+            $attributesOld      = ($FtPqr->getTercero())->getAttributes(true);
             $FtPqr->sys_tercero = $Tercero->getPK();
             $FtPqr->save();
 
 
             $modified = [];
-            $skip = [
+            $skip     = [
                 'imagen',
                 'tipo',
                 'titulo',
@@ -241,10 +246,11 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @param int $idft
-     * @param Request $request
+     * @param int                 $idft
+     * @param Request             $request
      * @param JsonResponseService $json
-     * @param Connection $Connection
+     * @param Connection          $Connection
+     *
      * @return Response
      */
     #[Route('/updateType', name: 'updateType', methods: ['PUT'])]
@@ -274,10 +280,11 @@ class FtPqrController extends AbstractController
     }
 
     /**
-     * @param int $idft
-     * @param Request $request
+     * @param int                 $idft
+     * @param Request             $request
      * @param JsonResponseService $json
-     * @param Connection $Connection
+     * @param Connection          $Connection
+     *
      * @return Response
      */
     #[Route('/finish', name: 'finish', methods: ['PUT'])]

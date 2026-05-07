@@ -8,12 +8,11 @@ use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
 use Saia\controllers\functions\Header;
 
-class PqrNotyMessageService
+readonly class PqrNotyMessageService
 {
     public function __construct(
-        private readonly PqrNotyMessageRepository $repository,
-    ) {
-    }
+        private PqrNotyMessageRepository $repository,
+    ) {}
 
     public function update(int $id, array $data): void
     {
@@ -65,7 +64,7 @@ class PqrNotyMessageService
         $functions = str_replace(['{*', '*}'], '', $functions);
 
         foreach ($functions as $variable) {
-            $value = call_user_func([self::class, $variable], $FtPqr);
+            $value       = call_user_func([self::class, $variable], $FtPqr);
             $baseContent = str_replace("{*$variable*}", $value, $baseContent);
         }
 
@@ -82,7 +81,7 @@ class PqrNotyMessageService
         return $FtPqr->getService()->getPqrForm()->label;
     }
 
-    public static function n_consecutivoPqr(FtPqr $FtPqr): string
+    public static function n_consecutivoPqr(FtPqr $FtPqr): string|int
     {
         return $FtPqr->getDocument()->numero;
     }

@@ -72,7 +72,7 @@ class PqrController extends AbstractController
         jsonResponseService $json,
     ): Response {
         try {
-            $data = json_decode(CryptController::decrypt($request->query->get('infoCryp')));
+            $data  = json_decode(CryptController::decrypt($request->query->get('infoCryp')));
             $FtPqr = UtilitiesPqr::getInstanceForDocumentId($data->documentId);
 
             if ($FtPqr->getPK() != $data->id) {
@@ -112,7 +112,7 @@ class PqrController extends AbstractController
         PqrFormFieldRepository $pqrFormFieldRepository,
     ): Response {
         try {
-            $field = PqrFormField::FIELD_NAME_SYS_DEPENDENCIA;
+            $field        = PqrFormField::FIELD_NAME_SYS_DEPENDENCIA;
             $pqrFormField = $pqrFormFieldRepository->findOneBy(['name' => $field]);
 
             if (!$pqrFormField || !$pqrFormField->getFkCamposFormato()) {
@@ -123,13 +123,13 @@ class PqrController extends AbstractController
 
             $camposFormato = new CamposFormato($pqrFormField->getFkCamposFormato());
             $allDependency = Dependencia::findAllByAttributes();
-            $options[] = "<option value='' data-i18n='g.seleccione'>Por favor Seleccione ...</option>";
+            $options[]     = "<option value='' data-i18n='g.seleccione'>Por favor Seleccione ...</option>";
             foreach ($allDependency as $Dependencia) {
                 $options[] = "<option value='{$Dependencia->getPK()}'>$Dependencia->nombre</option>";
             }
             $options = implode('', $options);
 
-            $i18n = "data-i18n='{$camposFormato->getFormat()->getKeyTranslatorAttribute()}.campos.{$camposFormato->nombre}'";
+            $i18n = "data-i18n='{$camposFormato->getFormat()->getKeyTranslatorAttribute()}.campos.$camposFormato->nombre'";
             $html = <<<HTML
                 <div class='form-group form-group-default form-group-default-select2'>
                     <label $i18n>{$pqrFormField->getLabel()}</label>

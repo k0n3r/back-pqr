@@ -220,9 +220,11 @@ class PqrFormController extends AbstractController
     /**
      * Actualiza el campo mostrar/ocultar campos vacios
      *
-     * @param Request $Request
+     * @param Request             $Request
      * @param jsonResponseService $json
-     * @param Connection $connection
+     * @param Connection          $connection
+     * @param PqrFormService      $PqrFormService
+     *
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
@@ -256,10 +258,13 @@ class PqrFormController extends AbstractController
     /**
      * Habilita y aplica el filtro por dependencia a los reportes
      *
-     * @param Request $Request
+     * @param Request             $Request
      * @param jsonResponseService $json
-     * @param Connection $connection
+     * @param Connection          $connection
      * @param TranslatorInterface $translator
+     * @param PqrFormService      $PqrFormService
+     * @param PqrFormProvider     $pqrFormProvider
+     *
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
      */
@@ -307,9 +312,11 @@ class PqrFormController extends AbstractController
     /**
      * Habilita/deshabilita el balanceo
      *
-     * @param Request $Request
+     * @param Request             $Request
      * @param jsonResponseService $json
-     * @param Connection $connection
+     * @param Connection          $connection
+     * @param PqrFormService      $PqrFormService
+     *
      * @return Response
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
      */
@@ -416,7 +423,7 @@ class PqrFormController extends AbstractController
         $connection->beginTransaction();
 
         try {
-            $channels = $Request->request->all('channels', []);
+            $channels = $Request->request->all('channels');
 
             if (!$channels) {
                 $trans = $translator->trans("indicar_canales_recepcion");
@@ -443,7 +450,8 @@ class PqrFormController extends AbstractController
      * Crea o edita la funciones utilizadas para filtros sobre los reportes de PQR
      *
      * @param string $functionName
-     * @param int $status
+     * @param int    $status
+     *
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2022-07-01
      */
     private function editOrCreateFunction(string $functionName, int $status): void

@@ -7,7 +7,6 @@ use App\Bundles\pqr\Entity\PqrHistory as PqrHistoryEntity;
 use App\Bundles\pqr\Entity\PqrNotyMessage as PqrNotyMessageEntity;
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
-use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrHistoryRepository;
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
 use App\EventSubscriber\Mailer\MailSubscriber;
@@ -26,10 +25,11 @@ use Saia\models\tarea\TareaEstado;
 use Saia\models\Tercero;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Throwable;
 
 class FtPqrRespuestaService extends ModelService
 {
-    public const int OPTION_EMAIL_RESPUESTA = 1;
+    public const int OPTION_EMAIL_RESPUESTA    = 1;
     public const int OPTION_EMAIL_CALIFICACION = 2;
 
     public function __construct(FtPqrRespuesta $Ft)
@@ -88,7 +88,8 @@ class FtPqrRespuestaService extends ModelService
      * Se crea un registro en el historial
      *
      * @param string $description
-     * @param int $type
+     * @param int    $type
+     *
      * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -113,7 +114,7 @@ class FtPqrRespuestaService extends ModelService
 
         try {
             $this->getPqrHistoryRepository()->create($entity);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->getErrorManager()->setMessage($e->getMessage());
 
             return false;
@@ -134,18 +135,18 @@ class FtPqrRespuestaService extends ModelService
         switch ((int)$this->getModel()->getKeyField('tipo_distribucion')) {
             case FtPqrRespuesta::DISTRIBUCION_RECOGIDA_ENTREGA:
                 $recogida = DistributionService::ESTADO_RECOGIDA;
-                $estado = DistributionService::DISTRIBUCION_POR_RECEPCIONAR;
+                $estado   = DistributionService::DISTRIBUCION_POR_RECEPCIONAR;
                 break;
 
             case FtPqrRespuesta::DISTRIBUCION_SOLO_ENTREGA:
                 $recogida = DistributionService::ESTADO_ENTREGA;
-                $estado = DistributionService::DISTRIBUCION_PENDIENTE;
+                $estado   = DistributionService::DISTRIBUCION_PENDIENTE;
                 break;
 
             case FtPqrRespuesta::DISTRIBUCION_NO_REQUIERE_MENSAJERIA:
             case FtPqrRespuesta::DISTRIBUCION_ENVIAR_EMAIL:
                 $recogida = DistributionService::ESTADO_ENTREGA;
-                $estado = DistributionService::DISTRIBUCION_FINALIZADA;
+                $estado   = DistributionService::DISTRIBUCION_FINALIZADA;
                 break;
 
             default:
@@ -189,7 +190,7 @@ class FtPqrRespuestaService extends ModelService
     public function transferCopiaInterna(): bool
     {
         if ($this->getModel()->copia_interna) {
-            $Transfer = new Transfer(
+            $Transfer     = new Transfer(
                 $this->getModel()->getDocument(),
                 $this->getFuncionario()->getCode(),
                 BuzonSalida::NOMBRE_COPIA,
@@ -217,12 +218,12 @@ class FtPqrRespuestaService extends ModelService
         }
 
         $FtPqrRespuesta = $this->getModel();
-        $FtPqr = $FtPqrRespuesta->getFtPqr();
-        $DocumentoPqr = $FtPqr->getDocument();
+        $FtPqr          = $FtPqrRespuesta->getFtPqr();
+        $DocumentoPqr   = $FtPqr->getDocument();
 
         $pqrFormLabel = $this->getPqrFormEntity()->getLabel();
-        $message = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de {$pqrFormLabel} con número de radicado $DocumentoPqr->numero.<br/><br/>";
-        $subject = "Respuesta solicitud de {$pqrFormLabel} # $DocumentoPqr->numero";
+        $message      = "Cordial Saludo,<br/><br/>Adjunto encontrara la respuesta a la solicitud de $pqrFormLabel con número de radicado $DocumentoPqr->numero.<br/><br/>";
+        $subject      = "Respuesta solicitud de $pqrFormLabel # $DocumentoPqr->numero";
 
         if ($notyMessage = $this->getPqrNotyMessageRepository()->findByName('f2_email_respuesta')) {
             $message = PqrNotyMessageService::resolveVariables($notyMessage->getMessageBody() ?? '', $FtPqr);
@@ -230,14 +231,14 @@ class FtPqrRespuestaService extends ModelService
         }
 
         if ($FtPqrRespuesta->sol_encuesta) {
-            $url = $this->getUrlEncuesta();
+            $url     = $this->getUrlEncuesta();
             $message .= "Califica nuestro servicio haciendo clic en el siguiente enlace: <a href='$url'>Calificar el servicio</a> .<br/><br/>";
         }
 
         $email = (new Email());
 
         $DocumentoRespuesta = $FtPqrRespuesta->getDocument();
-        $file = FilesystemForJson::getFileJson($DocumentoRespuesta->getPdfJson());
+        $file               = FilesystemForJson::getFileJson($DocumentoRespuesta->getPdfJson());
         $email->attach($file->getContent(), basename($file->getName()));
 
         $DocumentoService = $DocumentoRespuesta->getService();
@@ -260,7 +261,7 @@ class FtPqrRespuestaService extends ModelService
 
         $description = "Se le notificó a: {$FtPqrRespuesta->getTercero()->getEmail()}";
         if ($emailCopy) {
-            $texCopia = implode(", ", $emailCopy);
+            $texCopia    = implode(", ", $emailCopy);
             $description .= " con copia a: ($texCopia)";
         }
 
@@ -336,7 +337,7 @@ class FtPqrRespuestaService extends ModelService
     public function requestSurvey(): bool
     {
         $tercero = $this->getModel()->getTercero();
-        $email = $tercero->getEmail();
+        $email   = $tercero->getEmail();
         if (!CoreFunctions::isEmailValid($email)) {
             $this->getErrorManager()->setMessage("El email ($email) NO es valido");
 
@@ -345,15 +346,16 @@ class FtPqrRespuestaService extends ModelService
 
         $DocumentoPqr = $this->getModel()->getFtPqr()->getDocument();
 
-        $url = $this->getUrlEncuesta();
+        $url     = $this->getUrlEncuesta();
         $message = "Cordial Saludo,<br/><br/>
         Nos gustaría recibir tus comentarios sobre el servicio que has recibido por parte de nuestro equipo.<br/><a href='$url'>Calificar el servicio</a>";
 
-        $nameFormat = $this->getModel()->getFormat()->etiqueta;
+        $nameFormat  = $this->getModel()->getFormat()->etiqueta;
         $description = "Se solicita la calificación de la ($nameFormat) # {$this->getModel()->getDocument()->numero} al e-mail: ($email)";
 
         $EmailSaia = (new Email())
-            ->subject("Queremos conocer tu opinión! (Solicitud de {$this->getPqrFormEntity()->getLabel()} # $DocumentoPqr->numero)")
+            ->subject("Queremos conocer tu opinión! (Solicitud de {$this->getPqrFormEntity()->getLabel()} # $DocumentoPqr->numero)",
+            )
             ->html($message)
             ->to(new Address($tercero->getEmail(), $tercero->getName()));
 
@@ -413,7 +415,7 @@ class FtPqrRespuestaService extends ModelService
 
         foreach ($records as $Tarea) {
             $TareaService = $Tarea->getService();
-            $valor = $TareaService->getState()->valor;
+            $valor        = $TareaService->getState()->valor;
             if (
                 $valor != TareaEstado::REALIZADA &&
                 $valor != TareaEstado::CANCELADA

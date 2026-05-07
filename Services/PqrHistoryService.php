@@ -7,6 +7,7 @@ namespace App\Bundles\pqr\Services;
 use App\Bundles\pqr\Entity\PqrHistory;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Repository\PqrHistoryRepository;
+use DateTimeImmutable;
 use Saia\controllers\anexos\FileJson;
 use Saia\models\Configuracion;
 use Saia\models\Dependencia;
@@ -19,8 +20,7 @@ class PqrHistoryService
 
     public function __construct(
         private readonly PqrHistoryRepository $repository,
-    ) {
-    }
+    ) {}
 
     public function getRepository(): PqrHistoryRepository
     {
@@ -35,7 +35,7 @@ class PqrHistoryService
         $entity->setTipo((int)$attributes['tipo']);
         $entity->setIdfk((int)($attributes['idfk'] ?? 0));
         $entity->setDescripcion((string)$attributes['descripcion']);
-        $entity->setFecha($attributes['fecha'] ?? new \DateTimeImmutable());
+        $entity->setFecha($attributes['fecha'] ?? new DateTimeImmutable());
         $this->repository->create($entity);
 
         return $entity;
@@ -47,7 +47,7 @@ class PqrHistoryService
     public function getHistoryForTimeline(PqrHistory $history): ?array
     {
         $funcionario = new Funcionario($history->getFkFuncionario());
-        $data = [
+        $data        = [
             'header'      => true,
             'imgRoute'    => $this->getLogo(),
             'userName'    => $funcionario->getName(),
@@ -59,7 +59,7 @@ class PqrHistoryService
         switch ($history->getTipo()) {
             case PqrHistory::TIPO_RESPUESTA:
                 $FtPqrRespuesta = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($history->getIdfk());
-                $data = array_merge($data, [
+                $data           = array_merge($data, [
                     'iconPoint'      => 'fa fa-envelope-o',
                     'iconPointColor' => 'warning',
                     'url'            => UtilitiesPqr::getRoutePdf($FtPqrRespuesta->getDocument()),
@@ -68,7 +68,7 @@ class PqrHistoryService
 
             case PqrHistory::TIPO_CALIFICACION:
                 $FtPqrRespuesta = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($history->getIdfk());
-                $data = array_merge($data, [
+                $data           = array_merge($data, [
                     'iconPoint'      => 'fa fa-comment',
                     'iconPointColor' => 'danger',
                     'description'    => "Se solicita la calificación del servicio prestado a la respuesta # {$FtPqrRespuesta->getDocument()->numero}",
@@ -98,9 +98,9 @@ class PqrHistoryService
         if (!$Configuracion->getValue()) {
             return null;
         }
-        $FileJson = new FileJson($Configuracion->getValue());
+        $FileJson     = new FileJson($Configuracion->getValue());
         $FileTemporal = $FileJson->convertToFileTemporal();
-        $this->logo = $_SERVER['APP_DOMAIN'] . $FileTemporal->getRouteFromRoot();
+        $this->logo   = $_SERVER['APP_DOMAIN'].$FileTemporal->getRouteFromRoot();
 
         return $this->logo;
     }

@@ -9,6 +9,7 @@ use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Saia\controllers\SaveDocument;
 use Saia\models\formatos\Formato;
 use Saia\models\vistas\VfuncionarioDc;
@@ -23,11 +24,14 @@ use Throwable;
 class CaptchaController extends AbstractController implements IHasCaptcha
 {
     /**
-     * @param Request $Request
-     * @param jsonResponseService $json
-     * @param Connection $Connection
-     * @param TranslatorInterface $translator
+     * @param Request                  $Request
+     * @param jsonResponseService      $json
+     * @param Connection               $Connection
+     * @param TranslatorInterface      $translator
+     * @param PqrNotyMessageRepository $pqrNotyMessageRepository
+     *
      * @return Response
+     * @throws Exception
      */
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
     public function saveDocument(
@@ -70,10 +74,12 @@ class CaptchaController extends AbstractController implements IHasCaptcha
 
             $Documento = $SaveDocument->getDocument();
 
-            $message = "<br/>Su solicitud ha sido generada con el número de radicado <strong>$Documento->numero</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
+            $message        = "<br/>Su solicitud ha sido generada con el número de radicado <strong>$Documento->numero</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
             $pqrNotyMessage = $pqrNotyMessageRepository->findByName('ws_noty_radicado');
             if ($pqrNotyMessage) {
-                $message = PqrNotyMessageService::resolveVariables($pqrNotyMessage->getMessageBody() ?? '', $Documento->getFt());
+                $message = PqrNotyMessageService::resolveVariables($pqrNotyMessage->getMessageBody() ?? '',
+                    $Documento->getFt(),
+                );
             }
 
             $attributes = [
