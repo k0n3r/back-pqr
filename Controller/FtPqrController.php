@@ -2,11 +2,13 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\Entity\PqrFormField;
+use App\Bundles\pqr\Entity\PqrHistory as PqrHistoryEntity;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Bundles\pqr\Services\PqrHistoryService;
 use App\Bundles\pqr\Services\PqrService;
+use Saia\controllers\SessionController;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
@@ -177,6 +179,7 @@ class FtPqrController extends AbstractController
         JsonResponseService $json,
         Connection $Connection,
         TranslatorInterface $translator,
+        PqrHistoryService $pqrHistoryService,
     ): Response {
         $Connection->beginTransaction();
         try {
@@ -214,20 +217,13 @@ class FtPqrController extends AbstractController
             }
 
             if ($modified) {
-                $PqrHistoryService = (new PqrHistory())->getService();
-                $history = [
-                    'fecha'          => date('Y-m-d H:i:s'),
+                $pqrHistoryService->create([
                     'idft'           => $FtPqr->getPK(),
-                    'fk_funcionario' => $PqrHistoryService->getFuncionario()->getPK(),
-                    'tipo'           => PqrHistory::TIPO_MODIFICACION_TERCERO,
+                    'fk_funcionario' => SessionController::getUser()->getPK(),
+                    'tipo'           => PqrHistoryEntity::TIPO_MODIFICACION_TERCERO,
                     'idfk'           => $Tercero->getPK(),
                     'descripcion'    => 'Se actualizo el tercero: '.implode(', ', $modified),
-                ];
-                if (!$PqrHistoryService->save($history)) {
-                    throw new ValidationFailedException(
-                        $PqrHistoryService->getErrorManager()->getMessage(),
-                    );
-                }
+                ]);
             }
 
             $data = [
