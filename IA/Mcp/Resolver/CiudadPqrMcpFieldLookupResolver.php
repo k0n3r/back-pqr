@@ -4,13 +4,20 @@ namespace App\Bundles\pqr\IA\Mcp\Resolver;
 
 use App\Bundles\ia\Mcp\McpFieldLookupResolverInterface;
 use App\Bundles\ia\Mcp\Traits\McpCiudadLookupTrait;
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrHtmlField;
+use App\Bundles\pqr\Entity\PqrHtmlField;
+use App\Bundles\pqr\Repository\PqrHtmlFieldRepository;
+use App\Bundles\pqr\Service\PqrFormProvider;
 use Saia\models\formatos\CamposFormato;
 
 class CiudadPqrMcpFieldLookupResolver implements McpFieldLookupResolverInterface
 {
     use McpCiudadLookupTrait;
+
+    public function __construct(
+        private readonly PqrFormProvider $pqrFormProvider,
+        private readonly PqrHtmlFieldRepository $pqrHtmlFieldRepository,
+    ) {
+    }
 
     public function supports(string $fieldName, int $idformato): bool
     {
@@ -24,12 +31,14 @@ class CiudadPqrMcpFieldLookupResolver implements McpFieldLookupResolverInterface
             return false;
         }
 
-        $field = PqrForm::getInstance()->getRow($campos->nombre);
+        $field = $this->pqrFormProvider->getFieldByName($campos->nombre);
         if (is_null($field)) {
             return false;
         }
 
-        return $field->getPqrHtmlField()->type == PqrHtmlField::TYPE_LOCALIDAD;
+        $htmlField = $this->pqrHtmlFieldRepository->find($field->getFkPqrHtmlField());
+
+        return $htmlField?->getType() === PqrHtmlField::TYPE_LOCALIDAD;
     }
 
     public function search(string $fieldName, int $idformato, string $query): array

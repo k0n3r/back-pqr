@@ -4,9 +4,10 @@ namespace App\Bundles\pqr\EventSubscriber;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\Entity\PqrHistory as PqrHistoryEntity;
+use App\Bundles\pqr\Service\PqrFormProvider;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Bundles\pqr\Services\PqrHistoryService;
 use App\Event\tarea\TaskCreatedEvent;
 use App\Event\tarea\TaskDeletedEvent;
 use App\Event\tarea\TaskStatusCreatedEvent;
@@ -31,6 +32,8 @@ readonly class PqrSubscriber implements EventSubscriberInterface
         private LoggerInterface $logger,
         private TranslatorInterface $translator,
         private CacheInterface $cache,
+        private PqrFormProvider $pqrFormProvider,
+        private PqrHistoryService $pqrHistoryService,
     ) {
     }
 
@@ -114,22 +117,15 @@ readonly class PqrSubscriber implements EventSubscriberInterface
     {
         if ($TareaService->getModel()->relacion == Tarea::RELACION_DOCUMENTO) {
             $Documento = new Documento($TareaService->getModel()->relacion_id);
-            if ($Documento->formato_idformato == PqrForm::getInstance()->fk_formato) {
-                $history = [
-                    'fecha'          => date('Y-m-d H:i:s'),
+            $pqrForm = $this->pqrFormProvider->getOrNull();
+            if ($pqrForm && $Documento->formato_idformato == $pqrForm->getFkFormato()) {
+                $this->pqrHistoryService->create([
                     'idft'           => $Documento->getFt()->getPK(),
                     'fk_funcionario' => $TareaService->getFuncionario()->getPK(),
-                    'tipo'           => PqrHistory::TIPO_TAREA,
+                    'tipo'           => PqrHistoryEntity::TIPO_TAREA,
                     'idfk'           => $TareaService->getModel()->getPK(),
                     'descripcion'    => $description,
-                ];
-
-                $PqrHistoryService = (new PqrHistory())->getService();
-                if (!$PqrHistoryService->save($history)) {
-                    throw new RuntimeException(
-                        $PqrHistoryService->getErrorManager()->getMessage(),
-                    );
-                }
+                ]);
 
                 if (!$this->updateEstado($Documento)) {
                     $trans = $this->translator->trans("no_fue_posible_actualizar_estado_solicitud");
