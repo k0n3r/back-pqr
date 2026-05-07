@@ -2,10 +2,11 @@
 
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\Service\PqrFormProvider;
 use App\Bundles\pqr\Services\FtPqrService;
-use App\Bundles\pqr\Services\models\PqrForm;
 use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Services\PqrFormFieldService;
+use App\Bundles\pqr\Services\PqrFormService;
 use App\Bundles\pqr\Services\PqrService;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
@@ -37,11 +38,10 @@ class PqrFormController extends AbstractController
     #[Route('/setting', name: 'getSetting', methods: ['GET'])]
     public function getSetting(
         jsonResponseService $json,
+        PqrFormService $pqrFormService,
     ): Response {
         try {
-            $data = (PqrForm::getInstance())
-                ->getService()
-                ->getSetting();
+            $data = $pqrFormService->getSetting();
 
             return $json->success($data);
         } catch (Throwable $th) {
@@ -52,10 +52,10 @@ class PqrFormController extends AbstractController
     #[Route('/responseSetting', name: 'getResponseSetting', methods: ['GET'])]
     public function getResponseSetting(
         jsonResponseService $json,
+        PqrFormService $pqrFormService,
     ): Response {
         try {
-            $data = (PqrForm::getInstance())
-                ->getResponseConfiguration(true) ?? [];
+            $data = $pqrFormService->getResponseConfiguration(true) ?? [];
 
             return $json->success($data);
         } catch (Throwable $th) {
@@ -67,11 +67,11 @@ class PqrFormController extends AbstractController
     public function publish(
         jsonResponseService $json,
         Connection $connection,
+        PqrFormService $PqrFormService,
     ): Response {
         $connection->beginTransaction();
 
         try {
-            $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->publish()) {
                 throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
@@ -127,10 +127,10 @@ class PqrFormController extends AbstractController
         Request $request,
         jsonResponseService $json,
         Connection $connection,
+        PqrFormService $PqrFormService,
     ): Response {
         $connection->beginTransaction();
         try {
-            $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateSetting($request->request->all('data'))) {
                 throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
@@ -157,10 +157,10 @@ class PqrFormController extends AbstractController
         Request $request,
         jsonResponseService $json,
         Connection $connection,
+        PqrFormService $PqrFormService,
     ): Response {
         $connection->beginTransaction();
         try {
-            $PqrFormService = (PqrForm::getInstance())->getService();
             if (!$PqrFormService->updateResponseSetting($request->request->all('data'))) {
                 throw new ValidationFailedException(
                     $PqrFormService->getErrorManager()->getMessage(),
@@ -182,6 +182,7 @@ class PqrFormController extends AbstractController
         Request $request,
         jsonResponseService $json,
         Connection $connection,
+        PqrFormService $PqrFormService,
     ): Response {
         $connection->beginTransaction();
         try {
@@ -201,7 +202,6 @@ class PqrFormController extends AbstractController
                 }
             }
 
-            $PqrFormService = (PqrForm::getInstance())->getService();
             $PqrFormService->generaReport();
             $data = $PqrFormService->getDataPqrFormFields();
 
@@ -229,10 +229,10 @@ class PqrFormController extends AbstractController
         Request $Request,
         jsonResponseService $json,
         Connection $connection,
+        PqrFormService $PqrFormService,
     ): Response {
         $connection->beginTransaction();
         try {
-            $PqrFormService = (PqrForm::getInstance())->getService();
             $success = $PqrFormService->save([
                 'show_empty' => $Request->request->get('show_empty', 1),
             ]);
@@ -267,15 +267,14 @@ class PqrFormController extends AbstractController
         jsonResponseService $json,
         Connection $connection,
         TranslatorInterface $translator,
+        PqrFormService $PqrFormService,
+        PqrFormProvider $pqrFormProvider,
     ): Response {
         $connection->beginTransaction();
         try {
             $status = $Request->request->get('enable_filter_dep', 0);
 
-            $PqrForm = PqrForm::getInstance();
-            $PqrFormService = $PqrForm->getService();
-
-            if ($status && !$PqrForm->getRow(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA)) {
+            if ($status && !$pqrFormProvider->getFieldByName(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA)) {
                 $trans = $translator->trans("agregar_componente_dependencia");
                 throw new ValidationFailedException($trans);
             }
@@ -317,13 +316,11 @@ class PqrFormController extends AbstractController
         Request $Request,
         jsonResponseService $json,
         Connection $connection,
+        PqrFormService $PqrFormService,
     ): Response {
         $connection->beginTransaction();
         try {
             $status = $Request->request->get('enable_balancer', 0);
-
-            $PqrForm = PqrForm::getInstance();
-            $PqrFormService = $PqrForm->getService();
 
             $success = $PqrFormService->save([
                 'enable_balancer' => $status,
@@ -349,13 +346,11 @@ class PqrFormController extends AbstractController
         Request $Request,
         jsonResponseService $json,
         Connection $connection,
+        PqrFormService $PqrFormService,
     ): Response {
         $connection->beginTransaction();
         try {
             $status = $Request->request->get('enable_con_days', 0);
-
-            $PqrForm = PqrForm::getInstance();
-            $PqrFormService = $PqrForm->getService();
 
             $success = $PqrFormService->save([
                 'enable_con_days' => $status,
@@ -382,6 +377,7 @@ class PqrFormController extends AbstractController
         Request $Request,
         Connection $connection,
         TranslatorInterface $translator,
+        PqrFormService $PqrFormsService,
     ): Response {
         $connection->beginTransaction();
 
@@ -392,8 +388,6 @@ class PqrFormController extends AbstractController
                 $message = $translator->trans('indicar_identificador_campo_descripcion');
                 throw new MissingParameterException($message);
             }
-
-            $PqrFormsService = (PqrForm::getInstance())->getService();
 
             if (!$PqrFormsService->updateFieldDescription((int)$fieldId)) {
                 throw new ValidationFailedException($PqrFormsService->getErrorManager()->getMessage());
@@ -415,6 +409,7 @@ class PqrFormController extends AbstractController
         Request $Request,
         Connection $connection,
         TranslatorInterface $translator,
+        PqrFormService $PqrFormsService,
     ): Response {
         $connection->beginTransaction();
 
@@ -425,8 +420,6 @@ class PqrFormController extends AbstractController
                 $trans = $translator->trans("indicar_canales_recepcion");
                 throw new MissingParameterException($trans);
             }
-
-            $PqrFormsService = (PqrForm::getInstance())->getService();
 
             if (!$PqrFormsService->save([
                 'canal_recepcion' => json_encode($channels),

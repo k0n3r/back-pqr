@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\PqrFormService;
 use App\Bundles\pqr\Services\PqrService;
 use App\Service\JsonResponseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,10 +19,9 @@ class StructureController extends AbstractController
     public function getDataViewIndex(
         JsonResponseService $json,
         PqrService $pqrService,
+        PqrFormService $PqrFormService,
     ): Response {
         try {
-            $PqrFormService = PqrForm::getInstance()->getService();
-
             $data = [
                 'pqrForm'       => $PqrFormService->getDataPqrForm(),
                 'pqrFormFields' => $PqrFormService->getDataPqrFormFields(),

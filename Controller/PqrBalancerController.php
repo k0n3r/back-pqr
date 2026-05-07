@@ -3,7 +3,7 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Services\models\PqrBalancer;
-use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Services\PqrFormService;
 use App\Exception\MissingParameterException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
@@ -60,6 +60,7 @@ class PqrBalancerController extends AbstractController
         jsonResponseService $json,
         Connection $Connection,
         TranslatorInterface $translator,
+        PqrFormService $pqrFormService,
     ): Response {
         $Connection->beginTransaction();
         try {
@@ -68,8 +69,7 @@ class PqrBalancerController extends AbstractController
                 throw new MissingParameterException($trans);
             }
 
-            $PqrForm = PqrForm::getInstance();
-            $PqrForm->getService()->save([
+            $pqrFormService->save([
                 'fk_field_balancer' => $id,
             ]);
 

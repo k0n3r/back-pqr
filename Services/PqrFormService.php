@@ -47,6 +47,11 @@ class PqrFormService extends ModelService
         return $this->Model;
     }
 
+    public function getResponseConfiguration(bool $inArray = false): object|array|null
+    {
+        return $this->getModel()->getResponseConfiguration($inArray);
+    }
+
     /**
      * Actualiza los datos de configuracion del formulario
      *
