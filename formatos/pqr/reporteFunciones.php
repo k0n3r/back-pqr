@@ -3,8 +3,8 @@
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Services\FtPqrService;
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
+use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
 use App\Service\LegacyServiceLocator;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
@@ -114,7 +114,7 @@ function getDaysWait(): string
  */
 function getValueSysTipo(int $iddocumento, $fkCampoOpciones): string
 {
-    if ($fkCampoOpciones == PqrFormField::FIELD_NAME_SYS_TIPO) {
+    if ($fkCampoOpciones == PqrFormFieldEntity::FIELD_NAME_SYS_TIPO) {
         return 'Sin Tipo';
     }
 
@@ -398,7 +398,7 @@ function getCantidad(): string
     }
     $cant = $Qb->executeQuery()->fetchOne();
 
-    return createView(PqrForm::FILTER_TODOS, (int)$cant);
+    return createView(PqrFormEntity::FILTER_TODOS, (int)$cant);
 }
 
 /**
@@ -417,7 +417,7 @@ function getPendientes(): string
 
     $cant = $Qb->executeQuery()->fetchOne();
 
-    return createView(PqrForm::FILTER_PENDIENTES, (int)$cant);
+    return createView(PqrFormEntity::FILTER_PENDIENTES, (int)$cant);
 }
 
 /**
@@ -435,7 +435,7 @@ function getResueltas(): string
     }
     $cant = $Qb->executeQuery()->fetchOne();
 
-    return createView(PqrForm::FILTER_RESUELTAS, (int)$cant);
+    return createView(PqrFormEntity::FILTER_RESUELTAS, (int)$cant);
 }
 
 /**
@@ -446,7 +446,7 @@ function getComponenteRepTodos(): int
 {
     if (!$GLOBALS['idbusquedaComponenteRepTodos']) {
         $GLOBALS['idbusquedaComponenteRepTodos'] = BusquedaComponente::findColumn('idbusqueda_componente', [
-            'nombre' => PqrForm::NOMBRE_REPORTE_TODOS,
+            'nombre' => PqrFormEntity::NOMBRE_REPORTE_TODOS,
         ])[0];
     }
 
@@ -498,8 +498,8 @@ function filter_pqr(): string
     }
 
     return match ($params['filterName']) {
-        PqrForm::FILTER_PENDIENTES => "sys_dependencia=$sysDependencia AND sys_estado IN ('".FtPqr::ESTADO_PENDIENTE."','".FtPqr::ESTADO_PROCESO."')",
-        PqrForm::FILTER_RESUELTAS => "sys_dependencia=$sysDependencia AND sys_estado LIKE '".FtPqr::ESTADO_TERMINADO."'",
+        PqrFormEntity::FILTER_PENDIENTES => "sys_dependencia=$sysDependencia AND sys_estado IN ('".FtPqr::ESTADO_PENDIENTE."','".FtPqr::ESTADO_PROCESO."')",
+        PqrFormEntity::FILTER_RESUELTAS => "sys_dependencia=$sysDependencia AND sys_estado LIKE '".FtPqr::ESTADO_TERMINADO."'",
         default => "sys_dependencia=$sysDependencia",
     };
 }
@@ -520,10 +520,11 @@ function filter_pqr_admin(string $nameReport): string
 {
     $nameReport = strtoupper($nameReport);
 
-    $PqrForm = PqrForm::getInstance();
-    $PqrFormField = $PqrForm->getRow('sys_dependencia');
+    $em = LegacyServiceLocator::getInstance()->getEntityManager();
+    $PqrForm = $em->getRepository(PqrFormEntity::class)->findActiveOrFail();
+    $PqrFormField = $em->getRepository(PqrFormFieldEntity::class)->findByName('sys_dependencia');
 
-    if (!$PqrFormField || !$PqrForm->enable_filter_dep) {
+    if (!$PqrFormField || !$PqrForm->isEnableFilterDep()) {
         return '';
     }
 

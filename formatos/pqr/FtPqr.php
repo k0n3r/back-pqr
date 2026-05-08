@@ -8,9 +8,10 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\IA\Service\PqrCustomParameterForIA;
 use App\Bundles\pqr\IA\Service\PqrJsonForIA;
 use App\Bundles\pqr\Services\FtPqrService;
-use App\Bundles\pqr\Services\models\PqrBackup;
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Entity\PqrBackup as PqrBackupEntity;
+use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
+use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
+use App\Service\LegacyServiceLocator;
 use App\Exception\ValidationFailedException;
 use Doctrine\DBAL\ParameterType;
 use Saia\controllers\documento\DocumentoService;
@@ -18,6 +19,7 @@ use Saia\controllers\generator\component\Distribution;
 use Saia\models\Dependencia;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\CamposFormato;
+use Saia\models\formatos\Formato;
 use Saia\models\Tercero;
 use Saia\models\vistas\VfuncionarioDc;
 
@@ -102,14 +104,15 @@ class FtPqr extends FtPqrProperties
     {
         $data = [];
         if (!$action) {
-            $PqrForm = PqrForm::getInstance();
+            $em = LegacyServiceLocator::getInstance()->getEntityManager();
+            $PqrForm = $em->getRepository(PqrFormEntity::class)->findActiveOrFail();
 
-            $PqrFormField = $PqrForm->getRow('sys_subtipo');
+            $PqrFormField = $em->getRepository(PqrFormFieldEntity::class)->findByName('sys_subtipo');
 
-            $IWsHtml = $PqrForm->getWebservicePqr();
+            $IWsHtml = (new Formato($PqrForm->getFkFormato()))->getClassToGenerateWs()->getIWsHtml();
             $data = [
                 'isActiveSubType'        => (int)($PqrFormField && $PqrFormField->isActive()),
-                'isEnabledAnonymous'     => (int)$PqrForm->show_anonymous,
+                'isEnabledAnonymous'     => (int)$PqrForm->isShowAnonymous(),
                 'fieldsWithoutAnonymous' => $IWsHtml->getFieldsWithoutAnonymous(),
                 'fieldsWithAnonymous'    => $IWsHtml->getFieldsWithAnonymous(),
                 'channels'               => $PqrForm->getCanalRecepcion(),
@@ -134,15 +137,16 @@ class FtPqr extends FtPqrProperties
     }
 
     /**
-     * @return PqrBackup|null
+     * @return PqrBackupEntity|null
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-05-28
      */
-    public function getPqrBackup(): ?PqrBackup
+    public function getPqrBackup(): ?PqrBackupEntity
     {
         if (!$this->PqrBackup) {
-            $this->PqrBackup = PqrBackup::findByAttributes([
-                'fk_documento' => $this->documento_iddocumento,
-            ]);
+            $this->PqrBackup = LegacyServiceLocator::getInstance()
+                ->getEntityManager()
+                ->getRepository(PqrBackupEntity::class)
+                ->findOneBy(['fkDocumento' => (int)$this->documento_iddocumento]);
         }
 
         return $this->PqrBackup;
@@ -335,7 +339,7 @@ class FtPqr extends FtPqrProperties
             $this->getDocument()->getService()->getFilingReferenceNumber(),
         );
 
-        $labelPQR = mb_strtoupper($this->getService()->getPqrForm()->label, 'UTF-8');
+        $labelPQR = mb_strtoupper($this->getService()->getPqrForm()->getLabel(), 'UTF-8');
         $tr = implode('', $this->getTableRows());
 
         return <<<HTML
@@ -365,7 +369,7 @@ class FtPqr extends FtPqrProperties
             return [];
         }
 
-        $showEmpty = $this->getService()->getPqrForm()->show_empty ?? 1;
+        $showEmpty = $this->getService()->getPqrForm()->isShowEmpty();
 
         $tr = [];
         foreach ($data as $key => $value) {
@@ -398,11 +402,12 @@ class FtPqr extends FtPqrProperties
      */
     public function autocompleteD(CamposFormato $CamposFormato): string
     {
-        $PqrFormField = PqrFormField::findByAttributes([
-            'fk_campos_formato' => $CamposFormato->getPK(),
-        ]);
+        $PqrFormField = LegacyServiceLocator::getInstance()
+            ->getEntityManager()
+            ->getRepository(PqrFormFieldEntity::class)
+            ->findOneBy(['fkCamposFormato' => $CamposFormato->getPK()]);
 
-        return $this->getService()->generateField($PqrFormField);
+        return $PqrFormField ? $this->getService()->generateField($PqrFormField) : '';
     }
 
     /**
@@ -416,11 +421,12 @@ class FtPqr extends FtPqrProperties
      */
     public function autocompleteM(CamposFormato $CamposFormato): string
     {
-        $PqrFormField = PqrFormField::findByAttributes([
-            'fk_campos_formato' => $CamposFormato->getPK(),
-        ]);
+        $PqrFormField = LegacyServiceLocator::getInstance()
+            ->getEntityManager()
+            ->getRepository(PqrFormFieldEntity::class)
+            ->findOneBy(['fkCamposFormato' => $CamposFormato->getPK()]);
 
-        return $this->getService()->generateField($PqrFormField);
+        return $PqrFormField ? $this->getService()->generateField($PqrFormField) : '';
     }
 
     /**

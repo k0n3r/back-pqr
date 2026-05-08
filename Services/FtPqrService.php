@@ -17,8 +17,12 @@ use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrHistoryRepository;
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
 use App\Bundles\pqr\Repository\PqrResponseTimeRepository;
-use App\Bundles\pqr\Services\models\PqrForm;
-use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
+use App\Bundles\pqr\Entity\PqrNotification as PqrNotificationEntity;
+use App\Bundles\pqr\Repository\PqrFormRepository;
+use App\Bundles\pqr\Repository\PqrNotificationRepository;
+use App\Bundles\pqr\Service\PqrFormFieldServiceFactory;
+use Saia\models\formatos\CamposFormato;
 use Doctrine\ORM\EntityManagerInterface;
 use Saia\models\Funcionario;
 use App\EventSubscriber\Mailer\MailSubscriber;
@@ -91,12 +95,12 @@ class FtPqrService extends ModelService
     }
 
     /**
-     * @return PqrForm
+     * @return PqrFormEntity
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-23
      */
-    public function getPqrForm(): PqrForm
+    public function getPqrForm(): PqrFormEntity
     {
-        return PqrForm::getInstance();
+        return $this->getPqrFormRepository()->findActiveOrFail();
     }
 
     /**
@@ -158,17 +162,17 @@ class FtPqrService extends ModelService
     protected function getDataRow(): array
     {
         $data = [];
-        if ($this->getPqrForm()->show_anonymous) {
+        if ($this->getPqrForm()->isShowAnonymous()) {
             $data = [
                 'REGISTRADO COMO ANÓNIMO' => $this->getModel()->sys_anonimo ? 'SI' : 'NO',
             ];
         }
 
-        $Fields = $this->getPqrForm()->getPqrFormFields();
+        $Fields = $this->getPqrFormFieldRepository()->findByPqrFormOrdered($this->getPqrForm()->getId());
         foreach ($Fields as $PqrFormField) {
-            if ($PqrFormField->active) {
+            if ($PqrFormField->isActive()) {
                 if ($value = $this->getValue($PqrFormField)) {
-                    $key = $this->getKey($PqrFormField->label);
+                    $key = $this->getKey($PqrFormField->getLabel());
                     if (array_key_exists($key, $data)) {
                         $value[$key."__".uniqid()] = $value[$key];
                         unset($value[$key]);
@@ -190,14 +194,14 @@ class FtPqrService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    protected function getValue(PqrFormField $PqrFormField): ?array
+    protected function getValue(PqrFormFieldEntity $PqrFormField): ?array
     {
-        $PqrHtmlField = $PqrFormField->getPqrHtmlField();
-        $fieldName    = $PqrFormField->name;
-        $label        = $this->getKey($PqrFormField->label);
+        $PqrHtmlField = $PqrFormField->getHtmlField();
+        $fieldName    = $PqrFormField->getName();
+        $label        = $this->getKey($PqrFormField->getLabel());
         $data         = [];
 
-        switch ($PqrHtmlField->type_saia) {
+        switch ($PqrHtmlField->getTypeSaia()) {
             case 'Hidden':
             case 'Attached':
                 break;
@@ -212,9 +216,8 @@ class FtPqrService extends ModelService
             case 'AutocompleteM':
                 $value = null;
                 if ($this->getModel()->$fieldName) {
-                    $value = $PqrFormField->getService()->getListDataForAutocomplete(
-                        ['id' => $this->getModel()->$fieldName],
-                    );
+                    $value = (new PqrFormFieldServiceFactory())->create($PqrFormField->getId())
+                        ->getListDataForAutocomplete(['id' => $this->getModel()->$fieldName]);
                 }
                 $data[$label] = $value ? $value[0]['text'] : '';
                 break;
@@ -332,7 +335,7 @@ class FtPqrService extends ModelService
      */
     protected function getIdFromResponseTimes(): int
     {
-        $CamposFormato = $this->getPqrForm()->getCampoFormatoForFieldTime();
+        $CamposFormato = new CamposFormato($this->getPqrForm()->getFkFieldTime());
         $sysTipoField  = $this->getPqrFormFieldRepository()->findSysTipo();
         if ($CamposFormato->getPK() == ($sysTipoField?->getFkCamposFormato() ?? 0)) {
             return -1;
@@ -344,7 +347,7 @@ class FtPqrService extends ModelService
 
     protected function getIdFromBalancer(): int
     {
-        $CamposFormato = $this->getPqrForm()->getCampoFormatoForFieldBalancer();
+        $CamposFormato = new CamposFormato($this->getPqrForm()->getFkFieldBalancer());
         $sysTipoField  = $this->getPqrFormFieldRepository()->findSysTipo();
         if ($CamposFormato->getPK() == ($sysTipoField?->getFkCamposFormato() ?? 0)) {
             return -1;
@@ -523,7 +526,7 @@ class FtPqrService extends ModelService
      */
     protected function getDataFinish(): array
     {
-        $type = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
+        $type = $this->getModel()->getFieldValue(PqrFormFieldEntity::FIELD_NAME_SYS_TIPO);
 
         return [
             'iconPoint'      => 'fa fa-flag-checkered',
@@ -546,9 +549,9 @@ class FtPqrService extends ModelService
             return true;
         }
 
-        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el radicado {$this->getDocument()->getService()->getFilingReferenceNumber()}, adjunto encontrará una copia de la {$this->getPqrForm()->label} diligenciada el día de hoy.<br/><br/>
+        $message = "Cordial Saludo,<br/><br/>Su solicitud ha sido generada con el radicado {$this->getDocument()->getService()->getFilingReferenceNumber()}, adjunto encontrará una copia de la {$this->getPqrForm()->getLabel()} diligenciada el día de hoy.<br/><br/>
         El seguimiento lo puede realizar escaneando el código QR o consultando con el número de consecutivo asignado";
-        $subject = "Solicitud de {$this->getPqrForm()->label} # {$this->getDocument()->numero}";
+        $subject = "Solicitud de {$this->getPqrForm()->getLabel()} # {$this->getDocument()->numero}";
 
         if ($PqrNotyMessage = $this->getPqrNotyMessageRepository()->findByName('f1_email_solicitante')) {
             $message = PqrNotyMessageService::resolveVariables(
@@ -598,14 +601,15 @@ class FtPqrService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function generateField(PqrFormField $PqrFormField): string
+    public function generateField(PqrFormFieldEntity $PqrFormField): string
     {
-        $name     = $PqrFormField->name;
-        $required = $PqrFormField->required ? 'required' : '';
+        $name     = $PqrFormField->getName();
+        $required = $PqrFormField->isRequired() ? 'required' : '';
 
         $options = '';
         if ($this->getModel()->$name) {
-            $list = $PqrFormField->getService()->getListDataForAutocomplete(['id' => $this->getModel()->$name]);
+            $list = (new PqrFormFieldServiceFactory())->create($PqrFormField->getId())
+                ->getListDataForAutocomplete(['id' => $this->getModel()->$name]);
             if ($list) {
                 $options .= "<option value='{$list[0]['id']}' selected='selected'>{$list[0]['text']}</option>";
             }
@@ -613,7 +617,7 @@ class FtPqrService extends ModelService
 
         return <<<HTML
             <div class='form-group form-group-default form-group-default-select2 $required' id='group_$name'>
-                <label>$PqrFormField->label</label>
+                <label>{$PqrFormField->getLabel()}</label>
                 <div class='form-group'>
                     <select class='full-width pqrAutocomplete $required' name='$name' id='$name'>
                         $options
@@ -635,17 +639,17 @@ class FtPqrService extends ModelService
         $this->sendNotificationToInternalDestination();
 
         $emails  = $codes = [];
-        $records = $this->getPqrForm()->getPqrNotifications();
+        $records = $this->getPqrNotificationRepository()->findByPqrForm($this->getPqrForm()->getId());
         if ($records) {
             foreach ($records as $PqrNotification) {
-                if ($PqrNotification->email) {
-                    $email = $PqrNotification->getFuncionario()->email ?? '';
+                if ($PqrNotification->isEmail()) {
+                    $email = (new Funcionario($PqrNotification->getFkFuncionario()))->email ?? '';
                     if (CoreFunctions::isEmailValid($email)) {
                         $emails[] = $email;
                     }
                 }
-                if ($PqrNotification->notify) {
-                    $codes[] = $PqrNotification->getFuncionario()->getCode();
+                if ($PqrNotification->isNotify()) {
+                    $codes[] = (new Funcionario($PqrNotification->getFkFuncionario()))->getCode();
                 }
             }
         }
@@ -659,10 +663,10 @@ class FtPqrService extends ModelService
         }
 
         if ($emails) {
-            $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->getPqrForm()->label} con radicado {$Documento->getService()->getFilingReferenceNumber()}.<br/><br/>
+            $message = "Cordial Saludo,<br/><br/>Se notifica que se ha generado una solicitud de {$this->getPqrForm()->getLabel()} con radicado {$Documento->getService()->getFilingReferenceNumber()}.<br/><br/>
             El seguimiento lo puede realizar escaneando el código QR o consultando con el número de consecutivo asignado";
             $email   = (new Email())
-                ->subject("Notificación de {$this->getPqrForm()->label} # $Documento->numero")
+                ->subject("Notificación de {$this->getPqrForm()->getLabel()} # $Documento->numero")
                 ->html($message)
                 ->to(...$emails);
 
@@ -693,7 +697,7 @@ class FtPqrService extends ModelService
      */
     public function createTercero(): bool
     {
-        $config = $this->getPqrForm()->getResponseConfiguration(true);
+        $config = $this->getPqrForm()->getResponseConfiguration();
 
         if (!$config['tercero']) {
             $this->getErrorManager()->setMessage(
@@ -778,7 +782,7 @@ class FtPqrService extends ModelService
         $newAttributes      = [];
         $textField          = [];
         if ($data['type'] != $this->getModel()->sys_tipo) {
-            $oldType                   = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
+            $oldType                   = $this->getModel()->getFieldValue(PqrFormFieldEntity::FIELD_NAME_SYS_TIPO);
             $newAttributes['sys_tipo'] = $data['type'];
             $textField[]               = "tipo de '$oldType' a '{newType}'";
             $refreshDescription        = true;
@@ -797,11 +801,11 @@ class FtPqrService extends ModelService
 
         if ($this->getPqrService()->dependencyExist()) {
             if ($data['dependency'] != $this->getModel()->sys_dependencia) {
-                $oldDependency = $this->getValueForReport(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA);
+                $oldDependency = $this->getValueForReport(PqrFormFieldEntity::FIELD_NAME_SYS_DEPENDENCIA);
                 if (!$oldDependency) {
                     $oldDependency = '-';
                 }
-                $newAttributes[PqrFormField::FIELD_NAME_SYS_DEPENDENCIA] = $data['dependency'];
+                $newAttributes[PqrFormFieldEntity::FIELD_NAME_SYS_DEPENDENCIA] = $data['dependency'];
                 $textField[]                                             = "dependencia de $oldDependency a {newDependency}";
             }
         }
@@ -854,10 +858,10 @@ class FtPqrService extends ModelService
 
 
         $text          = "Se actualiza: ".implode(', ', $textField);
-        $newType       = $this->getModel()->getFieldValue(PqrFormField::FIELD_NAME_SYS_TIPO);
+        $newType       = $this->getModel()->getFieldValue(PqrFormFieldEntity::FIELD_NAME_SYS_TIPO);
         $newSubType    = $this->getPqrService()->subTypeExist() ? $this->getModel()->getFieldValue('sys_subtipo') : '';
         $newDependency = $this->getPqrService()->dependencyExist() ? $this->getValueForReport(
-            PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
+            PqrFormFieldEntity::FIELD_NAME_SYS_DEPENDENCIA,
         ) : '';
 
         $text = str_replace([
@@ -1037,7 +1041,11 @@ class FtPqrService extends ModelService
      */
     public function getValueForReport(string $name): ?string
     {
-        $value = $this->getValue($this->getPqrForm()->getRow($name));
+        $field = $this->getPqrFormFieldRepository()->findByName($name);
+        if (!$field) {
+            return null;
+        }
+        $value = $this->getValue($field);
 
         return $value ? implode(',', $value) : null;
     }
@@ -1462,6 +1470,16 @@ class FtPqrService extends ModelService
     private function getEntityManager(): EntityManagerInterface
     {
         return $this->serviceLocator->getEntityManager();
+    }
+
+    private function getPqrFormRepository(): PqrFormRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrFormEntity::class);
+    }
+
+    private function getPqrNotificationRepository(): PqrNotificationRepository
+    {
+        return $this->getEntityManager()->getRepository(PqrNotificationEntity::class);
     }
 
     private function getPqrBackupRepository(): PqrBackupRepository

@@ -261,7 +261,7 @@ class PqrFormService extends ModelService
         }
 
         if (Modulo::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
+            'nombre' => PqrFormEntity::NOMBRE_REPORTE_POR_DEPENDENCIA,
         ])) {
             return;
         }
@@ -276,14 +276,14 @@ class PqrFormService extends ModelService
         }
 
         $BusquedaComponente = BusquedaComponente::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
+            'nombre' => PqrFormEntity::NOMBRE_REPORTE_POR_DEPENDENCIA,
         ]);
 
         $enlace = 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector":"iframe","url": "views/buzones/grilla.php?idbusqueda_componente='.$BusquedaComponente->getPK(
         ).'"}]';
         $data = [
             'pertenece_nucleo' => 0,
-            'nombre'           => PqrForm::NOMBRE_REPORTE_POR_DEPENDENCIA,
+            'nombre'           => PqrFormEntity::NOMBRE_REPORTE_POR_DEPENDENCIA,
             'tipo'             => Modulo::TIPO_HIJO,
             'imagen'           => 'fa fa-bar-chart-o',
             'etiqueta'         => 'Por Dependencia',
@@ -582,13 +582,13 @@ class PqrFormService extends ModelService
 
         //REPORTE PENDIENTE
         if ($Pendiente = BusquedaComponente::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_REPORTE_PENDIENTE,
+            'nombre' => PqrFormEntity::NOMBRE_REPORTE_PENDIENTE,
         ])) {
             $Pendiente->setAttributes(
                 $this->getDefaultDataComponente(
                     $selectedFields,
                     $nameOfSeletedFields,
-                    PqrForm::NOMBRE_REPORTE_PENDIENTE,
+                    PqrFormEntity::NOMBRE_REPORTE_PENDIENTE,
                 ),
             );
             $Pendiente->save();
@@ -596,13 +596,13 @@ class PqrFormService extends ModelService
 
         //REPORTE PROCESO
         if ($Proceso = BusquedaComponente::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_REPORTE_PROCESO,
+            'nombre' => PqrFormEntity::NOMBRE_REPORTE_PROCESO,
         ])) {
             $Proceso->setAttributes(
                 $this->getDefaultDataComponente(
                     $selectedFields,
                     $nameOfSeletedFields,
-                    PqrForm::NOMBRE_REPORTE_PROCESO,
+                    PqrFormEntity::NOMBRE_REPORTE_PROCESO,
                 ),
             );
             $Proceso->save();
@@ -610,13 +610,13 @@ class PqrFormService extends ModelService
 
         //REPORTE TERMINADO
         if ($Terminado = BusquedaComponente::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_REPORTE_TERMINADO,
+            'nombre' => PqrFormEntity::NOMBRE_REPORTE_TERMINADO,
         ])) {
             $Terminado->setAttributes(
                 $this->getDefaultDataComponente(
                     $selectedFields,
                     $nameOfSeletedFields,
-                    PqrForm::NOMBRE_REPORTE_TERMINADO,
+                    PqrFormEntity::NOMBRE_REPORTE_TERMINADO,
                 ),
             );
             $Terminado->save();
@@ -624,13 +624,13 @@ class PqrFormService extends ModelService
 
         //REPORTE TODOS
         if ($Todos = BusquedaComponente::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_REPORTE_TODOS,
+            'nombre' => PqrFormEntity::NOMBRE_REPORTE_TODOS,
         ])) {
             $Todos->setAttributes(
                 $this->getDefaultDataComponente(
                     $selectedFields,
                     $nameOfSeletedFields,
-                    PqrForm::NOMBRE_REPORTE_TODOS,
+                    PqrFormEntity::NOMBRE_REPORTE_TODOS,
                 ),
             );
             $Todos->save();
@@ -882,15 +882,15 @@ class PqrFormService extends ModelService
         ];
 
         $fieldForReport = match ($reportName) {
-            PqrForm::NOMBRE_REPORTE_TODOS => array_merge([
+            PqrFormEntity::NOMBRE_REPORTE_TODOS => array_merge([
                 [
                     'title' => 'ESTADO',
                     'field' => '{*sys_estado*}',
                     'align' => 'center',
                 ],
             ], $otherDefaultFields, $defaultFiels),
-            PqrForm::NOMBRE_REPORTE_PROCESO => array_merge($otherDefaultFields, $defaultFiels),
-            PqrForm::NOMBRE_REPORTE_TERMINADO => array_merge([
+            PqrFormEntity::NOMBRE_REPORTE_PROCESO => array_merge($otherDefaultFields, $defaultFiels),
+            PqrFormEntity::NOMBRE_REPORTE_TERMINADO => array_merge([
                 [
                     'title' => 'DÍAS RETRASO',
                     'field' => '{*getDaysLate@idft*}',

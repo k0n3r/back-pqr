@@ -14,7 +14,7 @@ use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrResponseTimeRepository;
 use App\Bundles\pqr\Services\models\PqrFormField;
-use App\Bundles\pqr\Services\models\PqrHtmlField;
+use App\Bundles\pqr\Entity\PqrHtmlField as PqrHtmlFieldEntity;
 use App\services\models\ModelService\ModelService;
 use App\services\ServiceEventDispatcher;
 use Doctrine\DBAL\ArrayParameterType;
@@ -155,7 +155,7 @@ class PqrFormFieldService extends ModelService
 
         if (
             $this->getModel()->name != 'sys_subtipo'
-            && $this->getModel()->name != PqrFormField::FIELD_NAME_SYS_DEPENDENCIA
+            && $this->getModel()->name != PqrFormFieldEntity::FIELD_NAME_SYS_DEPENDENCIA
         ) {
             $attributes['show_report'] = 0;
         }
@@ -291,11 +291,11 @@ class PqrFormFieldService extends ModelService
         $list = [];
 
         switch ($this->getModel()->getPqrHtmlField()->type) {
-            case PqrHtmlField::TYPE_DEPENDENCIA:
+            case PqrHtmlFieldEntity::TYPE_DEPENDENCIA:
                 $list = $this->getDependencys($this->getModel()->getSetting(), $data);
                 break;
 
-            case PqrHtmlField::TYPE_LOCALIDAD:
+            case PqrHtmlFieldEntity::TYPE_LOCALIDAD:
                 $list = $this->getListLocalidad($this->getModel()->getSetting(), $data);
                 break;
         }
@@ -492,7 +492,7 @@ class PqrFormFieldService extends ModelService
      */
     private function addEditPqrResponseTimesAndBalancer(): void
     {
-        if ($this->getModel()->name == PqrFormField::FIELD_NAME_SYS_TIPO) {
+        if ($this->getModel()->name == PqrFormFieldEntity::FIELD_NAME_SYS_TIPO) {
             $this->addEditPqrResponseTimesForSysTipo();
             $this->addEditPqrBalancerForSysTipo();
         } else {

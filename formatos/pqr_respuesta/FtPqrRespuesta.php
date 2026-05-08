@@ -7,7 +7,7 @@ use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\IA\Service\PqrRespuestaDataJsonForIA;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
-use App\Bundles\pqr\Services\models\PqrHistory;
+use App\Bundles\pqr\Entity\PqrHistory;
 use DateTime;
 use IntlDateFormatter;
 use RuntimeException;
