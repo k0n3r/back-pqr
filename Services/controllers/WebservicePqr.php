@@ -2,15 +2,19 @@
 
 namespace App\Bundles\pqr\Services\controllers;
 
-use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
+use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
+use App\Bundles\pqr\Repository\PqrFormFieldRepository;
+use App\Service\LegacyServiceLocator;
 use Saia\controllers\generator\webservice\IWsFields;
 use Saia\controllers\generator\webservice\WsFt;
+use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
-use App\Bundles\pqr\Services\models\PqrFormField;
 
 class WebservicePqr extends WsFt
 {
-    protected PqrForm $PqrForm;
+    protected PqrFormEntity $PqrForm;
+    private PqrFormFieldRepository $fieldRepo;
     private array $objectFieldsForAnonymous = [];
     private array $objectFields = [];
     private bool $isProcessFields = false;
@@ -18,17 +22,19 @@ class WebservicePqr extends WsFt
 
     public function __construct(Formato $Formato)
     {
-        $this->PqrForm = PqrForm::getInstance();
+        $em = LegacyServiceLocator::getInstance()->getEntityManager();
+        $this->PqrForm    = $em->getRepository(PqrFormEntity::class)->findActiveOrFail();
+        $this->fieldRepo  = $em->getRepository(PqrFormFieldEntity::class);
         parent::__construct($Formato);
     }
 
     public function getOtherValuesFromForm(): array
     {
         return [
-            'emailLabel'    => $this->PqrForm->getRow('sys_email')->label,
-            'showAnonymous' => (int)$this->PqrForm->show_anonymous,
-            'showLabel'     => (int)$this->PqrForm->show_label,
-            'nameForm'      => $this->PqrForm->label,
+            'emailLabel'    => $this->fieldRepo->findByName('sys_email')?->getLabel() ?? '',
+            'showAnonymous' => (int)$this->PqrForm->isShowAnonymous(),
+            'showLabel'     => (int)$this->PqrForm->isShowLabel(),
+            'nameForm'      => $this->PqrForm->getLabel(),
         ];
     }
 
@@ -82,18 +88,19 @@ class WebservicePqr extends WsFt
         return $this->objectFieldsForAnonymous;
     }
 
-    private function setFieldsAnonymous(PqrFormField $PqrFormField): void
+    private function setFieldsAnonymous(PqrFormFieldEntity $field): void
     {
+        $typeSaia = $field->getHtmlField()->getTypeSaia();
         $this->objectFields[] = [
-            'name'     => $PqrFormField->name,
-            'required' => (int)$PqrFormField->required,
-            'type'     => $PqrFormField->getPqrHtmlField()->type_saia,
+            'name'     => $field->getName(),
+            'required' => (int)$field->isRequired(),
+            'type'     => $typeSaia,
         ];
         $this->objectFieldsForAnonymous[] = [
-            'name'     => $PqrFormField->name,
-            'show'     => (int)$PqrFormField->anonymous,
-            'required' => (int)($PqrFormField->anonymous ? $PqrFormField->required_anonymous : 0),
-            'type'     => $PqrFormField->getPqrHtmlField()->type_saia,
+            'name'     => $field->getName(),
+            'show'     => (int)$field->isAnonymous(),
+            'required' => (int)($field->isAnonymous() ? $field->isRequiredAnonymous() : 0),
+            'type'     => $typeSaia,
         ];
     }
 
@@ -122,28 +129,30 @@ class WebservicePqr extends WsFt
             return;
         }
 
-        $records = $this->PqrForm->getPqrFormFields();
+        $records = $this->fieldRepo->findByPqrFormOrdered($this->PqrForm->getId());
         $specialFields = [
             'tratamiento',
             'localidad',
             'dependencia',
         ];
 
-        foreach ($records as $PqrFormField) {
-            if (!$PqrFormField->active || !$PqrFormField->fk_campos_formato) {
+        foreach ($records as $field) {
+            if (!$field->isActive() || !$field->getFkCamposFormato()) {
                 continue;
             }
 
-            if (in_array($PqrFormField->getPqrHtmlField()->type, $specialFields)) {
-                if ($class = $this->resolveCustomClass(ucfirst($PqrFormField->getPqrHtmlField()->type))) {
-                    $this->fields[] = new $class($PqrFormField);
-                    $this->setFieldsAnonymous($PqrFormField);
+            $htmlType = $field->getHtmlField()->getType();
+            if (in_array($htmlType, $specialFields)) {
+                if ($class = $this->resolveCustomClass(ucfirst($htmlType))) {
+                    $this->fields[] = new $class($field);
+                    $this->setFieldsAnonymous($field);
                 }
             } else {
-                $ComponentBuilder = $PqrFormField->getCamposFormato()->getComponentBuilder();
-                if ($ComponentBuilder->supportWs() && $PqrFormField->getCamposFormato()->isVisibleFieldAdd()) {
+                $camposFormato   = new CamposFormato($field->getFkCamposFormato());
+                $ComponentBuilder = $camposFormato->getComponentBuilder();
+                if ($ComponentBuilder->supportWs() && $camposFormato->isVisibleFieldAdd()) {
                     $this->fields[] = $ComponentBuilder;
-                    $this->setFieldsAnonymous($PqrFormField);
+                    $this->setFieldsAnonymous($field);
                 }
             }
         }

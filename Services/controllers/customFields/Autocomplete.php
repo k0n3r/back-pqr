@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Services\controllers\customFields;
 
-use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
 use Saia\controllers\generator\webservice\IWsFields;
 use Saia\models\formatos\CamposFormato;
 
@@ -10,9 +10,9 @@ class Autocomplete implements IWsFields
 {
     protected CamposFormato $CamposFormato;
 
-    public function __construct(PqrFormField $PqrFormField)
+    public function __construct(PqrFormFieldEntity $PqrFormField)
     {
-        $this->CamposFormato = $PqrFormField->getCamposFormato();
+        $this->CamposFormato = new CamposFormato($PqrFormField->getFkCamposFormato());
     }
 
     public function getLibrariesWs(): array

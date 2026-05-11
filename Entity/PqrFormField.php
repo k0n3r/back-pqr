@@ -228,4 +228,24 @@ class PqrFormField
         $this->active = $active;
         return $this;
     }
+
+    public function getDataAttributes(): array
+    {
+        return [
+            'id'                 => $this->id ?? 0,
+            'name'               => $this->name,
+            'label'              => $this->label,
+            'required'           => (int)$this->isRequired(),
+            'anonymous'          => (int)$this->isAnonymous(),
+            'show_report'        => (int)$this->isShowReport(),
+            'required_anonymous' => (int)$this->isRequiredAnonymous(),
+            'setting'            => $this->setting,
+            'fk_pqr_html_field'  => $this->getFkPqrHtmlField(),
+            'fk_pqr_form'        => $this->getFkPqrForm(),
+            'fk_campos_formato'  => $this->getFkCamposFormato(),
+            'is_system'          => (int)$this->isSystem(),
+            'orden'              => $this->getOrden(),
+            'active'             => (int)$this->isActive(),
+        ];
+    }
 }

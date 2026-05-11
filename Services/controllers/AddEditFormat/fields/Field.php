@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Services\controllers\AddEditFormat\fields;
 
-use App\Bundles\pqr\Services\models\PqrFormField;
+use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
 use Saia\models\formatos\CamposFormato;
 
 abstract class Field
@@ -16,14 +16,14 @@ abstract class Field
         'sys_estado',
     ];
 
-    private PqrFormField $PqrFormField;
+    private PqrFormFieldEntity $PqrFormField;
 
-    public function __construct(PqrFormField $PqrFormField)
+    public function __construct(PqrFormFieldEntity $PqrFormField)
     {
         $this->PqrFormField = $PqrFormField;
     }
 
-    public function getPqrFormField(): PqrFormField
+    public function getPqrFormField(): PqrFormFieldEntity
     {
         return $this->PqrFormField;
     }
@@ -36,15 +36,15 @@ abstract class Field
         ];
 
         $isDescription = false;
-        if ($this->PqrFormField->required) {
-            if (in_array($this->PqrFormField->name, self::FIELDS_DESCRIPTION)) {
+        if ($this->PqrFormField->isRequired()) {
+            if (in_array($this->PqrFormField->getName(), self::FIELDS_DESCRIPTION)) {
                 $actions[] = CamposFormato::ACTION_DESCRIPTION;
                 $isDescription = true;
             }
         }
 
         if (!$isDescription) {
-            if ($this->PqrFormField->getPqrForm()->description_field == $this->PqrFormField->getPK()) {
+            if ($this->PqrFormField->getPqrForm()->getDescriptionField() === $this->PqrFormField->getId()) {
                 $actions[] = CamposFormato::ACTION_DESCRIPTION;
             }
         }

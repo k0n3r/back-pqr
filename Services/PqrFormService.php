@@ -9,27 +9,81 @@ use App\Bundles\pqr\Entity\PqrNotyMessage as PqrNotyMessageEntity;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrNotificationRepository;
-use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
 use App\Bundles\pqr\Service\PqrFormFieldServiceFactory;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
-use App\Bundles\pqr\Services\models\PqrForm;
 use App\Entity\EmailConfiguration;
-use App\Repository\EmailConfigurationRepository;
-use App\services\models\ModelService\ModelService;
+use App\services\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
+use Saia\models\Funcionario;
 use Saia\models\grupo\Grupo;
 use Saia\models\Modulo;
 use Saia\models\tarea\Tarea;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\tarea\TareaFuncionario;
 
-class PqrFormService extends ModelService
+class PqrFormService extends Service
 {
+    private PqrFormEntity $entity;
+
+    public function __construct(
+        private EntityManagerInterface $em,
+        private PqrFormRepository $pqrFormRepository,
+        private PqrFormFieldRepository $pqrFormFieldRepository,
+        private PqrFormFieldServiceFactory $pqrFormFieldServiceFactory,
+        ?Funcionario $funcionario = null,
+    ) {
+        parent::__construct($funcionario);
+        $this->entity = $pqrFormRepository->findActiveOrFail();
+    }
+
+    public function save(array $attributes): bool
+    {
+        $this->applyAttributes($attributes);
+        $this->em->flush();
+
+        return true;
+    }
+
+    protected function update(array $attributes): bool
+    {
+        return $this->save($attributes);
+    }
+
+    private function applyAttributes(array $attributes): void
+    {
+        foreach ($attributes as $key => $value) {
+            match ($key) {
+                'label'                  => $this->entity->setLabel((string)$value),
+                'name'                   => $this->entity->setName((string)$value),
+                'show_anonymous'         => $this->entity->setShowAnonymous((bool)$value),
+                'show_label'             => $this->entity->setShowLabel((bool)$value),
+                'show_empty'             => $this->entity->setShowEmpty((bool)$value),
+                'fk_formato'             => $this->entity->setFkFormato((int)$value),
+                'fk_contador'            => $this->entity->setFkContador((int)$value),
+                'fk_field_time'          => $this->entity->setFkFieldTime((int)$value),
+                'enable_filter_dep'      => $this->entity->setEnableFilterDep((bool)$value),
+                'description_field'      => $this->entity->setDescriptionField((int)$value),
+                'enable_balancer'        => $this->entity->setEnableBalancer((bool)$value),
+                'enable_con_days'        => $this->entity->setEnableConDays((bool)$value),
+                'fk_field_balancer'      => $this->entity->setFkFieldBalancer((int)$value),
+                'response_configuration' => $this->entity->setResponseConfiguration(
+                    is_string($value) ? json_decode($value, true) : (array)$value
+                ),
+                'canal_recepcion'        => $this->entity->setCanalRecepcion(
+                    is_string($value) ? json_decode($value, true) : (array)$value
+                ),
+                'active'                 => $this->entity->setActive((bool)$value),
+                default                  => null,
+            };
+        }
+    }
+
+
     /**
      * Ruta del Ws de PQR
      *
@@ -48,14 +102,19 @@ class PqrFormService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function getModel(): PqrForm
+    public function getModel(): PqrFormEntity
     {
-        return $this->Model;
+        return $this->entity;
     }
 
     public function getResponseConfiguration(bool $inArray = false): object|array|null
     {
-        return $this->getModel()->getResponseConfiguration($inArray);
+        $config = $this->entity->getResponseConfiguration();
+        if ($config === null) {
+            return null;
+        }
+
+        return $inArray ? $config : json_decode(json_encode($config));
     }
 
     /**
@@ -74,15 +133,14 @@ class PqrFormService extends ModelService
             return false;
         }
 
-        $this->serviceLocator
-            ->getConnection()
+        $this->em->getConnection()
             ->createQueryBuilder()
             ->update('pqr_form_fields')
             ->set('anonymous', 0)
             ->set('required_anonymous', 0)
             ->where("name<>'sys_tipo'")->executeStatement();
 
-        if ($this->getModel()->show_anonymous) {
+        if ($this->entity->isShowAnonymous()) {
             if ($formFields = $data['formFields']) {
                 foreach ($formFields['dataShowAnonymous'] as $id) {
                     $attributes = [
@@ -94,8 +152,8 @@ class PqrFormService extends ModelService
                         }
                     }
 
-                    $PqrFormFieldService = $this->getPqrFormFieldServiceFactory()->create((int)$id);
-                    if (!$PqrFormFieldService->update($attributes)) {
+                    $PqrFormFieldService = $this->pqrFormFieldServiceFactory->create((int)$id);
+                    if (!$PqrFormFieldService->save($attributes)) {
                         $this->getErrorManager()->setMessage("No fue posible actualizar");
 
                         return false;
@@ -143,7 +201,7 @@ class PqrFormService extends ModelService
 
         return [
             'urlWs'               => static::getUrlWsPQR(),
-            'publish'             => $this->getModel()->fk_formato ? 1 : 0,
+            'publish'             => $this->entity->getFkFormato() ? 1 : 0,
             'pqrForm'             => $this->getDataPqrForm(),
             'pqrFormFields'       => $this->getDataPqrFormFields(),
             'pqrNotifications'    => $this->getDataPqrNotifications(),
@@ -152,15 +210,14 @@ class PqrFormService extends ModelService
             'balancerOptions'     => $options,
             'groupOptions'        => $this->getGroupsForBalancer(),
             'descriptionField'    => $this->getdescriptionField(),
-            'receivingChannel'    => $this->getModel()->getCanalRecepcion(),
+            'receivingChannel'    => $this->entity->getCanalRecepcion(),
             'emailsConfig'        => $this->getEmailsConfig(),
         ];
     }
 
     private function getEmailsConfig(): array
     {
-        /** @var EmailConfigurationRepository $repository */
-        $repository = $this->serviceLocator->getRepository(EmailConfiguration::class);
+        $repository = $this->em->getRepository(EmailConfiguration::class);
         $emailsConfiguration = $repository->findByPqrModule();
 
         return array_map(fn ($config) => $config->toArray(), $emailsConfiguration);
@@ -192,12 +249,12 @@ class PqrFormService extends ModelService
      */
     public function publish(): bool
     {
-        (new AddEditFtPqr($this->getModel()))->updateChange();
+        (new AddEditFtPqr($this->entity))->updateChange();
 
-        $this->getModel()->getFormatoFk()->getService()->generate();
+        (new Formato($this->entity->getFkFormato()))->getService()->generate();
 
-        if (!$this->getModel()->fk_field_time) {
-            $sysTipoField = $this->getPqrFormFieldRepository()->findSysTipo();
+        if (!$this->entity->getFkFieldTime()) {
+            $sysTipoField = $this->pqrFormFieldRepository->findSysTipo();
             $this->editFieldTime($sysTipoField ? $sysTipoField->getFkCamposFormato() : 0);
         }
 
@@ -209,7 +266,7 @@ class PqrFormService extends ModelService
             return false;
         }
 
-        $formatNameR = "COMUNICACIÓN EXTERNA ({$this->getModel()->label})";
+        $formatNameR = "COMUNICACIÓN EXTERNA ({$this->entity->getLabel()})";
         if ($FormatoR->etiqueta != $formatNameR) {
             $FormatoR->etiqueta = $formatNameR;
             $FormatoR->save();
@@ -224,7 +281,7 @@ class PqrFormService extends ModelService
             return false;
         }
 
-        $formatNameC = "CALIFICACIÓN ({$this->getModel()->label})";
+        $formatNameC = "CALIFICACIÓN ({$this->entity->getLabel()})";
         if ($FormatoC->etiqueta != $formatNameC || !$FormatoC->isEnabledWs()) {
             $FormatoC->etiqueta = $formatNameC;
             $FormatoC->info_ws = json_encode(array_merge($FormatoC->getInfoWs(), [
@@ -254,7 +311,7 @@ class PqrFormService extends ModelService
      */
     private function activeInfoForDependency(): void
     {
-        $PqrFormField = $this->getPqrFormFieldRepository()->findByName(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA);
+        $PqrFormField = $this->pqrFormFieldRepository->findByName(PqrFormFieldEntity::FIELD_NAME_SYS_DEPENDENCIA);
 
         if (!$PqrFormField) {
             return;
@@ -311,7 +368,7 @@ class PqrFormService extends ModelService
      */
     public function getDataPqrFormFields(): array
     {
-        return $this->getPqrFormFieldRepository()->getDataAttributesForForm($this->getModel()->getPK());
+        return $this->pqrFormFieldRepository->getDataAttributesForForm($this->entity->getId());
     }
 
     /**
@@ -323,9 +380,7 @@ class PqrFormService extends ModelService
      */
     public function getDataPqrForm(): array
     {
-        $pqrForm = $this->getPqrFormRepository()->find($this->getModel()->getPK());
-
-        return $pqrForm?->toArray() ?? $this->getModel()->getDataAttributes();
+        return $this->entity->toArray();
     }
 
     /**
@@ -337,7 +392,7 @@ class PqrFormService extends ModelService
      */
     public function getDataPqrNotifications(): array
     {
-        $notifications = $this->getPqrNotificationRepository()->findByPqrForm($this->getModel()->getPK());
+        $notifications = $this->getPqrNotificationRepository()->findByPqrForm($this->entity->getId());
 
         return array_map(static fn ($n) => [
             'id'            => $n->getId(),
@@ -372,7 +427,7 @@ class PqrFormService extends ModelService
      */
     private function getFieldsReport(): array
     {
-        return $this->getPqrFormFieldRepository()->getReportFieldsData($this->getModel()->getPK());
+        return $this->pqrFormFieldRepository->getReportFieldsData($this->entity->getId());
     }
 
     /**
@@ -385,7 +440,7 @@ class PqrFormService extends ModelService
     {
         return array_map(
             fn ($f) => "ft.{$f->getName()}",
-            $this->getPqrFormFieldRepository()->findByPqrFormOrdered($this->getModel()->getPK()),
+            $this->pqrFormFieldRepository->findByPqrFormOrdered($this->entity->getId()),
         );
     }
 
@@ -452,7 +507,7 @@ class PqrFormService extends ModelService
         $data = [];
 
         if ($pqrFormId) {
-            $pqrFormFieldEntity = $this->getPqrFormFieldRepository()->find($pqrFormId);
+            $pqrFormFieldEntity = $this->pqrFormFieldRepository->find($pqrFormId);
             $data = [
                 "id"   => $pqrFormId,
                 "name" => $pqrFormFieldEntity?->getLabel() ?? '',
@@ -564,17 +619,17 @@ class PqrFormService extends ModelService
     {
         $selectedFields = $nameOfSeletedFields = [];
         foreach ($fields as $PqrFormField) {
-            $nameOfSeletedFields[] = $PqrFormField->name;
-            $type = $PqrFormField->getPqrHtmlField()->type_saia;
+            $nameOfSeletedFields[] = $PqrFormField['name'];
+            $type = $PqrFormField['type_saia'];
             $selectedFields[] = match ($type) {
                 'Text', 'Textarea' => [
-                    'title' => strtoupper($PqrFormField->label),
-                    'field' => "{*$PqrFormField->name*}",
+                    'title' => strtoupper($PqrFormField['label']),
+                    'field' => "{*{$PqrFormField['name']}*}",
                     'align' => 'center',
                 ],
                 default => [
-                    'title' => strtoupper($PqrFormField->label),
-                    'field' => "{*get_$PqrFormField->name@idft,$PqrFormField->name*}",
+                    'title' => strtoupper($PqrFormField['label']),
+                    'field' => "{*get_{$PqrFormField['name']}@idft,{$PqrFormField['name']}*}",
                     'align' => 'center',
                 ],
             };
@@ -783,35 +838,35 @@ class PqrFormService extends ModelService
     private function getDataresponseTime(): array
     {
         $data = [];
-        if ($records = $this->getModel()->getPqrFormFields()) {
-            foreach ($records as $PqrFormField) {
-                $PqrHtmlField = $PqrFormField->getPqrHtmlField();
+        $records = $this->pqrFormFieldRepository->findByPqrFormOrdered($this->entity->getId());
 
-                if (
-                    $PqrHtmlField->isValidFieldForResponseDaysOrBalance() &&
-                    $PqrFormField->isActive() &&
-                    $PqrFormField->fk_campos_formato
-                ) {
-                    $fieldOptions = [];
+        foreach ($records as $pqrFormField) {
+            $htmlField = $pqrFormField->getHtmlField();
 
-                    if ($PqrFormField->name != PqrFormField::FIELD_NAME_SYS_TIPO) {
-                        $options = $PqrFormField->getCamposFormato()->getCampoOpciones(['estado' => 1]);
-                        foreach ($options as $CampoOpcion) {
-                            if ($CampoOpcion->estado) {
-                                $fieldOptions[] = [
-                                    'id'    => $CampoOpcion->getPK(),
-                                    'label' => $CampoOpcion->valor,
-                                ];
-                            }
+            if (
+                $htmlField->isValidFieldForResponseDaysOrBalance() &&
+                $pqrFormField->isActive() &&
+                $pqrFormField->getFkCamposFormato()
+            ) {
+                $fieldOptions = [];
+
+                if ($pqrFormField->getName() !== PqrFormFieldEntity::FIELD_NAME_SYS_TIPO) {
+                    $options = (new CamposFormato($pqrFormField->getFkCamposFormato()))->getCampoOpciones(['estado' => 1]);
+                    foreach ($options as $CampoOpcion) {
+                        if ($CampoOpcion->estado) {
+                            $fieldOptions[] = [
+                                'id'    => $CampoOpcion->getPK(),
+                                'label' => $CampoOpcion->valor,
+                            ];
                         }
                     }
-
-                    $data[] = [
-                        'id'      => $PqrFormField->fk_campos_formato,
-                        'label'   => $PqrFormField->label,
-                        'options' => $fieldOptions,
-                    ];
                 }
+
+                $data[] = [
+                    'id'      => $pqrFormField->getFkCamposFormato(),
+                    'label'   => $pqrFormField->getLabel(),
+                    'options' => $fieldOptions,
+                ];
             }
         }
 
@@ -905,7 +960,7 @@ class PqrFormService extends ModelService
             default => $otherDefaultFields,
         };
 
-        $FtClassName = $this->getModel()->getFormatoFk()->getFtClass();
+        $FtClassName = (new Formato($this->entity->getFkFormato()))->getFtClass();
         if (method_exists($FtClassName, 'getCustomColumnsForReport')) {
             $fieldForReport = array_merge($fieldForReport, $FtClassName::getCustomColumnsForReport($reportName));
         }
@@ -922,19 +977,20 @@ class PqrFormService extends ModelService
      */
     public function updateFieldDescription(int $fieldId): bool
     {
-        $PqrForms = $this->getModel();
-
-        if ($PqrForms->description_field && $PqrForms->description_field == $fieldId) {
+        if ($this->entity->getDescriptionField() && $this->entity->getDescriptionField() === $fieldId) {
             return true;
         }
 
-        $isDescription = false;
-        $CamposFormato = (new PqrFormField($fieldId))->getCamposFormato();
-        if ($CamposFormato->isDescriptionField()) {
-            $isDescription = true;
-            if ($fieldId == $PqrForms->description_field) {
-                return true;
-            }
+        $pqrFormField = $this->pqrFormFieldRepository->find($fieldId);
+        if (!$pqrFormField) {
+            return false;
+        }
+
+        $CamposFormato = new CamposFormato($pqrFormField->getFkCamposFormato());
+        $isDescription = $CamposFormato->isDescriptionField();
+
+        if ($isDescription && $fieldId === $this->entity->getDescriptionField()) {
+            return true;
         }
 
         if (!$isDescription) {
@@ -946,41 +1002,44 @@ class PqrFormService extends ModelService
             ]);
         }
 
-        $PqrFormFieldDes = $PqrForms->getPqrFormFieldDescription();
-        if ($PqrFormFieldDes) {
-            $CamposFormatoOld = $PqrFormFieldDes->getCamposFormato();
-
-            $actionListOld = array_diff(explode(',', $CamposFormatoOld->acciones), [CamposFormato::ACTION_DESCRIPTION]);
-
-            $CamposFormatoServiceOld = $CamposFormatoOld->getService();
-            $CamposFormatoServiceOld->save([
-                'acciones' => implode(',', array_filter($actionListOld)),
-            ]);
+        $currentDescField = $this->entity->getDescriptionField();
+        if ($currentDescField) {
+            $PqrFormFieldDes = $this->pqrFormFieldRepository->find($currentDescField);
+            if ($PqrFormFieldDes) {
+                $CamposFormatoOld = new CamposFormato($PqrFormFieldDes->getFkCamposFormato());
+                $actionListOld = array_diff(
+                    explode(',', $CamposFormatoOld->acciones),
+                    [CamposFormato::ACTION_DESCRIPTION],
+                );
+                $CamposFormatoOld->getService()->save([
+                    'acciones' => implode(',', array_filter($actionListOld)),
+                ]);
+            }
         }
 
-        return $PqrForms->getService()->save([
+        return $this->save([
             'description_field' => $fieldId,
         ]);
     }
 
     private function getEntityManager(): EntityManagerInterface
     {
-        return $this->serviceLocator->getEntityManager();
+        return $this->em;
     }
 
     private function getPqrFormFieldRepository(): PqrFormFieldRepository
     {
-        return $this->getEntityManager()->getRepository(PqrFormFieldEntity::class);
+        return $this->pqrFormFieldRepository;
     }
 
     private function getPqrFormRepository(): PqrFormRepository
     {
-        return $this->getEntityManager()->getRepository(PqrFormEntity::class);
+        return $this->pqrFormRepository;
     }
 
     private function getPqrNotificationRepository(): PqrNotificationRepository
     {
-        return $this->getEntityManager()->getRepository(PqrNotificationEntity::class);
+        return $this->em->getRepository(PqrNotificationEntity::class);
     }
 
     private function getDataPqrNotyMessages(): array

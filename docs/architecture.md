@@ -10,8 +10,8 @@
 ┌─────────────────────────────────────────────────────────────┐
 │                  Bundle PQR — Symfony 7.4                   │
 │                                                             │
-│  FtPqrController        WebserviceController   PqrChatCtrl │
-│  FtPqrRespuestaCtrl     CaptchaController                   │
+│  FtPqrController        WebserviceController   PqrChatController │
+│  FtPqrRespuestaController  CaptchaController                │
 │       │                      │                    │         │
 │  FtPqrService          PqrFormService       PqrStatsTool   │
 │  FtPqrRespuestaService  PqrFormFieldService  PqrTool       │
@@ -47,4 +47,8 @@
 
 ## Registro del bundle
 
-El bundle se registra automáticamente vía `src/Bundles/pqr/config/bundle.php`. No requiere modificar `bundles.php`.
+El bundle se carga automáticamente por los globs de `config/services.yaml` y `config/routes/annotations.yaml`:
+- Rutas: `src/Bundles/*/Resources/config/routes.yaml`
+- Servicios: `src/Bundles/*/Resources/config/services.yaml`
+
+No requiere modificar `bundles.php` ni crear un archivo `bundle.php` — el propio directorio `Resources/config/` actúa como punto de entrada.

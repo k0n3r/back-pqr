@@ -20,17 +20,11 @@ services:
       - '../../helpers/'
       - '../../Services/models/'
       - '../../Services/controllers/'
+      - '../../Services/PqrFormFieldService.php'
       - '../../Services/Customizable/'
       - '../../Services/crontab/'
       - '../../IA/'
 
-  App\Bundles\pqr\Services\models\PqrForm:
-    factory: ['App\Bundles\pqr\Services\models\PqrForm', 'getInstance']
-    public: false
-
-  App\Bundles\pqr\Services\PqrFormService:
-    factory: ['@App\Bundles\pqr\Services\models\PqrForm', 'getService']
-    public: false
 
 imports:
   - { resource: "./migrations.yaml" }

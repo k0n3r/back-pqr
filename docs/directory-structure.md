@@ -6,8 +6,7 @@ Estructura post-refactor ORM (rama `refactor/pqr-orm`).
 src/Bundles/pqr/
 ├── Command/
 │   ├── GenerateIndixesPqrCommand.php         # app:generate:indexesPqr
-│   ├── GenerateJsonTranslatorForPQRCommand.php # app:generate:jsonTranslatorForPQR
-│   └── ImportFromFileCommand.php             # app:pqr:import-from-file
+│   └── GenerateJsonTranslatorForPQRCommand.php # app:generate:json-translator-for-pqr
 │
 ├── Controller/
 │   ├── CaptchaController.php                 # POST /api/pqr/captcha/saveDocument
@@ -88,7 +87,8 @@ src/Bundles/pqr/
 │       └── Version*.php                      # 12 migraciones (2019 → 2025)
 │
 ├── Service/                                  # Servicios Symfony DI (ORM puro)
-│   └── PqrFormProvider.php                   # ORM singleton: findActiveOrFail() — reemplaza PqrForm::getInstance()
+│   ├── PqrFormProvider.php                   # ORM singleton: findActiveOrFail() — reemplaza PqrForm::getInstance()
+│   └── PqrFormFieldServiceFactory.php        # Factory DI para PqrFormFieldService
 │
 ├── Services/                                 # Servicios legacy + business logic
 │   ├── FtPqrService.php                      # Ciclo de vida PQR (extiende ModelService)
@@ -101,6 +101,11 @@ src/Bundles/pqr/
 │   ├── PqrNotyMessageService.php             # Mensajes de notificación
 │   ├── Customizable/
 │   │   └── PqrCustomizable.php               # Clase extensible por cliente
+│   ├── crontab/
+│   │   └── ChangeStatusOfOportunoField.php   # Actualiza estado oportuno/extemporáneo de PQRs
+│   ├── generadoresWs/                        # Generadores de archivos del webservice
+│   │   ├── GenerateWsPqr.php
+│   │   └── GenerateWsPqrCalificacion.php
 │   └── controllers/
 │       ├── WebservicePqr.php                 # Generador del webservice de radicación
 │       ├── WebserviceCalificacion.php        # Generador del webservice de calificación
@@ -113,13 +118,13 @@ src/Bundles/pqr/
 │       │   ├── Dependencia.php
 │       │   ├── Localidad.php
 │       │   └── Tratamiento.php
-│       ├── generadoresWs/                    # Generadores de archivos del webservice
 │       └── templates/                        # Templates HTML/JS del formulario público
 │
 ├── formatos/
 │   ├── pqr/
 │   │   ├── FtPqrProperties.php               # Definición de campos en BD
 │   │   ├── FtPqr.php                         # Hooks del ciclo de vida (extiende ModelFormat)
+│   │   ├── functionsReport.php               # Funciones de reporte (auto-generado)
 │   │   └── reporteFunciones.php              # Funciones auxiliares del reporte
 │   ├── pqr_respuesta/
 │   │   ├── FtPqrRespuestaProperties.php

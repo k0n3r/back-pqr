@@ -13,10 +13,10 @@ use App\Bundles\pqr\Repository\PqrBalancerRepository;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrResponseTimeRepository;
-use App\Bundles\pqr\Services\models\PqrFormField;
 use App\Bundles\pqr\Entity\PqrHtmlField as PqrHtmlFieldEntity;
-use App\services\models\ModelService\ModelService;
+use App\services\Service;
 use App\services\ServiceEventDispatcher;
+use Saia\models\Funcionario;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,26 +25,127 @@ use Saia\controllers\generator\component\Rad;
 use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
 
-class PqrFormFieldService extends ModelService
+class PqrFormFieldService extends Service
 {
-    /**
-     * Bandera que indica el numero minimo donde empezara el orden de los campos
-     */
     public const int INITIAL_ORDER = 2;
     public const int DEFAULT_DAY   = 15;
 
     private array $CampoOpcionesSysTipo = [];
+    private PqrFormFieldEntity $entity;
+    private bool $isNew;
+    protected bool $skipSubscriber = false;
 
-    /**
-     * Obtiene la instancia de PqrFormField actualizada
-     *
-     * @return PqrFormField
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    public function getModel(): PqrFormField
+    public function __construct(EntityManagerInterface $em, ?int $id = null, ?Funcionario $Funcionario = null)
     {
-        return $this->Model;
+        parent::__construct($Funcionario);
+        if ($id) {
+            $this->entity = $em->getRepository(PqrFormFieldEntity::class)->find($id);
+            $this->isNew  = false;
+        } else {
+            $this->entity = new PqrFormFieldEntity();
+            $this->isNew  = true;
+        }
+    }
+
+    public function getModel(): PqrFormFieldEntity
+    {
+        return $this->entity;
+    }
+
+    public function save(array $attributes): bool
+    {
+        $attributes = $this->clearAttributes($attributes);
+
+        if ($this->isNew) {
+            $attributes = $this->processAttributesBeforeCreating($attributes);
+            if (!$attributes) {
+                return false;
+            }
+            $this->applyAttributes($attributes);
+            $this->getEntityManager()->persist($this->entity);
+            $this->getEntityManager()->flush();
+            $this->isNew = false;
+            if (!$this->skipSubscriber) {
+                $this->getIServiceEventDispatcher()->dispatch(ServiceEventDispatcher::EVENT_CREATED);
+            }
+            return true;
+        }
+
+        return $this->update($attributes);
+    }
+
+    protected function update(array $attributes): bool
+    {
+        $attributes = $this->processAttributesBeforeUpdating($this->clearAttributes($attributes));
+        if (!$attributes) {
+            $this->getErrorManager()->setMessage('error_actualizar');
+            return false;
+        }
+        $this->applyAttributes($attributes);
+        $this->getEntityManager()->flush();
+        if (!$this->skipSubscriber) {
+            $this->getIServiceEventDispatcher()->dispatch(ServiceEventDispatcher::EVENT_UPDATED);
+        }
+        return true;
+    }
+
+    public function delete(): bool
+    {
+        $fkCampos = $this->entity->getFkCamposFormato();
+
+        $this->getEntityManager()->remove($this->entity);
+        $this->getEntityManager()->flush();
+        $this->getIServiceEventDispatcher()->dispatch(ServiceEventDispatcher::EVENT_DELETED);
+
+        if ($fkCampos) {
+            if (!(new CamposFormato($fkCampos))->getService()->delete()) {
+                $this->getErrorManager()->setMessage('No fue posible eliminar el campo');
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function skipSubscriber(): void
+    {
+        $this->skipSubscriber = true;
+    }
+
+    private function applyAttributes(array $attributes): void
+    {
+        foreach ($attributes as $key => $value) {
+            match ($key) {
+                'name'               => $this->entity->setName((string)$value),
+                'label'              => $this->entity->setLabel((string)$value),
+                'required'           => $this->entity->setRequired((bool)$value),
+                'anonymous'          => $this->entity->setAnonymous((bool)$value),
+                'show_report'        => $this->entity->setShowReport((bool)$value),
+                'required_anonymous' => $this->entity->setRequiredAnonymous((bool)$value),
+                'setting'            => $this->entity->setSetting((string)$value),
+                'fk_pqr_html_field'  => $this->entity->setHtmlField(
+                    $this->getEntityManager()->getRepository(PqrHtmlFieldEntity::class)->find((int)$value)
+                ),
+                'fk_pqr_form'        => $this->entity->setPqrForm(
+                    $this->getEntityManager()->getRepository(PqrFormEntity::class)->find((int)$value)
+                ),
+                'fk_campos_formato'  => $this->entity->setFkCamposFormato((int)$value),
+                'is_system'          => $this->entity->setIsSystem((bool)$value),
+                'orden'              => $this->entity->setOrden((int)$value),
+                'active'             => $this->entity->setActive((bool)$value),
+                default              => null,
+            };
+        }
+    }
+
+    private function clearAttributes(array $attributes): array
+    {
+        array_walk_recursive($attributes, static function (&$item): void {
+            if (!is_null($item) && !is_numeric($item)) {
+                $item = trim((string)$item);
+            }
+        });
+        return $attributes;
     }
 
     /**
@@ -117,24 +218,6 @@ class PqrFormFieldService extends ModelService
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function delete(): bool
-    {
-        if (parent::delete()) {
-            if ($this->getModel()->fk_campos_formato) {
-                if (!$this->getModel()->getCamposFormato()->getService()->delete()) {
-                    $this->getErrorManager()->setMessage("No fue posible eliminar el campo");
-
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        $this->getErrorManager()->setMessage("No fue posible eliminar");
-
-        return false;
-    }
 
     /**
      * Actualiza el estado(active) del campo
@@ -154,17 +237,17 @@ class PqrFormFieldService extends ModelService
         ];
 
         if (
-            $this->getModel()->name != 'sys_subtipo'
-            && $this->getModel()->name != PqrFormFieldEntity::FIELD_NAME_SYS_DEPENDENCIA
+            $this->entity->getName() != 'sys_subtipo'
+            && $this->entity->getName() != PqrFormFieldEntity::FIELD_NAME_SYS_DEPENDENCIA
         ) {
             $attributes['show_report'] = 0;
         }
 
         if (!$status && $this->isFieldTime()) {
             $sysTipoField = $this->getPqrFormFieldRepository()->findSysTipo();
-            $this
-                ->getModel()->getPqrForm()->getService()
-                ->editFieldTime($sysTipoField ? $sysTipoField->getFkCamposFormato() : 0);
+            $pqrForm      = $this->entity->getPqrForm();
+            $pqrForm->setFkFieldTime($sysTipoField ? $sysTipoField->getFkCamposFormato() : 0);
+            $this->getEntityManager()->flush();
         }
 
         return $this->update($attributes);
@@ -179,10 +262,7 @@ class PqrFormFieldService extends ModelService
      */
     private function isFieldTime(): bool
     {
-        $idCampoFormato = $this->getModel()->fk_campos_formato;
-        $idField        = $this->getModel()->getPqrForm()->fk_field_time;
-
-        return $idCampoFormato == $idField;
+        return $this->entity->getFkCamposFormato() == $this->entity->getPqrForm()->getFkFieldTime();
     }
 
     /**
@@ -290,13 +370,13 @@ class PqrFormFieldService extends ModelService
     {
         $list = [];
 
-        switch ($this->getModel()->getPqrHtmlField()->type) {
+        switch ($this->entity->getHtmlField()->getType()) {
             case PqrHtmlFieldEntity::TYPE_DEPENDENCIA:
-                $list = $this->getDependencys($this->getModel()->getSetting(), $data);
+                $list = $this->getDependencys($this->entity->getSettingDecoded(), $data);
                 break;
 
             case PqrHtmlFieldEntity::TYPE_LOCALIDAD:
-                $list = $this->getListLocalidad($this->getModel()->getSetting(), $data);
+                $list = $this->getListLocalidad($this->entity->getSettingDecoded(), $data);
                 break;
         }
 
@@ -428,31 +508,26 @@ class PqrFormFieldService extends ModelService
      */
     public function addEditformatOptions(): void
     {
-        $PqrFormField = $this->getModel();
-        $CampoFormato = $PqrFormField->getCamposFormato();
+        $CampoFormato = new CamposFormato($this->entity->getFkCamposFormato());
         $llave        = 0;
         foreach ($CampoFormato->getCampoOpciones() as $CampoOpciones) {
             if ((int)$CampoOpciones->llave > $llave) {
                 $llave = (int)$CampoOpciones->llave;
             }
             if ((int)$CampoOpciones->estado) {
-                $CampoOpciones->setAttributes([
-                    'estado' => 0,
-                ]);
+                $CampoOpciones->setAttributes(['estado' => 0]);
                 $CampoOpciones->save();
             }
         }
 
         $data = $values = [];
-        foreach ($PqrFormField->getSetting()->options as $option) {
+        foreach ($this->entity->getSettingDecoded()->options as $option) {
             if ($CampoOpciones = CampoOpciones::findByAttributes([
                 'valor'             => $option->text,
                 'fk_campos_formato' => $CampoFormato->getPK(),
             ])) {
                 $CampoOpcionesService = $CampoOpciones->getService();
-                $CampoOpcionesService->save([
-                    'estado' => 1,
-                ]);
+                $CampoOpcionesService->save(['estado' => 1]);
                 $id = $CampoOpcionesService->getModel()->llave;
             } else {
                 $id    = $llave + 1;
@@ -467,10 +542,7 @@ class PqrFormFieldService extends ModelService
                 ]);
             }
 
-            $data[]   = [
-                'llave' => $id,
-                'item'  => $option->text,
-            ];
+            $data[]   = ['llave' => $id, 'item' => $option->text];
             $values[] = "$id,$option->text";
         }
 
@@ -480,7 +552,7 @@ class PqrFormFieldService extends ModelService
         ]);
         $CampoFormato->save();
 
-        if ($PqrFormField->getPqrHtmlField()->isValidFieldForResponseDaysOrBalance()) {
+        if ($this->entity->getHtmlField()->isValidFieldForResponseDaysOrBalance()) {
             $this->addEditPqrResponseTimesAndBalancer();
         }
     }
@@ -492,7 +564,7 @@ class PqrFormFieldService extends ModelService
      */
     private function addEditPqrResponseTimesAndBalancer(): void
     {
-        if ($this->getModel()->name == PqrFormFieldEntity::FIELD_NAME_SYS_TIPO) {
+        if ($this->entity->getName() == PqrFormFieldEntity::FIELD_NAME_SYS_TIPO) {
             $this->addEditPqrResponseTimesForSysTipo();
             $this->addEditPqrBalancerForSysTipo();
         } else {
@@ -593,7 +665,7 @@ class PqrFormFieldService extends ModelService
     private function addEditPqrResponseTimesForOtherFields(): void
     {
         $sysTipoOptions = $this->getSysTipoOptions();
-        $records        = $this->getModel()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
+        $records        = (new CamposFormato($this->entity->getFkCamposFormato()))->getCampoOpciones(['estado' => 1]);
         $em             = $this->getEntityManager();
 
         foreach ($records as $CampoOpciones) {
@@ -639,7 +711,7 @@ class PqrFormFieldService extends ModelService
     private function addEditPqrBalancerForOtherFields(): void
     {
         $sysTipoOptions = $this->getSysTipoOptions();
-        $records        = $this->getModel()->getCamposFormato()->getCampoOpciones(['estado' => 1]);
+        $records        = (new CamposFormato($this->entity->getFkCamposFormato()))->getCampoOpciones(['estado' => 1]);
         $em             = $this->getEntityManager();
 
         foreach ($records as $CampoOpciones) {
