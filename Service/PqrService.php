@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Bundles\pqr\Services;
+namespace App\Bundles\pqr\Service;
 
 use App\Bundles\pqr\Entity\PqrForm;
 use App\Bundles\pqr\Entity\PqrFormField;
@@ -11,8 +11,8 @@ use App\Bundles\pqr\Entity\PqrNotification;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrHtmlFieldRepository;
 use App\Bundles\pqr\Service\PqrFormProvider;
-use App\Service\LegacyServiceLocator;
 use Doctrine\DBAL\Connection;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\DBAL\ParameterType;
 use RuntimeException;
 use Saia\models\formatos\CamposFormato;
@@ -25,37 +25,13 @@ class PqrService
     private ?bool $subTypeExist = null;
     private ?bool $dependencyExist = null;
 
-    private readonly PqrFormProvider $pqrFormProvider;
-    private readonly PqrFormFieldRepository $pqrFormFieldRepository;
-    private readonly PqrHtmlFieldRepository $pqrHtmlFieldRepository;
-    private readonly Connection $connection;
-    private readonly LegacyServiceLocator $serviceLocator;
-
-    /**
-     * Acepta DI completo cuando es construido por el container Symfony.
-     * Si se construye con `new PqrService()` desde código legacy, resuelve sus
-     * dependencias vía LegacyServiceLocator. Eliminar el fallback cuando se
-     * complete el refactor de FtPqrService y desaparezca `new PqrService()`.
-     */
     public function __construct(
-        ?PqrFormProvider $pqrFormProvider = null,
-        ?PqrFormFieldRepository $pqrFormFieldRepository = null,
-        ?PqrHtmlFieldRepository $pqrHtmlFieldRepository = null,
-        ?Connection $connection = null,
-        ?LegacyServiceLocator $serviceLocator = null,
+        private readonly PqrFormProvider $pqrFormProvider,
+        private readonly PqrFormFieldRepository $pqrFormFieldRepository,
+        private readonly PqrHtmlFieldRepository $pqrHtmlFieldRepository,
+        private readonly Connection $connection,
+        private readonly TranslatorInterface $translator,
     ) {
-        $loc = $serviceLocator ?? LegacyServiceLocator::getInstance();
-        $em  = $loc->getEntityManager();
-
-        $this->pqrFormFieldRepository = $pqrFormFieldRepository ?? $em->getRepository(PqrFormField::class);
-        $this->pqrHtmlFieldRepository = $pqrHtmlFieldRepository ?? $em->getRepository(PqrHtmlField::class);
-        $this->connection             = $connection ?? $loc->getConnection();
-        $this->serviceLocator         = $loc;
-        $this->pqrFormProvider        = $pqrFormProvider ?? new PqrFormProvider(
-            $em->getRepository(PqrForm::class),
-            $this->pqrFormFieldRepository,
-            $em->getRepository(PqrNotification::class),
-        );
     }
 
     public function getPqrForm(): PqrForm
@@ -202,7 +178,7 @@ class PqrService
     {
         $qb = $this->pqrFormFieldRepository
             ->createQueryBuilder('ff')
-            ->innerJoin(PqrHtmlField::class, 'hf', 'WITH', 'ff.fkPqrHtmlField = hf.id')
+            ->innerJoin('ff.htmlField', 'hf')
             ->where("hf.typeSaia = 'Text'")
             ->andWhere('ff.active = true')
             ->orderBy('ff.orden', 'ASC');
@@ -245,7 +221,7 @@ class PqrService
             'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO,
         ]);
         if (!$PantallaGrafico) {
-            $trans = $this->serviceLocator->getTranslator()->trans('no_se_encuentra_pantalla_grafico');
+            $trans = $this->translator->trans('no_se_encuentra_pantalla_grafico');
             throw new RuntimeException($trans);
         }
 

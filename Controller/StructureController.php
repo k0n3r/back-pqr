@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\PqrFormService;
-use App\Bundles\pqr\Services\PqrService;
+use App\Bundles\pqr\Service\PqrFormService;
+use App\Bundles\pqr\Service\PqrService;
 use App\Service\JsonResponseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;

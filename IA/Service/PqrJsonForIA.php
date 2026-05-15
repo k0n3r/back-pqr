@@ -6,7 +6,8 @@ use App\Bundles\ia\Services\JsonForIA;
 use App\Bundles\pqr\Entity\PqrFormField;
 use App\Bundles\pqr\Entity\PqrHtmlField;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
-use App\Service\LegacyServiceLocator;
+use Doctrine\DBAL\Connection;
+use Saia\controllers\documento\DocumentoService;
 use Saia\controllers\generator\component\Method;
 use Saia\core\model\ModelFormat;
 use Saia\models\formatos\CamposFormato;
@@ -14,6 +15,11 @@ use Saia\models\formatos\CamposFormato;
 class PqrJsonForIA extends JsonForIA
 {
     protected ModelFormat|FtPqr $ft;
+
+    public function __construct(DocumentoService $documentoService, private readonly Connection $connection)
+    {
+        parent::__construct($documentoService);
+    }
 
     protected const array SPECIAL_FIELDS = [
         'sys_tercero',
@@ -107,7 +113,7 @@ class PqrJsonForIA extends JsonForIA
 
         if ($camposFormato->valor == '{*autocompleteM*}') {
             if ($this->ft->$nameDb) {
-                $connection = LegacyServiceLocator::getInstance()->getConnection();
+                $connection = $this->connection;
                 $type = $connection->createQueryBuilder()
                     ->select('phf.type')
                     ->from('pqr_form_fields', 'pff')

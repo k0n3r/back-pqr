@@ -20,10 +20,21 @@ services:
       - '../../helpers/'
       - '../../Services/models/'
       - '../../Services/controllers/'
-      - '../../Services/PqrFormFieldService.php'
+      - '../../Services/generadoresWs/'
       - '../../Services/Customizable/'
       - '../../Services/crontab/'
+      - '../../Service/PqrFormFieldService.php'
       - '../../IA/'
+
+  # Públicos para acceso dinámico desde clases FT (via LegacyServiceLocator::get()), evitar uso (Usado para migracion legacy)
+  App\Bundles\pqr\Service\PqrService:
+    public: true
+
+  App\Bundles\pqr\Service\PqrFormFieldServiceFactory:
+    public: true
+
+  App\Bundles\pqr\Service\PqrHistoryService:
+    public: true
 
 
 imports:

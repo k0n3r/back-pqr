@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Entity\PqrBalancer as PqrBalancerEntity;
 use App\Bundles\pqr\Repository\PqrBalancerRepository;
-use App\Bundles\pqr\Services\PqrFormService;
+use App\Bundles\pqr\Service\PqrFormService;
 use App\Exception\MissingParameterException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;

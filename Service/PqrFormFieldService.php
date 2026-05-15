@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Bundles\pqr\Services;
+namespace App\Bundles\pqr\Service;
 
 use App\Bundles\pqr\Entity\PqrBalancer as PqrBalancerEntity;
 use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
@@ -18,6 +18,7 @@ use App\services\Service;
 use App\services\ServiceEventDispatcher;
 use Saia\models\Funcionario;
 use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Saia\controllers\generator\component\Distribution;
@@ -35,8 +36,12 @@ class PqrFormFieldService extends Service
     private bool $isNew;
     protected bool $skipSubscriber = false;
 
-    public function __construct(EntityManagerInterface $em, ?int $id = null, ?Funcionario $Funcionario = null)
-    {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly Connection $connection,
+        ?int $id = null,
+        ?Funcionario $Funcionario = null,
+    ) {
         parent::__construct($Funcionario);
         if ($id) {
             $this->entity = $em->getRepository(PqrFormFieldEntity::class)->find($id);
@@ -62,8 +67,8 @@ class PqrFormFieldService extends Service
                 return false;
             }
             $this->applyAttributes($attributes);
-            $this->getEntityManager()->persist($this->entity);
-            $this->getEntityManager()->flush();
+            $this->em->persist($this->entity);
+            $this->em->flush();
             $this->isNew = false;
             if (!$this->skipSubscriber) {
                 $this->getIServiceEventDispatcher()->dispatch(ServiceEventDispatcher::EVENT_CREATED);
@@ -82,7 +87,7 @@ class PqrFormFieldService extends Service
             return false;
         }
         $this->applyAttributes($attributes);
-        $this->getEntityManager()->flush();
+        $this->em->flush();
         if (!$this->skipSubscriber) {
             $this->getIServiceEventDispatcher()->dispatch(ServiceEventDispatcher::EVENT_UPDATED);
         }
@@ -93,8 +98,8 @@ class PqrFormFieldService extends Service
     {
         $fkCampos = $this->entity->getFkCamposFormato();
 
-        $this->getEntityManager()->remove($this->entity);
-        $this->getEntityManager()->flush();
+        $this->em->remove($this->entity);
+        $this->em->flush();
         $this->getIServiceEventDispatcher()->dispatch(ServiceEventDispatcher::EVENT_DELETED);
 
         if ($fkCampos) {
@@ -124,10 +129,10 @@ class PqrFormFieldService extends Service
                 'required_anonymous' => $this->entity->setRequiredAnonymous((bool)$value),
                 'setting'            => $this->entity->setSetting((string)$value),
                 'fk_pqr_html_field'  => $this->entity->setHtmlField(
-                    $this->getEntityManager()->getRepository(PqrHtmlFieldEntity::class)->find((int)$value)
+                    $this->em->getRepository(PqrHtmlFieldEntity::class)->find((int)$value)
                 ),
                 'fk_pqr_form'        => $this->entity->setPqrForm(
-                    $this->getEntityManager()->getRepository(PqrFormEntity::class)->find((int)$value)
+                    $this->em->getRepository(PqrFormEntity::class)->find((int)$value)
                 ),
                 'fk_campos_formato'  => $this->entity->setFkCamposFormato((int)$value),
                 'is_system'          => $this->entity->setIsSystem((bool)$value),
@@ -178,7 +183,7 @@ class PqrFormFieldService extends Service
             return false;
         }
 
-        $fieldCount = $this->getPqrFormFieldRepository()->count(['fkPqrForm' => $pqrForm->getId()]);
+        $fieldCount = $this->getPqrFormFieldRepository()->count(['pqrForm' => $pqrForm]);
 
         $defaultFields = [
             'name'              => $this->generateName(trim(strtolower($attributes['label']))),
@@ -247,7 +252,7 @@ class PqrFormFieldService extends Service
             $sysTipoField = $this->getPqrFormFieldRepository()->findSysTipo();
             $pqrForm      = $this->entity->getPqrForm();
             $pqrForm->setFkFieldTime($sysTipoField ? $sysTipoField->getFkCamposFormato() : 0);
-            $this->getEntityManager()->flush();
+            $this->em->flush();
         }
 
         return $this->update($attributes);
@@ -349,8 +354,7 @@ class PqrFormFieldService extends Service
      */
     private function columnExistsDB(string $name): bool
     {
-        $connection    = $this->serviceLocator->getConnection();
-        $schemaManager = $connection->createSchemaManager();
+        $schemaManager = $this->connection->createSchemaManager();
         $table         = $schemaManager->introspectTable('ft_pqr');
 
         return $table->hasColumn($name);
@@ -397,8 +401,7 @@ class PqrFormFieldService extends Service
      */
     private function getDependencys(object $ObjSettings, array $data = []): array
     {
-        $Qb = $this->serviceLocator
-            ->getConnection()
+        $Qb = $this->connection
             ->createQueryBuilder()
             ->select('iddependencia as id,nombre as text')
             ->from('dependencia');
@@ -454,8 +457,7 @@ class PqrFormFieldService extends Service
      */
     private function getListLocalidad(object $ObjSettings, array $data = []): array
     {
-        $Qb = $this->serviceLocator
-            ->getConnection()
+        $Qb = $this->connection
             ->createQueryBuilder()
             ->select(
                 "CONCAT(a.nombre,
@@ -581,17 +583,11 @@ class PqrFormFieldService extends Service
     private function addEditPqrResponseTimesForSysTipo(): void
     {
         $sysTipoOptions = $this->getSysTipoOptions();
-        $em             = $this->getEntityManager();
 
-        $this->serviceLocator
-            ->getConnection()->createQueryBuilder()
-            ->update('pqr_response_times')
-            ->set('active', ':active')
-            ->where('fk_campo_opciones = :fkCampoOpciones')
-            ->setParameter('active', 0, ParameterType::INTEGER)
-            ->setParameter('fkCampoOpciones', -1, ParameterType::INTEGER)
-            ->executeStatement();
-        $em->clear();
+        foreach ($this->getPqrResponseTimeRepository()->findBy(['fkCampoOpciones' => -1]) as $rt) {
+            $rt->setActive(false);
+        }
+        $this->em->flush();
 
         foreach ($sysTipoOptions as $Option) {
             if (!$Option->estado) {
@@ -611,26 +607,20 @@ class PqrFormFieldService extends Service
                     ->setFkSysTipo($Option->getPK())
                     ->setNumberDays($this->getDaysForSystipo($Option->valor))
                     ->setActive(true);
-                $em->persist($pqrRt);
+                $this->em->persist($pqrRt);
             }
-            $em->flush();
+            $this->em->flush();
         }
     }
 
     private function addEditPqrBalancerForSysTipo(): void
     {
         $sysTipoOptions = $this->getSysTipoOptions();
-        $em             = $this->getEntityManager();
 
-        $this->serviceLocator
-            ->getConnection()->createQueryBuilder()
-            ->update('pqr_balancer')
-            ->set('active', ':active')
-            ->where('fk_campo_opciones = :fkCampoOpciones')
-            ->setParameter('active', 0, ParameterType::INTEGER)
-            ->setParameter('fkCampoOpciones', -1, ParameterType::INTEGER)
-            ->executeStatement();
-        $em->clear();
+        foreach ($this->getPqrBalancerRepository()->findBy(['fkCampoOpciones' => -1]) as $balancer) {
+            $balancer->setActive(false);
+        }
+        $this->em->flush();
 
         foreach ($sysTipoOptions as $Option) {
             if (!$Option->estado) {
@@ -650,9 +640,9 @@ class PqrFormFieldService extends Service
                     ->setFkSysTipo($Option->getPK())
                     ->setFkGrupo(-1)
                     ->setActive(true);
-                $em->persist($pqrBalancer);
+                $this->em->persist($pqrBalancer);
             }
-            $em->flush();
+            $this->em->flush();
         }
     }
 
@@ -666,18 +656,12 @@ class PqrFormFieldService extends Service
     {
         $sysTipoOptions = $this->getSysTipoOptions();
         $records        = (new CamposFormato($this->entity->getFkCamposFormato()))->getCampoOpciones(['estado' => 1]);
-        $em             = $this->getEntityManager();
 
         foreach ($records as $CampoOpciones) {
-            $this->serviceLocator
-                ->getConnection()->createQueryBuilder()
-                ->update('pqr_response_times')
-                ->set('active', ':active')
-                ->where('fk_campo_opciones = :fkCampoOpciones')
-                ->setParameter('active', 0, ParameterType::INTEGER)
-                ->setParameter('fkCampoOpciones', $CampoOpciones->getPK(), ParameterType::INTEGER)
-                ->executeStatement();
-            $em->clear();
+            foreach ($this->getPqrResponseTimeRepository()->findBy(['fkCampoOpciones' => $CampoOpciones->getPK()]) as $rt) {
+                $rt->setActive(false);
+            }
+            $this->em->flush();
 
             if (!$CampoOpciones->estado) {
                 continue;
@@ -701,9 +685,9 @@ class PqrFormFieldService extends Service
                         ->setFkSysTipo($Option->getPK())
                         ->setNumberDays($this->getDaysForSystipo($Option->valor))
                         ->setActive(true);
-                    $em->persist($pqrRt);
+                    $this->em->persist($pqrRt);
                 }
-                $em->flush();
+                $this->em->flush();
             }
         }
     }
@@ -712,18 +696,12 @@ class PqrFormFieldService extends Service
     {
         $sysTipoOptions = $this->getSysTipoOptions();
         $records        = (new CamposFormato($this->entity->getFkCamposFormato()))->getCampoOpciones(['estado' => 1]);
-        $em             = $this->getEntityManager();
 
         foreach ($records as $CampoOpciones) {
-            $this->serviceLocator
-                ->getConnection()->createQueryBuilder()
-                ->update('pqr_balancer')
-                ->set('active', ':active')
-                ->where('fk_campo_opciones = :fkCampoOpciones')
-                ->setParameter('active', 0, ParameterType::INTEGER)
-                ->setParameter('fkCampoOpciones', $CampoOpciones->getPK(), ParameterType::INTEGER)
-                ->executeStatement();
-            $em->clear();
+            foreach ($this->getPqrBalancerRepository()->findBy(['fkCampoOpciones' => $CampoOpciones->getPK()]) as $balancer) {
+                $balancer->setActive(false);
+            }
+            $this->em->flush();
 
             if (!$CampoOpciones->estado) {
                 continue;
@@ -747,9 +725,9 @@ class PqrFormFieldService extends Service
                         ->setFkSysTipo($Option->getPK())
                         ->setFkGrupo(-1)
                         ->setActive(true);
-                    $em->persist($pqrBalancer);
+                    $this->em->persist($pqrBalancer);
                 }
-                $em->flush();
+                $this->em->flush();
             }
         }
     }
@@ -796,28 +774,23 @@ class PqrFormFieldService extends Service
         return $this->CampoOpcionesSysTipo;
     }
 
-    private function getEntityManager(): EntityManagerInterface
-    {
-        return $this->serviceLocator->getEntityManager();
-    }
-
     private function getPqrFormRepository(): PqrFormRepository
     {
-        return $this->getEntityManager()->getRepository(PqrFormEntity::class);
+        return $this->em->getRepository(PqrFormEntity::class);
     }
 
     private function getPqrFormFieldRepository(): PqrFormFieldRepository
     {
-        return $this->getEntityManager()->getRepository(PqrFormFieldEntity::class);
+        return $this->em->getRepository(PqrFormFieldEntity::class);
     }
 
     private function getPqrResponseTimeRepository(): PqrResponseTimeRepository
     {
-        return $this->getEntityManager()->getRepository(PqrResponseTimeEntity::class);
+        return $this->em->getRepository(PqrResponseTimeEntity::class);
     }
 
     private function getPqrBalancerRepository(): PqrBalancerRepository
     {
-        return $this->getEntityManager()->getRepository(PqrBalancerEntity::class);
+        return $this->em->getRepository(PqrBalancerEntity::class);
     }
 }

@@ -23,10 +23,10 @@ class AddEditFtPqr implements IAddEditFormat
     private PqrFormEntity $PqrForm;
     private EntityManagerInterface $em;
 
-    public function __construct(PqrFormEntity $PqrForm)
+    public function __construct(PqrFormEntity $PqrForm, EntityManagerInterface $em)
     {
         $this->PqrForm = $PqrForm;
-        $this->em      = LegacyServiceLocator::getInstance()->getEntityManager();
+        $this->em      = $em;
     }
 
     /**
@@ -204,7 +204,7 @@ class AddEditFtPqr implements IAddEditFormat
     private function addEditRecordsInFormatFields(): self
     {
         $fields  = $this->em->getRepository(PqrFormFieldEntity::class)->findByPqrFormOrdered($this->PqrForm->getId());
-        $factory = new PqrFormFieldServiceFactory($this->em);
+        $factory = LegacyServiceLocator::getInstance()->get(PqrFormFieldServiceFactory::class);
         foreach ($fields as $PqrFormField) {
             if (!$PqrFormField->getFkCamposFormato()) {
                 $this->createRecordInFormatFields($PqrFormField);

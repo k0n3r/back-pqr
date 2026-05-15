@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Bundles\pqr\Services;
+namespace App\Bundles\pqr\Service;
 
 use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
 use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
@@ -35,6 +35,7 @@ class PqrFormService extends Service
         private PqrFormRepository $pqrFormRepository,
         private PqrFormFieldRepository $pqrFormFieldRepository,
         private PqrFormFieldServiceFactory $pqrFormFieldServiceFactory,
+        private PqrService $pqrService,
         ?Funcionario $funcionario = null,
     ) {
         parent::__construct($funcionario);
@@ -249,7 +250,7 @@ class PqrFormService extends Service
      */
     public function publish(): bool
     {
-        (new AddEditFtPqr($this->entity))->updateChange();
+        (new AddEditFtPqr($this->entity, $this->em))->updateChange();
 
         (new Formato($this->entity->getFkFormato()))->getService()->generate();
 
@@ -297,7 +298,7 @@ class PqrFormService extends Service
         $this->viewCalificacionPqr();
         $this->viewPqrTarea();
 
-        (new PqrService())->activeGraphics();
+        $this->pqrService->activeGraphics();
         $this->activeInfoForDependency();
 
         return true;

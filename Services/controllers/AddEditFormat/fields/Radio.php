@@ -16,7 +16,7 @@ class Radio extends Field implements IField
             'longitud'  => 11,
         ]);
 
-        if (!$this->getPqrFormField()->active) {
+        if (!$this->getPqrFormField()->isActive()) {
             $data['etiqueta_html'] = 'Hidden';
             $data['opciones'] = '{"type":"hidden"}';
         }

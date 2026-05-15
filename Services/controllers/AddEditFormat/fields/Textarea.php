@@ -16,10 +16,10 @@ class Textarea extends Field implements IField
         $data = array_merge($this->getDefaultValues(), [
             'tipo_dato'   => 'text',
             'longitud'    => null,
-            'placeholder' => $PqrFormField->getSetting()->placeholder,
+            'placeholder' => $PqrFormField->getSettingDecoded()->placeholder,
         ]);
 
-        if (!$PqrFormField->active) {
+        if (!$PqrFormField->isActive()) {
             $data['etiqueta_html'] = 'Hidden';
             $data['opciones'] = '{"type":"hidden"}';
         }

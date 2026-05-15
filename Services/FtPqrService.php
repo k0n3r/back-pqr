@@ -5,11 +5,15 @@ namespace App\Bundles\pqr\Services;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
+use App\Bundles\pqr\Service\PqrService;
+use App\Service\LegacyServiceLocator;
 use App\Bundles\pqr\Entity\PqrBackup as PqrBackupEntity;
 use App\Bundles\pqr\Entity\PqrBalancer as PqrBalancerEntity;
 use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
 use App\Bundles\pqr\Entity\PqrHistory as PqrHistoryEntity;
+use App\Bundles\pqr\Service\PqrHistoryService;
 use App\Bundles\pqr\Entity\PqrNotyMessage as PqrNotyMessageEntity;
+use App\Bundles\pqr\Service\PqrNotyMessageService;
 use App\Bundles\pqr\Entity\PqrResponseTime as PqrResponseTimeEntity;
 use App\Bundles\pqr\Repository\PqrBackupRepository;
 use App\Bundles\pqr\Repository\PqrBalancerRepository;
@@ -59,7 +63,7 @@ class FtPqrService extends ModelService
     public function __construct(FtPqr $Ft)
     {
         parent::__construct($Ft);
-        $this->PqrService = new PqrService();
+        $this->PqrService = LegacyServiceLocator::getInstance()->get(PqrService::class);
     }
 
     /**
@@ -216,7 +220,8 @@ class FtPqrService extends ModelService
             case 'AutocompleteM':
                 $value = null;
                 if ($this->getModel()->$fieldName) {
-                    $value = (new PqrFormFieldServiceFactory())->create($PqrFormField->getId())
+                    $value = LegacyServiceLocator::getInstance()->get(PqrFormFieldServiceFactory::class)
+                        ->create($PqrFormField->getId())
                         ->getListDataForAutocomplete(['id' => $this->getModel()->$fieldName]);
                 }
                 $data[$label] = $value ? $value[0]['text'] : '';
@@ -608,7 +613,8 @@ class FtPqrService extends ModelService
 
         $options = '';
         if ($this->getModel()->$name) {
-            $list = (new PqrFormFieldServiceFactory())->create($PqrFormField->getId())
+            $list = LegacyServiceLocator::getInstance()->get(PqrFormFieldServiceFactory::class)
+                ->create($PqrFormField->getId())
                 ->getListDataForAutocomplete(['id' => $this->getModel()->$name]);
             if ($list) {
                 $options .= "<option value='{$list[0]['id']}' selected='selected'>{$list[0]['text']}</option>";
@@ -1514,7 +1520,7 @@ class FtPqrService extends ModelService
 
     private function getPqrHistoryService(): PqrHistoryService
     {
-        return new PqrHistoryService($this->getPqrHistoryRepository());
+        return LegacyServiceLocator::getInstance()->get(PqrHistoryService::class);
     }
 
 }

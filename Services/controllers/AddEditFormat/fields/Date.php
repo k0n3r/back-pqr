@@ -12,15 +12,15 @@ class Date extends Field implements IField
     public function getValues(): array
     {
         $PqrFormField = $this->getPqrFormField();
-        $type = $PqrFormField->getSetting()->dateType;
+        $setting = $PqrFormField->getSettingDecoded();
 
         $data = array_merge($this->getDefaultValues(), [
             'tipo_dato'   => 'datetime',
-            'placeholder' => $PqrFormField->getSetting()->placeholder,
-            'opciones'    => '{"hoy":true,"tipo":"'.$type.'"}',
+            'placeholder' => $setting->placeholder,
+            'opciones'    => '{"hoy":true,"tipo":"'.$setting->dateType.'"}',
         ]);
 
-        if (!$PqrFormField->active) {
+        if (!$PqrFormField->isActive()) {
             $data['etiqueta_html'] = 'Hidden';
             $data['opciones'] = '{"type":"hidden"}';
         }

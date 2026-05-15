@@ -16,9 +16,9 @@ class Select extends Field implements IField
             'longitud'  => 11,
         ]);
 
-        if (!$this->getPqrFormField()->active && $this->getPqrFormField()->name != 'sys_subtipo') {
+        if (!$this->getPqrFormField()->isActive() && $this->getPqrFormField()->getName() !== 'sys_subtipo') {
             $data['etiqueta_html'] = 'Hidden';
-            $data['opciones'] = '{"type":"hidden"}';
+            $data['opciones']      = '{"type":"hidden"}';
         }
 
         return $data;

@@ -29,7 +29,7 @@ class PqrHistory
     #[ORM\Column(name: 'idft', type: 'integer', nullable: false)]
     private int $idft;
 
-    #[ORM\Column(name: 'fecha', type: 'datetime', nullable: false)]
+    #[ORM\Column(name: 'fecha', type: 'datetime_immutable', nullable: false)]
     private DateTimeInterface $fecha;
 
     #[ORM\Column(name: 'fk_funcionario', type: 'integer', nullable: false)]

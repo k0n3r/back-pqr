@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Bundles\pqr\Services;
+namespace App\Bundles\pqr\Service;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
@@ -79,7 +79,7 @@ readonly class PqrNotyMessageService
 
     public static function n_nombreFormularioPqr(FtPqr $FtPqr): string
     {
-        return $FtPqr->getService()->getPqrForm()->label;
+        return $FtPqr->getService()->getPqrForm()->getLabel();
     }
 
     public static function n_consecutivoPqr(FtPqr $FtPqr): string|int

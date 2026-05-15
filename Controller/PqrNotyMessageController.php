@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Controller;
 
-use App\Bundles\pqr\Services\PqrNotyMessageService;
+use App\Bundles\pqr\Service\PqrNotyMessageService;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

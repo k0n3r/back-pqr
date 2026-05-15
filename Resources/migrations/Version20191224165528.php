@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\Resources\migrations;
 
-use App\Bundles\pqr\Services\PqrService;
+use App\Bundles\pqr\Service\PqrService;
 use DateTime;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\grafico\Grafico;

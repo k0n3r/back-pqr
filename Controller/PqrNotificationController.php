@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Repository\PqrNotificationRepository;
-use App\Bundles\pqr\Services\PqrNotificationService;
+use App\Bundles\pqr\Service\PqrNotificationService;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;

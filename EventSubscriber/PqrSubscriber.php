@@ -7,7 +7,7 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Entity\PqrHistory as PqrHistoryEntity;
 use App\Bundles\pqr\Service\PqrFormProvider;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
-use App\Bundles\pqr\Services\PqrHistoryService;
+use App\Bundles\pqr\Service\PqrHistoryService;
 use App\Event\tarea\TaskCreatedEvent;
 use App\Event\tarea\TaskDeletedEvent;
 use App\Event\tarea\TaskStatusCreatedEvent;

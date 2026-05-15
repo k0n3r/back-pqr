@@ -2,6 +2,8 @@
 
 namespace App\Bundles\pqr\Services\controllers\AddEditFormat\fields;
 
+use Saia\models\formatos\CamposFormato;
+
 class Attached extends Field implements IField
 {
     use TField;
@@ -11,7 +13,7 @@ class Attached extends Field implements IField
      */
     public function getValues(): array
     {
-        $setting = $this->getPqrFormField()->getSetting();
+        $setting = $this->getPqrFormField()->getSettingDecoded();
 
         $data = array_merge($this->getDefaultValues(), [
             'valor'    => $setting->typeFiles,
@@ -19,7 +21,7 @@ class Attached extends Field implements IField
             ).'","cantidad":"'.$setting->numberFiles.'","ruta_consulta":"api/documentFile/info"}',
         ]);
 
-        if (!$this->getPqrFormField()->active) {
+        if (!$this->getPqrFormField()->isActive()) {
             $data['etiqueta_html'] = 'Hidden';
             $data['opciones'] = '{"type":"hidden"}';
         }
@@ -36,7 +38,7 @@ class Attached extends Field implements IField
     private function getSize(): int
     {
         $size = 3;
-        $CampoFormato = $this->getPqrFormField()->getCamposFormato();
+        $CampoFormato = new CamposFormato($this->getPqrFormField()->getFkCamposFormato());
         if ($CampoFormato->getPK()) {
             $size = ((int)$CampoFormato->getOptions()->longitud) ?: 3;
         }

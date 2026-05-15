@@ -3,7 +3,7 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
-use App\Bundles\pqr\Services\PqrNotyMessageService;
+use App\Bundles\pqr\Service\PqrNotyMessageService;
 use App\EventSubscriber\middlewares\IHasCaptcha;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
@@ -67,11 +67,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
             }
 
             $SaveDocument = new SaveDocument($Formato, $VfuncionarioDc);
-            if (!$SaveDocument->create($Request->request->all())) {
-                $trans = $translator->trans('no_fue_posible_generar_documento');
-                throw new ValidationFailedException($trans);
-            }
-
+            $SaveDocument->createOrUpdateDocument($Request->request->all());
             $Documento = $SaveDocument->getDocument();
 
             $message        = "<br/>Su solicitud ha sido generada con el número de radicado <strong>$Documento->numero</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";

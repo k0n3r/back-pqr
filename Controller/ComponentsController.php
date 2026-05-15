@@ -4,7 +4,7 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Entity\PqrHtmlField;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
-use App\Bundles\pqr\Services\PqrService;
+use App\Bundles\pqr\Service\PqrService;
 use App\Exception\MissingParameterException;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;

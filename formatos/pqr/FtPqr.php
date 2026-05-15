@@ -471,7 +471,7 @@ class FtPqr extends FtPqrProperties
      * @return object|null
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-08-14
      */
-    protected function getJsonFromPqrBackup(): ?object
+    protected function getJsonFromPqrBackup(): ?array
     {
         return $this->getPqrBackup()?->getDataJson() ?? null;
     }

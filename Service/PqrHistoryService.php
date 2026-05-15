@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Bundles\pqr\Services;
+namespace App\Bundles\pqr\Service;
 
 use App\Bundles\pqr\Entity\PqrHistory;
 use App\Bundles\pqr\helpers\UtilitiesPqr;

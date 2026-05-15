@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Event;
 
-use App\Bundles\pqr\Services\PqrFormFieldService;
+use App\Bundles\pqr\Service\PqrFormFieldService;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class PqrFormFieldEvent extends Event
