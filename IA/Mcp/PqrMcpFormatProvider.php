@@ -35,4 +35,30 @@ class PqrMcpFormatProvider implements McpFormatProviderInterface
     {
         return 'public';
     }
+
+    public function supportsQuery(): bool
+    {
+        return true;
+    }
+
+    public function getQueryFields(): array
+    {
+        return [
+            [
+                'name'  => 'email',
+                'label' => '¿Cuál es el correo electrónico con que realizó la solicitud?',
+                'type'  => 'email',
+            ],
+        ];
+    }
+
+    public function getResultFields(): array
+    {
+        return [
+            ['key' => 'number',            'label' => 'Número de radicado', 'icon' => '📄', 'format' => null],
+            ['key' => 'state',             'label' => 'Estado',             'icon' => '🔖', 'format' => null],
+            ['key' => 'filed_at',          'label' => 'Radicado el',        'icon' => '📅', 'format' => 'datetime'],
+            ['key' => 'response_deadline', 'label' => 'Plazo de respuesta', 'icon' => '⏰', 'format' => 'date'],
+        ];
+    }
 }
