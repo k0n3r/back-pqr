@@ -30,4 +30,9 @@ class PqrMcpFormatProvider implements McpFormatProviderInterface
     {
         return 'Petición, Queja o Reclamo. Usar para radicar solicitudes, quejas, reclamos y peticiones de ciudadanos o usuarios.';
     }
+
+    public function getVisibility(): string
+    {
+        return 'public';
+    }
 }
