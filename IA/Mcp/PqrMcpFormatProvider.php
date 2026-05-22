@@ -45,9 +45,10 @@ class PqrMcpFormatProvider implements McpFormatProviderInterface
     {
         return [
             [
-                'name'  => 'email',
-                'label' => '¿Cuál es el correo electrónico con que realizó la solicitud?',
-                'type'  => 'email',
+                'name'     => 'email',
+                'label'    => 'Si registró un correo electrónico al radicar, ingréselo aquí. De lo contrario, escriba *omitir*:',
+                'type'     => 'email',
+                'optional' => true,
             ],
         ];
     }
