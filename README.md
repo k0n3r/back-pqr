@@ -6,6 +6,16 @@ trazabilidad completa.
 
 ---
 
+## Documentación ampliada (`docs/`)
+
+| Archivo | Contenido |
+|---------|-----------|
+| [docs/01-ia-integration.md](docs/01-ia-integration.md) | Agente `ia_pqr`, tools, MCP, consulta WSO, `PqrMcpFormatProvider` |
+| [docs/02-webservice-publico.md](docs/02-webservice-publico.md) | URLs públicas, flujo de radicación, tipos de campo, infoQR |
+| [docs/03-ciclo-de-vida.md](docs/03-ciclo-de-vida.md) | Estados, oportunidad, notificaciones, balanceador |
+
+---
+
 ## Índice
 
 1. [¿Qué hace este módulo?](#1-qué-hace-este-módulo)
@@ -126,11 +136,13 @@ src/Bundles/pqr/
 │   ├── Dto/
 │   │   └── askChatForPqr.php               # DTO de request de chat
 │   ├── Mcp/
-│   │   └── PqrMcpFormatProvider.php        # Registra formato PQR en servidor MCP
+│   │   ├── PqrMcpFormatProvider.php        # Registra formato PQR en MCP + consulta de radicados WSO
+│   │   └── Resolver/
+│   │       └── PqrMcpFieldLookupResolver.php # Lookups dinámicos (ciudad, dependencia, localidad)
 │   └── Service/
 │       ├── PqrAgentProvider.php            # Expone ia_pqr al ModuleAgentRegistry
 │       ├── PqrCustomParameterForIA.php     # Parámetros de contexto para el modelo IA
-│       ├── PqrDocumentProcessor.php        # Procesador de documentos PQR
+│       ├── PqrDocumentProcessor.php        # Procesador de documentos PQR (retorna DocumentCreatedDto)
 │       ├── PqrFormatoJsonProcessor.php     # Personaliza JSON de estructura del formato
 │       ├── PqrIaGuard.php                  # Verifica si IA está habilitada; FORMAT_NAME='pqr'
 │       ├── PqrJsonForIA.php                # Serializa PQR a JSON para knowledge base
@@ -585,7 +597,7 @@ condicional están en `Resources/config/ia_routes.php` e `ia_services.php`.
 
 | Variable       | Default                     | Descripción                                                                                                                                         |
 |----------------|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `IA_PQR_MODEL` | `claude-haiku-4-5-20251001` | Modelo del agente `ia_pqr`. Sonnet por defecto — recomendado para redacción de respuestas oficiales. Configurable en `.env.local` sin tocar código. |
+| `IA_PQR_MODEL` | `claude-haiku-4-5-20251001` | Modelo del agente `ia_pqr`. Haiku por defecto — cambiar a Sonnet en `.env.local` si se requiere mayor calidad en redacción de respuestas oficiales. |
 
 ### 11.2 Agente dedicado `ia_pqr`
 
@@ -670,10 +682,12 @@ Todas las herramientas verifican `PqrIaGuard::isPqrEnabled()` antes de ejecutars
   `PqrFormatoJsonProcessor`, `PqrDocumentProcessor`, `PqrStatsTool` y `PqrIaGuard` mismo para evitar literales
   dispersos.
 
-### 11.6 Servidor MCP
+### 11.6 Servidor MCP y consulta de radicados WSO
 
-**`PqrMcpFormatProvider`** implementa `McpFormatProviderInterface` y registra el formato PQR en el servidor MCP. Permite
-que agentes externos (Claude Desktop, Cursor, AWS AgentCore) radiquen PQRs autónomamente:
+**`PqrMcpFormatProvider`** implementa `McpFormatProviderInterface` y es la **única clase** del módulo PQR
+que cubre tanto el registro del formato en el servidor MCP como la consulta de radicados por WhatsApp (WSO).
+
+**Flujo de radicación por agentes MCP:**
 
 ```
 list_formats          → identifica idformato del PQR
@@ -681,6 +695,34 @@ get_format_structure  → conoce los campos requeridos
 search_field_options  → resuelve lookups (ciudad, dependencia, localidad)
 create_document       → radica la PQR
 ```
+
+**Flujo de consulta por WhatsApp:**
+
+```
+GET /api/ia/mcp/wso/filings/{consecutivo}?email=x@y.com
+  └─ FilingStatusService busca McpFormatProviderInterface con format_id = PQR
+       └─ PqrMcpFormatProvider::resolve()
+             • Busca por número en documento + ft_pqr
+             • Valida email contra documento.descripcion (opcional — se puede omitir)
+             • Retorna FilingStatusDto con state, filed_at, response_deadline
+               + URL infoQR (enlace público de seguimiento)
+             • Si hay URL → orquestador muestra botón "Ver más información"
+```
+
+**Campos de consulta (`getQueryFields`):**
+
+| Campo | Tipo | Obligatorio |
+|-------|------|-------------|
+| `email` | email | No (opcional — usuario puede escribir "omitir") |
+
+**Campos de resultado (`getResultFields`):**
+
+| Clave | Etiqueta | Formato |
+|-------|----------|---------|
+| `number` | Número de radicado | — |
+| `state` | Estado | — |
+| `filed_at` | Radicado el | datetime |
+| `response_deadline` | Plazo de respuesta | date |
 
 ### 11.7 Procesador de formato para IA (`PqrFormatoJsonProcessor`)
 

@@ -21,6 +21,9 @@ services:
       - '../../Services/'
       - '../../IA/'
 
+  App\Bundles\pqr\Services\crontab\:
+    resource: '../../Services/crontab/'
+
 imports:
   - { resource: "./migrations.yaml" }
   - { resource: "./ia_services.php" }
