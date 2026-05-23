@@ -29,14 +29,4 @@ class FtPqrCalificacionProperties extends ModelFormat
             'primary' => 'idft_pqr_calificacion'
         ];
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function afterRad(): bool
-    {
-        $this->createTaskFromDataTemp();
-
-        return true;
-    }
 }

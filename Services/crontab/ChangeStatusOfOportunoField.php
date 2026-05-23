@@ -20,7 +20,8 @@ readonly class ChangeStatusOfOportunoField implements ScheduledTaskInterface
         private Connection $connection,
         private LoggerInterface $logger,
         private UserLoginService $userLoginService,
-    ) {}
+    ) {
+    }
 
     public function execute(): bool
     {

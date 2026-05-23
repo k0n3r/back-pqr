@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\IA\Service;
 
-use Doctrine\DBAL\Connection;
+use App\Bundles\ia\Repository\IAProcessRepository;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -19,7 +19,7 @@ readonly class PqrIaGuard
     private const string CACHE_KEY_PROCESS = 'pqr_ia.process_id';
 
     public function __construct(
-        private Connection $connection,
+        private IAProcessRepository $iaProcessRepository,
         #[Autowire(service: 'cache.app')]
         private CacheItemPoolInterface $cache,
     ) {
@@ -38,16 +38,7 @@ readonly class PqrIaGuard
             return $item->get();
         }
 
-        $id = $this->connection->fetchOne(
-            'SELECT ip.id
-             FROM ia_process ip
-             JOIN formato f ON f.idformato = ip.main_format_id
-             WHERE f.nombre = :nombre
-             LIMIT 1',
-            ['nombre' => self::FORMAT_NAME],
-        );
-
-        $processId = $id !== false ? (int)$id : null;
+        $processId = $this->iaProcessRepository->findIdByMainFormatName(self::FORMAT_NAME);
         $this->cache->save($item->set($processId));
 
         return $processId;

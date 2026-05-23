@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\IA\Service\Tools;
 
 use App\Bundles\pqr\IA\Service\PqrIaGuard;
+use App\Bundles\pqr\Repository\PqrStatsRepository;
 use App\Bundles\pqr\Services\models\PqrFormField;
-use Doctrine\DBAL\Connection;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
@@ -125,7 +125,7 @@ readonly class PqrStatsTool
     ];
 
     public function __construct(
-        private Connection $connection,
+        private PqrStatsRepository $pqrStatsRepository,
         #[Autowire(service: 'cache.app')]
         private CacheItemPoolInterface $cache,
         #[Autowire(service: 'monolog.logger.ia')]
@@ -268,32 +268,27 @@ readonly class PqrStatsTool
 
     private function queryTotal(string $whereSql, array $params, array $filters): string
     {
-        $sql = sprintf('SELECT COUNT(*) FROM %s %s', self::VIEW, $whereSql);
-        $total = $this->connection->fetchOne($sql, $params);
+        $total = $this->pqrStatsRepository->countTotal($whereSql, $params);
 
         $desc = empty($filters)
             ? 'sin filtros'
             : implode(', ', array_map(fn ($f) => "{$f['column']} = '{$f['value']}'", $filters));
 
-        $this->logger->info('PqrStatsTool::countPqr', ['sql' => $sql, 'params' => $params]);
+        $this->logger->info('PqrStatsTool::countPqr', ['where' => $whereSql, 'params' => $params]);
 
         return "Total de PQRs ($desc): $total";
     }
 
     private function queryGrouped(string $groupBy, string $whereSql, array $params): string
     {
-        $sql = sprintf(
-            'SELECT %s, COUNT(*) as total FROM %s %s GROUP BY %s ORDER BY total DESC LIMIT %d',
+        $rows = $this->pqrStatsRepository->countGrouped(
             $groupBy,
-            self::VIEW,
             $whereSql,
-            $groupBy,
+            $params,
             self::GROUP_BY_LIMIT + 1,
         );
 
-        $rows = $this->connection->fetchAllAssociative($sql, $params);
-
-        $this->logger->info('PqrStatsTool::countPqr grouped', ['sql' => $sql, 'params' => $params]);
+        $this->logger->info('PqrStatsTool::countPqr grouped', ['groupBy' => $groupBy, 'params' => $params]);
 
         if (empty($rows)) {
             return "No se encontraron PQRs agrupadas por $groupBy.";
@@ -317,9 +312,7 @@ readonly class PqrStatsTool
 
     private function queryDependenciaOptions(): string
     {
-        $rows = $this->connection->fetchAllAssociative(
-            'SELECT iddependencia AS id, nombre AS etiqueta FROM dependencia WHERE estado = 1 ORDER BY nombre',
-        );
+        $rows = $this->pqrStatsRepository->listActiveDependencias();
 
         if (empty($rows)) {
             return 'No se encontraron dependencias disponibles.';
@@ -332,15 +325,7 @@ readonly class PqrStatsTool
 
     private function queryTipoOptions(): string
     {
-        $rows = $this->connection->fetchAllAssociative(
-            'SELECT co.idcampo_opciones AS id, co.valor AS etiqueta
-             FROM campo_opciones co
-             JOIN campos_formato cf ON cf.idcampos_formato = co.fk_campos_formato
-             JOIN formato f ON f.idformato = cf.formato_idformato
-             WHERE f.nombre = :format AND cf.nombre = :campo
-             ORDER BY co.llave',
-            ['format' => PqrIaGuard::FORMAT_NAME, 'campo' => 'sys_tipo'],
-        );
+        $rows = $this->pqrStatsRepository->listPqrTypes(PqrIaGuard::FORMAT_NAME, 'sys_tipo');
 
         if (empty($rows)) {
             return 'No se encontraron tipos de PQR disponibles.';

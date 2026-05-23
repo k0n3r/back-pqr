@@ -28,17 +28,19 @@ class FtPqrProperties extends ModelFormat
                 'sys_severidad',
                 'sys_oportuno',
                 'sys_impacto',
-                'radicacion',
                 'sys_frecuencia',
                 'sys_fecha_vencimiento',
-                'sys_anonimo',
+                'radicacion',
                 'sys_fecha_terminado',
                 'sys_estado',
+                'sys_anonimo',
                 'dependencia',
                 'sys_tipo',
                 'sys_email',
                 'sys_folios',
+                'descripcion_1',
                 'sys_anexos',
+                'linea',
                 'distribucion',
                 'destino_interno',
                 'select_mensajeria',
@@ -50,22 +52,6 @@ class FtPqrProperties extends ModelFormat
             'table' => 'ft_pqr',
             'primary' => 'idft_pqr'
         ];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function afterRad(): bool
-    {
-        $this->createTaskFromDataTemp();
-        if (!$this->radicacion_rapida) {
-            $this->postDocumentRad();
-            if (!$this->sendDocumentsByEmail()) {
-                throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
-            }
-        }
-
-        return true;
     }
 
     /**
@@ -88,6 +74,22 @@ class FtPqrProperties extends ModelFormat
             $Documento->save();
             $Documento->getPdfJson(true);
 
+            if (!$this->sendDocumentsByEmail()) {
+                throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function afterRad(): bool
+    {
+        $this->createTaskFromDataTemp();
+        if (!$this->radicacion_rapida) {
+            $this->postDocumentRad();
             if (!$this->sendDocumentsByEmail()) {
                 throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
             }

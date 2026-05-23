@@ -6,8 +6,8 @@ namespace App\Bundles\pqr\IA\Mcp;
 
 use App\Bundles\ia\Mcp\McpFormatProviderInterface;
 use App\Bundles\ia\Services\Filing\FilingStatusDto;
+use App\Bundles\pqr\Repository\PqrLookupRepository;
 use App\Bundles\pqr\Services\models\PqrForm;
-use Doctrine\DBAL\Connection;
 use Saia\controllers\CryptController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -25,7 +25,9 @@ class PqrMcpFormatProvider implements McpFormatProviderInterface
     public function __construct(
         #[Autowire('%env(APP_DOMAIN)%')]
         private readonly string $domain,
-    ) {}
+        private readonly PqrLookupRepository $pqrLookupRepository,
+    ) {
+    }
 
     public function getFormatId(): int
     {
@@ -75,36 +77,14 @@ class PqrMcpFormatProvider implements McpFormatProviderInterface
     }
 
     public function resolve(
-        string     $filingNumber,
-        array      $extraFields,
-        Connection $connection,
+        string $filingNumber,
+        array  $extraFields,
     ): ?FilingStatusDto {
-        $email = strtolower(trim($extraFields['email'] ?? ''));
+        $email = $extraFields['email'] ?? '';
 
-        $row = $connection->fetchAssociative(
-            <<<'SQL'
-            SELECT
-                d.iddocumento,
-                d.numero                                          AS number,
-                COALESCE(d.estado_aprobacion, d.estado,
-                         'desconocido')                           AS state,
-                d.fecha                                           AS filed_at,
-                d.fecha_limite                                    AS response_deadline,
-                ft.idft_pqr                                       AS pqr_id
-            FROM documento d
-            INNER JOIN ft_pqr ft ON ft.fk_documento = d.iddocumento
-            WHERE d.numero = :number
-              AND (:email = '' OR LOWER(d.descripcion) LIKE :emailLike)
-            LIMIT 1
-            SQL,
-            [
-                'number'    => $filingNumber,
-                'email'     => $email,
-                'emailLike' => '%' . $email . '%',
-            ],
-        );
+        $row = $this->pqrLookupRepository->findFilingByNumberAndEmail($filingNumber, $email);
 
-        if ($row === false) {
+        if ($row === null) {
             return null;
         }
 
@@ -115,7 +95,7 @@ class PqrMcpFormatProvider implements McpFormatProviderInterface
             'response_deadline' => $row['response_deadline'],
         ];
 
-        return new FilingStatusDto($data, $this->buildInfoUrl((int) $row['pqr_id'], (int) $row['iddocumento']));
+        return new FilingStatusDto($data, $this->buildInfoUrl($row['pqr_id'], $row['iddocumento']));
     }
 
     private function buildInfoUrl(int $pqrId, int $documentId): string
