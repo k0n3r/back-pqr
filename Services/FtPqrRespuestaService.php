@@ -9,7 +9,6 @@ use App\Bundles\pqr\Services\models\PqrHistory;
 use App\Bundles\pqr\Services\models\PqrNotyMessage;
 use App\EventSubscriber\Mailer\MailSubscriber;
 use App\services\documento\DocumentoExpuestoService;
-use App\services\Gaufrette\Gaufrette\FilesystemForJson;
 use App\services\models\ModelService\ModelService;
 use RuntimeException;
 use Saia\controllers\DistributionService;
@@ -231,14 +230,15 @@ class FtPqrRespuestaService extends ModelService
         $email = (new Email());
 
         $DocumentoRespuesta = $FtPqrRespuesta->getDocument();
-        $file = FilesystemForJson::getFileJson($DocumentoRespuesta->getPdfJson());
-        $email->attach($file->getContent(), basename($file->getName()));
+        $pdfPath = $DocumentoRespuesta->getPdfJson();
+        $file = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
+        $email->attach($file->getContent(), basename($pdfPath));
 
         $DocumentoService = $DocumentoRespuesta->getService();
         if ($records = $DocumentoService->getAllFilesAnexos(true)) {
             foreach ($records as $Anexos) {
-                $file = FilesystemForJson::getFileJson($Anexos->ruta);
-                $email->attach($file->getContent(), basename($file->getName()));
+                $file = $this->serviceLocator->getFileResolver()->fromStoragePath($Anexos->ruta);
+                $email->attach($file->getContent(), basename($Anexos->ruta));
             }
         }
 

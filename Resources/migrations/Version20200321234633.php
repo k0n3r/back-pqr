@@ -36,8 +36,8 @@ final class Version20200321234633 extends AbstractMigration
             "crear_%s",
             $this->formatName,
         );
-        $sql = "SELECT idmodulo FROM modulo WHERE nombre like 'modulo_formatos'";
-        $idModulo = (int)$this->connection->fetchOne($sql);
+        $sql        = "SELECT idmodulo FROM modulo WHERE nombre like 'modulo_formatos'";
+        $idModulo   = (int)$this->connection->fetchOne($sql);
 
         $attributes = [
             'nombre'      => $moduleName,
@@ -53,7 +53,7 @@ final class Version20200321234633 extends AbstractMigration
 
     private function createFormat(): int
     {
-        $sql = "SELECT idcontador FROM contador WHERE nombre like 'apoyo'";
+        $sql        = "SELECT idcontador FROM contador WHERE nombre like 'apoyo'";
         $idcontador = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$idcontador, "El contador apoyo NO existe");
 
@@ -61,7 +61,7 @@ final class Version20200321234633 extends AbstractMigration
         $this->abortIf(!$idfuncionario, "El funcionario SAIA NO existe");
 
         $sqlCodPadre = "SELECT idformato FROM formato WHERE nombre like 'pqr_respuesta'";
-        $codPadre = (int)$this->connection->fetchOne($sqlCodPadre);
+        $codPadre    = (int)$this->connection->fetchOne($sqlCodPadre);
         $this->abortIf(!$codPadre, "No se encontro el formato padre Respuesta PQRSF");
 
         $name = $this->formatName;
@@ -71,7 +71,6 @@ final class Version20200321234633 extends AbstractMigration
             'cod_padre'                 => $codPadre,
             'contador_idcontador'       => $idcontador,
             'nombre_tabla'              => "ft_$name",
-            'ruta_mostrar'              => "views/modules/pqr/formatos/$name/mostrar.php",
             'ruta_editar'               => "views/modules/pqr/formatos/$name/editar.html",
             'ruta_adicionar'            => "views/modules/pqr/formatos/$name/adicionar.html",
             'ruta_buscar'               => "views/modules/pqr/formatos/$name/buscar.html",
