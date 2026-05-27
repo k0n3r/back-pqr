@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\IA\Service\Tools;
 
 use App\Bundles\pqr\IA\Service\PqrIaGuard;
+use App\Bundles\pqr\Entity\PqrFormField;
 use App\Bundles\pqr\Repository\PqrStatsRepository;
-use App\Bundles\pqr\Services\models\PqrFormField;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;

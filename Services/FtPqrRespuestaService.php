@@ -9,6 +9,7 @@ use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\Repository\PqrHistoryRepository;
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
+use App\Bundles\pqr\Service\PqrNotyMessageService;
 use App\EventSubscriber\Mailer\MailSubscriber;
 use App\services\documento\DocumentoExpuestoService;
 use App\services\models\ModelService\ModelService;
@@ -106,6 +107,7 @@ class FtPqrRespuestaService extends ModelService
 
         $entity = new PqrHistoryEntity();
         $entity->setIdft((int)$history['idft']);
+        $entity->setFecha(new \DateTimeImmutable($history['fecha']));
         $entity->setFkFuncionario((int)$history['fk_funcionario']);
         $entity->setTipo((int)$history['tipo']);
         $entity->setIdfk((int)$history['idfk']);
