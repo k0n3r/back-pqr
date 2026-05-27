@@ -97,7 +97,6 @@ class AddEditFtPqr implements IAddEditFormat
             'cod_padre'                 => 0,
             'contador_idcontador'       => $this->PqrForm->getFkContador(),
             'nombre_tabla'              => "ft_$name",
-            'ruta_mostrar'              => "views/modules/pqr/formatos/$name/mostrar.php",
             'ruta_editar'               => "views/modules/pqr/formatos/$name/editar.html",
             'ruta_adicionar'            => "views/modules/pqr/formatos/$name/adicionar.html",
             'ruta_buscar'               => "views/modules/pqr/formatos/$name/buscar.html",

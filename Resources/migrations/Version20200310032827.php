@@ -43,8 +43,8 @@ final class Version20200310032827 extends AbstractMigration
             "crear_%s",
             $this->formatName,
         );
-        $sql = "SELECT idmodulo FROM modulo WHERE nombre like 'modulo_formatos'";
-        $idModulo = (int)$this->connection->fetchOne($sql);
+        $sql        = "SELECT idmodulo FROM modulo WHERE nombre like 'modulo_formatos'";
+        $idModulo   = (int)$this->connection->fetchOne($sql);
 
         $attributes = [
             'nombre'      => $moduleName,
@@ -60,7 +60,7 @@ final class Version20200310032827 extends AbstractMigration
 
     private function createFormat(): int
     {
-        $sql = "SELECT idcontador FROM contador WHERE nombre like 'radicacion_salida'";
+        $sql        = "SELECT idcontador FROM contador WHERE nombre like 'radicacion_salida'";
         $idcontador = (int)$this->connection->fetchOne($sql);
         $this->abortIf(!$idcontador, "El contador radicacion_salida NO existe");
 
@@ -75,7 +75,6 @@ final class Version20200310032827 extends AbstractMigration
             'cod_padre'                 => 0,
             'contador_idcontador'       => $idcontador,
             'nombre_tabla'              => "ft_$name",
-            'ruta_mostrar'              => "views/modules/pqr/formatos/$name/mostrar.php",
             'ruta_editar'               => "views/modules/pqr/formatos/$name/editar.html",
             'ruta_adicionar'            => "views/modules/pqr/formatos/$name/adicionar.html",
             'ruta_buscar'               => "views/modules/pqr/formatos/$name/buscar.html",

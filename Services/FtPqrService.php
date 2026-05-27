@@ -30,7 +30,6 @@ use Saia\models\formatos\CamposFormato;
 use Doctrine\ORM\EntityManagerInterface;
 use Saia\models\Funcionario;
 use App\EventSubscriber\Mailer\MailSubscriber;
-use App\services\Gaufrette\Gaufrette\FilesystemForJson;
 use App\services\models\ModelService\ModelService;
 use DateInterval;
 use DateTime;
@@ -569,13 +568,14 @@ class FtPqrService extends ModelService
         $email = (new Email());
 
         $Documento = $this->getDocument();
-        $file      = FilesystemForJson::getFileJson($Documento->getPdfJson());
-        $email->attach($file->getContent(), basename($file->getName()));
+        $pdfPath = $Documento->getPdfJson();
+        $file = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
+        $email->attach($file->getContent(), basename($pdfPath));
 
         $records = $Documento->getService()->getAllFilesAnexos(true);
         foreach ($records as $Anexos) {
-            $file = FilesystemForJson::getFileJson($Anexos->ruta);
-            $email->attach($file->getContent(), basename($file->getName()));
+            $file = $this->serviceLocator->getFileResolver()->fromStoragePath($Anexos->ruta);
+            $email->attach($file->getContent(), basename($Anexos->ruta));
         }
 
         $email
@@ -676,8 +676,9 @@ class FtPqrService extends ModelService
                 ->html($message)
                 ->to(...$emails);
 
-            $file = FilesystemForJson::getFileJson($Documento->getPdfJson());
-            $email->attach($file->getContent(), basename($file->getName()));
+            $pdfPath = $Documento->getPdfJson();
+            $file = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
+            $email->attach($file->getContent(), basename($pdfPath));
 
             $params = [
                 'documentId' => $Documento->getPK(),

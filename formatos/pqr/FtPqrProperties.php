@@ -56,22 +56,6 @@ class FtPqrProperties extends ModelFormat
     /**
      * @inheritDoc
      */
-    public function afterRad(): bool
-    {
-        $this->createTaskFromDataTemp();
-        if (!$this->radicacion_rapida) {
-            $this->postDocumentRad();
-            if (!$this->sendDocumentsByEmail()) {
-                throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function afterEdit(): bool
     {
         $Documento = $this->getDocument();
@@ -89,6 +73,22 @@ class FtPqrProperties extends ModelFormat
             $Documento->save();
             $Documento->getPdfJson(true);
 
+            if (!$this->sendDocumentsByEmail()) {
+                throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function afterRad(): bool
+    {
+        $this->createTaskFromDataTemp();
+        if (!$this->radicacion_rapida) {
+            $this->postDocumentRad();
             if (!$this->sendDocumentsByEmail()) {
                 throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
             }

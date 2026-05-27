@@ -36,6 +36,8 @@ services:
   App\Bundles\pqr\Service\PqrHistoryService:
     public: true
 
+  App\Bundles\pqr\Services\crontab\:
+    resource: '../../Services/crontab/'
 
 imports:
   - { resource: "./migrations.yaml" }
