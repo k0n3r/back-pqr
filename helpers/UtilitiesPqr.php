@@ -5,7 +5,6 @@ namespace App\Bundles\pqr\helpers;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Service\LegacyServiceLocator;
-use Saia\controllers\anexos\FileJson;
 use Saia\core\model\ModelFormat;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\Formato;
@@ -145,10 +144,11 @@ class UtilitiesPqr
             if (!$Documento->pdf) {
                 $Documento->getPdfJson(true);
             }
-            $FileJson = new FileJson($Documento->pdf);
-            $FileTemporal = $FileJson->convertToFileTemporal();
+            $publicPath = LegacyServiceLocator::getInstance()->getFileResolver()
+                ->fromStoragePath($Documento->pdf)
+                ->getPublicTemporalPath();
 
-            return $_SERVER['APP_DOMAIN'].$FileTemporal->getRouteFromRoot();
+            return LegacyServiceLocator::getInstance()->domain.$publicPath;
         } catch (Throwable $th) {
             $serviceLocator = LegacyServiceLocator::getInstance();
             $serviceLocator->getLogger()->error($th->getMessage(), [

@@ -1087,7 +1087,7 @@ class FtPqrService extends ModelService
 
         return sprintf(
             "%sws/%s/infoQR.html?data=%s",
-            $_SERVER['APP_DOMAIN'],
+            LegacyServiceLocator::getInstance()->domain,
             $this->getModel()->getFormat()->nombre,
             urlencode($data),
         );

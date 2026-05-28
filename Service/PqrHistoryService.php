@@ -7,8 +7,8 @@ namespace App\Bundles\pqr\Service;
 use App\Bundles\pqr\Entity\PqrHistory;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Repository\PqrHistoryRepository;
+use App\Service\Storage\FileResolver;
 use DateTimeImmutable;
-use Saia\controllers\anexos\FileJson;
 use Saia\models\Configuracion;
 use Saia\models\Dependencia;
 use Saia\models\Funcionario;
@@ -20,6 +20,8 @@ class PqrHistoryService
 
     public function __construct(
         private readonly PqrHistoryRepository $repository,
+        private readonly FileResolver $fileResolver,
+        private readonly string $domain,
     ) {
     }
 
@@ -99,9 +101,8 @@ class PqrHistoryService
         if (!$Configuracion->getValue()) {
             return null;
         }
-        $FileJson     = new FileJson($Configuracion->getValue());
-        $FileTemporal = $FileJson->convertToFileTemporal();
-        $this->logo   = $_SERVER['APP_DOMAIN'].$FileTemporal->getRouteFromRoot();
+        $publicPath = $this->fileResolver->fromStoragePath($Configuracion->getValue())->getPublicTemporalPath();
+        $this->logo = $this->domain.$publicPath;
 
         return $this->logo;
     }

@@ -19,13 +19,13 @@ use Saia\models\formatos\CampoSeleccionados;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\vistas\VfuncionarioDc;
 
-include_once $_SERVER['ROOT_PATH'].'src/Bundles/pqr/formatos/reporteFuncionesGenerales.php';
-$fileAdditionalFunctions = $_SERVER['ROOT_PATH'].'src/Bundles/pqr/formatos/pqr/functionsReport.php';
+include_once dirname(__DIR__).'/reporteFuncionesGenerales.php';
+$fileAdditionalFunctions = __DIR__.'/functionsReport.php';
 if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
 }
 
-$fileAdditionalFunctions = $_SERVER['ROOT_PATH'].'src/Bundles/client/pqr/functionsReportPqr.php';
+$fileAdditionalFunctions = dirname(__DIR__, 3).'/client/pqr/functionsReportPqr.php';
 if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
 }

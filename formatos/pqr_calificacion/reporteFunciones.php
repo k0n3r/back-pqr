@@ -2,7 +2,7 @@
 
 use Saia\models\formatos\CampoSeleccionados;
 
-include_once $_SERVER['ROOT_PATH'].'src/Bundles/pqr/formatos/reporteFuncionesGenerales.php';
+include_once dirname(__DIR__).'/reporteFuncionesGenerales.php';
 
 /**
  * Obtiene el filtro por las calificaciones

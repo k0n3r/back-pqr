@@ -12,6 +12,7 @@ use App\Bundles\pqr\Repository\PqrNotificationRepository;
 use App\Bundles\pqr\Service\PqrFormFieldServiceFactory;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Entity\EmailConfiguration;
+use App\Service\LegacyServiceLocator;
 use App\services\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
@@ -36,6 +37,7 @@ class PqrFormService extends Service
         private PqrFormFieldRepository $pqrFormFieldRepository,
         private PqrFormFieldServiceFactory $pqrFormFieldServiceFactory,
         private PqrService $pqrService,
+        private readonly string $domain,
         ?Funcionario $funcionario = null,
     ) {
         parent::__construct($funcionario);
@@ -93,7 +95,7 @@ class PqrFormService extends Service
      */
     public static function getUrlWsPQR(): string
     {
-        return $_SERVER['APP_DOMAIN'].'ws/pqr/index.html';
+        return $this->domain.'ws/pqr/index.html';
     }
 
     /**
@@ -596,7 +598,7 @@ class PqrFormService extends Service
                 $fieldCode[] = $code;
             }
         }
-        $file = $_SERVER["ROOT_PATH"].'src/Bundles/pqr/formatos/pqr/functionsReport.php';
+        $file = LegacyServiceLocator::getInstance()->projectDir.'/src/Bundles/pqr/formatos/pqr/functionsReport.php';
         if (file_exists($file)) {
             unlink($file);
         }
