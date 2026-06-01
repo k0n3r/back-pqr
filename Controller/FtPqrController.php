@@ -8,7 +8,6 @@ use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Service\PqrHistoryService;
 use App\Bundles\pqr\Service\PqrService;
-use Saia\controllers\SessionController;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
@@ -224,7 +223,7 @@ class FtPqrController extends AbstractController
             if ($modified) {
                 $pqrHistoryService->create([
                     'idft'           => $FtPqr->getPK(),
-                    'fk_funcionario' => SessionController::getUser()->getPK(),
+                    'fk_funcionario' => \App\Service\LegacyServiceLocator::getInstance()->getSecurity()->getUser()?->getId(),
                     'tipo'           => PqrHistoryEntity::TIPO_MODIFICACION_TERCERO,
                     'idfk'           => $Tercero->getPK(),
                     'descripcion'    => 'Se actualizo el tercero: '.implode(', ', $modified),

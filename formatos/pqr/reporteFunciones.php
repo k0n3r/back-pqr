@@ -10,7 +10,6 @@ use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Saia\controllers\DateController;
-use Saia\controllers\SessionController;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\busqueda\BusquedaFiltroTemp;
 use Saia\models\Dependencia;
@@ -528,7 +527,7 @@ function filter_pqr_admin(string $nameReport): string
         return '';
     }
 
-    $Funcionario = SessionController::getUser();
+    $Funcionario = LegacyServiceLocator::getInstance()->getCurrentUser();
 
     $isAdmin = $Funcionario->getService()->hasFunction(FtPqrService::FUNCTION_ADMIN_PQR);
     if ($isAdmin) {

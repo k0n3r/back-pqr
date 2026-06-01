@@ -74,6 +74,6 @@ JSON;
 
     protected function getJsonFilePath(): string
     {
-        return $this->projectDir . '/public/views/modules/pqr/translations/en_tmp.json';
+        return $this->pathResolver->absolutePublicPath('views/modules/pqr/translations/en_tmp.json');
     }
 }

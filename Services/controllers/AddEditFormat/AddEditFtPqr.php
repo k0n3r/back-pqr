@@ -13,7 +13,6 @@ use RuntimeException;
 use Saia\controllers\generator\component\Distribution;
 use Saia\controllers\generator\component\Hidden;
 use Saia\controllers\generator\component\Rad;
-use Saia\controllers\SessionController;
 use Saia\models\formatos\CampoOpciones;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
@@ -106,7 +105,7 @@ class AddEditFtPqr implements IAddEditFormat
             'margenes'                  => '25,25,30,25',
             'orientacion'               => 0,
             'papel'                     => 'Letter',
-            'funcionario_idfuncionario' => SessionController::getValue('idfuncionario'),
+            'funcionario_idfuncionario' => LegacyServiceLocator::getInstance()->getSecurity()->getUser()?->getId(),
             'detalle'                   => 0,
             'tipo_edicion'              => 0,
             'item'                      => 0,
