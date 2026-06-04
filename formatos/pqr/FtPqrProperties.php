@@ -2,9 +2,9 @@
 
 namespace App\Bundles\pqr\formatos\pqr;
 
-use Saia\core\model\ModelFormat;
 use App\Exception\ValidationFailedException;
 use Saia\controllers\distribucion\DistributionExecutor;
+use Saia\core\model\ModelFormat;
 use Saia\models\documento\Documento;
 
 class FtPqrProperties extends ModelFormat
@@ -60,7 +60,9 @@ class FtPqrProperties extends ModelFormat
         $Documento = $this->getDocument();
 
         if (!$this->editDistribution()) {
-            throw new ValidationFailedException('No fue posible editar la distribución');
+            throw new ValidationFailedException(
+                $this->serviceLocator->getTranslator()->trans('no_fue_posible_editar_distribucion'),
+            );
         }
 
         if (
@@ -73,7 +75,9 @@ class FtPqrProperties extends ModelFormat
             $Documento->getPdfJson(true);
 
             if (!$this->sendDocumentsByEmail()) {
-                throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
+                throw new ValidationFailedException(
+                    $this->serviceLocator->getTranslator()->trans('no_fue_posible_enviar_notificacion_correo'),
+                );
             }
         }
 
@@ -89,7 +93,9 @@ class FtPqrProperties extends ModelFormat
         if (!$this->radicacion_rapida) {
             $this->postDocumentRad();
             if (!$this->sendDocumentsByEmail()) {
-                throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
+                throw new ValidationFailedException(
+                    $this->serviceLocator->getTranslator()->trans('no_fue_posible_enviar_notificacion_correo'),
+                );
             }
         }
 

@@ -74,11 +74,7 @@ class PqrFormController extends AbstractController
         $connection->beginTransaction();
 
         try {
-            if (!$PqrFormService->publish()) {
-                throw new ValidationFailedException(
-                    $PqrFormService->getErrorManager()->getMessage(),
-                );
-            }
+            $PqrFormService->publish();
 
             $data = [
                 'pqrForm'       => $PqrFormService->getDataPqrForm(),
@@ -102,13 +98,14 @@ class PqrFormController extends AbstractController
         Connection $connection,
         PqrFormFieldRepository $pqrFormFieldRepository,
         EntityManagerInterface $em,
+        TranslatorInterface $translator,
     ): Response {
         $connection->beginTransaction();
         try {
             foreach ($request->request->all('fieldOrder') as $record) {
                 $field = $pqrFormFieldRepository->find($record['id']);
                 if (!$field) {
-                    throw new ValidationFailedException("No fue posible actualizar el orden");
+                    throw new ValidationFailedException($translator->trans('no_fue_posible_actualizar_orden'));
                 }
                 $field->setOrden($record['order'] + PqrFormFieldService::INITIAL_ORDER);
             }
@@ -133,11 +130,7 @@ class PqrFormController extends AbstractController
     ): Response {
         $connection->beginTransaction();
         try {
-            if (!$PqrFormService->updateSetting($request->request->all('data'))) {
-                throw new ValidationFailedException(
-                    $PqrFormService->getErrorManager()->getMessage(),
-                );
-            }
+            $PqrFormService->updateSetting($request->request->all('data'));
 
             $data = [
                 'pqrForm'       => $PqrFormService->getDataPqrForm(),
@@ -163,11 +156,7 @@ class PqrFormController extends AbstractController
     ): Response {
         $connection->beginTransaction();
         try {
-            if (!$PqrFormService->updateResponseSetting($request->request->all('data'))) {
-                throw new ValidationFailedException(
-                    $PqrFormService->getErrorManager()->getMessage(),
-                );
-            }
+            $PqrFormService->updateResponseSetting($request->request->all('data'));
 
             $connection->commit();
 
@@ -237,12 +226,9 @@ class PqrFormController extends AbstractController
     ): Response {
         $connection->beginTransaction();
         try {
-            $success = $PqrFormService->save([
+            $PqrFormService->save([
                 'show_empty' => $Request->request->get('show_empty', 1),
             ]);
-            if (!$success) {
-                throw new ValidationFailedException($PqrFormService->getErrorManager()->getMessage());
-            }
 
             $data = $PqrFormService->getDataPqrForm();
             $connection->commit();
@@ -290,13 +276,9 @@ class PqrFormController extends AbstractController
             $this->editOrCreateFunction(FtPqrService::FUNCTION_ADMIN_DEP_PQR, $status);
 
 
-            $success = $PqrFormService->save([
+            $PqrFormService->save([
                 'enable_filter_dep' => $status,
             ]);
-
-            if (!$success) {
-                throw new ValidationFailedException($PqrFormService->getErrorManager()->getMessage());
-            }
 
             $data = $PqrFormService->getDataPqrForm();
             $connection->commit();
@@ -331,13 +313,9 @@ class PqrFormController extends AbstractController
         try {
             $status = $Request->request->get('enable_balancer', 0);
 
-            $success = $PqrFormService->save([
+            $PqrFormService->save([
                 'enable_balancer' => $status,
             ]);
-
-            if (!$success) {
-                throw new ValidationFailedException($PqrFormService->getErrorManager()->getMessage());
-            }
 
             $data = $PqrFormService->getDataPqrForm();
             $connection->commit();
@@ -361,13 +339,9 @@ class PqrFormController extends AbstractController
         try {
             $status = $Request->request->get('enable_con_days', 0);
 
-            $success = $PqrFormService->save([
+            $PqrFormService->save([
                 'enable_con_days' => $status,
             ]);
-
-            if (!$success) {
-                throw new ValidationFailedException($PqrFormService->getErrorManager()->getMessage());
-            }
 
             $data = $PqrFormService->getDataPqrForm();
             $connection->commit();
@@ -398,9 +372,7 @@ class PqrFormController extends AbstractController
                 throw new MissingParameterException($message);
             }
 
-            if (!$PqrFormsService->updateFieldDescription((int)$fieldId)) {
-                throw new ValidationFailedException($PqrFormsService->getErrorManager()->getMessage());
-            }
+            $PqrFormsService->updateFieldDescription((int)$fieldId);
 
             $connection->commit();
 
@@ -430,11 +402,9 @@ class PqrFormController extends AbstractController
                 throw new MissingParameterException($trans);
             }
 
-            if (!$PqrFormsService->save([
+            $PqrFormsService->save([
                 'canal_recepcion' => json_encode($channels),
-            ])) {
-                throw new ValidationFailedException($PqrFormsService->getErrorManager()->getMessage());
-            }
+            ]);
 
             $connection->commit();
 

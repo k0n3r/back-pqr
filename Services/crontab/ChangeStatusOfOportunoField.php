@@ -12,6 +12,7 @@ use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 readonly class ChangeStatusOfOportunoField implements ScheduledTaskInterface
@@ -19,9 +20,9 @@ readonly class ChangeStatusOfOportunoField implements ScheduledTaskInterface
     public function __construct(
         private Connection $connection,
         private LoggerInterface $logger,
+        private TranslatorInterface $translator,
         private UserLoginService $userLoginService,
-    ) {
-    }
+    ) {}
 
     public function execute(): bool
     {
@@ -48,7 +49,7 @@ readonly class ChangeStatusOfOportunoField implements ScheduledTaskInterface
                 $FtPqr   = UtilitiesPqr::getInstanceForFtId($record['idft']);
                 $Service = $FtPqr->getService();
                 if (!$Service->updateSysOportuno()) {
-                    throw new RuntimeException($Service->getErrorManager()->getMessage());
+                    throw new RuntimeException($this->translator->trans('no_fue_posible_actualizar_estado_solicitud'));
                 }
                 $this->connection->commit();
             } catch (Throwable $th) {

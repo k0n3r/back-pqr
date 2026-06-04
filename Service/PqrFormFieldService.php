@@ -14,6 +14,8 @@ use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrResponseTimeRepository;
 use App\Bundles\pqr\Entity\PqrHtmlField as PqrHtmlFieldEntity;
+use App\Exception\ValidationFailedException;
+use App\Service\LegacyServiceLocator;
 use App\services\Service;
 use App\services\ServiceEventDispatcher;
 use Saia\models\Funcionario;
@@ -57,15 +59,12 @@ class PqrFormFieldService extends Service
         return $this->entity;
     }
 
-    public function save(array $attributes): bool
+    public function save(array $attributes): void
     {
         $attributes = $this->clearAttributes($attributes);
 
         if ($this->isNew) {
             $attributes = $this->processAttributesBeforeCreating($attributes);
-            if (!$attributes) {
-                return false;
-            }
             $this->applyAttributes($attributes);
             $this->em->persist($this->entity);
             $this->em->flush();
@@ -73,28 +72,27 @@ class PqrFormFieldService extends Service
             if (!$this->skipSubscriber) {
                 $this->getIServiceEventDispatcher()->dispatch(ServiceEventDispatcher::EVENT_CREATED);
             }
-            return true;
+
+            return;
         }
 
-        return $this->update($attributes);
+        $this->update($attributes);
     }
 
-    protected function update(array $attributes): bool
+    protected function update(array $attributes): void
     {
         $attributes = $this->processAttributesBeforeUpdating($this->clearAttributes($attributes));
         if (!$attributes) {
-            $this->getErrorManager()->setMessage('error_actualizar');
-            return false;
+            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator()->trans('error_actualizar'));
         }
         $this->applyAttributes($attributes);
         $this->em->flush();
         if (!$this->skipSubscriber) {
             $this->getIServiceEventDispatcher()->dispatch(ServiceEventDispatcher::EVENT_UPDATED);
         }
-        return true;
     }
 
-    public function delete(): bool
+    public function delete(): void
     {
         $fkCampos = $this->entity->getFkCamposFormato();
 
@@ -102,14 +100,9 @@ class PqrFormFieldService extends Service
         $this->em->flush();
         $this->getIServiceEventDispatcher()->dispatch(ServiceEventDispatcher::EVENT_DELETED);
 
-        if ($fkCampos) {
-            if (!(new CamposFormato($fkCampos))->getService()->delete()) {
-                $this->getErrorManager()->setMessage('No fue posible eliminar el campo');
-                return false;
-            }
+        if ($fkCampos && !(new CamposFormato($fkCampos))->getService()->delete()) {
+            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator()->trans('no_fue_posible_eliminar_campo'));
         }
-
-        return true;
     }
 
     public function skipSubscriber(): void
@@ -168,19 +161,15 @@ class PqrFormFieldService extends Service
     /**
      * @inheritDoc
      */
-    public function processAttributesBeforeCreating(array $attributes): false|array
+    public function processAttributesBeforeCreating(array $attributes): array
     {
         if (!isset($attributes['fk_pqr_form'])) {
-            $this->getErrorManager()->setMessage("Falta el identificador del formulario");
-
-            return false;
+            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator()->trans('falta_identificador_formulario'));
         }
 
         $pqrForm = $this->getPqrFormRepository()->find((int)$attributes['fk_pqr_form']);
         if (!$pqrForm) {
-            $this->getErrorManager()->setMessage("Formulario no encontrado");
-
-            return false;
+            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator()->trans('formulario_no_encontrado'));
         }
 
         $fieldCount = $this->getPqrFormFieldRepository()->count(['pqrForm' => $pqrForm]);
@@ -233,7 +222,7 @@ class PqrFormFieldService extends Service
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function updateActive(int $status): bool
+    public function updateActive(int $status): void
     {
         $attributes = [
             'active'             => $status,
@@ -255,7 +244,7 @@ class PqrFormFieldService extends Service
             $this->em->flush();
         }
 
-        return $this->update($attributes);
+        $this->update($attributes);
     }
 
 

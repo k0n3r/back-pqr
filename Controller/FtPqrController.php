@@ -9,13 +9,13 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Service\PqrHistoryService;
 use App\Bundles\pqr\Service\PqrService;
 use App\Exception\MissingParameterException;
-use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Saia\controllers\DateController;
 use Saia\controllers\functions\CoreFunctions;
 use Saia\models\Tercero;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -166,7 +166,7 @@ class FtPqrController extends AbstractController
                 'total' => count($records),
                 'rows'  => $records,
             ];
-        } catch (Throwable $th) {
+        } catch (Throwable) {
             $data = [
                 'total' => 0,
                 'rows'  => [],
@@ -184,6 +184,7 @@ class FtPqrController extends AbstractController
         Connection $Connection,
         TranslatorInterface $translator,
         PqrHistoryService $pqrHistoryService,
+        Security $security,
     ): Response {
         $Connection->beginTransaction();
         try {
@@ -223,7 +224,7 @@ class FtPqrController extends AbstractController
             if ($modified) {
                 $pqrHistoryService->create([
                     'idft'           => $FtPqr->getPK(),
-                    'fk_funcionario' => \App\Service\LegacyServiceLocator::getInstance()->getSecurity()->getUser()?->getId(),
+                    'fk_funcionario' => $security->getUser()->getId(),
                     'tipo'           => PqrHistoryEntity::TIPO_MODIFICACION_TERCERO,
                     'idfk'           => $Tercero->getPK(),
                     'descripcion'    => 'Se actualizo el tercero: '.implode(', ', $modified),
@@ -262,11 +263,7 @@ class FtPqrController extends AbstractController
         $Connection->beginTransaction();
         try {
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
-            if (!$FtPqrService->updateType($request->request->all('data'))) {
-                throw new ValidationFailedException(
-                    $FtPqrService->getErrorManager()->getMessage(),
-                );
-            }
+            $FtPqrService->updateType($request->request->all('data'));
 
             $Connection->commit();
 
@@ -297,11 +294,7 @@ class FtPqrController extends AbstractController
             $Connection->beginTransaction();
 
             $FtPqrService = (UtilitiesPqr::getInstanceForFtId($idft))->getService();
-            if (!$FtPqrService->finish($request->request->get('observaciones'))) {
-                throw new ValidationFailedException(
-                    $FtPqrService->getErrorManager()->getMessage(),
-                );
-            }
+            $FtPqrService->finish($request->request->get('observaciones'));
 
             $Connection->commit();
 

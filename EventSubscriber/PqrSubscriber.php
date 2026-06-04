@@ -18,6 +18,7 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Saia\models\documento\Documento;
 use Saia\models\tarea\Tarea;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Mailer\Event\SentMessageEvent;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -34,8 +35,8 @@ readonly class PqrSubscriber implements EventSubscriberInterface
         private CacheInterface $cache,
         private PqrFormProvider $pqrFormProvider,
         private PqrHistoryService $pqrHistoryService,
-    ) {
-    }
+        private Security $security,
+    ) {}
 
 
     public static function getSubscribedEvents(): array
@@ -58,6 +59,7 @@ readonly class PqrSubscriber implements EventSubscriberInterface
      * evento a ejecutar despues de crear la tarea
      *
      * @param TaskCreatedEvent $TaskCreatedEvent
+     *
      * @return bool
      * @throws Exception
      * @author Andres Agudelo <jhon.valencia@cerok.com>
@@ -66,7 +68,7 @@ readonly class PqrSubscriber implements EventSubscriberInterface
     public function onTaskCreated(TaskCreatedEvent $TaskCreatedEvent): bool
     {
         $TareaService = $TaskCreatedEvent->getService();
-        $description = "Se crea la tarea: {$TareaService->getModel()->nombre}";
+        $description  = "Se crea la tarea: {$TareaService->getModel()->nombre}";
 
         return $this->saveHistory($TareaService, $description);
     }
@@ -75,6 +77,7 @@ readonly class PqrSubscriber implements EventSubscriberInterface
      * Evento a ejecutar despues de eliminar una tarea
      *
      * @param TaskDeletedEvent $TaskDeletedEvent
+     *
      * @return bool
      * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-03-17
@@ -82,7 +85,7 @@ readonly class PqrSubscriber implements EventSubscriberInterface
     public function onTaskDeletedEvent(TaskDeletedEvent $TaskDeletedEvent): bool
     {
         $TareaService = $TaskDeletedEvent->getService();
-        $description = "Se elimina la tarea: {$TareaService->getModel()->nombre}";
+        $description  = "Se elimina la tarea: {$TareaService->getModel()->nombre}";
 
         return $this->saveHistory($TareaService, $description);
     }
@@ -91,6 +94,7 @@ readonly class PqrSubscriber implements EventSubscriberInterface
      * Evento a ejecutar despues de crear un estado de la tarea
      *
      * @param TaskStatusCreatedEvent $TaskStatusCreatedEvent
+     *
      * @return bool
      * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-03-18
@@ -98,8 +102,8 @@ readonly class PqrSubscriber implements EventSubscriberInterface
     public function onTaskStatusCreatedEvent(TaskStatusCreatedEvent $TaskStatusCreatedEvent): bool
     {
         $TareaEstadoService = $TaskStatusCreatedEvent->getService();
-        $TareaService = $TareaEstadoService->getTarea()->getService();
-        $description = "Se actualiza el estado de la tarea ({$TareaService->getModel()->nombre}) a : {$TareaEstadoService->getModel()->getValueLabel('valor')}";
+        $TareaService       = $TareaEstadoService->getTarea()->getService();
+        $description        = "Se actualiza el estado de la tarea ({$TareaService->getModel()->nombre}) a : {$TareaEstadoService->getModel()->getValueLabel('valor')}";
 
         return $this->saveHistory($TareaService, $description);
     }
@@ -108,7 +112,8 @@ readonly class PqrSubscriber implements EventSubscriberInterface
      * Actualiza el historial de cambios
      *
      * @param TareaService $TareaService
-     * @param string $description
+     * @param string       $description
+     *
      * @return bool
      * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-03-18
@@ -117,11 +122,11 @@ readonly class PqrSubscriber implements EventSubscriberInterface
     {
         if ($TareaService->getModel()->relacion == Tarea::RELACION_DOCUMENTO) {
             $Documento = new Documento($TareaService->getModel()->relacion_id);
-            $pqrForm = $this->pqrFormProvider->getOrNull();
+            $pqrForm   = $this->pqrFormProvider->getOrNull();
             if ($pqrForm && $Documento->formato_idformato == $pqrForm->getFkFormato()) {
                 $this->pqrHistoryService->create([
                     'idft'           => $Documento->getFt()->getPK(),
-                    'fk_funcionario' => $TareaService->getFuncionario()->getPK(),
+                    'fk_funcionario' => $this->security->getUser()->getId(),
                     'tipo'           => PqrHistoryEntity::TIPO_TAREA,
                     'idfk'           => $TareaService->getModel()->getPK(),
                     'descripcion'    => $description,
@@ -141,6 +146,7 @@ readonly class PqrSubscriber implements EventSubscriberInterface
      * Actualiza el estado de la PQR
      *
      * @param Documento $Documento
+     *
      * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -148,7 +154,7 @@ readonly class PqrSubscriber implements EventSubscriberInterface
     private function updateEstado(Documento $Documento): bool
     {
         $estado = FtPqr::ESTADO_PENDIENTE;
-        $data = UtilitiesPqr::getFinishTotalTask($Documento);
+        $data   = UtilitiesPqr::getFinishTotalTask($Documento);
 
         $total = $data['total'] - $data['cancel'];
         if ($total) {
@@ -176,8 +182,8 @@ readonly class PqrSubscriber implements EventSubscriberInterface
     {
         try {
             $message = $event->getMessage()->getOriginalMessage();
-            $params = $this->extractDataFromHeaders($message->getHeaders());
-            $isPqr = $params['isRespuetaPqr'] ?? null;
+            $params  = $this->extractDataFromHeaders($message->getHeaders());
+            $isPqr   = $params['isRespuetaPqr'] ?? null;
 
             if (!$isPqr) {
                 return;

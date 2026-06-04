@@ -3,7 +3,6 @@
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\helpers\UtilitiesPqr;
-use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,11 +19,7 @@ class FtPqrRespuestaController extends AbstractController
     ): Response {
         try {
             $FtPqrRespuestaService = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($idft)->getService();
-            if (!$FtPqrRespuestaService->requestSurvey()) {
-                throw new ValidationFailedException(
-                    $FtPqrRespuestaService->getErrorManager()->getMessage(),
-                );
-            }
+            $FtPqrRespuestaService->requestSurvey();
 
             return $json->success();
         } catch (Throwable $th) {

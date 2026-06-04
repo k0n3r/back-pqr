@@ -89,11 +89,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     public function afterAdd(): bool
     {
         if ($this->getService()->sendByEmail()) {
-            if (!$this->getService()->validEmails()) {
-                throw new RuntimeException(
-                    $this->getService()->getErrorManager()->getMessage(),
-                );
-            }
+            $this->getService()->validEmails();
         }
 
         return true;
@@ -105,11 +101,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     public function afterEdit(): bool
     {
         if ($this->getService()->sendByEmail()) {
-            if (!$this->getService()->validEmails()) {
-                throw new RuntimeException(
-                    $this->getService()->getErrorManager()->getMessage(),
-                );
-            }
+            $this->getService()->validEmails();
         }
 
         return true;
@@ -123,13 +115,11 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
         $description = "Se genera la respuesta con radicado # {$this->getDocument()->numero}";
         $tipo = PqrHistory::TIPO_RESPUESTA;
 
-        if (
-            !$this->getService()->saveHistory($description, $tipo) ||
-            !$this->getService()->saveDistribution() ||
-            !$this->getService()->notifyEmail()
-        ) {
+        $this->getService()->saveHistory($description, $tipo);
+        $this->getService()->saveDistribution();
+        if (!$this->getService()->notifyEmail()) {
             throw new RuntimeException(
-                $this->getService()->getErrorManager()->getMessage(),
+                $this->serviceLocator->getTranslator()->trans('no_fue_posible_enviar_notificacion_correo'),
             );
         }
 

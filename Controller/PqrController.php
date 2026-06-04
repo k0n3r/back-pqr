@@ -30,10 +30,11 @@ class PqrController extends AbstractController
         Request $request,
         jsonResponseService $json,
         Connection $Connection,
+        TranslatorInterface $translator,
     ): Response {
         try {
             if (empty($request->query->get('numero'))) {
-                throw new MissingParameterException("Se debe indicar el numero de radicado");
+                throw new MissingParameterException($translator->trans('se_debe_indicar_numero_radicado'));
             }
             $email = trim($request->query->get('sys_email'));
 
@@ -70,13 +71,14 @@ class PqrController extends AbstractController
     public function getHistoryForTimeline(
         Request $request,
         jsonResponseService $json,
+        TranslatorInterface $translator,
     ): Response {
         try {
             $data  = json_decode(CryptController::decrypt($request->query->get('infoCryp')));
             $FtPqr = UtilitiesPqr::getInstanceForDocumentId($data->documentId);
 
             if ($FtPqr->getPK() != $data->id) {
-                throw new ValidationFailedException("La URL ingresada NO existe o ha sido eliminada");
+                throw new ValidationFailedException($translator->trans('url_ingresada_no_existe_o_eliminada'));
             }
 
             $data = $FtPqr->getService()->getHistoryForTimeline();
@@ -91,10 +93,11 @@ class PqrController extends AbstractController
     public function decrypt(
         Request $request,
         jsonResponseService $json,
+        TranslatorInterface $translator,
     ): Response {
         try {
             if (!$request->query->get('dataCrypt')) {
-                throw new MissingParameterException("Faltan parametros");
+                throw new MissingParameterException($translator->trans('faltan_parametros'));
             }
 
             $data = json_decode(CryptController::decrypt($request->query->get('dataCrypt')), true);

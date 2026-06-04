@@ -26,20 +26,20 @@ use Saia\models\vistas\VfuncionarioDc;
 class FtPqr extends FtPqrProperties
 {
     public const string ESTADO_PENDIENTE = 'PENDIENTE';
-    public const string ESTADO_INICIADO = 'INICIADO';
-    public const string ESTADO_PROCESO = 'PROCESO';
+    public const string ESTADO_INICIADO  = 'INICIADO';
+    public const string ESTADO_PROCESO   = 'PROCESO';
     public const string ESTADO_TERMINADO = 'TERMINADO';
 
-    public const int VENCIMIENTO_ROJO = 1;            //DIAS
-    public const int VENCIMIENTO_AMARILLO = 5;        //DIAS
+    public const int VENCIMIENTO_ROJO     = 1;            //DIAS
+    public const int VENCIMIENTO_AMARILLO = 5;            //DIAS
 
-    public const int ESTADO_FRE_IMP_SEV_BAJO = 1;
+    public const int ESTADO_FRE_IMP_SEV_BAJO  = 1;
     public const int ESTADO_FRE_IMP_SEV_MEDIO = 2;
-    public const int ESTADO_FRE_IMP_SEV_ALTO = 3;
+    public const int ESTADO_FRE_IMP_SEV_ALTO  = 3;
 
-    public const string OPORTUNO_PENDIENTES_SIN_VENCER = 'PENDIENTES SIN VENCER';
-    public const string OPORTUNO_VENCIDAS_SIN_CERRAR = 'VENCIDAS SIN CERRAR';
-    public const string OPORTUNO_CERRADAS_A_TERMINO = 'CERRADAS A TERMINO';
+    public const string OPORTUNO_PENDIENTES_SIN_VENCER     = 'PENDIENTES SIN VENCER';
+    public const string OPORTUNO_VENCIDAS_SIN_CERRAR       = 'VENCIDAS SIN CERRAR';
+    public const string OPORTUNO_CERRADAS_A_TERMINO        = 'CERRADAS A TERMINO';
     public const string OPORTUNO_CERRADAS_FUERA_DE_TERMINO = 'CERRADAS FUERA DE TERMINO';
 
     protected ?FtPqrService $FtPqrService = null;
@@ -104,13 +104,13 @@ class FtPqr extends FtPqrProperties
     {
         $data = [];
         if (!$action) {
-            $em = LegacyServiceLocator::getInstance()->getEntityManager();
+            $em      = LegacyServiceLocator::getInstance()->getEntityManager();
             $PqrForm = $em->getRepository(PqrFormEntity::class)->findActiveOrFail();
 
             $PqrFormField = $em->getRepository(PqrFormFieldEntity::class)->findByName('sys_subtipo');
 
             $IWsHtml = (new Formato($PqrForm->getFkFormato()))->getClassToGenerateWs()->getIWsHtml();
-            $data = [
+            $data    = [
                 'isActiveSubType'        => (int)($PqrFormField && $PqrFormField->isActive()),
                 'isEnabledAnonymous'     => (int)$PqrForm->isShowAnonymous(),
                 'fieldsWithoutAnonymous' => $IWsHtml->getFieldsWithoutAnonymous(),
@@ -143,7 +143,7 @@ class FtPqr extends FtPqrProperties
     public function getPqrBackup(): ?PqrBackupEntity
     {
         if (!$this->PqrBackup) {
-            $this->PqrBackup = LegacyServiceLocator::getInstance()
+            $this->PqrBackup = $this->serviceLocator
                 ->getEntityManager()
                 ->getRepository(PqrBackupEntity::class)
                 ->findOneBy(['fkDocumento' => (int)$this->documento_iddocumento]);
@@ -211,9 +211,7 @@ class FtPqr extends FtPqrProperties
     public function afterAdd(): bool
     {
         $this->setDefaultValues();
-        if (!$this->getService()->validSysEmail()) {
-            throw new ValidationFailedException($this->getService()->getErrorManager()->getMessage());
-        }
+        $this->getService()->validSysEmail();
 
         return true;
     }
@@ -223,13 +221,11 @@ class FtPqr extends FtPqrProperties
      */
     public function afterEdit(): bool
     {
-        if (!$this->getService()->validSysEmail()) {
-            throw new ValidationFailedException($this->getService()->getErrorManager()->getMessage());
-        }
+        $this->getService()->validSysEmail();
 
         if ($this->getDocument()->isStarted()) {
-            $this->sys_estado = self::ESTADO_PENDIENTE;
-            $this->getDocument()->estado = Documento::APROBADO;
+            $this->sys_estado                       = self::ESTADO_PENDIENTE;
+            $this->getDocument()->estado            = Documento::APROBADO;
             $this->getDocument()->estado_aprobacion = Documento::APROBADO_LABEL;
 
             $this->beforeRad();
@@ -261,13 +257,12 @@ class FtPqr extends FtPqrProperties
             return true;
         }
 
-        if (
-            !$this->getService()->createBackup() ||
-            !$this->getService()->updateFechaVencimiento() ||
-            !$this->getService()->createTercero()
-        ) {
-            throw new ValidationFailedException($this->getService()->getErrorManager()->getMessage());
+        if (!$this->getService()->createBackup() || !$this->getService()->updateFechaVencimiento()) {
+            throw new ValidationFailedException(
+                $this->serviceLocator->getTranslator()->trans('no_fue_posible_procesar_pqr'),
+            );
         }
+        $this->getService()->createTercero();
 
         return true;
     }
@@ -287,8 +282,9 @@ class FtPqr extends FtPqrProperties
         $this->descripcion = $this->getDocument()->getDescription();
         $this->save();
 
-        return $this->getService()->saveDistribution() &&
-            $this->getService()->sendNotifications() &&
+        $this->getService()->saveDistribution();
+
+        return $this->getService()->sendNotifications() &&
             $this->getService()->notifyEmail();
     }
 
@@ -315,10 +311,10 @@ class FtPqr extends FtPqrProperties
      */
     protected function setDefaultValues(): void
     {
-        $this->sys_estado = ((int)$this->getRequest(
-        )['radicacion_rapida']) ? self::ESTADO_INICIADO : self::ESTADO_PENDIENTE;
+        $this->sys_estado            = ((int)$this->getRequest()['radicacion_rapida'])
+            ? self::ESTADO_INICIADO : self::ESTADO_PENDIENTE;
         $this->sys_fecha_vencimiento = null;
-        $this->sys_fecha_terminado = null;
+        $this->sys_fecha_terminado   = null;
         $this->save();
     }
 
@@ -340,7 +336,7 @@ class FtPqr extends FtPqrProperties
         );
 
         $labelPQR = mb_strtoupper($this->getService()->getPqrForm()->getLabel(), 'UTF-8');
-        $tr = implode('', $this->getTableRows());
+        $tr       = implode('', $this->getTableRows());
 
         return <<<HTML
             <table class="table table-borderless" style="width:100%">
@@ -396,13 +392,14 @@ class FtPqr extends FtPqrProperties
      *  AutompleteD
      *
      * @param CamposFormato $CamposFormato
+     *
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
     public function autocompleteD(CamposFormato $CamposFormato): string
     {
-        $PqrFormField = LegacyServiceLocator::getInstance()
+        $PqrFormField = $this->serviceLocator
             ->getEntityManager()
             ->getRepository(PqrFormFieldEntity::class)
             ->findOneBy(['fkCamposFormato' => $CamposFormato->getPK()]);
@@ -415,13 +412,14 @@ class FtPqr extends FtPqrProperties
      *  Automplete
      *
      * @param CamposFormato $CamposFormato
+     *
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
     public function autocompleteM(CamposFormato $CamposFormato): string
     {
-        $PqrFormField = LegacyServiceLocator::getInstance()
+        $PqrFormField = $this->serviceLocator
             ->getEntityManager()
             ->getRepository(PqrFormFieldEntity::class)
             ->findOneBy(['fkCamposFormato' => $CamposFormato->getPK()]);
@@ -491,7 +489,7 @@ class FtPqr extends FtPqrProperties
                     $fieldName = $this->getFieldNameDestinoInterno();
 
                     $this->FuncionarioDestinoInterno = $VfuncionarioDc;
-                    $this->$fieldName = $VfuncionarioDc->iddependencia_cargo;
+                    $this->$fieldName                = $VfuncionarioDc->iddependencia_cargo;
                 }
             }
         }
@@ -520,11 +518,12 @@ class FtPqr extends FtPqrProperties
      * Metodo para generar datos para la IA
      *
      * @param DocumentoService $documentoService
+     *
      * @return PqrJsonForIA
      */
     public function getIAJsonGenerator(DocumentoService $documentoService): PqrJsonForIA
     {
-        return new PqrJsonForIA($documentoService);
+        return new PqrJsonForIA($documentoService, $this->serviceLocator->getConnection());
     }
 
     /**

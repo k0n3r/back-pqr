@@ -22,7 +22,7 @@ class Tratamiento implements IWsFields
     public function getAdditionHTMLWs(): string
     {
         $setting = $this->PqrFormField->getSettingDecoded();
-        $name = $this->PqrFormField->getName();
+        $name    = $this->PqrFormField->getName();
 
         $infoUrl = '';
         if ($setting->url ?? null) {
@@ -32,17 +32,17 @@ class Tratamiento implements IWsFields
         }
 
         return <<<HTML
-            <div class="form-group" id="group_{$name}">
+            <div class="form-group" id="group_$name">
                 <h5 class="text-center">AUTORIZACIÓN PARA EL TRATAMIENTO DE INFORMACIÓN</h5>
                 <p class="text-justify">$setting->tratamiento</p>
                 $infoUrl
                 <div class="checkbox check-danger input-group">
-                    <input type="checkbox" name="{$name}" id="{$name}" value="1" aria-required="true" class="required">
-                    <label for="{$name}" class="me-3">
+                    <input type="checkbox" name="$name" id="$name" value="1" aria-required="true" class="required">
+                    <label for="$name" class="me-3">
                         ACEPTO LOS TÉRMINOS Y CONDICIONES
                     </label>
                 </div>
-                <label id="{$name}-error" class="error" for="{$name}" style="display: none;"></label>
+                <label id="$name-error" class="error" for="$name" style="display: none;"></label>
             </div>
             HTML;
     }

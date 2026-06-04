@@ -3,10 +3,10 @@
 namespace App\Bundles\pqr\Services;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
+use App\Exception\ValidationFailedException;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Service\PqrService;
-use App\Service\LegacyServiceLocator;
 use App\Bundles\pqr\Entity\PqrBackup as PqrBackupEntity;
 use App\Bundles\pqr\Entity\PqrBalancer as PqrBalancerEntity;
 use App\Bundles\pqr\Entity\PqrFormField as PqrFormFieldEntity;
@@ -50,7 +50,6 @@ use Saia\models\tarea\Tarea;
 use Saia\models\Tercero;
 use Saia\models\vistas\VfuncionarioDc;
 use Symfony\Component\Mime\Email;
-use Throwable;
 
 class FtPqrService extends ModelService
 {
@@ -62,7 +61,7 @@ class FtPqrService extends ModelService
     public function __construct(FtPqr $Ft)
     {
         parent::__construct($Ft);
-        $this->PqrService = LegacyServiceLocator::getInstance()->get(PqrService::class);
+        $this->PqrService = $this->serviceLocator->get(PqrService::class);
     }
 
     /**
@@ -109,23 +108,20 @@ class FtPqrService extends ModelService
     /**
      * Valida si el campo sys_email es valido
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function validSysEmail(): bool
+    public function validSysEmail(): void
     {
         if ($this->getModel()->sys_email) {
             if (!CoreFunctions::isEmailValid($this->getModel()->sys_email)) {
-                $this->getErrorManager()->setMessage(
-                    "Esta dirección de correo ({$this->getModel()->sys_email}) no es válida.",
+                throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('correo_invalido',
+                    ['%email%' => $this->getModel()->sys_email],
+                ),
                 );
-
-                return false;
             }
         }
-
-        return true;
     }
 
     /**
@@ -191,7 +187,7 @@ class FtPqrService extends ModelService
     /**
      * Obtiene el valor de un campo
      *
-     * @param PqrFormField $PqrFormField
+     * @param PqrFormFieldEntity $PqrFormField
      *
      * @return array|null
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -219,7 +215,8 @@ class FtPqrService extends ModelService
             case 'AutocompleteM':
                 $value = null;
                 if ($this->getModel()->$fieldName) {
-                    $value = LegacyServiceLocator::getInstance()->get(PqrFormFieldServiceFactory::class)
+                    $value = $this->serviceLocator
+                        ->get(PqrFormFieldServiceFactory::class)
                         ->create($PqrFormField->getId())
                         ->getListDataForAutocomplete(['id' => $this->getModel()->$fieldName]);
                 }
@@ -414,16 +411,13 @@ class FtPqrService extends ModelService
      *
      * @param string $observaciones
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function finish(string $observaciones = ''): bool
+    public function finish(string $observaciones = ''): void
     {
-        return $this->changeStatus(
-            FtPqr::ESTADO_TERMINADO,
-            $observaciones,
-        );
+        $this->changeStatus(FtPqr::ESTADO_TERMINADO, $observaciones);
     }
 
     /**
@@ -568,8 +562,8 @@ class FtPqrService extends ModelService
         $email = (new Email());
 
         $Documento = $this->getDocument();
-        $pdfPath = $Documento->getPdfJson();
-        $file = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
+        $pdfPath   = $Documento->getPdfJson();
+        $file      = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
         $email->attach($file->getContent(), basename($pdfPath));
 
         $records = $Documento->getService()->getAllFilesAnexos(true);
@@ -600,7 +594,7 @@ class FtPqrService extends ModelService
     /**
      * Html de los campos Automplete
      *
-     * @param PqrFormField $PqrFormField
+     * @param PqrFormFieldEntity $PqrFormField $PqrFormField
      *
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
@@ -613,7 +607,8 @@ class FtPqrService extends ModelService
 
         $options = '';
         if ($this->getModel()->$name) {
-            $list = LegacyServiceLocator::getInstance()->get(PqrFormFieldServiceFactory::class)
+            $list = $this->serviceLocator
+                ->get(PqrFormFieldServiceFactory::class)
                 ->create($PqrFormField->getId())
                 ->getListDataForAutocomplete(['id' => $this->getModel()->$name]);
             if ($list) {
@@ -677,7 +672,7 @@ class FtPqrService extends ModelService
                 ->to(...$emails);
 
             $pdfPath = $Documento->getPdfJson();
-            $file = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
+            $file    = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
             $email->attach($file->getContent(), basename($pdfPath));
 
             $params = [
@@ -698,20 +693,18 @@ class FtPqrService extends ModelService
     /**
      * Crea el tercero segun la configuracion del funcionario
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function createTercero(): bool
+    public function createTercero(): void
     {
         $config = $this->getPqrForm()->getResponseConfiguration();
 
         if (!$config['tercero']) {
-            $this->getErrorManager()->setMessage(
-                "Contacte al administrador!, Se debe definir la configuración de la respuesta",
+            throw new ValidationFailedException($this->serviceLocator->getTranslator(
+            )->trans('configuracion_respuesta_no_definida'),
             );
-
-            return false;
         }
 
         $data = [
@@ -754,13 +747,17 @@ class FtPqrService extends ModelService
         $Tercero        ??= new Tercero();
         $TerceroService = new TerceroService($Tercero);
         if (!$TerceroService->save($data)) {
-            $this->getErrorManager()->setMessage($TerceroService->getErrorManager()->getMessage());
-
-            return false;
+            throw new ValidationFailedException($this->serviceLocator->getTranslator(
+            )->trans('no_fue_posible_guardar_tercero'),
+            );
         }
         $this->getModel()->sys_tercero = $TerceroService->getModel()->getPK();
 
-        return $this->getModel()->save() > 0;
+        if (!$this->getModel()->save()) {
+            throw new ValidationFailedException($this->serviceLocator->getTranslator(
+            )->trans('no_fue_posible_guardar_pqr'),
+            );
+        }
     }
 
     /**
@@ -768,22 +765,20 @@ class FtPqrService extends ModelService
      *
      * @param array $data
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function updateType(array $data): bool
+    public function updateType(array $data): void
     {
         if (!$data['type']) {
-            $this->getErrorManager()->setMessage("Error faltan parametros");
-
-            return false;
+            throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('error_faltan_parametros'),
+            );
         }
 
         if ($this->getPqrService()->subTypeExist() && !$data['subtype']) {
-            $this->getErrorManager()->setMessage("Error faltan parametros");
-
-            return false;
+            throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('error_faltan_parametros'),
+            );
         }
         $refreshDescription = false;
         $newAttributes      = [];
@@ -813,7 +808,7 @@ class FtPqrService extends ModelService
                     $oldDependency = '-';
                 }
                 $newAttributes[PqrFormFieldEntity::FIELD_NAME_SYS_DEPENDENCIA] = $data['dependency'];
-                $textField[]                                             = "dependencia de $oldDependency a {newDependency}";
+                $textField[]                                                   = "dependencia de $oldDependency a {newDependency}";
             }
         }
 
@@ -852,7 +847,7 @@ class FtPqrService extends ModelService
         }
 
         if (!$newAttributes) {
-            return true;
+            return;
         }
 
         $SaveFt = new SaveFt($this->getDocument());
@@ -886,7 +881,7 @@ class FtPqrService extends ModelService
             'descripcion' => $text,
         ];
 
-        return $this->saveHistory($history);
+        $this->saveHistory($history);
     }
 
     public function updateSysOportuno(): bool
@@ -907,7 +902,9 @@ class FtPqrService extends ModelService
             'descripcion' => "Se actualiza la oportunidad en la respuesta de : $oldOportuno a $newOportuno",
         ];
 
-        return $this->saveHistory($history);
+        $this->saveHistory($history);
+
+        return true;
     }
 
     /**
@@ -1087,7 +1084,7 @@ class FtPqrService extends ModelService
 
         return sprintf(
             "%sws/%s/infoQR.html?data=%s",
-            LegacyServiceLocator::getInstance()->domain,
+            $this->serviceLocator->domain,
             $this->getModel()->getFormat()->nombre,
             urlencode($data),
         );
@@ -1099,11 +1096,11 @@ class FtPqrService extends ModelService
      * @param string $newStatus
      * @param string $observations
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function changeStatus(string $newStatus, string $observations = ''): bool
+    public function changeStatus(string $newStatus, string $observations = ''): void
     {
         $actualStatus = $this->getModel()->sys_estado;
 
@@ -1120,15 +1117,11 @@ class FtPqrService extends ModelService
             }
             $this->getModel()->save();
 
-            if (!$this->saveHistory([
+            $this->saveHistory([
                 'tipo'        => PqrHistoryEntity::TIPO_CAMBIO_ESTADO,
                 'descripcion' => "Se actualiza el estado de la solicitud de $actualStatus a $newStatus. $observations",
-            ])) {
-                return false;
-            }
+            ]);
         }
-
-        return true;
     }
 
     /**
@@ -1201,13 +1194,11 @@ class FtPqrService extends ModelService
             $this->getDocument()->fecha_limite = $DateTimeForType->format('Y-m-d H:i:s');
             $this->getDocument()->save();
 
-            if (!$this->saveHistory([
+            $this->saveHistory([
                 'tipo'        => PqrHistoryEntity::TIPO_CAMBIO_VENCIMIENTO,
                 'descripcion' => "Se actualiza la fecha de vencimiento a ".
                     $DateTimeForType->format(DateController::PUBLIC_DATE_FORMAT),
-            ])) {
-                return false;
-            }
+            ]);
         }
 
         return true;
@@ -1216,14 +1207,14 @@ class FtPqrService extends ModelService
     /**
      * Registra la distribucion
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function saveDistribution(): bool
+    public function saveDistribution(): void
     {
         if ($this->getDocument()->fromWebservice()) {
-            return true;
+            return;
         }
 
         $option = (int)$this->getModel()->getKeyField(Distribution::SELECT_MENSAJERIA);
@@ -1246,9 +1237,9 @@ class FtPqrService extends ModelService
                 break;
 
             default:
-                $this->getErrorManager()->setMessage("Tipo de distribucion no definida");
-
-                return false;
+                throw new ValidationFailedException($this->serviceLocator->getTranslator(
+                )->trans('tipo_distribucion_no_definida'),
+                );
         }
         $DistributionService = new DistributionService($this->getModel()->getDocument());
         $fieldName           = Distribution::DESTINO_INTERNO;
@@ -1261,8 +1252,6 @@ class FtPqrService extends ModelService
             $estado,
             $recogida,
         );
-
-        return true;
     }
 
     protected function sendNotificationToInternalDestination(): void
@@ -1274,7 +1263,9 @@ class FtPqrService extends ModelService
 
         $TareaService = (new Tarea())->getService();
         if (!$TareaService->createOrUpdate($this->getTaskDefaultData())) {
-            throw new InvalidArgumentException($TareaService->getErrorManager()->getMessage());
+            throw new InvalidArgumentException($this->serviceLocator->getTranslator(
+            )->trans('no_fue_posible_crear_tarea'),
+            );
         }
     }
 
@@ -1377,26 +1368,18 @@ class FtPqrService extends ModelService
      *
      * @param array $data
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-06-26
      */
-    protected function saveHistory(array $data): bool
+    protected function saveHistory(array $data): void
     {
         $history = array_merge([
             'idft'           => $this->getModel()->getPK(),
-            'fk_funcionario' => $this->getFuncionario()->getPK(),
+            'fk_funcionario' => $this->serviceLocator->getSecurity()->getUser()->getId(),
             'idfk'           => 0,
         ], $data);
 
-        try {
-            $this->getPqrHistoryService()->create($history);
-        } catch (Throwable $e) {
-            $this->getErrorManager()->setMessage($e->getMessage());
-
-            return false;
-        }
-
-        return true;
+        $this->getPqrHistoryService()->create($history);
     }
 
     /**
@@ -1521,7 +1504,7 @@ class FtPqrService extends ModelService
 
     private function getPqrHistoryService(): PqrHistoryService
     {
-        return LegacyServiceLocator::getInstance()->get(PqrHistoryService::class);
+        return $this->serviceLocator->get(PqrHistoryService::class);
     }
 
 }

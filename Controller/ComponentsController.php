@@ -32,15 +32,15 @@ class ComponentsController extends AbstractController
             }
 
             $pqrHtmlField = $pqrFormField->getHtmlField();
-            $setting = json_decode($pqrFormField->getSetting());
-            $queryData = $request->query->all('data');
+            $setting      = json_decode($pqrFormField->getSetting());
+            $queryData    = $request->query->all('data');
 
-            $data = match ($pqrHtmlField?->getType()) {
+            $data = match ($pqrHtmlField->getType()) {
                 PqrHtmlField::TYPE_DEPENDENCIA => $this->queryDependencias($connection, $setting, $queryData),
-                PqrHtmlField::TYPE_LOCALIDAD   => $this->queryLocalidades($connection, $setting, $queryData),
-                default                        => [],
+                PqrHtmlField::TYPE_LOCALIDAD => $this->queryLocalidades($connection, $setting, $queryData),
+                default => [],
             };
-        } catch (Throwable $th) {
+        } catch (Throwable) {
             $data = [];
         }
 
@@ -51,31 +51,36 @@ class ComponentsController extends AbstractController
 
     private function queryDependencias(Connection $connection, object $setting, array $data): array
     {
-        $qb = $connection->createQueryBuilder()
+        $qb = $connection
+            ->createQueryBuilder()
             ->select('iddependencia as id', 'nombre as text')
             ->from('dependencia');
 
         if ($data['id'] ?? null) {
-            return $qb->where('iddependencia = :id')
+            return $qb
+                ->where('iddependencia = :id')
                 ->setParameter('id', $data['id'])
                 ->executeQuery()
                 ->fetchAllAssociative();
         }
 
-        $qb->where('estado = 1')
+        $qb
+            ->where('estado = 1')
             ->orderBy('nombre', 'ASC')
             ->setFirstResult(0)
             ->setMaxResults(40);
 
         if (isset($data['term'])) {
-            $qb->andWhere('nombre LIKE :nombre')
+            $qb
+                ->andWhere('nombre LIKE :nombre')
                 ->setParameter('nombre', '%'.$data['term'].'%');
         }
 
         if (!($setting->allDependency ?? true)) {
             $ids = array_column((array)($setting->options ?? []), 'id');
             if ($ids) {
-                $qb->andWhere('iddependencia IN (:ids)')
+                $qb
+                    ->andWhere('iddependencia IN (:ids)')
                     ->setParameter('ids', $ids, ArrayParameterType::INTEGER);
             }
         }
@@ -85,20 +90,23 @@ class ComponentsController extends AbstractController
 
     private function queryLocalidades(Connection $connection, object $setting, array $data): array
     {
-        $qb = $connection->createQueryBuilder()
+        $qb = $connection
+            ->createQueryBuilder()
             ->select("CONCAT(a.nombre, ' - ', b.nombre, ' - ', c.nombre) AS text", 'a.idmunicipio as id')
             ->from('municipio', 'a')
             ->join('a', 'departamento', 'b', 'a.departamento_iddepartamento = b.iddepartamento')
             ->join('b', 'pais', 'c', 'b.pais_idpais = c.idpais');
 
         if ($data['id'] ?? null) {
-            return $qb->where('a.idmunicipio = :id')
+            return $qb
+                ->where('a.idmunicipio = :id')
                 ->setParameter('id', $data['id'])
                 ->executeQuery()
                 ->fetchAllAssociative();
         }
 
-        $qb->where("CONCAT(a.nombre, ' ', b.nombre) LIKE :query")
+        $qb
+            ->where("CONCAT(a.nombre, ' ', b.nombre) LIKE :query")
             ->andWhere('a.estado = 1 AND b.estado = 1 AND c.estado = 1')
             ->setParameter('query', '%'.($data['term'] ?? '').'%')
             ->orderBy('a.nombre', 'ASC')
@@ -106,7 +114,8 @@ class ComponentsController extends AbstractController
             ->setMaxResults(40);
 
         if (!($setting->allCountry ?? true)) {
-            $qb->andWhere('c.idpais = :pais')
+            $qb
+                ->andWhere('c.idpais = :pais')
                 ->setParameter('pais', $setting->country->id ?? 0);
         }
 
@@ -123,7 +132,7 @@ class ComponentsController extends AbstractController
                 $request->query->get('type'),
                 $request->query->all('data'),
             );
-        } catch (Throwable $th) {
+        } catch (Throwable) {
             $data = [];
         }
 

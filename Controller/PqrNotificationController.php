@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 #[Route('/notification', name: 'notification_')]
@@ -49,13 +50,14 @@ class PqrNotificationController extends AbstractController
         Connection $connection,
         PqrNotificationService $service,
         PqrNotificationRepository $repository,
+        TranslatorInterface $translator,
     ): Response {
         try {
             $connection->beginTransaction();
 
             $entity = $repository->find($id);
             if (!$entity) {
-                throw new ValidationFailedException("Notificación no encontrada");
+                throw new ValidationFailedException($translator->trans('notificacion_no_encontrada'));
             }
 
             $service->update($entity, $request->request->all('data'));
@@ -76,13 +78,14 @@ class PqrNotificationController extends AbstractController
         Connection $connection,
         PqrNotificationService $service,
         PqrNotificationRepository $repository,
+        TranslatorInterface $translator,
     ): Response {
         try {
             $connection->beginTransaction();
 
             $entity = $repository->find($id);
             if (!$entity) {
-                throw new ValidationFailedException("Notificación no encontrada");
+                throw new ValidationFailedException($translator->trans('notificacion_no_encontrada'));
             }
 
             $service->delete($entity);

@@ -12,6 +12,7 @@ use App\Bundles\pqr\Repository\PqrNotificationRepository;
 use App\Bundles\pqr\Service\PqrFormFieldServiceFactory;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Entity\EmailConfiguration;
+use App\Exception\ValidationFailedException;
 use App\Service\LegacyServiceLocator;
 use App\services\Service;
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,17 +45,15 @@ class PqrFormService extends Service
         $this->entity = $pqrFormRepository->findActiveOrFail();
     }
 
-    public function save(array $attributes): bool
+    public function save(array $attributes): void
     {
         $this->applyAttributes($attributes);
         $this->em->flush();
-
-        return true;
     }
 
-    protected function update(array $attributes): bool
+    protected function update(array $attributes): void
     {
-        return $this->save($attributes);
+        $this->save($attributes);
     }
 
     private function applyAttributes(array $attributes): void
@@ -128,13 +127,9 @@ class PqrFormService extends Service
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function updateSetting(array $data): bool
+    public function updateSetting(array $data): void
     {
-        if (!$this->update($data['pqrForm'])) {
-            $this->getErrorManager()->setMessage("No fue posible actualizar");
-
-            return false;
-        }
+        $this->update($data['pqrForm']);
 
         $this->em->getConnection()
             ->createQueryBuilder()
@@ -155,17 +150,10 @@ class PqrFormService extends Service
                         }
                     }
 
-                    $PqrFormFieldService = $this->pqrFormFieldServiceFactory->create((int)$id);
-                    if (!$PqrFormFieldService->save($attributes)) {
-                        $this->getErrorManager()->setMessage("No fue posible actualizar");
-
-                        return false;
-                    }
+                    $this->pqrFormFieldServiceFactory->create((int)$id)->save($attributes);
                 }
             }
         }
-
-        return true;
     }
 
     /**
@@ -176,7 +164,7 @@ class PqrFormService extends Service
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function updateResponseSetting(array $data): bool
+    public function updateResponseSetting(array $data): void
     {
         $info = [];
         foreach ($data['tercero'] as $name => $value) {
@@ -186,7 +174,7 @@ class PqrFormService extends Service
             ];
         }
 
-        return $this->update([
+        $this->update([
             'response_configuration' => json_encode(['tercero' => $info]),
         ]);
     }
@@ -250,7 +238,7 @@ class PqrFormService extends Service
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function publish(): bool
+    public function publish(): void
     {
         (new AddEditFtPqr($this->entity, $this->em))->updateChange();
 
@@ -264,9 +252,9 @@ class PqrFormService extends Service
         if (!$FormatoR = Formato::findByAttributes([
             'nombre' => 'pqr_respuesta',
         ])) {
-            $this->getErrorManager()->setMessage("El formato de respuesta PQR no fue encontrado");
-
-            return false;
+            throw new ValidationFailedException(
+                LegacyServiceLocator::getInstance()->getTranslator()->trans('formato_respuesta_pqr_no_encontrado'),
+            );
         }
 
         $formatNameR = "COMUNICACIÓN EXTERNA ({$this->entity->getLabel()})";
@@ -279,9 +267,9 @@ class PqrFormService extends Service
         if (!$FormatoC = Formato::findByAttributes([
             'nombre' => 'pqr_calificacion',
         ])) {
-            $this->getErrorManager()->setMessage("El formato de calificacion PQR no fue encontrado");
-
-            return false;
+            throw new ValidationFailedException(
+                LegacyServiceLocator::getInstance()->getTranslator()->trans('formato_calificacion_pqr_no_encontrado'),
+            );
         }
 
         $formatNameC = "CALIFICACIÓN ({$this->entity->getLabel()})";
@@ -302,8 +290,6 @@ class PqrFormService extends Service
 
         $this->pqrService->activeGraphics();
         $this->activeInfoForDependency();
-
-        return true;
     }
 
     /**
@@ -978,22 +964,24 @@ class PqrFormService extends Service
      * @return bool
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-10-11
      */
-    public function updateFieldDescription(int $fieldId): bool
+    public function updateFieldDescription(int $fieldId): void
     {
         if ($this->entity->getDescriptionField() && $this->entity->getDescriptionField() === $fieldId) {
-            return true;
+            return;
         }
 
         $pqrFormField = $this->pqrFormFieldRepository->find($fieldId);
         if (!$pqrFormField) {
-            return false;
+            throw new ValidationFailedException(
+                LegacyServiceLocator::getInstance()->getTranslator()->trans('campo_descripcion_no_encontrado'),
+            );
         }
 
         $CamposFormato = new CamposFormato($pqrFormField->getFkCamposFormato());
         $isDescription = $CamposFormato->isDescriptionField();
 
         if ($isDescription && $fieldId === $this->entity->getDescriptionField()) {
-            return true;
+            return;
         }
 
         if (!$isDescription) {
@@ -1020,7 +1008,7 @@ class PqrFormService extends Service
             }
         }
 
-        return $this->save([
+        $this->save([
             'description_field' => $fieldId,
         ]);
     }

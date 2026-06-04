@@ -3,6 +3,7 @@
 namespace App\Bundles\pqr\Services;
 
 use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
+use App\Exception\ValidationFailedException;
 use App\Bundles\pqr\Entity\PqrHistory as PqrHistoryEntity;
 use App\Bundles\pqr\Entity\PqrNotyMessage as PqrNotyMessageEntity;
 use App\Bundles\pqr\formatos\pqr_calificacion\FtPqrCalificacion;
@@ -13,6 +14,7 @@ use App\Bundles\pqr\Service\PqrNotyMessageService;
 use App\EventSubscriber\Mailer\MailSubscriber;
 use App\services\documento\DocumentoExpuestoService;
 use App\services\models\ModelService\ModelService;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 use Saia\controllers\DistributionService;
@@ -25,7 +27,6 @@ use Saia\models\tarea\TareaEstado;
 use Saia\models\Tercero;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Throwable;
 
 class FtPqrRespuestaService extends ModelService
 {
@@ -46,42 +47,41 @@ class FtPqrRespuestaService extends ModelService
     /**
      * Verifica si los email son validos
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function validEmails(): bool
+    public function validEmails(): void
     {
         $email = $this->getModel()->getTercero()->getEmail();
         if (!$email) {
-            $this->getErrorManager()->setMessage("Debe ingresar el email (Destino)");
-
-            return false;
+            throw new ValidationFailedException($this->serviceLocator->getTranslator(
+            )->trans('debe_ingresar_email_destino'),
+            );
         }
 
         if (!CoreFunctions::isEmailValid($email)) {
-            $this->getErrorManager()->setMessage("El email ($email) NO es valido");
-
-            return false;
+            throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('email_no_valido',
+                ['%email%' => $email],
+            ),
+            );
         }
 
         if ($emailCopy = $this->getCopyEmail()) {
             foreach ($emailCopy as $copia) {
                 if (!$copia) {
-                    $this->getErrorManager()->setMessage("Debe ingresar el email (Con copia a)");
-
-                    return false;
+                    throw new ValidationFailedException($this->serviceLocator->getTranslator(
+                    )->trans('email_copia_no_ingresado'),
+                    );
                 }
 
                 if (!CoreFunctions::isEmailValid($copia)) {
-                    $this->getErrorManager()->setMessage("El email en copia externa ($copia) NO es valido");
-
-                    return false;
+                    throw new ValidationFailedException($this->serviceLocator->getTranslator(
+                    )->trans('email_copia_no_valido', ['%email%' => $copia]),
+                    );
                 }
             }
         }
-
-        return true;
     }
 
     /**
@@ -90,16 +90,16 @@ class FtPqrRespuestaService extends ModelService
      * @param string $description
      * @param int    $type
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function saveHistory(string $description, int $type): bool
+    public function saveHistory(string $description, int $type): void
     {
         $history = [
             'fecha'          => date('Y-m-d H:i:s'),
             'idft'           => $this->getModel()->getFtPqr()->getPK(),
-            'fk_funcionario' => $this->getFuncionario()->getPK(),
+            'fk_funcionario' => $this->serviceLocator->getSecurity()->getUser()->getId(),
             'tipo'           => $type,
             'idfk'           => $this->getModel()->getPK(),
             'descripcion'    => $description,
@@ -107,31 +107,23 @@ class FtPqrRespuestaService extends ModelService
 
         $entity = new PqrHistoryEntity();
         $entity->setIdft((int)$history['idft']);
-        $entity->setFecha(new \DateTimeImmutable($history['fecha']));
+        $entity->setFecha(new DateTimeImmutable($history['fecha']));
         $entity->setFkFuncionario((int)$history['fk_funcionario']);
         $entity->setTipo((int)$history['tipo']);
         $entity->setIdfk((int)$history['idfk']);
         $entity->setDescripcion((string)$history['descripcion']);
 
-        try {
-            $this->getPqrHistoryRepository()->create($entity);
-        } catch (Throwable $e) {
-            $this->getErrorManager()->setMessage($e->getMessage());
-
-            return false;
-        }
-
-        return true;
+        $this->getPqrHistoryRepository()->create($entity);
     }
 
     /**
      * Registra la distribucion
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function saveDistribution(): bool
+    public function saveDistribution(): void
     {
         switch ((int)$this->getModel()->getKeyField('tipo_distribucion')) {
             case FtPqrRespuesta::DISTRIBUCION_RECOGIDA_ENTREGA:
@@ -151,9 +143,9 @@ class FtPqrRespuestaService extends ModelService
                 break;
 
             default:
-                $this->getErrorManager()->setMessage("Tipo de distribucion no definida");
-
-                return false;
+                throw new ValidationFailedException($this->serviceLocator->getTranslator(
+                )->trans('tipo_distribucion_no_definida'),
+                );
         }
         $DistributionService = new DistributionService($this->getModel()->getDocument());
         $DistributionService->start(
@@ -164,8 +156,6 @@ class FtPqrRespuestaService extends ModelService
             $estado,
             $recogida,
         );
-
-        return true;
     }
 
     /**
@@ -193,7 +183,7 @@ class FtPqrRespuestaService extends ModelService
         if ($this->getModel()->copia_interna) {
             $Transfer     = new Transfer(
                 $this->getModel()->getDocument(),
-                $this->getFuncionario()->getCode(),
+                $this->serviceLocator->getSecurity()->getUser()->getId(),
                 BuzonSalida::NOMBRE_COPIA,
             );
             $destinations = explode(',', $this->getModel()->copia_interna);
@@ -239,8 +229,8 @@ class FtPqrRespuestaService extends ModelService
         $email = (new Email());
 
         $DocumentoRespuesta = $FtPqrRespuesta->getDocument();
-        $pdfPath = $DocumentoRespuesta->getPdfJson();
-        $file = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
+        $pdfPath            = $DocumentoRespuesta->getPdfJson();
+        $file               = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
         $email->attach($file->getContent(), basename($pdfPath));
 
         $DocumentoService = $DocumentoRespuesta->getService();
@@ -332,18 +322,19 @@ class FtPqrRespuestaService extends ModelService
     /**
      * Solicita via email la encuesta de satisfaccion
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
-    public function requestSurvey(): bool
+    public function requestSurvey(): void
     {
         $tercero = $this->getModel()->getTercero();
         $email   = $tercero->getEmail();
         if (!CoreFunctions::isEmailValid($email)) {
-            $this->getErrorManager()->setMessage("El email ($email) NO es valido");
-
-            return false;
+            throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('email_no_valido',
+                ['%email%' => $email],
+            ),
+            );
         }
 
         $DocumentoPqr = $this->getModel()->getFtPqr()->getDocument();
@@ -377,9 +368,6 @@ class FtPqrRespuestaService extends ModelService
         );
 
         $this->serviceLocator->getMailerService()->send($EmailSaia, 'pqr.respuesta.encuesta');
-
-
-        return true;
     }
 
     /**
@@ -425,7 +413,7 @@ class FtPqrRespuestaService extends ModelService
             ) {
                 $save = $TareaService->setState(
                     TareaEstado::REALIZADA,
-                    $this->getFuncionario()->getPK(),
+                    $this->serviceLocator->getSecurity()->getUser()->getId(),
                     'La tarea se cambia a estado realizada al radicar la COMUNICACIÓN EXTERNA (PQRSF)',
                 );
 

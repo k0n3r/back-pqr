@@ -4,7 +4,6 @@ namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Entity\PqrFormField;
 use App\Bundles\pqr\Service\PqrFormFieldServiceFactory;
-use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,11 +26,7 @@ class PqrFormFieldController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrFormFieldService = $factory->create();
-            if (!$PqrFormFieldService->save($request->request->all('data'))) {
-                throw new ValidationFailedException(
-                    $PqrFormFieldService->getErrorManager()->getMessage(),
-                );
-            }
+            $PqrFormFieldService->save($request->request->all('data'));
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
 
@@ -57,11 +52,7 @@ class PqrFormFieldController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrFormFieldService = $factory->create($id);
-            if (!$PqrFormFieldService->save($request->request->all('data'))) {
-                throw new ValidationFailedException(
-                    $PqrFormFieldService->getErrorManager()->getMessage(),
-                );
-            }
+            $PqrFormFieldService->save($request->request->all('data'));
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
 
@@ -106,11 +97,7 @@ class PqrFormFieldController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrFormFieldService = $factory->create($id);
-            if (!$PqrFormFieldService->updateActive($status)) {
-                throw new ValidationFailedException(
-                    $PqrFormFieldService->getErrorManager()->getMessage(),
-                );
-            }
+            $PqrFormFieldService->updateActive($status);
 
             $data = $PqrFormFieldService->getModel()->getDataAttributes();
 
@@ -135,11 +122,7 @@ class PqrFormFieldController extends AbstractController
             $Connection->beginTransaction();
 
             $PqrFormFieldService = $factory->create($id);
-            if (!$PqrFormFieldService->delete()) {
-                throw new ValidationFailedException(
-                    $PqrFormFieldService->getErrorManager()->getMessage(),
-                );
-            }
+            $PqrFormFieldService->delete();
 
             $Connection->commit();
 
