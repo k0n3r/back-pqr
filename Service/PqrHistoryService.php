@@ -9,9 +9,12 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Repository\PqrHistoryRepository;
 use App\Service\Storage\FileResolver;
 use DateTimeImmutable;
+use Psr\Log\LoggerInterface;
 use Saia\models\Configuracion;
 use Saia\models\Dependencia;
+use Saia\models\documento\Documento;
 use Saia\models\Funcionario;
+use Throwable;
 
 class PqrHistoryService
 {
@@ -21,9 +24,9 @@ class PqrHistoryService
     public function __construct(
         private readonly PqrHistoryRepository $repository,
         private readonly FileResolver $fileResolver,
+        private readonly LoggerInterface $logger,
         private readonly string $domain,
-    ) {
-    }
+    ) {}
 
     public function getRepository(): PqrHistoryRepository
     {
@@ -65,7 +68,7 @@ class PqrHistoryService
                 $data           = array_merge($data, [
                     'iconPoint'      => 'fa fa-envelope-o',
                     'iconPointColor' => 'warning',
-                    'url'            => UtilitiesPqr::getRoutePdf($FtPqrRespuesta->getDocument()),
+                    'url'            => $this->buildPdfUrl($FtPqrRespuesta->getDocument()),
                 ]);
                 break;
 
@@ -90,6 +93,28 @@ class PqrHistoryService
         }
 
         return $data;
+    }
+
+    private function buildPdfUrl(Documento $documento): string
+    {
+        try {
+            if (!$documento->pdf) {
+                $pdf = $documento->getPdfJson(true);
+            } else {
+                $pdf = $documento->pdf;
+            }
+
+            $publicPath = $this->fileResolver->fromStoragePath($pdf)->getPublicTemporalPath();
+
+            return $this->domain.$publicPath;
+        } catch (Throwable $th) {
+            $this->logger->error($th->getMessage(), [
+                'documentId' => $documento->getPK(),
+                'trace'      => $th->getTraceAsString(),
+            ]);
+        }
+
+        return '#';
     }
 
     private function getLogo(): ?string

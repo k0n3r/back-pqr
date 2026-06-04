@@ -9,12 +9,12 @@ use App\Bundles\pqr\Entity\PqrNotyMessage as PqrNotyMessageEntity;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrNotificationRepository;
-use App\Bundles\pqr\Service\PqrFormFieldServiceFactory;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Entity\EmailConfiguration;
 use App\Exception\ValidationFailedException;
 use App\Service\LegacyServiceLocator;
 use App\services\Service;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
@@ -33,11 +33,11 @@ class PqrFormService extends Service
     private PqrFormEntity $entity;
 
     public function __construct(
-        private EntityManagerInterface $em,
-        private PqrFormRepository $pqrFormRepository,
-        private PqrFormFieldRepository $pqrFormFieldRepository,
-        private PqrFormFieldServiceFactory $pqrFormFieldServiceFactory,
-        private PqrService $pqrService,
+        private readonly EntityManagerInterface $em,
+        private readonly PqrFormRepository $pqrFormRepository,
+        private readonly PqrFormFieldRepository $pqrFormFieldRepository,
+        private readonly PqrFormFieldServiceFactory $pqrFormFieldServiceFactory,
+        private readonly PqrService $pqrService,
         private readonly string $domain,
         ?Funcionario $funcionario = null,
     ) {
@@ -60,27 +60,27 @@ class PqrFormService extends Service
     {
         foreach ($attributes as $key => $value) {
             match ($key) {
-                'label'                  => $this->entity->setLabel((string)$value),
-                'name'                   => $this->entity->setName((string)$value),
-                'show_anonymous'         => $this->entity->setShowAnonymous((bool)$value),
-                'show_label'             => $this->entity->setShowLabel((bool)$value),
-                'show_empty'             => $this->entity->setShowEmpty((bool)$value),
-                'fk_formato'             => $this->entity->setFkFormato((int)$value),
-                'fk_contador'            => $this->entity->setFkContador((int)$value),
-                'fk_field_time'          => $this->entity->setFkFieldTime((int)$value),
-                'enable_filter_dep'      => $this->entity->setEnableFilterDep((bool)$value),
-                'description_field'      => $this->entity->setDescriptionField((int)$value),
-                'enable_balancer'        => $this->entity->setEnableBalancer((bool)$value),
-                'enable_con_days'        => $this->entity->setEnableConDays((bool)$value),
-                'fk_field_balancer'      => $this->entity->setFkFieldBalancer((int)$value),
+                'label' => $this->entity->setLabel((string)$value),
+                'name' => $this->entity->setName((string)$value),
+                'show_anonymous' => $this->entity->setShowAnonymous((bool)$value),
+                'show_label' => $this->entity->setShowLabel((bool)$value),
+                'show_empty' => $this->entity->setShowEmpty((bool)$value),
+                'fk_formato' => $this->entity->setFkFormato((int)$value),
+                'fk_contador' => $this->entity->setFkContador((int)$value),
+                'fk_field_time' => $this->entity->setFkFieldTime((int)$value),
+                'enable_filter_dep' => $this->entity->setEnableFilterDep((bool)$value),
+                'description_field' => $this->entity->setDescriptionField((int)$value),
+                'enable_balancer' => $this->entity->setEnableBalancer((bool)$value),
+                'enable_con_days' => $this->entity->setEnableConDays((bool)$value),
+                'fk_field_balancer' => $this->entity->setFkFieldBalancer((int)$value),
                 'response_configuration' => $this->entity->setResponseConfiguration(
-                    is_string($value) ? json_decode($value, true) : (array)$value
+                    is_string($value) ? json_decode($value, true) : (array)$value,
                 ),
-                'canal_recepcion'        => $this->entity->setCanalRecepcion(
-                    is_string($value) ? json_decode($value, true) : (array)$value
+                'canal_recepcion' => $this->entity->setCanalRecepcion(
+                    is_string($value) ? json_decode($value, true) : (array)$value,
                 ),
-                'active'                 => $this->entity->setActive((bool)$value),
-                default                  => null,
+                'active' => $this->entity->setActive((bool)$value),
+                default => null,
             };
         }
     }
@@ -92,7 +92,7 @@ class PqrFormService extends Service
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-25
      */
-    public static function getUrlWsPQR(): string
+    public function getUrlWsPQR(): string
     {
         return $this->domain.'ws/pqr/index.html';
     }
@@ -100,7 +100,7 @@ class PqrFormService extends Service
     /**
      * Obtiene la instancia de PqrForm actualizada
      *
-     * @return PqrForm
+     * @return PqrFormEntity
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -123,7 +123,9 @@ class PqrFormService extends Service
      * Actualiza los datos de configuracion del formulario
      *
      * @param array $data
-     * @return bool
+     *
+     * @return void
+     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -131,7 +133,8 @@ class PqrFormService extends Service
     {
         $this->update($data['pqrForm']);
 
-        $this->em->getConnection()
+        $this->em
+            ->getConnection()
             ->createQueryBuilder()
             ->update('pqr_form_fields')
             ->set('anonymous', 0)
@@ -160,7 +163,8 @@ class PqrFormService extends Service
      * Actualiza la configuracion para la respuesta
      *
      * @param array $data
-     * @return bool
+     *
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -191,7 +195,7 @@ class PqrFormService extends Service
         $options = $this->getDataresponseTime();
 
         return [
-            'urlWs'               => static::getUrlWsPQR(),
+            'urlWs'               => $this->getUrlWsPQR(),
             'publish'             => $this->entity->getFkFormato() ? 1 : 0,
             'pqrForm'             => $this->getDataPqrForm(),
             'pqrFormFields'       => $this->getDataPqrFormFields(),
@@ -208,10 +212,10 @@ class PqrFormService extends Service
 
     private function getEmailsConfig(): array
     {
-        $repository = $this->em->getRepository(EmailConfiguration::class);
+        $repository          = $this->em->getRepository(EmailConfiguration::class);
         $emailsConfiguration = $repository->findByPqrModule();
 
-        return array_map(fn ($config) => $config->toArray(), $emailsConfiguration);
+        return array_map(fn($config) => $config->toArray(), $emailsConfiguration);
     }
 
     private function getGroupsForBalancer(): array
@@ -234,7 +238,7 @@ class PqrFormService extends Service
     /**
      * publica o crea el formulario en el webservice
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -275,7 +279,7 @@ class PqrFormService extends Service
         $formatNameC = "CALIFICACIÓN ({$this->entity->getLabel()})";
         if ($FormatoC->etiqueta != $formatNameC || !$FormatoC->isEnabledWs()) {
             $FormatoC->etiqueta = $formatNameC;
-            $FormatoC->info_ws = json_encode(array_merge($FormatoC->getInfoWs(), [
+            $FormatoC->info_ws  = json_encode(array_merge($FormatoC->getInfoWs(), [
                 'habilita_webservice' => 1,
             ]));
 
@@ -326,8 +330,8 @@ class PqrFormService extends Service
         ]);
 
         $enlace = 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector":"iframe","url": "views/buzones/grilla.php?idbusqueda_componente='.$BusquedaComponente->getPK(
-        ).'"}]';
-        $data = [
+            ).'"}]';
+        $data   = [
             'pertenece_nucleo' => 0,
             'nombre'           => PqrFormEntity::NOMBRE_REPORTE_POR_DEPENDENCIA,
             'tipo'             => Modulo::TIPO_HIJO,
@@ -383,12 +387,13 @@ class PqrFormService extends Service
     {
         $notifications = $this->getPqrNotificationRepository()->findByPqrForm($this->entity->getId());
 
-        return array_map(static fn ($n) => [
-            'id'            => $n->getId(),
+        return array_map(static fn($n)
+            => [
+            'id'             => $n->getId(),
             'fk_funcionario' => $n->getFkFuncionario(),
-            'fk_pqr_form'   => $n->getFkPqrForm(),
-            'email'         => (int)$n->isEmail(),
-            'notify'        => (int)$n->isNotify(),
+            'fk_pqr_form'    => $n->getFkPqrForm(),
+            'email'          => (int)$n->isEmail(),
+            'notify'         => (int)$n->isNotify(),
         ], $notifications);
     }
 
@@ -428,7 +433,7 @@ class PqrFormService extends Service
     private function getFieldsView(): array
     {
         return array_map(
-            fn ($f) => "ft.{$f->getName()}",
+            fn($f) => "ft.{$f->getName()}",
             $this->pqrFormFieldRepository->findByPqrFormOrdered($this->entity->getId()),
         );
     }
@@ -493,11 +498,11 @@ class PqrFormService extends Service
     private function getDescriptionField(): array
     {
         $pqrFormId = $this->getDataPqrForm()['description_field'];
-        $data = [];
+        $data      = [];
 
         if ($pqrFormId) {
             $pqrFormFieldEntity = $this->pqrFormFieldRepository->find($pqrFormId);
-            $data = [
+            $data               = [
                 "id"   => $pqrFormId,
                 "name" => $pqrFormFieldEntity?->getLabel() ?? '',
             ];
@@ -511,6 +516,7 @@ class PqrFormService extends Service
      *
      * @param string $name
      * @param string $select
+     *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -524,7 +530,8 @@ class PqrFormService extends Service
     /**
      * Genera el archivo de funciones para el reporte
      *
-     * @param PqrFormField[] $fields
+     * @param PqrFormFieldEntity[] $fields
+     *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -599,7 +606,8 @@ class PqrFormService extends Service
     /**
      * actualiza el reporte (busqueda componente)
      *
-     * @param PqrFormField[] $fields
+     * @param PqrFormFieldEntity[] $fields
+     *
      * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -609,8 +617,8 @@ class PqrFormService extends Service
         $selectedFields = $nameOfSeletedFields = [];
         foreach ($fields as $PqrFormField) {
             $nameOfSeletedFields[] = $PqrFormField['name'];
-            $type = $PqrFormField['type_saia'];
-            $selectedFields[] = match ($type) {
+            $type                  = $PqrFormField['type_saia'];
+            $selectedFields[]      = match ($type) {
                 'Text', 'Textarea' => [
                     'title' => strtoupper($PqrFormField['label']),
                     'field' => "{*{$PqrFormField['name']}*}",
@@ -686,9 +694,10 @@ class PqrFormService extends Service
      * Obtiene los campos y el info por defecto
      * de los reportes (busqueda componente)
      *
-     * @param array $selectedFields
-     * @param array $nameOfSeletedFields
+     * @param array  $selectedFields
+     * @param array  $nameOfSeletedFields
      * @param string $reportName
+     *
      * @return array
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -799,7 +808,7 @@ class PqrFormService extends Service
             TareaEstado::PROCESO,
             TareaEstado::DEVUELTA,
         ]);
-        $tfTipo = TareaFuncionario::TYPE_MANAGER;
+        $tfTipo    = TareaFuncionario::TYPE_MANAGER;
         $tfExterno = TareaFuncionario::INTERNAL_USER;
 
         $sql = <<<SQL
@@ -826,7 +835,7 @@ class PqrFormService extends Service
      */
     private function getDataresponseTime(): array
     {
-        $data = [];
+        $data    = [];
         $records = $this->pqrFormFieldRepository->findByPqrFormOrdered($this->entity->getId());
 
         foreach ($records as $pqrFormField) {
@@ -840,7 +849,8 @@ class PqrFormService extends Service
                 $fieldOptions = [];
 
                 if ($pqrFormField->getName() !== PqrFormFieldEntity::FIELD_NAME_SYS_TIPO) {
-                    $options = (new CamposFormato($pqrFormField->getFkCamposFormato()))->getCampoOpciones(['estado' => 1]);
+                    $options = (new CamposFormato($pqrFormField->getFkCamposFormato(),
+                    ))->getCampoOpciones(['estado' => 1]);
                     foreach ($options as $CampoOpcion) {
                         if ($CampoOpcion->estado) {
                             $fieldOptions[] = [
@@ -866,6 +876,7 @@ class PqrFormService extends Service
      * Actualiza el campo que define los tiempos de respuesta
      *
      * @param int $idCampoFormato
+     *
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-06-09
      */
     public function editFieldTime(int $idCampoFormato): void
@@ -879,6 +890,7 @@ class PqrFormService extends Service
      * Obtiene las columnas que tendran las columnas de los reportes
      *
      * @param string $reportName
+     *
      * @return array[]
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-10-05
      */
@@ -961,7 +973,8 @@ class PqrFormService extends Service
      * Actualiza el campo descripcion adicional que se adicionara al formulario de PQR
      *
      * @param int $fieldId
-     * @return bool
+     *
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2023-10-11
      */
     public function updateFieldDescription(int $fieldId): void
@@ -985,7 +998,7 @@ class PqrFormService extends Service
         }
 
         if (!$isDescription) {
-            $actionList = explode(',', $CamposFormato->acciones);
+            $actionList   = explode(',', $CamposFormato->acciones);
             $actionList[] = CamposFormato::ACTION_DESCRIPTION;
 
             $CamposFormato->getService()->save([
@@ -998,7 +1011,7 @@ class PqrFormService extends Service
             $PqrFormFieldDes = $this->pqrFormFieldRepository->find($currentDescField);
             if ($PqrFormFieldDes) {
                 $CamposFormatoOld = new CamposFormato($PqrFormFieldDes->getFkCamposFormato());
-                $actionListOld = array_diff(
+                $actionListOld    = array_diff(
                     explode(',', $CamposFormatoOld->acciones),
                     [CamposFormato::ACTION_DESCRIPTION],
                 );
@@ -1018,16 +1031,6 @@ class PqrFormService extends Service
         return $this->em;
     }
 
-    private function getPqrFormFieldRepository(): PqrFormFieldRepository
-    {
-        return $this->pqrFormFieldRepository;
-    }
-
-    private function getPqrFormRepository(): PqrFormRepository
-    {
-        return $this->pqrFormRepository;
-    }
-
     private function getPqrNotificationRepository(): PqrNotificationRepository
     {
         return $this->em->getRepository(PqrNotificationEntity::class);
@@ -1035,7 +1038,8 @@ class PqrFormService extends Service
 
     private function getDataPqrNotyMessages(): array
     {
-        return array_map(static fn ($msg) => [
+        return array_map(static fn($msg)
+            => [
             'text'  => $msg->getLabel(),
             'value' => [
                 'id'           => $msg->getId(),

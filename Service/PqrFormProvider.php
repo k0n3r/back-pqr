@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\Service;
 
 use App\Bundles\pqr\Entity\PqrForm;
+use App\Bundles\pqr\Entity\PqrFormField;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrNotificationRepository;
@@ -21,8 +22,7 @@ class PqrFormProvider
         private readonly PqrFormRepository $pqrFormRepository,
         private readonly PqrFormFieldRepository $pqrFormFieldRepository,
         private readonly PqrNotificationRepository $pqrNotificationRepository,
-    ) {
-    }
+    ) {}
 
     public function get(): PqrForm
     {
@@ -49,13 +49,14 @@ class PqrFormProvider
         return $this->pqrNotificationRepository->findByPqrForm($this->get()->getId());
     }
 
-    public function getFieldByName(string $name): ?\App\Bundles\pqr\Entity\PqrFormField
+    public function getFieldByName(string $name): ?PqrFormField
     {
         foreach ($this->getFields() as $field) {
             if ($field->getName() === $name) {
                 return $field;
             }
         }
+
         return null;
     }
 

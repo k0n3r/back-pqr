@@ -6,11 +6,8 @@ namespace App\Bundles\pqr\Service;
 
 use App\Bundles\pqr\Entity\PqrForm;
 use App\Bundles\pqr\Entity\PqrFormField;
-use App\Bundles\pqr\Entity\PqrHtmlField;
-use App\Bundles\pqr\Entity\PqrNotification;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrHtmlFieldRepository;
-use App\Bundles\pqr\Service\PqrFormProvider;
 use Doctrine\DBAL\Connection;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\DBAL\ParameterType;
@@ -31,8 +28,7 @@ class PqrService
         private readonly PqrHtmlFieldRepository $pqrHtmlFieldRepository,
         private readonly Connection $connection,
         private readonly TranslatorInterface $translator,
-    ) {
-    }
+    ) {}
 
     public function getPqrForm(): PqrForm
     {
@@ -167,8 +163,8 @@ class PqrService
     public function dependencyExist(): bool
     {
         return $this->dependencyExist ??= $this->pqrFormProvider->getFieldByName(
-            PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
-        ) !== null;
+                PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
+            ) !== null;
     }
 
     /**

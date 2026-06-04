@@ -5,7 +5,6 @@ namespace App\Bundles\pqr\Services;
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Exception\ValidationFailedException;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
-use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Service\PqrService;
 use App\Bundles\pqr\Entity\PqrBackup as PqrBackupEntity;
 use App\Bundles\pqr\Entity\PqrBalancer as PqrBalancerEntity;
@@ -50,50 +49,26 @@ use Saia\models\tarea\Tarea;
 use Saia\models\Tercero;
 use Saia\models\vistas\VfuncionarioDc;
 use Symfony\Component\Mime\Email;
+use Throwable;
 
 class FtPqrService extends ModelService
 {
-    private PqrService $PqrService;
-
     public const string FUNCTION_ADMIN_PQR     = 'Administrador PQRS';
     public const string FUNCTION_ADMIN_DEP_PQR = 'Administrador Dependencia PQRS';
 
-    public function __construct(FtPqr $Ft)
-    {
-        parent::__construct($Ft);
-        $this->PqrService = $this->serviceLocator->get(PqrService::class);
-    }
-
-    /**
-     * Obtiene la instancia de FtPqr actualizada
-     *
-     * @return FtPqr
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
     public function getModel(): FtPqr
     {
         return $this->Model;
     }
 
-    /**
-     * Obtiene el documento del modelo
-     *
-     * @return Documento
-     * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-07-26
-     */
     public function getDocument(): Documento
     {
         return $this->getModel()->getDocument();
     }
 
-    /**
-     * @return PqrService
-     * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-02-23
-     */
     public function getPqrService(): PqrService
     {
-        return $this->PqrService;
+        return $this->serviceLocator->get(PqrService::class);
     }
 
     /**
@@ -511,7 +486,7 @@ class FtPqrService extends ModelService
             'iconPointColor' => 'success',
             'date'           => DateController::convertDate($this->getDocument()->fecha),
             'description'    => "Se registra la solicitud No # {$this->getDocument()->numero}",
-            'url'            => UtilitiesPqr::getRoutePdf($this->getDocument()),
+            'url'            => $this->buildPdfUrl(),
         ];
     }
 
@@ -772,12 +747,14 @@ class FtPqrService extends ModelService
     public function updateType(array $data): void
     {
         if (!$data['type']) {
-            throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('error_faltan_parametros'),
+            throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('error_faltan_parametros',
+            ),
             );
         }
 
         if ($this->getPqrService()->subTypeExist() && !$data['subtype']) {
-            throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('error_faltan_parametros'),
+            throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('error_faltan_parametros',
+            ),
             );
         }
         $refreshDescription = false;
@@ -1500,6 +1477,29 @@ class FtPqrService extends ModelService
     private function getPqrResponseTimeRepository(): PqrResponseTimeRepository
     {
         return $this->getEntityManager()->getRepository(PqrResponseTimeEntity::class);
+    }
+
+    private function buildPdfUrl(): string
+    {
+        $documento = $this->getDocument();
+        try {
+            if (!$documento->pdf) {
+                $documento->getPdfJson(true);
+            }
+            $publicPath = $this->serviceLocator
+                ->getFileResolver()
+                ->fromStoragePath($documento->pdf)
+                ->getPublicTemporalPath();
+
+            return $this->serviceLocator->domain.$publicPath;
+        } catch (Throwable $th) {
+            $this->serviceLocator->getLogger()->error($th->getMessage(), [
+                'documentId' => $documento->getPK(),
+                'trace'      => $th->getTraceAsString(),
+            ]);
+        }
+
+        return '#';
     }
 
     private function getPqrHistoryService(): PqrHistoryService

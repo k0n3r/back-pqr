@@ -6,20 +6,22 @@ namespace App\Bundles\pqr\Service;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
+use App\Exception\ValidationFailedException;
 use Saia\controllers\functions\Header;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class PqrNotyMessageService
 {
     public function __construct(
         private PqrNotyMessageRepository $repository,
-    ) {
-    }
+        private TranslatorInterface $translator,
+    ) {}
 
     public function update(int $id, array $data): void
     {
         $entity = $this->repository->find($id);
         if (!$entity) {
-            return;
+            throw new ValidationFailedException($this->translator->trans('notificacion_no_encontrada'));
         }
 
         if (array_key_exists('subject', $data)) {
@@ -32,16 +34,11 @@ readonly class PqrNotyMessageService
         $this->repository->update();
     }
 
-    /**
-     * Obtiene los registros para actualizar el cuerpo de las notificaciones
-     *
-     * @return array
-     */
     public function getDataPqrNotyMessages(): array
     {
-        $data = [];
-        foreach ($this->repository->findBy(['active' => true]) as $msg) {
-            $data[] = [
+        return array_map(
+            static fn($msg)
+                => [
                 'text'  => $msg->getLabel(),
                 'value' => [
                     'id'           => $msg->getId(),
@@ -50,40 +47,25 @@ readonly class PqrNotyMessageService
                     'message_body' => $msg->getMessageBody(),
                     'type'         => $msg->getType(),
                 ],
-            ];
-        }
-
-        return $data;
+            ],
+            $this->repository->findBy(['active' => true]),
+        );
     }
 
-    /**
-     * Resuelve y reemplaza las variables por los valores
-     */
     public static function resolveVariables(string $baseContent, FtPqr $FtPqr): string
     {
-        $functions = Header::getFunctionsFromString($baseContent);
-        $functions = str_replace(['{*', '*}'], '', $functions);
+        $variables = [
+            'n_radicadoPqr'         => fn() => $FtPqr->getDocument()->getService()->getFilingReferenceNumber(),
+            'n_nombreFormularioPqr' => fn() => $FtPqr->getService()->getPqrForm()->getLabel(),
+            'n_consecutivoPqr'      => fn() => (string)$FtPqr->getDocument()->numero,
+        ];
 
-        foreach ($functions as $variable) {
-            $value       = call_user_func([self::class, $variable], $FtPqr);
-            $baseContent = str_replace("{*$variable*}", $value, $baseContent);
+        foreach (str_replace(['{*', '*}'], '', Header::getFunctionsFromString($baseContent)) as $variable) {
+            if (isset($variables[$variable])) {
+                $baseContent = str_replace("{*$variable*}", ($variables[$variable])(), $baseContent);
+            }
         }
 
         return $baseContent;
-    }
-
-    public static function n_radicadoPqr(FtPqr $FtPqr): string
-    {
-        return $FtPqr->getDocument()->getService()->getFilingReferenceNumber();
-    }
-
-    public static function n_nombreFormularioPqr(FtPqr $FtPqr): string
-    {
-        return $FtPqr->getService()->getPqrForm()->getLabel();
-    }
-
-    public static function n_consecutivoPqr(FtPqr $FtPqr): string|int
-    {
-        return $FtPqr->getDocument()->numero;
     }
 }

@@ -4,12 +4,10 @@ namespace App\Bundles\pqr\helpers;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
-use App\Service\LegacyServiceLocator;
 use Saia\core\model\ModelFormat;
 use Saia\models\documento\Documento;
 use Saia\models\formatos\Formato;
 use Saia\models\tarea\TareaEstado;
-use Throwable;
 
 class UtilitiesPqr
 {
@@ -42,6 +40,7 @@ class UtilitiesPqr
      * Obtiene la instancia de la FtPqr o clase que la extienda
      *
      * @param int $documentId
+     *
      * @return FtPqr
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
@@ -56,6 +55,7 @@ class UtilitiesPqr
      * Obtiene la instancia de la FtPqr o clase que la extienda
      *
      * @param int $idft
+     *
      * @return FtPqr
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
@@ -70,6 +70,7 @@ class UtilitiesPqr
      * Obtiene la instancia de la FtPqrRespuesta o clase que la extienda
      *
      * @param int $idft
+     *
      * @return FtPqrRespuesta
      * @author Andres Agudelo <andres.agudelo@cerok.com> 2021-10-05
      */
@@ -85,6 +86,7 @@ class UtilitiesPqr
      * del documento
      *
      * @param Documento $Documento
+     *
      * @return int[]
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -121,6 +123,7 @@ class UtilitiesPqr
      * Retorna la imagen del QR
      *
      * @param FtPqr $FtPqr
+     *
      * @return string
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
@@ -128,35 +131,5 @@ class UtilitiesPqr
     public static function showQr(FtPqr $FtPqr): string
     {
         return '<img src="/'.$FtPqr->getDocument()->getQR().'" width="80px" height="80px" />';
-    }
-
-    /**
-     * Obtiene la ruta del PDF
-     *
-     * @param Documento $Documento
-     * @return string
-     * @author Andres Agudelo <andres.agudelo@cerok.com>
-     * @date   2020
-     */
-    public static function getRoutePdf(Documento $Documento): string
-    {
-        try {
-            if (!$Documento->pdf) {
-                $Documento->getPdfJson(true);
-            }
-            $publicPath = LegacyServiceLocator::getInstance()->getFileResolver()
-                ->fromStoragePath($Documento->pdf)
-                ->getPublicTemporalPath();
-
-            return LegacyServiceLocator::getInstance()->domain.$publicPath;
-        } catch (Throwable $th) {
-            $serviceLocator = LegacyServiceLocator::getInstance();
-            $serviceLocator->getLogger()->error($th->getMessage(), [
-                'documentId' => $Documento->getPK(),
-                'trace'      => $th->getTraceAsString(),
-            ]);
-        }
-
-        return '#';
     }
 }

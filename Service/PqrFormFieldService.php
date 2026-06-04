@@ -83,7 +83,9 @@ class PqrFormFieldService extends Service
     {
         $attributes = $this->processAttributesBeforeUpdating($this->clearAttributes($attributes));
         if (!$attributes) {
-            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator()->trans('error_actualizar'));
+            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator(
+            )->trans('error_actualizar'),
+            );
         }
         $this->applyAttributes($attributes);
         $this->em->flush();
@@ -101,7 +103,9 @@ class PqrFormFieldService extends Service
         $this->getIServiceEventDispatcher()->dispatch(ServiceEventDispatcher::EVENT_DELETED);
 
         if ($fkCampos && !(new CamposFormato($fkCampos))->getService()->delete()) {
-            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator()->trans('no_fue_posible_eliminar_campo'));
+            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator(
+            )->trans('no_fue_posible_eliminar_campo'),
+            );
         }
     }
 
@@ -114,24 +118,24 @@ class PqrFormFieldService extends Service
     {
         foreach ($attributes as $key => $value) {
             match ($key) {
-                'name'               => $this->entity->setName((string)$value),
-                'label'              => $this->entity->setLabel((string)$value),
-                'required'           => $this->entity->setRequired((bool)$value),
-                'anonymous'          => $this->entity->setAnonymous((bool)$value),
-                'show_report'        => $this->entity->setShowReport((bool)$value),
+                'name' => $this->entity->setName((string)$value),
+                'label' => $this->entity->setLabel((string)$value),
+                'required' => $this->entity->setRequired((bool)$value),
+                'anonymous' => $this->entity->setAnonymous((bool)$value),
+                'show_report' => $this->entity->setShowReport((bool)$value),
                 'required_anonymous' => $this->entity->setRequiredAnonymous((bool)$value),
-                'setting'            => $this->entity->setSetting((string)$value),
-                'fk_pqr_html_field'  => $this->entity->setHtmlField(
-                    $this->em->getRepository(PqrHtmlFieldEntity::class)->find((int)$value)
+                'setting' => $this->entity->setSetting((string)$value),
+                'fk_pqr_html_field' => $this->entity->setHtmlField(
+                    $this->em->getRepository(PqrHtmlFieldEntity::class)->find((int)$value),
                 ),
-                'fk_pqr_form'        => $this->entity->setPqrForm(
-                    $this->em->getRepository(PqrFormEntity::class)->find((int)$value)
+                'fk_pqr_form' => $this->entity->setPqrForm(
+                    $this->em->getRepository(PqrFormEntity::class)->find((int)$value),
                 ),
-                'fk_campos_formato'  => $this->entity->setFkCamposFormato((int)$value),
-                'is_system'          => $this->entity->setIsSystem((bool)$value),
-                'orden'              => $this->entity->setOrden((int)$value),
-                'active'             => $this->entity->setActive((bool)$value),
-                default              => null,
+                'fk_campos_formato' => $this->entity->setFkCamposFormato((int)$value),
+                'is_system' => $this->entity->setIsSystem((bool)$value),
+                'orden' => $this->entity->setOrden((int)$value),
+                'active' => $this->entity->setActive((bool)$value),
+                default => null,
             };
         }
     }
@@ -143,6 +147,7 @@ class PqrFormFieldService extends Service
                 $item = trim((string)$item);
             }
         });
+
         return $attributes;
     }
 
@@ -158,18 +163,19 @@ class PqrFormFieldService extends Service
         ];
     }
 
-    /**
-     * @inheritDoc
-     */
     public function processAttributesBeforeCreating(array $attributes): array
     {
         if (!isset($attributes['fk_pqr_form'])) {
-            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator()->trans('falta_identificador_formulario'));
+            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator(
+            )->trans('falta_identificador_formulario'),
+            );
         }
 
         $pqrForm = $this->getPqrFormRepository()->find((int)$attributes['fk_pqr_form']);
         if (!$pqrForm) {
-            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator()->trans('formulario_no_encontrado'));
+            throw new ValidationFailedException(LegacyServiceLocator::getInstance()->getTranslator(
+            )->trans('formulario_no_encontrado'),
+            );
         }
 
         $fieldCount = $this->getPqrFormFieldRepository()->count(['pqrForm' => $pqrForm]);
@@ -193,9 +199,6 @@ class PqrFormFieldService extends Service
         return $attributes;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function processAttributesBeforeUpdating(array $attributes): false|array
     {
         if (isset($attributes['setting'])) {
@@ -218,7 +221,7 @@ class PqrFormFieldService extends Service
      *
      * @param int $status
      *
-     * @return bool
+     * @return void
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */
@@ -647,7 +650,9 @@ class PqrFormFieldService extends Service
         $records        = (new CamposFormato($this->entity->getFkCamposFormato()))->getCampoOpciones(['estado' => 1]);
 
         foreach ($records as $CampoOpciones) {
-            foreach ($this->getPqrResponseTimeRepository()->findBy(['fkCampoOpciones' => $CampoOpciones->getPK()]) as $rt) {
+            foreach (
+                $this->getPqrResponseTimeRepository()->findBy(['fkCampoOpciones' => $CampoOpciones->getPK()]) as $rt
+            ) {
                 $rt->setActive(false);
             }
             $this->em->flush();
@@ -687,7 +692,9 @@ class PqrFormFieldService extends Service
         $records        = (new CamposFormato($this->entity->getFkCamposFormato()))->getCampoOpciones(['estado' => 1]);
 
         foreach ($records as $CampoOpciones) {
-            foreach ($this->getPqrBalancerRepository()->findBy(['fkCampoOpciones' => $CampoOpciones->getPK()]) as $balancer) {
+            foreach (
+                $this->getPqrBalancerRepository()->findBy(['fkCampoOpciones' => $CampoOpciones->getPK()]) as $balancer
+            ) {
                 $balancer->setActive(false);
             }
             $this->em->flush();
