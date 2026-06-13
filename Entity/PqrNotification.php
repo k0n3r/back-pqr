@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\Entity;
 
 use App\Bundles\pqr\Repository\PqrNotificationRepository;
+use App\Entity\Funcionario;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PqrNotificationRepository::class)]
@@ -18,8 +19,9 @@ class PqrNotification
     #[ORM\Column(name: 'id', type: 'integer', nullable: false)]
     private int $id;
 
-    #[ORM\Column(name: 'fk_funcionario', type: 'integer', nullable: false)]
-    private int $fkFuncionario;
+    #[ORM\ManyToOne(targetEntity: Funcionario::class)]
+    #[ORM\JoinColumn(name: 'fk_funcionario', referencedColumnName: 'idfuncionario', nullable: false)]
+    private Funcionario $funcionario;
 
     #[ORM\Column(name: 'fk_pqr_form', type: 'integer', nullable: false)]
     private int $fkPqrForm;
@@ -35,15 +37,20 @@ class PqrNotification
         return $this->id;
     }
 
-    public function getFkFuncionario(): int
+    public function getFuncionario(): Funcionario
     {
-        return $this->fkFuncionario;
+        return $this->funcionario;
     }
 
-    public function setFkFuncionario(int $fkFuncionario): self
+    public function setFuncionario(Funcionario $funcionario): self
     {
-        $this->fkFuncionario = $fkFuncionario;
+        $this->funcionario = $funcionario;
         return $this;
+    }
+
+    public function getFkFuncionario(): int
+    {
+        return $this->funcionario->getId();
     }
 
     public function getFkPqrForm(): int

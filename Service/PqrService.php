@@ -8,6 +8,7 @@ use App\Bundles\pqr\Entity\PqrForm;
 use App\Bundles\pqr\Entity\PqrFormField;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrHtmlFieldRepository;
+use App\Bundles\pqr\Repository\PqrLookupRepository;
 use Doctrine\DBAL\Connection;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\DBAL\ParameterType;
@@ -26,9 +27,11 @@ class PqrService
         private readonly PqrFormProvider $pqrFormProvider,
         private readonly PqrFormFieldRepository $pqrFormFieldRepository,
         private readonly PqrHtmlFieldRepository $pqrHtmlFieldRepository,
+        private readonly PqrLookupRepository $pqrLookupRepository,
         private readonly Connection $connection,
         private readonly TranslatorInterface $translator,
-    ) {}
+    ) {
+    }
 
     public function getPqrForm(): PqrForm
     {
@@ -37,10 +40,15 @@ class PqrService
 
     public function findDataForAutocomplete(string $type, array $data): array
     {
+        $term = isset($data['term']) ? (string)$data['term'] : null;
+
         $records = match ($type) {
-            'dependencia' => $this->getListDependency($data),
-            'pais' => $this->getListPais($data),
-            'departamento' => $this->getListDepartamento($data),
+            'dependencia' => $this->pqrLookupRepository->findActiveDependencies($term),
+            'pais' => $this->pqrLookupRepository->findActiveCountries($term),
+            'departamento' => $this->pqrLookupRepository->findActiveDepartments(
+                $term,
+                isset($data['idpais']) ? (int)$data['idpais'] : null,
+            ),
             default => [],
         };
 
@@ -50,63 +58,6 @@ class PqrService
         }
 
         return $list;
-    }
-
-    private function getListDependency(array $data): array
-    {
-        $qb = $this->connection
-            ->createQueryBuilder()
-            ->select('iddependencia as id,nombre')
-            ->from('dependencia')
-            ->where('estado=1')
-            ->orderBy('nombre', 'ASC')
-            ->setFirstResult(0)
-            ->setMaxResults(40);
-
-        if ($data['term'] ?? null) {
-            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%'.$data['term'].'%');
-        }
-
-        return $qb->executeQuery()->fetchAllAssociative();
-    }
-
-    private function getListPais(array $data): array
-    {
-        $qb = $this->connection
-            ->createQueryBuilder()
-            ->select('idpais as id,nombre')
-            ->from('pais')
-            ->where('estado=1')
-            ->orderBy('nombre', 'ASC')
-            ->setFirstResult(0)
-            ->setMaxResults(40);
-
-        if ($data['term'] ?? null) {
-            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%'.$data['term'].'%');
-        }
-
-        return $qb->executeQuery()->fetchAllAssociative();
-    }
-
-    private function getListDepartamento(array $data): array
-    {
-        $qb = $this->connection
-            ->createQueryBuilder()
-            ->select('iddepartamento as id,nombre')
-            ->from('departamento')
-            ->where('estado=1')
-            ->orderBy('nombre', 'ASC')
-            ->setFirstResult(0)
-            ->setMaxResults(40);
-
-        if ($data['idpais'] ?? null) {
-            $qb->andWhere('pais_idpais=:pais')->setParameter('pais', $data['idpais'], ParameterType::INTEGER);
-        }
-        if ($data['term'] ?? null) {
-            $qb->andWhere('nombre like :nombre')->setParameter('nombre', '%'.$data['term'].'%');
-        }
-
-        return $qb->executeQuery()->fetchAllAssociative();
     }
 
     public function getDataForEditTypes(): array
@@ -163,8 +114,8 @@ class PqrService
     public function dependencyExist(): bool
     {
         return $this->dependencyExist ??= $this->pqrFormProvider->getFieldByName(
-                PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
-            ) !== null;
+            PqrFormField::FIELD_NAME_SYS_DEPENDENCIA,
+        ) !== null;
     }
 
     /**

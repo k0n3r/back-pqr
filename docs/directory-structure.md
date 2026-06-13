@@ -86,19 +86,19 @@ src/Bundles/pqr/
 │       ├── TDependencyReport.php             # Trait para reportes de dependencias
 │       └── Version*.php                      # 12 migraciones (2019 → 2025)
 │
-├── Service/                                  # Servicios Symfony DI (ORM puro)
+├── Service/                                  # Servicios Symfony DI puros (ORM)
 │   ├── PqrFormProvider.php                   # ORM singleton: findActiveOrFail() — reemplaza PqrForm::getInstance()
-│   └── PqrFormFieldServiceFactory.php        # Factory DI para PqrFormFieldService
-│
-├── Services/                                 # Servicios legacy + business logic
-│   ├── FtPqrService.php                      # Ciclo de vida PQR (extiende ModelService)
-│   ├── FtPqrRespuestaService.php             # Gestión de respuestas a ciudadanos
-│   ├── PqrService.php                        # Utilidades generales
 │   ├── PqrFormService.php                    # Configuración del formulario
 │   ├── PqrFormFieldService.php               # CRUD de campos
+│   ├── PqrFormFieldServiceFactory.php        # Factory DI para PqrFormFieldService
+│   ├── PqrService.php                        # Utilidades generales (autocompletar, gráficos)
 │   ├── PqrHistoryService.php                 # Historial de cambios
 │   ├── PqrNotificationService.php            # Notificaciones por email
-│   ├── PqrNotyMessageService.php             # Mensajes de notificación
+│   └── PqrNotyMessageService.php             # Mensajes de notificación
+│
+├── Services/                                 # Servicios legacy (extienden ModelService)
+│   ├── FtPqrService.php                      # Ciclo de vida PQR (extiende ModelService)
+│   ├── FtPqrRespuestaService.php             # Gestión de respuestas a ciudadanos
 │   ├── Customizable/
 │   │   └── PqrCustomizable.php               # Clase extensible por cliente
 │   ├── crontab/
@@ -147,6 +147,19 @@ src/Bundles/pqr/
 |---|---|---|
 | `Entity/` + `Repository/` | Doctrine ORM | `pqr_*` |
 | `formatos/` | Active Record legacy (`ModelFormat`) | `ft_pqr`, `ft_pqr_respuesta`, `ft_pqr_calificacion` |
-| `Service/PqrFormProvider` | Symfony DI + ORM | `pqr_forms` |
+| `Service/` | Symfony DI puro + ORM | `pqr_*` |
+| `Services/` | Legacy (`ModelService`) | `ft_pqr*` |
 
-Las clases en `formatos/` no pueden migrar a ORM porque extienden `ModelFormat` del núcleo SAIA (fuera del módulo). Para acceder a entidades ORM desde estas clases se usa `LegacyServiceLocator::getInstance()->getEntityManager()`.
+Las clases en `formatos/` y `Services/` no pueden migrar a ORM porque extienden `ModelFormat`/`ModelService` del núcleo SAIA (fuera del módulo). Para acceder a entidades ORM desde estas clases se usa `LegacyServiceLocator::getInstance()->getEntityManager()`.
+
+### Servicios `Service/` (Symfony DI puro)
+
+Los servicios de `Service/` **no extienden** el `Service` legacy de SAIA: son servicios Symfony normales con inyección de dependencias.
+
+- **Funcionario logado:** se obtiene de `Security->getUser()` (no se inyecta como argumento ni se lee de `LegacyServiceLocator::getCurrentUser()`).
+- **Eventos:** se despachan con `Symfony\Component\EventDispatcher\EventDispatcherInterface` (p. ej. `new PqrFormFieldCreatedEvent($this)`), no con el `ServiceEventDispatcher` legacy.
+- **Consultas:** viven en los repositorios de `Repository/` (incluido `PqrLookupRepository` para queries DBAL de catálogos y búsqueda). Controladores y servicios no construyen SQL/DBAL directamente.
+
+### Relaciones Doctrine en entidades
+
+Las entidades usan asociaciones (`#[ORM\ManyToOne]`) **solo cuando el destino ya es una entidad Doctrine** (p. ej. `Funcionario` en `PqrNotification` y `PqrHistory`). Los FK hacia tablas legacy Active-Record (`campos_formato`, `campo_opciones`, `grupo`, `formato`, `contador`) se mantienen como `int` porque su destino no es una entidad Doctrine.

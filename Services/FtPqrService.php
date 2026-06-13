@@ -91,9 +91,11 @@ class FtPqrService extends ModelService
     {
         if ($this->getModel()->sys_email) {
             if (!CoreFunctions::isEmailValid($this->getModel()->sys_email)) {
-                throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('correo_invalido',
-                    ['%email%' => $this->getModel()->sys_email],
-                ),
+                throw new ValidationFailedException(
+                    $this->serviceLocator->getTranslator()->trans(
+                        'correo_invalido',
+                        ['%email%' => $this->getModel()->sys_email],
+                    ),
                 );
             }
         }
@@ -677,8 +679,9 @@ class FtPqrService extends ModelService
         $config = $this->getPqrForm()->getResponseConfiguration();
 
         if (!$config['tercero']) {
-            throw new ValidationFailedException($this->serviceLocator->getTranslator(
-            )->trans('configuracion_respuesta_no_definida'),
+            throw new ValidationFailedException(
+                $this->serviceLocator->getTranslator(
+                )->trans('configuracion_respuesta_no_definida'),
             );
         }
 
@@ -722,15 +725,17 @@ class FtPqrService extends ModelService
         $Tercero        ??= new Tercero();
         $TerceroService = new TerceroService($Tercero);
         if (!$TerceroService->save($data)) {
-            throw new ValidationFailedException($this->serviceLocator->getTranslator(
-            )->trans('no_fue_posible_guardar_tercero'),
+            throw new ValidationFailedException(
+                $this->serviceLocator->getTranslator(
+                )->trans('no_fue_posible_guardar_tercero'),
             );
         }
         $this->getModel()->sys_tercero = $TerceroService->getModel()->getPK();
 
         if (!$this->getModel()->save()) {
-            throw new ValidationFailedException($this->serviceLocator->getTranslator(
-            )->trans('no_fue_posible_guardar_pqr'),
+            throw new ValidationFailedException(
+                $this->serviceLocator->getTranslator(
+                )->trans('no_fue_posible_guardar_pqr'),
             );
         }
     }
@@ -747,14 +752,18 @@ class FtPqrService extends ModelService
     public function updateType(array $data): void
     {
         if (!$data['type']) {
-            throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('error_faltan_parametros',
-            ),
+            throw new ValidationFailedException(
+                $this->serviceLocator->getTranslator()->trans(
+                    'error_faltan_parametros',
+                ),
             );
         }
 
         if ($this->getPqrService()->subTypeExist() && !$data['subtype']) {
-            throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('error_faltan_parametros',
-            ),
+            throw new ValidationFailedException(
+                $this->serviceLocator->getTranslator()->trans(
+                    'error_faltan_parametros',
+                ),
             );
         }
         $refreshDescription = false;
@@ -1214,8 +1223,9 @@ class FtPqrService extends ModelService
                 break;
 
             default:
-                throw new ValidationFailedException($this->serviceLocator->getTranslator(
-                )->trans('tipo_distribucion_no_definida'),
+                throw new ValidationFailedException(
+                    $this->serviceLocator->getTranslator(
+                    )->trans('tipo_distribucion_no_definida'),
                 );
         }
         $DistributionService = new DistributionService($this->getModel()->getDocument());
@@ -1240,8 +1250,9 @@ class FtPqrService extends ModelService
 
         $TareaService = (new Tarea())->getService();
         if (!$TareaService->createOrUpdate($this->getTaskDefaultData())) {
-            throw new InvalidArgumentException($this->serviceLocator->getTranslator(
-            )->trans('no_fue_posible_crear_tarea'),
+            throw new InvalidArgumentException(
+                $this->serviceLocator->getTranslator(
+                )->trans('no_fue_posible_crear_tarea'),
             );
         }
     }

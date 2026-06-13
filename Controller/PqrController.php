@@ -1,21 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\formatos\pqr\FtPqr;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Entity\PqrFormField;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
+use App\Bundles\pqr\Repository\PqrLookupRepository;
 use Saia\models\formatos\CamposFormato;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\ParameterType;
 use Saia\controllers\CryptController;
 use Saia\controllers\DateController;
 use Saia\models\Dependencia;
-use Saia\models\documento\Documento;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,7 +29,7 @@ class PqrController extends AbstractController
     public function search(
         Request $request,
         jsonResponseService $json,
-        Connection $Connection,
+        PqrLookupRepository $pqrLookupRepository,
         TranslatorInterface $translator,
     ): Response {
         try {
@@ -38,15 +38,7 @@ class PqrController extends AbstractController
             }
             $email = trim($request->query->get('sys_email'));
 
-            $Qb = $Connection
-                ->createQueryBuilder()
-                ->select('ft.*')
-                ->from('ft_pqr', 'ft')
-                ->join('ft', 'documento', 'd', 'ft.documento_iddocumento=d.iddocumento')
-                ->where('d.estado<>:estado')
-                ->setParameter('estado', Documento::ELIMINADO)
-                ->andWhere('d.numero = :numero')
-                ->setParameter('numero', $request->query->get('numero'), ParameterType::INTEGER);
+            $Qb = $pqrLookupRepository->buildSearchByNumberQuery((string)$request->query->get('numero'));
 
             $records = FtPqr::findByQueryBuilder($Qb);
 
@@ -128,14 +120,21 @@ class PqrController extends AbstractController
             $allDependency = Dependencia::findAllByAttributes();
             $options[]     = "<option value='' data-i18n='g.seleccione'>Por favor Seleccione ...</option>";
             foreach ($allDependency as $Dependencia) {
-                $options[] = "<option value='{$Dependencia->getPK()}'>$Dependencia->nombre</option>";
+                $optionLabel = htmlspecialchars((string)$Dependencia->nombre, ENT_QUOTES, 'UTF-8');
+                $options[]   = "<option value='{$Dependencia->getPK()}'>$optionLabel</option>";
             }
             $options = implode('', $options);
 
-            $i18n = "data-i18n='{$camposFormato->getFormat()->getKeyTranslatorAttribute()}.campos.$camposFormato->nombre'";
-            $html = <<<HTML
+            $keyTranslator = htmlspecialchars(
+                "{$camposFormato->getFormat()->getKeyTranslatorAttribute()}.campos.$camposFormato->nombre",
+                ENT_QUOTES,
+                'UTF-8',
+            );
+            $label = htmlspecialchars((string)$pqrFormField->getLabel(), ENT_QUOTES, 'UTF-8');
+            $i18n  = "data-i18n='$keyTranslator'";
+            $html  = <<<HTML
                 <div class='form-group form-group-default form-group-default-select2'>
-                    <label $i18n>{$pqrFormField->getLabel()}</label>
+                    <label $i18n>$label</label>
                     <div class='form-group'>
                         <select class='full-width' name='bqCampo_$field' id='$field'>
                            $options

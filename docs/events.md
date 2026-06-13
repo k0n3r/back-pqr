@@ -10,7 +10,9 @@ Disparados por `PqrFormFieldService` al gestionar campos. Permiten que otros com
 | `PqrFormFieldUpdateEvent` | Al actualizar un campo |
 | `PqrFormFieldDeleteEvent` | Al eliminar un campo |
 
-Todos extienden `PqrFormFieldEvent` (clase base en `Event/`).
+Todos extienden `PqrFormFieldEvent` (clase base en `Event/`), que recibe la instancia de `PqrFormFieldService` en su constructor.
+
+`PqrFormFieldService` los despacha directamente con el `EventDispatcherInterface` de Symfony (inyectado), por ejemplo `$this->eventDispatcher->dispatch(new PqrFormFieldCreatedEvent($this))`. Ya no se usa el `ServiceEventDispatcher` legacy.
 
 ## Suscriptor `PqrSubscriber`
 

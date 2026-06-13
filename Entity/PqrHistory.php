@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\Entity;
 
 use App\Bundles\pqr\Repository\PqrHistoryRepository;
+use App\Entity\Funcionario;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PqrHistoryRepository::class)]
 #[ORM\Table(name: 'pqr_history')]
+#[ORM\Index(columns: ['fk_funcionario'], name: 'ipqr_histfk_funcio')]
 class PqrHistory
 {
     public const int TIPO_TAREA = 1;
@@ -32,8 +34,9 @@ class PqrHistory
     #[ORM\Column(name: 'fecha', type: 'datetime_immutable', nullable: false)]
     private DateTimeInterface $fecha;
 
-    #[ORM\Column(name: 'fk_funcionario', type: 'integer', nullable: false)]
-    private int $fkFuncionario;
+    #[ORM\ManyToOne(targetEntity: Funcionario::class)]
+    #[ORM\JoinColumn(name: 'fk_funcionario', referencedColumnName: 'idfuncionario', nullable: false)]
+    private Funcionario $funcionario;
 
     #[ORM\Column(name: 'tipo', type: 'integer', nullable: false)]
     private int $tipo;
@@ -71,15 +74,20 @@ class PqrHistory
         return $this;
     }
 
-    public function getFkFuncionario(): int
+    public function getFuncionario(): Funcionario
     {
-        return $this->fkFuncionario;
+        return $this->funcionario;
     }
 
-    public function setFkFuncionario(int $fkFuncionario): self
+    public function setFuncionario(Funcionario $funcionario): self
     {
-        $this->fkFuncionario = $fkFuncionario;
+        $this->funcionario = $funcionario;
         return $this;
+    }
+
+    public function getFkFuncionario(): int
+    {
+        return $this->funcionario->getId();
     }
 
     public function getTipo(): int

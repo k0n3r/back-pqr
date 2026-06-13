@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Bundles\pqr\Service;
 
 use App\Bundles\pqr\Entity\PqrForm as PqrFormEntity;
@@ -11,24 +13,23 @@ use App\Bundles\pqr\Repository\PqrFormRepository;
 use App\Bundles\pqr\Repository\PqrNotificationRepository;
 use App\Bundles\pqr\Services\controllers\AddEditFormat\AddEditFtPqr;
 use App\Entity\EmailConfiguration;
+use App\Entity\Funcionario;
 use App\Exception\ValidationFailedException;
-use App\Service\LegacyServiceLocator;
-use App\services\Service;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\formatos\CamposFormato;
 use Saia\models\formatos\Formato;
-use Saia\models\Funcionario;
 use Saia\models\grupo\Grupo;
 use Saia\models\Modulo;
 use Saia\models\tarea\Tarea;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\tarea\TareaFuncionario;
 
-class PqrFormService extends Service
+class PqrFormService
 {
     private PqrFormEntity $entity;
 
@@ -38,10 +39,10 @@ class PqrFormService extends Service
         private readonly PqrFormFieldRepository $pqrFormFieldRepository,
         private readonly PqrFormFieldServiceFactory $pqrFormFieldServiceFactory,
         private readonly PqrService $pqrService,
+        private readonly TranslatorInterface $translator,
         private readonly string $domain,
-        ?Funcionario $funcionario = null,
+        private readonly string $projectDir,
     ) {
-        parent::__construct($funcionario);
         $this->entity = $pqrFormRepository->findActiveOrFail();
     }
 
@@ -137,9 +138,11 @@ class PqrFormService extends Service
             ->getConnection()
             ->createQueryBuilder()
             ->update('pqr_form_fields')
-            ->set('anonymous', 0)
-            ->set('required_anonymous', 0)
-            ->where("name<>'sys_tipo'")->executeStatement();
+            ->set('anonymous', '0')
+            ->set('required_anonymous', '0')
+            ->where('name <> :sysTipo')
+            ->setParameter('sysTipo', PqrFormFieldEntity::FIELD_NAME_SYS_TIPO)
+            ->executeStatement();
 
         if ($this->entity->isShowAnonymous()) {
             if ($formFields = $data['formFields']) {
@@ -215,7 +218,7 @@ class PqrFormService extends Service
         $repository          = $this->em->getRepository(EmailConfiguration::class);
         $emailsConfiguration = $repository->findByPqrModule();
 
-        return array_map(fn($config) => $config->toArray(), $emailsConfiguration);
+        return array_map(fn ($config) => $config->toArray(), $emailsConfiguration);
     }
 
     private function getGroupsForBalancer(): array
@@ -257,7 +260,7 @@ class PqrFormService extends Service
             'nombre' => 'pqr_respuesta',
         ])) {
             throw new ValidationFailedException(
-                LegacyServiceLocator::getInstance()->getTranslator()->trans('formato_respuesta_pqr_no_encontrado'),
+                $this->translator->trans('formato_respuesta_pqr_no_encontrado'),
             );
         }
 
@@ -272,7 +275,7 @@ class PqrFormService extends Service
             'nombre' => 'pqr_calificacion',
         ])) {
             throw new ValidationFailedException(
-                LegacyServiceLocator::getInstance()->getTranslator()->trans('formato_calificacion_pqr_no_encontrado'),
+                $this->translator->trans('formato_calificacion_pqr_no_encontrado'),
             );
         }
 
@@ -321,7 +324,7 @@ class PqrFormService extends Service
         ]);
 
         if (!$ModuloPadre) {
-            $trans = $this->serviceLocator->getTranslator()->trans("no_se_encontro_modulo_reporte");
+            $trans = $this->translator->trans("no_se_encontro_modulo_reporte");
             throw new RuntimeException($trans);
         }
 
@@ -329,8 +332,8 @@ class PqrFormService extends Service
             'nombre' => PqrFormEntity::NOMBRE_REPORTE_POR_DEPENDENCIA,
         ]);
 
-        $enlace = 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector":"iframe","url": "views/buzones/grilla.php?idbusqueda_componente='.$BusquedaComponente->getPK(
-            ).'"}]';
+        $enlace = 'views/dashboard/kaiten_dashboard.php?panels=[{"kConnector":"iframe","url":
+        "views/buzones/grilla.php?idbusqueda_componente='.$BusquedaComponente->getPK().'"}]';
         $data   = [
             'pertenece_nucleo' => 0,
             'nombre'           => PqrFormEntity::NOMBRE_REPORTE_POR_DEPENDENCIA,
@@ -346,7 +349,7 @@ class PqrFormService extends Service
 
         $ModuloService = (new Modulo())->getService();
         if (!$ModuloService->save($data)) {
-            $trans = $this->serviceLocator->getTranslator()->trans("no_fue_posible_registrar_reporte_pqr");
+            $trans = $this->translator->trans("no_fue_posible_registrar_reporte_pqr");
 
             throw new RuntimeException($trans);
         }
@@ -387,10 +390,13 @@ class PqrFormService extends Service
     {
         $notifications = $this->getPqrNotificationRepository()->findByPqrForm($this->entity->getId());
 
-        return array_map(static fn($n)
+        return array_map(fn ($n)
             => [
             'id'             => $n->getId(),
-            'fk_funcionario' => $n->getFkFuncionario(),
+            'fk_funcionario' => [
+                'id'   => $n->getFkFuncionario(),
+                'text' => $this->em->find(Funcionario::class, $n->getFkFuncionario())?->getNombres() ?? '',
+            ],
             'fk_pqr_form'    => $n->getFkPqrForm(),
             'email'          => (int)$n->isEmail(),
             'notify'         => (int)$n->isNotify(),
@@ -433,7 +439,7 @@ class PqrFormService extends Service
     private function getFieldsView(): array
     {
         return array_map(
-            fn($f) => "ft.{$f->getName()}",
+            fn ($f) => "ft.{$f->getName()}",
             $this->pqrFormFieldRepository->findByPqrFormOrdered($this->entity->getId()),
         );
     }
@@ -591,14 +597,14 @@ class PqrFormService extends Service
                 $fieldCode[] = $code;
             }
         }
-        $file = LegacyServiceLocator::getInstance()->projectDir.'/src/Bundles/pqr/formatos/pqr/functionsReport.php';
+        $file = $this->projectDir.'/src/Bundles/pqr/formatos/pqr/functionsReport.php';
         if (file_exists($file)) {
             unlink($file);
         }
         $codeFunction = "<?php \n\n".implode("\n", $fieldCode);
 
         if (!file_put_contents($file, $codeFunction)) {
-            $trans = $this->serviceLocator->getTranslator()->trans("no_fue_posible_crear_funciones_formulario");
+            $trans = $this->translator->trans("no_fue_posible_crear_funciones_formulario");
             throw new RuntimeException($trans);
         }
     }
@@ -849,7 +855,8 @@ class PqrFormService extends Service
                 $fieldOptions = [];
 
                 if ($pqrFormField->getName() !== PqrFormFieldEntity::FIELD_NAME_SYS_TIPO) {
-                    $options = (new CamposFormato($pqrFormField->getFkCamposFormato(),
+                    $options = (new CamposFormato(
+                        $pqrFormField->getFkCamposFormato(),
                     ))->getCampoOpciones(['estado' => 1]);
                     foreach ($options as $CampoOpcion) {
                         if ($CampoOpcion->estado) {
@@ -986,7 +993,7 @@ class PqrFormService extends Service
         $pqrFormField = $this->pqrFormFieldRepository->find($fieldId);
         if (!$pqrFormField) {
             throw new ValidationFailedException(
-                LegacyServiceLocator::getInstance()->getTranslator()->trans('campo_descripcion_no_encontrado'),
+                $this->translator->trans('campo_descripcion_no_encontrado'),
             );
         }
 
@@ -1038,7 +1045,7 @@ class PqrFormService extends Service
 
     private function getDataPqrNotyMessages(): array
     {
-        return array_map(static fn($msg)
+        return array_map(static fn ($msg)
             => [
             'text'  => $msg->getLabel(),
             'value' => [

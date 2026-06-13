@@ -15,7 +15,8 @@ readonly class PqrNotyMessageService
     public function __construct(
         private PqrNotyMessageRepository $repository,
         private TranslatorInterface $translator,
-    ) {}
+    ) {
+    }
 
     public function update(int $id, array $data): void
     {
@@ -37,7 +38,7 @@ readonly class PqrNotyMessageService
     public function getDataPqrNotyMessages(): array
     {
         return array_map(
-            static fn($msg)
+            static fn ($msg)
                 => [
                 'text'  => $msg->getLabel(),
                 'value' => [
@@ -55,9 +56,9 @@ readonly class PqrNotyMessageService
     public static function resolveVariables(string $baseContent, FtPqr $FtPqr): string
     {
         $variables = [
-            'n_radicadoPqr'         => fn() => $FtPqr->getDocument()->getService()->getFilingReferenceNumber(),
-            'n_nombreFormularioPqr' => fn() => $FtPqr->getService()->getPqrForm()->getLabel(),
-            'n_consecutivoPqr'      => fn() => (string)$FtPqr->getDocument()->numero,
+            'n_radicadoPqr'         => fn () => $FtPqr->getDocument()->getService()->getFilingReferenceNumber(),
+            'n_nombreFormularioPqr' => fn () => $FtPqr->getService()->getPqrForm()->getLabel(),
+            'n_consecutivoPqr'      => fn () => (string)$FtPqr->getDocument()->numero,
         ];
 
         foreach (str_replace(['{*', '*}'], '', Header::getFunctionsFromString($baseContent)) as $variable) {

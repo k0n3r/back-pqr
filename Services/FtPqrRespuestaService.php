@@ -11,6 +11,7 @@ use App\Bundles\pqr\formatos\pqr_respuesta\FtPqrRespuesta;
 use App\Bundles\pqr\Repository\PqrHistoryRepository;
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
 use App\Bundles\pqr\Service\PqrNotyMessageService;
+use App\Entity\Funcionario as FuncionarioEntity;
 use App\EventSubscriber\Mailer\MailSubscriber;
 use App\services\documento\DocumentoExpuestoService;
 use App\services\models\ModelService\ModelService;
@@ -59,7 +60,8 @@ class FtPqrRespuestaService extends ModelService
             throw new ValidationFailedException(
                 $this->serviceLocator
                     ->getTranslator()
-                    ->trans('email_no_valido',
+                    ->trans(
+                        'email_no_valido',
                         ['%email%' => $email],
                     ),
             );
@@ -106,7 +108,9 @@ class FtPqrRespuestaService extends ModelService
         $entity = new PqrHistoryEntity();
         $entity->setIdft((int)$history['idft']);
         $entity->setFecha(new DateTimeImmutable($history['fecha']));
-        $entity->setFkFuncionario((int)$history['fk_funcionario']);
+        $entity->setFuncionario(
+            $this->getEntityManager()->getReference(FuncionarioEntity::class, (int)$history['fk_funcionario']),
+        );
         $entity->setTipo((int)$history['tipo']);
         $entity->setIdfk((int)$history['idfk']);
         $entity->setDescripcion((string)$history['descripcion']);
@@ -141,8 +145,9 @@ class FtPqrRespuestaService extends ModelService
                 break;
 
             default:
-                throw new ValidationFailedException($this->serviceLocator->getTranslator(
-                )->trans('tipo_distribucion_no_definida'),
+                throw new ValidationFailedException(
+                    $this->serviceLocator->getTranslator(
+                    )->trans('tipo_distribucion_no_definida'),
                 );
         }
         $DistributionService = new DistributionService($this->getModel()->getDocument());
@@ -330,7 +335,8 @@ class FtPqrRespuestaService extends ModelService
         $email   = $tercero->getEmail();
         if (!CoreFunctions::isEmailValid($email)) {
             throw new ValidationFailedException(
-                $this->serviceLocator->getTranslator()->trans('email_no_valido',
+                $this->serviceLocator->getTranslator()->trans(
+                    'email_no_valido',
                     ['%email%' => $email],
                 ),
             );

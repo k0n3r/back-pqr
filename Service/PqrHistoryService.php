@@ -7,8 +7,10 @@ namespace App\Bundles\pqr\Service;
 use App\Bundles\pqr\Entity\PqrHistory;
 use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\Repository\PqrHistoryRepository;
+use App\Entity\Funcionario as FuncionarioEntity;
 use App\Service\Storage\FileResolver;
 use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Saia\models\Configuracion;
 use Saia\models\Dependencia;
@@ -25,8 +27,10 @@ class PqrHistoryService
         private readonly PqrHistoryRepository $repository,
         private readonly FileResolver $fileResolver,
         private readonly LoggerInterface $logger,
+        private readonly EntityManagerInterface $em,
         private readonly string $domain,
-    ) {}
+    ) {
+    }
 
     public function getRepository(): PqrHistoryRepository
     {
@@ -37,7 +41,9 @@ class PqrHistoryService
     {
         $entity = new PqrHistory();
         $entity->setIdft((int)$attributes['idft']);
-        $entity->setFkFuncionario((int)$attributes['fk_funcionario']);
+        $entity->setFuncionario(
+            $this->em->getReference(FuncionarioEntity::class, (int)$attributes['fk_funcionario']),
+        );
         $entity->setTipo((int)$attributes['tipo']);
         $entity->setIdfk((int)($attributes['idfk'] ?? 0));
         $entity->setDescripcion((string)$attributes['descripcion']);

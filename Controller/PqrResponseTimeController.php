@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Bundles\pqr\Controller;
 
+use App\Bundles\pqr\Repository\PqrLookupRepository;
 use App\Bundles\pqr\Repository\PqrResponseTimeRepository;
 use App\Bundles\pqr\Service\PqrFormService;
 use App\Exception\MissingParameterException;
@@ -24,6 +27,7 @@ class PqrResponseTimeController extends AbstractController
         int $id,
         jsonResponseService $json,
         PqrResponseTimeRepository $pqrResponseTimeRepository,
+        PqrLookupRepository $pqrLookupRepository,
     ): Response {
         try {
             $records = $pqrResponseTimeRepository->findBy([
@@ -31,13 +35,18 @@ class PqrResponseTimeController extends AbstractController
                 'active'          => true,
             ]);
 
+            // Precarga en una sola consulta todas las opciones referenciadas (evita N+1).
+            $campoOpciones = $pqrLookupRepository->findCampoOpcionesByIds(
+                array_map(static fn ($rt) => $rt->getFkSysTipo(), $records),
+            );
+
             $data = [];
             $keys = [];
             $mayor = 0;
             foreach ($records as $rt) {
-                $CampoOpcion = new CampoOpciones($rt->getFkSysTipo());
+                $opcion = $campoOpciones[$rt->getFkSysTipo()] ?? ['orden' => 0, 'valor' => ''];
 
-                $key = (int)$CampoOpcion->orden;
+                $key = $opcion['orden'];
                 $mayor = max($key, $mayor);
 
                 if (!in_array($key, $keys)) {
@@ -50,7 +59,7 @@ class PqrResponseTimeController extends AbstractController
 
                 $data[$orden] = [
                     'id'   => $rt->getId(),
-                    'text' => $CampoOpcion->valor,
+                    'text' => $opcion['valor'],
                     'dias' => $rt->getNumberDays() ?: 1,
                 ];
             }

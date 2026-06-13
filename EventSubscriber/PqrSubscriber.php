@@ -36,7 +36,8 @@ readonly class PqrSubscriber implements EventSubscriberInterface
         private PqrFormProvider $pqrFormProvider,
         private PqrHistoryService $pqrHistoryService,
         private Security $security,
-    ) {}
+    ) {
+    }
 
 
     public static function getSubscribedEvents(): array
@@ -175,7 +176,9 @@ readonly class PqrSubscriber implements EventSubscriberInterface
             }
         }
 
-        return $Ft->getService()->changeStatus($estado);
+        $Ft->getService()->changeStatus($estado);
+
+        return true;
     }
 
     public function onSent(SentMessageEvent $event): void

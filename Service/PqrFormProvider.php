@@ -22,7 +22,8 @@ class PqrFormProvider
         private readonly PqrFormRepository $pqrFormRepository,
         private readonly PqrFormFieldRepository $pqrFormFieldRepository,
         private readonly PqrNotificationRepository $pqrNotificationRepository,
-    ) {}
+    ) {
+    }
 
     public function get(): PqrForm
     {

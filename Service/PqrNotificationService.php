@@ -6,13 +6,18 @@ namespace App\Bundles\pqr\Service;
 
 use App\Bundles\pqr\Entity\PqrNotification;
 use App\Bundles\pqr\Repository\PqrNotificationRepository;
+use App\Entity\Funcionario;
+use Doctrine\ORM\EntityManagerInterface;
+use RuntimeException;
 
 readonly class PqrNotificationService
 {
     public function __construct(
         private PqrNotificationRepository $repository,
         private PqrFormProvider $pqrFormProvider,
-    ) {}
+        private EntityManagerInterface $em,
+    ) {
+    }
 
     public function getRepository(): PqrNotificationRepository
     {
@@ -21,9 +26,12 @@ readonly class PqrNotificationService
 
     public function create(array $attributes): PqrNotification
     {
+        $funcionario = $this->em->find(Funcionario::class, (int)$attributes['fk_funcionario'])
+            ?? throw new RuntimeException('Funcionario no encontrado');
+
         $entity = new PqrNotification();
         $entity->setFkPqrForm($attributes['fk_pqr_form'] ?? $this->pqrFormProvider->get()->getId());
-        $entity->setFkFuncionario((int)$attributes['fk_funcionario']);
+        $entity->setFuncionario($funcionario);
         $entity->setEmail((bool)($attributes['email'] ?? 0));
         $entity->setNotify((bool)($attributes['notify'] ?? 1));
         $this->repository->create($entity);
@@ -34,7 +42,9 @@ readonly class PqrNotificationService
     public function update(PqrNotification $entity, array $attributes): void
     {
         if (array_key_exists('fk_funcionario', $attributes)) {
-            $entity->setFkFuncionario((int)$attributes['fk_funcionario']);
+            $funcionario = $this->em->find(Funcionario::class, (int)$attributes['fk_funcionario'])
+                ?? throw new RuntimeException('Funcionario no encontrado');
+            $entity->setFuncionario($funcionario);
         }
         if (array_key_exists('email', $attributes)) {
             $entity->setEmail((bool)$attributes['email']);
@@ -58,7 +68,10 @@ readonly class PqrNotificationService
     {
         return [
             'id'             => $entity->getId(),
-            'fk_funcionario' => $entity->getFkFuncionario(),
+            'fk_funcionario' => [
+                'id'   => $entity->getFkFuncionario(),
+                'text' => $entity->getFuncionario()->getNombres(),
+            ],
             'fk_pqr_form'    => $entity->getFkPqrForm(),
             'email'          => $entity->isEmail() ? 1 : 0,
             'notify'         => $entity->isNotify() ? 1 : 0,
