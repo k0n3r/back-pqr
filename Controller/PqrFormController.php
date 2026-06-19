@@ -184,7 +184,7 @@ class PqrFormController extends AbstractController
             $connection
                 ->createQueryBuilder()
                 ->update('pqr_form_fields')
-                ->set('show_report', 0)->executeStatement();
+                ->set('show_report', '0')->executeStatement();
             $em->clear();
 
             foreach ($request->request->all('ids') as $id) {
@@ -267,7 +267,7 @@ class PqrFormController extends AbstractController
     ): Response {
         $connection->beginTransaction();
         try {
-            $status = $Request->request->get('enable_filter_dep', 0);
+            $status = (int)$Request->request->get('enable_filter_dep', 0);
 
             if ($status && !$pqrFormProvider->getFieldByName(PqrFormField::FIELD_NAME_SYS_DEPENDENCIA)) {
                 $trans = $translator->trans("agregar_componente_dependencia");

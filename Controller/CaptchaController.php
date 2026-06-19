@@ -26,7 +26,7 @@ use Throwable;
 class CaptchaController extends AbstractController implements IHasCaptcha
 {
     /**
-     * @param Request                  $Request
+     * @param Request                  $request
      * @param jsonResponseService      $json
      * @param Connection               $Connection
      * @param TranslatorInterface      $translator
@@ -37,7 +37,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
      */
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
     public function saveDocument(
-        Request $Request,
+        Request $request,
         jsonResponseService $json,
         Connection $Connection,
         TranslatorInterface $translator,
@@ -45,31 +45,31 @@ class CaptchaController extends AbstractController implements IHasCaptcha
     ): Response {
         $Connection->beginTransaction();
         try {
-            if (empty($Request->request->get('formatId'))) {
+            if (empty($request->request->get('formatId'))) {
                 $trans = $translator->trans('indicar_formato');
                 throw new MissingParameterException($trans);
             }
 
-            if (empty($Request->request->get('dependencia'))) {
+            if (empty($request->request->get('dependencia'))) {
                 $trans = $translator->trans('indicar_rol_creador');
                 throw new MissingParameterException($trans);
             }
 
-            $VfuncionarioDc = VfuncionarioDc::findByRole($Request->request->get('dependencia'));
+            $VfuncionarioDc = VfuncionarioDc::findByRole((int)$request->request->get('dependencia'));
             if (!$VfuncionarioDc) {
                 $trans = $translator->trans('rol_creador_incorrecto');
                 throw new MissingParameterException($trans);
             }
 
-            $Request->request->set('webservice', 1);
-            $Formato = new Formato($Request->request->get('formatId'));
-            if ($Formato->isRequiredGeolocation() && empty($Request->request->get('geolocalizacion'))) {
+            $request->request->set('webservice', 1);
+            $Formato = new Formato($request->request->get('formatId'));
+            if ($Formato->isRequiredGeolocation() && empty($request->request->get('geolocalizacion'))) {
                 $trans = $translator->trans('debe_permitir_geolocalizacion');
                 throw new ValidationFailedException($trans);
             }
 
             $SaveDocument = new SaveDocument($Formato, $VfuncionarioDc);
-            $SaveDocument->createOrUpdateDocument($Request->request->all());
+            $SaveDocument->createOrUpdateDocument($request->request->all());
             $Documento = $SaveDocument->getDocument();
 
             $message        = "<br/>Su solicitud ha sido generada con el número de radicado <strong>$Documento->numero</strong><br/>el seguimiento lo puede realizar en el apartado de consulta con el radicado asignado<br/><br/>Gracias por visitarnos!";
