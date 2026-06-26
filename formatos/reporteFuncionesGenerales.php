@@ -13,7 +13,7 @@ function view(int $iddocumento, $numero): string
         HTML;
 }
 
-function dateRadication($date, string $format = null): string
+function dateRadication($date, ?string $format = null): string
 {
     if (!$format) {
         $format = DateController::PUBLIC_DATETIME_FORMAT;
