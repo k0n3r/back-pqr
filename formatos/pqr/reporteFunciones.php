@@ -491,10 +491,10 @@ function filter_pqr(): string
     }
 
     $params = json_decode($_REQUEST['variable_busqueda'], true);
-    $sysDependencia = (int)$params['sys_dependencia'];
-    if (!$sysDependencia) {
+    if (!isset($params['sys_dependencia']) || !is_numeric($params['sys_dependencia'])) {
         return $response;
     }
+    $sysDependencia = (int)$params['sys_dependencia'];
 
     return match ($params['filterName']) {
         PqrFormEntity::FILTER_PENDIENTES => "sys_dependencia=$sysDependencia AND sys_estado IN ('".FtPqr::ESTADO_PENDIENTE."','".FtPqr::ESTADO_PROCESO."')",
