@@ -13,8 +13,9 @@ include_once dirname(__DIR__).'/reporteFuncionesGenerales.php';
  */
 function filter_calificacion(): string
 {
-    if ($_REQUEST['variable_busqueda']) {
-        $params = json_decode($_REQUEST['variable_busqueda'], true);
+    $variableBusqueda = reportParam('variable_busqueda');
+    if ($variableBusqueda) {
+        $params = json_decode((string)$variableBusqueda, true);
         $idft = $params['idft_pqr_respuesta'];
         if ($idft) {
             return "ft_pqr_respuesta=$idft";

@@ -175,7 +175,7 @@ function totalAnswers(int $idft): string
         $fecha = DateController::convertDate($FtPqrRespuesta->getDocument()->fecha, DateController::PUBLIC_DATE_FORMAT);
         $answers[] = "<a class='kenlace_saia' data-enlace='$url' title='Respuestas a PQR No $numero' href='#'>{$FtPqrRespuesta->getDocument()->numero} - $fecha</a>";
     }
-    $separator = isset($_REQUEST['tempUrl']) ? '|' : '<br/>';
+    $separator = reportParam('tempUrl') !== null ? '|' : '<br/>';
 
     return implode($separator, $answers);
 }
@@ -203,7 +203,7 @@ function getResponsible(int $iddocumento): string
             $responsible[$Funcionario->getPK()] = $Funcionario->getName();
         }
     }
-    $separator = isset($_REQUEST['tempUrl']) ? '|' : '<br/>';
+    $separator = reportParam('tempUrl') !== null ? '|' : '<br/>';
 
     return implode($separator, $responsible);
 }
@@ -375,7 +375,7 @@ function filterByFiltroTemp(): string
     }
 
     $where = '';
-    $idBusquedaFiltroTemp = (int)$_REQUEST['idbusqueda_filtro_temp'];
+    $idBusquedaFiltroTemp = (int)reportParam('idbusqueda_filtro_temp');
     if ($idBusquedaFiltroTemp) {
         $BusquedaFiltroTemp = new BusquedaFiltroTemp($idBusquedaFiltroTemp);
         $where = $BusquedaFiltroTemp->detalle;
@@ -464,7 +464,7 @@ function createView(string $filterName, int $cant): string
     $url = 'views/buzones/grilla.php?';
 
     $url .= http_build_query([
-        'idbusqueda_filtro_temp' => (int)$_REQUEST['idbusqueda_filtro_temp'],
+        'idbusqueda_filtro_temp' => (int)reportParam('idbusqueda_filtro_temp'),
         'idbusqueda_componente'  => getComponenteRepTodos(),
         'variable_busqueda'      => json_encode([
             'sys_dependencia' => $Dependencia->getPK(),
@@ -486,11 +486,12 @@ function createView(string $filterName, int $cant): string
 function filter_pqr(): string
 {
     $response = "1=1";
-    if (!$_REQUEST['variable_busqueda']) {
+    $variableBusqueda = reportParam('variable_busqueda');
+    if (!$variableBusqueda) {
         return $response;
     }
 
-    $params = json_decode($_REQUEST['variable_busqueda'], true);
+    $params = json_decode((string)$variableBusqueda, true);
     if (!isset($params['sys_dependencia']) || !is_numeric($params['sys_dependencia'])) {
         return $response;
     }

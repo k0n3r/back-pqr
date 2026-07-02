@@ -31,8 +31,9 @@ function getFtPqrRespuesta(): FtPqrRespuesta
  */
 function filter_answer_by_pqr(): string
 {
-    if ($_REQUEST['variable_busqueda']) {
-        $params = json_decode($_REQUEST['variable_busqueda'], true);
+    $variableBusqueda = reportParam('variable_busqueda');
+    if ($variableBusqueda) {
+        $params = json_decode((string)$variableBusqueda, true);
         $idft = $params['idft_pqr'];
         if ($idft) {
             return "ft_pqr=$idft";
