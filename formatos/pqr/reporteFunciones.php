@@ -347,7 +347,7 @@ function getNombreDependencia(int $dependenciaId): string
     setDependencia($dependenciaId);
     $Dependencia = getDependencia();
 
-    return $Dependencia->nombre;
+    return (string)($Dependencia->nombre ?? '');
 }
 
 /**
