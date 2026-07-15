@@ -43,3 +43,7 @@ formulario_no_encontrado: "Formulario no encontrado"
 no_fue_posible_guardar_pqr: "No fue posible guardar la PQR"
 no_fue_posible_crear_tarea: "No fue posible crear la tarea"
 no_fue_posible_procesar_pqr: "No fue posible procesar la PQR"
+
+# ── Excepciones sin traducción — docs/migracion/24-throws-sin-traduccion.md (2026-07-06) ──
+no_fue_posible_editar_la_distribucion: 'No fue posible editar la distribución'
+no_fue_posible_enviar_la_notificacion_por_correo: 'No fue posible enviar la notificación por correo'

@@ -43,3 +43,7 @@ formulario_no_encontrado: "Form not found"
 no_fue_posible_guardar_pqr: "It was not possible to save the PQR"
 no_fue_posible_crear_tarea: "It was not possible to create the task"
 no_fue_posible_procesar_pqr: "It was not possible to process the PQR"
+
+# ── Excepciones sin traducción — docs/migracion/24-throws-sin-traduccion.md (2026-07-06) ──
+no_fue_posible_editar_la_distribucion: 'Could not edit the distribution'
+no_fue_posible_enviar_la_notificacion_por_correo: 'Could not send the email notification'
