@@ -104,13 +104,7 @@ class PqrHistoryService
     private function buildPdfUrl(Documento $documento): string
     {
         try {
-            if (!$documento->pdf) {
-                $pdf = $documento->getPdfJson(true);
-            } else {
-                $pdf = $documento->pdf;
-            }
-
-            $publicPath = $this->fileResolver->fromStoragePath($pdf)->getPublicTemporalPath();
+            $publicPath = $documento->getPdfFile()->getPublicTemporalPath();
 
             return $this->domain.$publicPath;
         } catch (Throwable $th) {

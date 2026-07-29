@@ -232,9 +232,8 @@ class FtPqrRespuestaService extends ModelService
         $email = (new Email());
 
         $DocumentoRespuesta = $FtPqrRespuesta->getDocument();
-        $pdfPath            = $DocumentoRespuesta->getPdfJson();
-        $file               = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
-        $email->attach($file->getContent(), basename($pdfPath));
+        $file               = $DocumentoRespuesta->getPdfFile();
+        $email->attach($file->getContent(), $file->getSplFileInfo()->getFilename());
 
         $DocumentoService = $DocumentoRespuesta->getService();
         if ($records = $DocumentoService->getAllFilesAnexos(true)) {

@@ -5,7 +5,6 @@ namespace App\Bundles\pqr\IA\Service;
 use App\Bundles\ia\Services\DocumentCreatedDto;
 use App\Bundles\ia\Services\FormatoDocumentProcessorInterface;
 use App\Service\PathResolver;
-use App\Service\Storage\FileResolver;
 use Saia\controllers\SaveDocument;
 use Saia\models\formatos\Formato;
 use Saia\models\vistas\VfuncionarioDc;
@@ -16,7 +15,6 @@ readonly class PqrDocumentProcessor implements FormatoDocumentProcessorInterface
     public function __construct(
         private Security $security,
         private PathResolver $pathResolver,
-        private FileResolver $fileResolver,
     ) {
     }
 
@@ -49,7 +47,7 @@ readonly class PqrDocumentProcessor implements FormatoDocumentProcessorInterface
         ]));
 
         $document     = $saveDocument->getDocument();
-        $fileTemporal = $this->fileResolver->fromStoragePath($document->getPdfJson())->getPublicTemporalPath();
+        $fileTemporal = $document->getPdfFile()->getPublicTemporalPath();
         $pdfUrl       = $this->pathResolver->generateURL($fileTemporal);
         $radicado     = $document->getService()->getFilingReferenceNumber();
 

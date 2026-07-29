@@ -539,9 +539,8 @@ class FtPqrService extends ModelService
         $email = (new Email());
 
         $Documento = $this->getDocument();
-        $pdfPath   = $Documento->getPdfJson();
-        $file      = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
-        $email->attach($file->getContent(), basename($pdfPath));
+        $file      = $Documento->getPdfFile();
+        $email->attach($file->getContent(), $file->getSplFileInfo()->getFilename());
 
         $records = $Documento->getService()->getAllFilesAnexos(true);
         foreach ($records as $Anexos) {
@@ -648,9 +647,8 @@ class FtPqrService extends ModelService
                 ->html($message)
                 ->to(...$emails);
 
-            $pdfPath = $Documento->getPdfJson();
-            $file    = $this->serviceLocator->getFileResolver()->fromStoragePath($pdfPath);
-            $email->attach($file->getContent(), basename($pdfPath));
+            $file = $Documento->getPdfFile();
+            $email->attach($file->getContent(), $file->getSplFileInfo()->getFilename());
 
             $params = [
                 'documentId' => $Documento->getPK(),
@@ -1494,13 +1492,7 @@ class FtPqrService extends ModelService
     {
         $documento = $this->getDocument();
         try {
-            if (!$documento->pdf) {
-                $documento->getPdfJson(true);
-            }
-            $publicPath = $this->serviceLocator
-                ->getFileResolver()
-                ->fromStoragePath($documento->pdf)
-                ->getPublicTemporalPath();
+            $publicPath = $documento->getPdfFile()->getPublicTemporalPath();
 
             return $this->serviceLocator->domain.$publicPath;
         } catch (Throwable $th) {
