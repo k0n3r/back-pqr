@@ -540,12 +540,12 @@ class FtPqrService extends ModelService
 
         $Documento = $this->getDocument();
         $file      = $Documento->getPdfFile();
-        $email->attach($file->getContent(), $file->getSplFileInfo()->getFilename());
+        $email->attachFromPath($file->getSplFileInfo()->getPathname(), $file->getSplFileInfo()->getFilename());
 
         $records = $Documento->getService()->getAllFilesAnexos(true);
         foreach ($records as $Anexos) {
             $file = $this->serviceLocator->getFileResolver()->fromStoragePath($Anexos->ruta);
-            $email->attach($file->getContent(), basename($Anexos->ruta));
+            $email->attachFromPath($file->getSplFileInfo()->getPathname(), basename($Anexos->ruta));
         }
 
         $email
@@ -678,8 +678,7 @@ class FtPqrService extends ModelService
 
         if (!$config['tercero']) {
             throw new ValidationFailedException(
-                $this->serviceLocator->getTranslator(
-                )->trans('configuracion_respuesta_no_definida'),
+                $this->serviceLocator->getTranslator()->trans('configuracion_respuesta_no_definida'),
             );
         }
 
@@ -724,16 +723,14 @@ class FtPqrService extends ModelService
         $TerceroService = new TerceroService($Tercero);
         if (!$TerceroService->save($data)) {
             throw new ValidationFailedException(
-                $this->serviceLocator->getTranslator(
-                )->trans('no_fue_posible_guardar_tercero'),
+                $this->serviceLocator->getTranslator()->trans('no_fue_posible_guardar_tercero'),
             );
         }
         $this->getModel()->sys_tercero = $TerceroService->getModel()->getPK();
 
         if (!$this->getModel()->save()) {
             throw new ValidationFailedException(
-                $this->serviceLocator->getTranslator(
-                )->trans('no_fue_posible_guardar_pqr'),
+                $this->serviceLocator->getTranslator()->trans('no_fue_posible_guardar_pqr'),
             );
         }
     }
@@ -1222,8 +1219,7 @@ class FtPqrService extends ModelService
 
             default:
                 throw new ValidationFailedException(
-                    $this->serviceLocator->getTranslator(
-                    )->trans('tipo_distribucion_no_definida'),
+                    $this->serviceLocator->getTranslator()->trans('tipo_distribucion_no_definida'),
                 );
         }
         $DistributionService = new DistributionService($this->getModel()->getDocument());
@@ -1249,8 +1245,7 @@ class FtPqrService extends ModelService
         $TareaService = (new Tarea())->getService();
         if (!$TareaService->createOrUpdate($this->getTaskDefaultData())) {
             throw new InvalidArgumentException(
-                $this->serviceLocator->getTranslator(
-                )->trans('no_fue_posible_crear_tarea'),
+                $this->serviceLocator->getTranslator()->trans('no_fue_posible_crear_tarea'),
             );
         }
     }
