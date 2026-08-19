@@ -229,31 +229,38 @@ class FtPqrRespuestaService extends ModelService
             $message .= "Califica nuestro servicio haciendo clic en el siguiente enlace: <a href='$url'>Calificar el servicio</a> .<br/><br/>";
         }
 
+        $tercero = $FtPqrRespuesta->getTercero();
+        if (!$tercero || !$tercero->getEmail()) {
+            throw new ValidationFailedException(
+                $this->serviceLocator->getTranslator()->trans('debe_ingresar_email_destino'),
+            );
+        }
+
         $email = (new Email());
 
         $DocumentoRespuesta = $FtPqrRespuesta->getDocument();
         $file               = $DocumentoRespuesta->getPdfFile();
-        $email->attach($file->getContent(), $file->getSplFileInfo()->getFilename());
+        $email->attachFromPath($file->getSplFileInfo()->getPathname(), $file->getSplFileInfo()->getFilename());
 
         $DocumentoService = $DocumentoRespuesta->getService();
         if ($records = $DocumentoService->getAllFilesAnexos(true)) {
             foreach ($records as $Anexos) {
                 $file = $this->serviceLocator->getFileResolver()->fromStoragePath($Anexos->ruta);
-                $email->attach($file->getContent(), basename($Anexos->ruta));
+                $email->attachFromPath($file->getSplFileInfo()->getPathname(), basename($Anexos->ruta));
             }
         }
 
         $email
             ->subject($subject)
             ->html($message)
-            ->to(new Address($FtPqrRespuesta->getTercero()->getEmail(), $FtPqrRespuesta->getTercero()->getName()));
+            ->to(new Address($tercero->getEmail(), $tercero->getName()));
 
         $emailCopy = $this->getCopyEmail();
         if ($emailCopy) {
             $email->cc(...$emailCopy);
         }
 
-        $description = "Se le notificó a: {$FtPqrRespuesta->getTercero()->getEmail()}";
+        $description = "Se le notificó a: {$tercero->getEmail()}";
         if ($emailCopy) {
             $texCopia    = implode(", ", $emailCopy);
             $description .= " con copia a: ($texCopia)";
