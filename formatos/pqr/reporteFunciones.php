@@ -247,6 +247,10 @@ function qualificationServ(): string
  */
 function options(int $iddocumento, string $estado, int $idft): string
 {
+    if (reportParam('exportColumns')) {
+        return "-";
+    }
+
     $options = match ($estado) {
         FtPqr::ESTADO_PROCESO => <<<HTML
              <a href="#" class="dropdown-item addTask" data-id="$iddocumento" data-idft="$idft">
@@ -460,6 +464,10 @@ function getComponenteRepTodos(): int
  */
 function createView(string $filterName, int $cant): string
 {
+    if (reportParam('exportColumns')) {
+        return $cant;
+    }
+
     $Dependencia = getDependencia();
     $url = 'views/buzones/grilla.php?';
 
