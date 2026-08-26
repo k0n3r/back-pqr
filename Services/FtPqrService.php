@@ -242,11 +242,7 @@ class FtPqrService extends ModelService
             $DateTime = (DateController::addBusinessDays($Created, $days));
         }
 
-        $DateTime->setTime(
-            $Created->format('H'),
-            $Created->format('i'),
-            $Created->format('s'),
-        );
+        $DateTime->setTime(23, 59, 59);
 
         return $instance ? $DateTime : $DateTime->format('Y-m-d H:i:s');
     }
@@ -1311,8 +1307,6 @@ class FtPqrService extends ModelService
      */
     protected function getTaskDefaultEndDate(DateTime $DateTime): string
     {
-        $DateTime->add(new DateInterval('PT30M'));
-
         return $DateTime->format('Y-m-d H:i:s');
     }
 

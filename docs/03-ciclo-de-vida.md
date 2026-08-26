@@ -66,6 +66,12 @@ Configurables por tipo de PQR en `PqrResponseTime`. Cuando se cumple el plazo si
 pasa a `OPORTUNO_VENCIDAS_SIN_CERRAR`. Los reportes de oportunidad usan estas fechas para calcular
 el cumplimiento.
 
+`FtPqrService::getDateForType()` calcula la fecha límite sumando los días configurados (calendario o
+hábiles, según `PqrForm::isEnabledCalendarDays()`) a la fecha de radicación, y siempre fija la hora en
+**23:59:59** — el responsable puede gestionar la PQR hasta el final del último día. Esta fecha se usa
+tanto para `sys_fecha_vencimiento`/`fecha_limite` del documento como para la tarea automática que crea
+el balanceador (`getTaskDefaultData()`).
+
 ---
 
 ## Balanceador de carga
