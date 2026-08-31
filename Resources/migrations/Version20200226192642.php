@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Bundles\pqr\Resources\migrations;
 
-use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Entity\PqrForm;
 use App\Bundles\pqr\Service\PqrService;
 use Doctrine\DBAL\Schema\Schema;
 use App\Bundles\pqr\formatos\pqr\FtPqr;

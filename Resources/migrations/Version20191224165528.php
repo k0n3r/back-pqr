@@ -9,7 +9,7 @@ use DateTime;
 use Saia\core\db\customDrivers\OtherQueriesForPlatform;
 use Saia\models\grafico\Grafico;
 use Saia\models\Perfil;
-use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Entity\PqrForm;
 use Doctrine\DBAL\Schema\Schema;
 use Saia\controllers\CryptController;
 use Doctrine\Migrations\AbstractMigration;
@@ -159,7 +159,7 @@ final class Version20191224165528 extends AbstractMigration
         ];
     }
 
-    private function generateModules(array $data, int $id = 0): void
+    private function generateModules(array $data, ?int $id = null): void
     {
         if ($data) {
             foreach ($data as $name => $dataModule) {

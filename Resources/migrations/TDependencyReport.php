@@ -2,7 +2,7 @@
 
 namespace App\Bundles\pqr\Resources\migrations;
 
-use App\Bundles\pqr\Services\models\PqrForm;
+use App\Bundles\pqr\Entity\PqrForm;
 
 trait TDependencyReport
 {
