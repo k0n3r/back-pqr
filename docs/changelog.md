@@ -1,5 +1,14 @@
 # Changelog
 
+### 2026-09 - Traducciones
+
+| Fecha | Cambio | Detalles |
+|-------|--------|----------|
+| 2026-09-02 | Catálogo de traducción migrado a formato ICU | `translations/messages.{es,en}.yaml` renombrado a `messages+intl-icu.{es,en}.yaml` (igual que el core), placeholders `%email%`/`%taskId%`... convertidos a `{email}`/`{taskId}`; ajustados los call sites en `FtPqrRespuestaService`/`FtPqrService` (parámetros sin signos `%`). Bonus: `no_fue_posible_cambiar_estado_tarea` ya usaba `{taskId}` en el catálogo viejo (no-ICU) — nunca interpolaba el valor real; con el cambio de formato ahora sí. Test: `Tests/Integration/PqrTranslationsIcuTest.php`. |
+| 2026-09-02 | Renombradas 2 claves colisionando con el core (`correo_invalido`→`pqr_correo_invalido`, `email_no_valido`→`pqr_email_no_valido`) | Hallazgo de la entrada anterior: este catálogo comparte dominio de traducción (`messages`) con el core — 5 claves tenían el mismo nombre que claves del core, y en 2 de ellas (estas) el texto era realmente distinto, con el core ganando la colisión silenciosamente. Efecto real: el mensaje específico de PQR para "email inválido"/"correo inválido" probablemente nunca se mostró a un usuario, siempre se vio el genérico del core. Renombradas con prefijo `pqr_`; actualizados los 3 call sites (`FtPqrRespuestaService` ×2, `FtPqrService` ×1). Las otras 3 colisiones (texto casi idéntico, sin impacto real) quedan sin renombrar. Test actualizado: `Tests/Integration/PqrTranslationsIcuTest.php`. |
+
+---
+
 ### 2026-08 - Correcciones
 
 | Fecha | Cambio | Detalles |

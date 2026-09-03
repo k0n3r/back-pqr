@@ -93,8 +93,8 @@ class FtPqrService extends ModelService
             if (!CoreFunctions::isEmailValid($this->getModel()->sys_email)) {
                 throw new ValidationFailedException(
                     $this->serviceLocator->getTranslator()->trans(
-                        'correo_invalido',
-                        ['%email%' => $this->getModel()->sys_email],
+                        'pqr_correo_invalido',
+                        ['email' => $this->getModel()->sys_email],
                     ),
                 );
             }

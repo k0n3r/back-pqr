@@ -26,15 +26,15 @@ notificacion_no_encontrada: "Notification not found"
 formato_respuesta_pqr_no_encontrado: "The PQR response format was not found"
 formato_calificacion_pqr_no_encontrado: "The PQR qualification format was not found"
 campo_descripcion_no_encontrado: "The description field was not found"
-email_no_valido: "The email (%email%) is NOT valid"
+pqr_email_no_valido: "The email ({email}) is NOT valid"
 no_fue_posible_finalizar_pqr: "It was not possible to finalize the PQR"
 error_faltan_parametros: "Error, missing parameters"
 no_fue_posible_editar_distribucion: "It was not possible to edit the distribution"
 debe_ingresar_email_destino: "You must enter the destination email"
 email_copia_no_ingresado: "You must enter the CC email"
-email_copia_no_valido: "The external CC email (%email%) is NOT valid"
+email_copia_no_valido: "The external CC email ({email}) is NOT valid"
 tipo_distribucion_no_definida: "Distribution type not defined"
-correo_invalido: "This email address (%email%) is not valid"
+pqr_correo_invalido: "This email address ({email}) is not valid"
 configuracion_respuesta_no_definida: "Contact the administrator, the response configuration must be defined"
 no_fue_posible_guardar_tercero: "It was not possible to save the third party"
 no_fue_posible_eliminar_campo: "It was not possible to delete the field"
@@ -44,6 +44,6 @@ no_fue_posible_guardar_pqr: "It was not possible to save the PQR"
 no_fue_posible_crear_tarea: "It was not possible to create the task"
 no_fue_posible_procesar_pqr: "It was not possible to process the PQR"
 
-# ── Excepciones sin traducción — docs/migracion/24-throws-sin-traduccion.md (2026-07-06) ──
+# ── Excepciones sin traducción — docs/migraciones-mantenimiento.md (2026-07-06) ──
 no_fue_posible_editar_la_distribucion: 'Could not edit the distribution'
 no_fue_posible_enviar_la_notificacion_por_correo: 'Could not send the email notification'

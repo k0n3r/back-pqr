@@ -61,8 +61,8 @@ class FtPqrRespuestaService extends ModelService
                 $this->serviceLocator
                     ->getTranslator()
                     ->trans(
-                        'email_no_valido',
-                        ['%email%' => $email],
+                        'pqr_email_no_valido',
+                        ['email' => $email],
                     ),
             );
         }
@@ -77,7 +77,7 @@ class FtPqrRespuestaService extends ModelService
 
                 if (!CoreFunctions::isEmailValid($copia)) {
                     throw new ValidationFailedException(
-                        $this->serviceLocator->getTranslator()->trans('email_copia_no_valido', ['%email%' => $copia]),
+                        $this->serviceLocator->getTranslator()->trans('email_copia_no_valido', ['email' => $copia]),
                     );
                 }
             }
@@ -342,8 +342,8 @@ class FtPqrRespuestaService extends ModelService
         if (!CoreFunctions::isEmailValid($email)) {
             throw new ValidationFailedException(
                 $this->serviceLocator->getTranslator()->trans(
-                    'email_no_valido',
-                    ['%email%' => $email],
+                    'pqr_email_no_valido',
+                    ['email' => $email],
                 ),
             );
         }
