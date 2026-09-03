@@ -9,12 +9,12 @@ use App\Bundles\pqr\Entity\PqrFormField;
 use App\Bundles\pqr\Repository\PqrFormFieldRepository;
 use App\Bundles\pqr\Repository\PqrHtmlFieldRepository;
 use App\Bundles\pqr\Repository\PqrLookupRepository;
+use App\Repository\PantallaGraficoRepository;
 use Doctrine\DBAL\Connection;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\DBAL\ParameterType;
 use RuntimeException;
 use Saia\models\formatos\CamposFormato;
-use Saia\models\grafico\PantallaGrafico;
 
 class PqrService
 {
@@ -28,6 +28,7 @@ class PqrService
         private readonly PqrFormFieldRepository $pqrFormFieldRepository,
         private readonly PqrHtmlFieldRepository $pqrHtmlFieldRepository,
         private readonly PqrLookupRepository $pqrLookupRepository,
+        private readonly PantallaGraficoRepository $pantallaGraficoRepository,
         private readonly Connection $connection,
         private readonly TranslatorInterface $translator,
     ) {
@@ -164,9 +165,7 @@ class PqrService
      */
     public function activeGraphics(): void
     {
-        $PantallaGrafico = PantallaGrafico::findByAttributes([
-            'nombre' => PqrForm::NOMBRE_PANTALLA_GRAFICO,
-        ]);
+        $PantallaGrafico = $this->pantallaGraficoRepository->findOneByNombre(PqrForm::NOMBRE_PANTALLA_GRAFICO);
         if (!$PantallaGrafico) {
             $trans = $this->translator->trans('no_se_encuentra_pantalla_grafico');
             throw new RuntimeException($trans);
@@ -176,7 +175,7 @@ class PqrService
             ->createQueryBuilder()
             ->update('grafico')
             ->where('fk_pantalla_grafico=:idpantalla')
-            ->setParameter('idpantalla', $PantallaGrafico->getPK(), ParameterType::INTEGER);
+            ->setParameter('idpantalla', $PantallaGrafico->getId(), ParameterType::INTEGER);
 
         $qb2 = clone $qb;
         $qb->set('estado', '1')->executeStatement();
