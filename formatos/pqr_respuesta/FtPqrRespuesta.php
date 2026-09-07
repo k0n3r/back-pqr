@@ -8,15 +8,14 @@ use App\Bundles\pqr\helpers\UtilitiesPqr;
 use App\Bundles\pqr\IA\Service\PqrRespuestaDataJsonForIA;
 use App\Bundles\pqr\Services\FtPqrRespuestaService;
 use App\Bundles\pqr\Entity\PqrHistory;
+use App\Entity\Municipio;
 use DateTime;
 use IntlDateFormatter;
 use RuntimeException;
 use Saia\controllers\documento\DocumentoService;
 use Saia\controllers\functions\CoreFunctions;
-use Saia\controllers\localidad\MunicipioService;
 use Saia\models\anexos\Anexos;
 use Saia\models\formatos\CamposFormato;
-use Saia\models\localidades\Municipio;
 use Saia\models\Tercero;
 
 class FtPqrRespuesta extends FtPqrRespuestaProperties
@@ -66,7 +65,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     public function getMunicipio(): Municipio
     {
         if (!$this->Municipio) {
-            $this->Municipio = new Municipio($this->ciudad_origen);
+            $this->Municipio = $this->getRepo(Municipio::class)->find($this->ciudad_origen);
         }
 
         return $this->Municipio;
@@ -158,7 +157,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
     {
         $options = '';
         if ($this->ciudad_origen) {
-            $data = MunicipioService::getCityByIdForAutocomplete($this->ciudad_origen);
+            $data = $this->getRepo(Municipio::class)->getCityByIdForAutocomplete($this->ciudad_origen);
             $options = "<option value='{$data['id']}'>{$data['text']}</option>";
         }
 
