@@ -194,7 +194,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
                 <div class='radio radio-success input-group'>
                     <input type='radio' name='$CamposFormato->nombre' id='{$CamposFormato->nombre}1' value='1' $checked1>
                     <label for='{$CamposFormato->nombre}1' class='me-3 label-without-focus'> SI </label>
-            
+
                     <input type='radio' name='$CamposFormato->nombre' id='{$CamposFormato->nombre}0' value='0' $checked0>
                     <label for='{$CamposFormato->nombre}0' class='me-3 label-without-focus'> NO </label>
                 </div>
@@ -223,7 +223,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
                     <tr>
                         <td colspan="2">{$this->getFechaCiudad()}</td>
                     </tr>
-            
+
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
@@ -233,34 +233,34 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
-            
+
                     <tr>
                         <td>{$this->getFieldValue('destino')}</td>
                         <td style="text-align:center">$Qr<br/>No.{$this->getRadicado()}</td>
                     </tr>
-            
+
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
-            
+
                     <tr>
                         <td colspan="2">ASUNTO: $this->asunto</td>
                     </tr>
-            
+
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
-            
+
                     <tr>
                         <td colspan="2">Cordial saludo:</td>
                     </tr>
-            
+
                     <tr>
                         <td colspan="2">&nbsp;</td>
                     </tr>
@@ -304,7 +304,7 @@ class FtPqrRespuesta extends FtPqrRespuestaProperties
             IntlDateFormatter::NONE, // No incluye hora
         );
 
-        return $this->getMunicipio()->nombre.", ".$formateador->format($fecha);
+        return $this->getMunicipio()->getNombre().", ".$formateador->format($fecha);
     }
 
     /**
