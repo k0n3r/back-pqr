@@ -5,7 +5,6 @@ agregar_componente_dependencia: "Debe agregar al formulario el componente de Dep
 indicar_identificador_campo_descripcion: "Debe indicar el identificador del campo descripción"
 indicar_canales_recepcion: "Debe indicar los canales de recepción"
 falta_identificador_tiempo_respuesta: "Falta el identificador del campo de los tiempos de respuesta"
-no_fue_posible_enviar_notificacion_correo: "No fue posible enviar la notificacion por correo"
 no_fue_posible_guardar_historial: "No fue posible guardar en el historial"
 no_se_encontro_modulo_reporte: "No se encontro el modulo del Reporte"
 no_fue_posible_registrar_reporte_pqr: "No fue posible registrar el reporte de PQR por Dependencia"
@@ -29,7 +28,6 @@ campo_descripcion_no_encontrado: "El campo de descripción no fue encontrado"
 pqr_email_no_valido: "El email ({email}) NO es válido"
 no_fue_posible_finalizar_pqr: "No fue posible finalizar la PQR"
 error_faltan_parametros: "Error, faltan parámetros"
-no_fue_posible_editar_distribucion: "No fue posible editar la distribución"
 debe_ingresar_email_destino: "Debe ingresar el email (Destino)"
 email_copia_no_ingresado: "Debe ingresar el email (Con copia a)"
 email_copia_no_valido: "El email en copia externa ({email}) NO es válido"
@@ -43,7 +41,3 @@ formulario_no_encontrado: "Formulario no encontrado"
 no_fue_posible_guardar_pqr: "No fue posible guardar la PQR"
 no_fue_posible_crear_tarea: "No fue posible crear la tarea"
 no_fue_posible_procesar_pqr: "No fue posible procesar la PQR"
-
-# ── Excepciones sin traducción — docs/migraciones-mantenimiento.md (2026-07-06) ──
-no_fue_posible_editar_la_distribucion: 'No fue posible editar la distribución'
-no_fue_posible_enviar_la_notificacion_por_correo: 'No fue posible enviar la notificación por correo'

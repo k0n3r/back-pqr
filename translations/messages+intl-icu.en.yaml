@@ -5,7 +5,6 @@ agregar_componente_dependencia: "You must add the Dependency component to the fo
 indicar_identificador_campo_descripcion: "You must specify the description field ID"
 indicar_canales_recepcion: "You must specify the reception channels"
 falta_identificador_tiempo_respuesta: "The response time field ID is missing"
-no_fue_posible_enviar_notificacion_correo: "It was not possible to send the notification by email"
 no_fue_posible_guardar_historial: "It was not possible to save in the history"
 no_se_encontro_modulo_reporte: "The Report module was not found"
 no_fue_posible_registrar_reporte_pqr: "It was not possible to register the PQR report by Dependency"
@@ -29,7 +28,6 @@ campo_descripcion_no_encontrado: "The description field was not found"
 pqr_email_no_valido: "The email ({email}) is NOT valid"
 no_fue_posible_finalizar_pqr: "It was not possible to finalize the PQR"
 error_faltan_parametros: "Error, missing parameters"
-no_fue_posible_editar_distribucion: "It was not possible to edit the distribution"
 debe_ingresar_email_destino: "You must enter the destination email"
 email_copia_no_ingresado: "You must enter the CC email"
 email_copia_no_valido: "The external CC email ({email}) is NOT valid"
@@ -43,7 +41,3 @@ formulario_no_encontrado: "Form not found"
 no_fue_posible_guardar_pqr: "It was not possible to save the PQR"
 no_fue_posible_crear_tarea: "It was not possible to create the task"
 no_fue_posible_procesar_pqr: "It was not possible to process the PQR"
-
-# ── Excepciones sin traducción — docs/migraciones-mantenimiento.md (2026-07-06) ──
-no_fue_posible_editar_la_distribucion: 'Could not edit the distribution'
-no_fue_posible_enviar_la_notificacion_por_correo: 'Could not send the email notification'

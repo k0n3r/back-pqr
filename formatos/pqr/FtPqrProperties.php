@@ -28,18 +28,17 @@ class FtPqrProperties extends ModelFormat
                 'sys_severidad',
                 'sys_oportuno',
                 'sys_impacto',
-                'sys_frecuencia',
                 'radicacion',
+                'sys_frecuencia',
                 'sys_fecha_vencimiento',
-                'sys_fecha_terminado',
                 'sys_anonimo',
+                'sys_fecha_terminado',
                 'sys_estado',
                 'dependencia',
                 'sys_tipo',
                 'sys_email',
                 'sys_folios',
                 'sys_anexos',
-                'sys_dependencia',
                 'distribucion',
                 'destino_interno',
                 'select_mensajeria',
@@ -61,7 +60,9 @@ class FtPqrProperties extends ModelFormat
         $Documento = $this->getDocument();
 
         if (!$this->editDistribution()) {
-            throw new ValidationFailedException('No fue posible editar la distribución');
+            throw new ValidationFailedException(
+                $this->serviceLocator->getTranslator()->trans('no_fue_posible_editar_la_distribucion')
+            );
         }
 
         if (
@@ -74,7 +75,9 @@ class FtPqrProperties extends ModelFormat
             $Documento->getPdfJson(true);
 
             if (!$this->sendDocumentsByEmail()) {
-                throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
+                throw new ValidationFailedException(
+                    $this->serviceLocator->getTranslator()->trans('no_fue_posible_enviar_la_notificacion_por_correo')
+                );
             }
         }
 
@@ -90,7 +93,7 @@ class FtPqrProperties extends ModelFormat
         if (!$this->radicacion_rapida) {
             $this->postDocumentRad();
             if (!$this->sendDocumentsByEmail()) {
-                throw new ValidationFailedException('No fue posible enviar la notificacion por correo');
+                throw new ValidationFailedException($this->serviceLocator->getTranslator()->trans('no_fue_posible_enviar_la_notificacion_por_correo'));
             }
         }
 
