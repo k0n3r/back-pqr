@@ -41,7 +41,9 @@ final class PqrFormProviderTest extends TestCase
 
         $dependencia = $this->field('sys_dependencia');
         $fieldRepo   = $this->createMock(PqrFormFieldRepository::class);
-        $fieldRepo->method('findByPqrFormOrdered')->with(1)->willReturn([
+        // 3 llamadas reales: getFieldByName() x2 (sin cache propio, delega en
+        // el repo cada vez) + countFields().
+        $fieldRepo->expects(self::exactly(3))->method('findByPqrFormOrdered')->with(1)->willReturn([
             $this->field('sys_tipo'),
             $dependencia,
         ]);
