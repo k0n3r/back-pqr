@@ -13,7 +13,6 @@ use Saia\controllers\DateController;
 use Saia\models\busqueda\BusquedaComponente;
 use Saia\models\busqueda\BusquedaFiltroTemp;
 use Saia\models\Dependencia;
-use Saia\models\documento\Documento;
 use Saia\models\formatos\CampoSeleccionados;
 use Saia\models\tarea\TareaEstado;
 use Saia\models\vistas\VfuncionarioDc;
@@ -27,6 +26,26 @@ if (file_exists($fileAdditionalFunctions)) {
 $fileAdditionalFunctions = dirname(__DIR__, 3).'/client/pqr/functionsReportPqr.php';
 if (file_exists($fileAdditionalFunctions)) {
     include_once $fileAdditionalFunctions;
+}
+
+/**
+ * Precarga en batch los Documento de la página (ver preloadDocuments() en
+ * reportLibraries/reportPreload.php) para que totalTask()/getResponsible()
+ * los reutilicen en vez de instanciar uno nuevo por fila.
+ *
+ * Guardada con function_exists(): dos reportes con ruta_libreria distinta
+ * pueden resolverse en el mismo proceso PHP (mismo request batch, un test,
+ * un worker) y esta función es global — sin el guard, el segundo reporte
+ * que la declare produce un fatal "Cannot redeclare function".
+ *
+ * @param array<int, array<string, mixed>> $rows
+ * @author Andres Agudelo <andres.agudelo@saiasoftware.com> 2026-09-15
+ */
+if (!function_exists('preloadReportRows')) {
+    function preloadReportRows(array $rows): void
+    {
+        preloadDocuments(array_column($rows, 'iddocumento'));
+    }
 }
 
 /**
@@ -135,7 +154,7 @@ function getValueSysTipo(int $iddocumento, $fkCampoOpciones): string
  */
 function totalTask(int $iddocumento): string
 {
-    $data = UtilitiesPqr::getFinishTotalTask(new Documento($iddocumento));
+    $data = UtilitiesPqr::getFinishTotalTask(getDocument($iddocumento));
 
     return "{$data['finish']}/{$data['total']}";
 }
@@ -187,7 +206,7 @@ function totalAnswers(int $idft): string
  */
 function getResponsible(int $iddocumento): string
 {
-    $tareas = (new Documento($iddocumento))->getService()->getTasks();
+    $tareas = getDocument($iddocumento)->getService()->getTasks();
     if (!$tareas) {
         return '';
     }

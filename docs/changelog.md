@@ -1,5 +1,13 @@
 # Changelog
 
+### 2026-09 - Rendimiento
+
+| Fecha | Cambio | Detalles |
+|-------|--------|----------|
+| 2026-09-15 | N+1 en `totalTask()`/`getResponsible()` de `formatos/pqr/reporteFunciones.php` | Ambas funciones instanciaban su propio `new Documento($iddocumento)` de forma independiente — en los reportes `rep_proceso_pqr`/`rep_terminados_pqr` (componentes `busqueda_componente` 811/812, que usan ambas columnas) eso eran 2 consultas duplicadas del mismo documento por cada fila. Cambiadas a `getDocument($iddocumento)` (helper del núcleo en `reportLibraries/reportPreload.php`) y se agregó `preloadReportRows(array $rows)` en el mismo archivo, que llama a `preloadDocuments(array_column($rows, 'iddocumento'))` una sola vez por página en vez de por fila. El reporte `rep_pendientes_pqr` (componente 810) comparte el mismo `ruta_libreria` pero no usa `getDocument()`/`Documento` en ninguna de sus columnas, así que el precargado no le aporta pero tampoco le afecta (solo trae una query de más que ninguna función usa). Pendiente si se quiere seguir optimizando: `viewFtPqr`/`getFtPqr()` (carga `FtPqr` por `idft`, 1 query/fila), `getFinishTotalTask()`/`getTasks()`/`getManagers()` (con bucle anidado por tarea), `totalAnswers()`, y `qualificationGest()`/`qualificationServ()` (llaman `getLastCalificacion()` cada una por separado, duplicando esa consulta). Ver `docs/reportes.md` del núcleo §4.4 para el patrón general. |
+
+---
+
 ### 2026-09 - Traducciones
 
 | Fecha | Cambio | Detalles |
