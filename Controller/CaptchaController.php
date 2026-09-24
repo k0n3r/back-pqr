@@ -33,7 +33,6 @@ class CaptchaController extends AbstractController implements IHasCaptcha
      * @param PqrNotyMessageRepository $pqrNotyMessageRepository
      *
      * @return Response
-     * @throws Exception
      */
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
     public function saveDocument(

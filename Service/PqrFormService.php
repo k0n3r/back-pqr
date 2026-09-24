@@ -126,7 +126,6 @@ class PqrFormService
      * @param array $data
      *
      * @return void
-     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com>
      * @date   2020
      */

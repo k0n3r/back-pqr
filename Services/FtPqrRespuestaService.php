@@ -357,7 +357,7 @@ class FtPqrRespuestaService extends ModelService
         $nameFormat  = $this->getModel()->getFormat()->etiqueta;
         $description = "Se solicita la calificación de la ($nameFormat) # {$this->getModel()->getDocument()->numero} al e-mail: ($email)";
 
-        $EmailSaia = (new Email())
+        $emailMessage = (new Email())
             ->subject(
                 "Queremos conocer tu opinión! (Solicitud de {$this->getPqrFormEntity()->getLabel()} # $DocumentoPqr->numero)",
             )
@@ -373,12 +373,12 @@ class FtPqrRespuestaService extends ModelService
             'tipo'          => PqrHistoryEntity::TIPO_CALIFICACION,
         ];
 
-        $EmailSaia->getHeaders()->addTextHeader(
+        $emailMessage->getHeaders()->addTextHeader(
             MailSubscriber::HEADER_METADATA,
             json_encode($params),
         );
 
-        $this->serviceLocator->getMailerService()->send($EmailSaia, 'pqr.respuesta.encuesta');
+        $this->serviceLocator->getMailerService()->send($emailMessage, 'pqr.respuesta.encuesta');
     }
 
     /**

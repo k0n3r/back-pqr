@@ -62,7 +62,6 @@ readonly class PqrSubscriber implements EventSubscriberInterface
      * @param TaskCreatedEvent $TaskCreatedEvent
      *
      * @return bool
-     * @throws Exception
      * @author Andres Agudelo <jhon.valencia@cerok.com>
      * @date   2021-02-03
      */
@@ -80,7 +79,6 @@ readonly class PqrSubscriber implements EventSubscriberInterface
      * @param TaskDeletedEvent $TaskDeletedEvent
      *
      * @return bool
-     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-03-17
      */
     public function onTaskDeletedEvent(TaskDeletedEvent $TaskDeletedEvent): bool
@@ -97,7 +95,6 @@ readonly class PqrSubscriber implements EventSubscriberInterface
      * @param TaskStatusCreatedEvent $TaskStatusCreatedEvent
      *
      * @return bool
-     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-03-18
      */
     public function onTaskStatusCreatedEvent(TaskStatusCreatedEvent $TaskStatusCreatedEvent): bool
@@ -116,7 +113,6 @@ readonly class PqrSubscriber implements EventSubscriberInterface
      * @param string       $description
      *
      * @return bool
-     * @throws Exception
      * @author Andres Agudelo <andres.agudelo@cerok.com> @date 2021-03-18
      */
     private function saveHistory(TareaService $TareaService, string $description): bool
