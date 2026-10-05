@@ -1,5 +1,13 @@
 # Changelog
 
+### 2026-10 - Correcciones
+
+| Fecha | Cambio | Detalles |
+|-------|--------|----------|
+| 2026-10-05 | Falso error "no fue posible guardar en el historial" en cada correo de PQR | `PqrSubscriber::onSent()` validaba el retorno de `FtPqrRespuestaService::saveHistory()` con `if (!$servicio->saveHistory(...))`, pero ese método está tipado `: void` (siempre retorna `null`). Como `!null` es siempre `true`, el `if` entraba en **todas** las ejecuciones (éxito o no) y lanzaba una `RuntimeException` que el propio `catch` de `onSent()` atrapaba y logueaba como error — ruido constante en logs de producción en cada respuesta/calificación de PQR enviada por correo, sin relación con una falla real. Quitado el `if`; ahora se llama `saveHistory()` directamente y una falla real de persistencia (excepción de Doctrine desde `BaseRepository::create()`) se sigue propagando y logueando igual por el `catch (Throwable $e)` existente, con mensaje y traza reales en vez del mensaje genérico traducido. |
+
+---
+
 ### 2026-09 - Rendimiento
 
 | Fecha | Cambio | Detalles |

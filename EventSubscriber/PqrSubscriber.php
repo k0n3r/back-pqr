@@ -194,10 +194,7 @@ readonly class PqrSubscriber implements EventSubscriberInterface
 
                     $FtPqrRespuesta = UtilitiesPqr::getInstanceForFtIdPqrRespuesta($params['idft']);
 
-                    if (!$FtPqrRespuesta->getService()->saveHistory($params['descripcion'], $params['tipo'])) {
-                        $trans = $this->translator->trans("no_fue_posible_guardar_historial");
-                        throw new RuntimeException($trans);
-                    }
+                    $FtPqrRespuesta->getService()->saveHistory($params['descripcion'], $params['tipo']);
                     break;
             }
 
