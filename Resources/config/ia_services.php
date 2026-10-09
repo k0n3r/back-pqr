@@ -33,9 +33,10 @@ return static function (ContainerConfigurator $container): void {
     $services->load('App\\Bundles\\pqr\\IA\\', '../../IA/');
 
     // Modelo del agente ia_pqr: configurable con IA_PQR_MODEL en .env.local.
-    // Si no se define, usa claude-haiku-4-5-20251001 (Sonnet recomendado para
-    // redacción de respuestas oficiales).
-    $container->parameters()->set('pqr_ia_df_model', 'claude-haiku-4-5-20251001');
+    // Si no se define, usa claude-sonnet-5 — mismo modelo migrado el 2026-10-08 para
+    // el resto de agentes del bundle ia (más barato y mejor en benchmarks que Haiku
+    // 4.5, y aquí además recomendado para redacción de respuestas oficiales).
+    $container->parameters()->set('pqr_ia_df_model', 'claude-sonnet-5');
     $container->parameters()->set('pqr_ia_model', '%env(default:pqr_ia_df_model:IA_PQR_MODEL)%');
 
     // Define el agente 'ia_pqr' con las herramientas exclusivas del módulo PQR.
