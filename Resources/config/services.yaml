@@ -17,7 +17,7 @@ services:
       - '../../Resources/'
       - '../../templates/'
       - '../../translations/'
-      - '../../formatos/'
+      - '../../{formatos}/'
       - '../../helpers/'
       - '../../Services/models/'
       - '../../Services/controllers/'
