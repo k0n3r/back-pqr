@@ -1,5 +1,13 @@
 # Changelog
 
+### 2026-10 - Nuevas funcionalidades
+
+| Fecha | Cambio | Detalles |
+|-------|--------|----------|
+| 2026-10-21 | Campo `sys_email` adoptó el nuevo componente de núcleo `Email` (con confirmación opcional) | Motivado por el caso real de negocio: un correo mal escrito por el ciudadano al radicar una PQR impedía que SAIA pudiera responderle, sin ninguna validación que lo evitara. En vez de parchar solo el campo de PQR, se pidió un componente reutilizable de núcleo (`etiqueta_html='Email'`, ver `docs/funcionalidades/componente-email.md` del core) que cualquier formato documental pueda usar; PQR es el primer adoptante. Nuevo `Services/controllers/AddEditFormat/fields/Email.php` — bridge que resuelve `type_saia='Email'` y traduce el `setting.confirmEmail` del builder de PQR hacia `campos_formato.opciones.confirmar_correo`. Frontend (`public/views/modules/pqr`): checkbox "Requerir confirmación de correo" en `src/pqr/modals/addEditField/input.html`/`js/input.js` (visible solo para campos tipo `email`, default `true` para campos nuevos), preview del segundo input en `src/pqr/components/viewField/ViewInput.vue`, claves nuevas `pqr.requerir_confirmacion_correo` en `translations/{es,en}.json`. Migración del core `Version20261021110315` migra el campo `sys_email` existente de `Text`+`opciones.type=email` a `Email` con `confirmar_correo=false` (no cambia comportamiento visible hasta que un admin lo active) y actualiza `pqr_html_fields` (`type='email'` → `type_saia='Email'`). Tipos de campo del formulario público documentados en `docs/02-webservice-publico.md` y `docs/frontend.md` — ambos actualizados para incluir `Email`. |
+
+---
+
 ### 2026-10 - Correcciones
 
 | Fecha | Cambio | Detalles |

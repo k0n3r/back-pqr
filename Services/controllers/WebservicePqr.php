@@ -43,7 +43,7 @@ class WebservicePqr extends WsFt
         return [
             'fieldsWithoutAnonymous' => json_encode($this->getFieldsWithoutAnonymous()),
             'fieldsWithAnonymous'    => json_encode($this->getFieldsWithAnonymous()),
-            'urlSaveFt'              => $_SERVER['APP_RECAPTCHA_PUBLIC_KEY'] ? '/api/pqr/captcha/saveDocument' : '/api/pqr/webservice/saveDocument',
+            'urlSaveFt'              => LegacyServiceLocator::getInstance()->parameterBag->get('app_recaptcha_public_key') ? '/api/pqr/captcha/saveDocument' : '/api/pqr/webservice/saveDocument',
         ];
     }
 

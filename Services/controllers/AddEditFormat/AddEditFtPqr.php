@@ -294,7 +294,6 @@ class AddEditFtPqr implements IAddEditFormat
         $fields = [
             'sys_estado'                    => [
                 'formato_idformato' => $this->PqrForm->getFkFormato(),
-                'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
                 'orden'             => 0,
                 'nombre'            => 'sys_estado',
@@ -312,7 +311,6 @@ class AddEditFtPqr implements IAddEditFormat
             ],
             'sys_tercero'                   => [
                 'formato_idformato' => $this->PqrForm->getFkFormato(),
-                'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
                 'orden'             => 0,
                 'nombre'            => 'sys_tercero',
@@ -330,7 +328,6 @@ class AddEditFtPqr implements IAddEditFormat
             ],
             'sys_fecha_vencimiento'         => [
                 'formato_idformato' => $this->PqrForm->getFkFormato(),
-                'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
                 'orden'             => 0,
                 'nombre'            => 'sys_fecha_vencimiento',
@@ -348,7 +345,6 @@ class AddEditFtPqr implements IAddEditFormat
             ],
             'sys_fecha_terminado'           => [
                 'formato_idformato' => $this->PqrForm->getFkFormato(),
-                'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
                 'orden'             => 0,
                 'nombre'            => 'sys_fecha_terminado',
@@ -366,7 +362,6 @@ class AddEditFtPqr implements IAddEditFormat
             ],
             'sys_anonimo'                   => [
                 'formato_idformato' => $this->PqrForm->getFkFormato(),
-                'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
                 'orden'             => 0,
                 'nombre'            => 'sys_anonimo',
@@ -384,7 +379,6 @@ class AddEditFtPqr implements IAddEditFormat
             ],
             'sys_frecuencia'                => [
                 'formato_idformato' => $this->PqrForm->getFkFormato(),
-                'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
                 'orden'             => 0,
                 'nombre'            => 'sys_frecuencia',
@@ -402,7 +396,6 @@ class AddEditFtPqr implements IAddEditFormat
             ],
             'sys_impacto'                   => [
                 'formato_idformato' => $this->PqrForm->getFkFormato(),
-                'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
                 'orden'             => 0,
                 'nombre'            => 'sys_impacto',
@@ -420,7 +413,6 @@ class AddEditFtPqr implements IAddEditFormat
             ],
             'sys_severidad'                 => [
                 'formato_idformato' => $this->PqrForm->getFkFormato(),
-                'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
                 'orden'             => 0,
                 'nombre'            => 'sys_severidad',
@@ -438,7 +430,6 @@ class AddEditFtPqr implements IAddEditFormat
             ],
             'sys_oportuno'                  => [
                 'formato_idformato' => $this->PqrForm->getFkFormato(),
-                'fila_visible'      => 0,
                 'obligatoriedad'    => 0,
                 'orden'             => 0,
                 'nombre'            => 'sys_oportuno',
@@ -456,7 +447,6 @@ class AddEditFtPqr implements IAddEditFormat
             ],
             'radicacion'                    => [
                 'formato_idformato' => $this->PqrForm->getFkFormato(),
-                'fila_visible'      => 1,
                 'obligatoriedad'    => 0,
                 'orden'             => 0,
                 'nombre'            => 'radicacion',
@@ -482,7 +472,6 @@ class AddEditFtPqr implements IAddEditFormat
                 'acciones'          => 'a,e,p',
                 'etiqueta_html'     => Hidden::getIdentification(),
                 'orden'             => 108,
-                'fila_visible'      => 1,
                 'placeholder'       => 'campo texto',
                 'listable'          => 0,
             ],

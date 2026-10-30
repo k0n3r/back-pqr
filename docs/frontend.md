@@ -12,7 +12,7 @@ El frontend usa Vue 3 + Pinia y se encuentra en `public/views/modules/pqr/`.
 
 ## Tipos de campo en el formulario público
 
-`Text`, `Textarea`, `Date`, `Select`, `Radio`, `Checkbox`, `File`, `Autocomplete`, `Tratamiento`, `Dependencia`, `Localidad`.
+`Text`, `Email` (con opción de confirmación — ver `docs/02-webservice-publico.md` y `docs/funcionalidades/componente-email.md` del core), `Textarea`, `Date`, `Select`, `Radio`, `Checkbox`, `File`, `Autocomplete`, `Tratamiento`, `Dependencia`, `Localidad`.
 
 ## Compilar
 

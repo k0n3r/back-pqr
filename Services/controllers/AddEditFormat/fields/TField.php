@@ -29,7 +29,6 @@ trait TField
             'etiqueta_html'     => (new ReflectionClass($this))->getShortName(),
             'orden'             => $PqrFormField->getOrden(),
             'adicionales'       => null,
-            'fila_visible'      => 1,
             'placeholder'       => null,
             'longitud_vis'      => null,
             'opciones'          => null,

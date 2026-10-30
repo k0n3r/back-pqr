@@ -42,6 +42,7 @@ No se requiere ninguna acción manual adicional.
 | Tipo | Descripción |
 |------|-------------|
 | `Text` | Campo de texto libre |
+| `Email` | Correo electrónico; opción "confirmar correo" agrega un segundo input obligatorio (sin pegar/soltar) que debe coincidir con el primero — ver `docs/funcionalidades/componente-email.md` del core. Adoptado por `sys_email` desde 2026-10-21 |
 | `Textarea` | Área de texto multilinea |
 | `Date` | Selector de fecha |
 | `Select` | Lista desplegable |
