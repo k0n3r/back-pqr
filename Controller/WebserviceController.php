@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Bundles\pqr\Controller;
 
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
+use App\EventSubscriber\middlewares\RateLimited;
 use App\Service\JsonResponseService;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,6 +18,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class WebserviceController extends AbstractController
 {
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
+    #[RateLimited('pqr_webservice_by_ip')]
     public function saveDocument(
         Request $Request,
         jsonResponseService $json,

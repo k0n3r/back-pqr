@@ -1,5 +1,13 @@
 # Changelog
 
+### 2026-11 - Correcciones
+
+| Fecha | Cambio | Detalles |
+|-------|--------|----------|
+| 2026-11-13 | Rate limiting por IP en el webservice público de PQR | Hasta ahora los 2 únicos endpoints públicos del bundle (`CaptchaController::saveDocument()` y su wrapper `WebserviceController::saveDocument()`, `POST /captcha/saveDocument` y `POST /webservice/saveDocument`) solo tenían captcha de Google como barrera — sin ningún control de tasa por IP, un atacante podía invocarlos tantas veces como quisiera. Se agregó `#[RateLimited('pqr_webservice_by_ip')]` (núcleo, `src/EventSubscriber/middlewares/RateLimited.php` + `KernelSubscriber`, mismo patrón ya usado para `IHasCaptcha`) a ambos puntos de entrada reales — se anotaron los dos porque `WebserviceController` delega en `CaptchaController` por llamada PHP directa, invisible para el evento `kernel.controller`; marcar solo uno habría dejado el otro sin protección. Límite definido en `config/packages/rate_limiter.yaml` del núcleo (`pqr_webservice_by_ip`, 30/hora). Ver `docs/changelog.md` del núcleo para el detalle completo del rate limiting centralizado con `symfony/rate-limiter`. |
+
+---
+
 ### 2026-10 - Nuevas funcionalidades
 
 | Fecha | Cambio | Detalles |

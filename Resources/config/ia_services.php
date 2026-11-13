@@ -14,6 +14,15 @@
  * Las herramientas PqrTool y PqrStatsTool NO se añaden al agente genérico 'ia'.
  * Solo están disponibles en el agente 'ia_pqr', que PqrAgentProvider expone
  * al orquestador mediante ModuleAgentProviderInterface.
+ *
+ * Nota sobre mail-intake (2026-11-13): PQR NO necesita sembrar una fila en
+ * IaMailIntakeProcessConfig aquí — un ContainerConfigurator no es el lugar para escribir en BD
+ * (solo registra servicios, no ejecuta en tiempo de request), y de todas formas no hace falta:
+ * "sin fila para este idformato" ya es el comportamiento actual exacto (sin estrategia de
+ * adjuntos, radicationMode=AI_ASSISTED) — ver MailAttachmentResolver::resolveExtractionFor().
+ * La fila solo se crea si un administrador decide, desde la pantalla de configuración de
+ * procesos del módulo ia, que la PQR de este cliente necesita leer su PDF adjunto (ej.
+ * attachmentStrategy='pdf_text_extraction', ya genérica, no hace falta nada nuevo de PQR).
  */
 
 use App\Bundles\ia\Controller\AbstractModuleChatController;

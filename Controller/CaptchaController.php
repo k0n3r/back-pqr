@@ -7,6 +7,7 @@ namespace App\Bundles\pqr\Controller;
 use App\Bundles\pqr\Repository\PqrNotyMessageRepository;
 use App\Bundles\pqr\Service\PqrNotyMessageService;
 use App\EventSubscriber\middlewares\IHasCaptcha;
+use App\EventSubscriber\middlewares\RateLimited;
 use App\Exception\MissingParameterException;
 use App\Exception\ValidationFailedException;
 use App\Service\JsonResponseService;
@@ -35,6 +36,7 @@ class CaptchaController extends AbstractController implements IHasCaptcha
      * @return Response
      */
     #[Route('/saveDocument', name: 'register', methods: ['POST'])]
+    #[RateLimited('pqr_webservice_by_ip')]
     public function saveDocument(
         Request $request,
         jsonResponseService $json,
