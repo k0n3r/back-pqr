@@ -127,7 +127,7 @@ class PqrService
         $qb = $this->pqrFormFieldRepository
             ->createQueryBuilder('ff')
             ->innerJoin('ff.htmlField', 'hf')
-            ->where("hf.typeSaia = 'Text'")
+            ->where("hf.typeSaia IN ('Text', 'Email')")
             ->andWhere('ff.active = true')
             ->orderBy('ff.orden', 'ASC');
 

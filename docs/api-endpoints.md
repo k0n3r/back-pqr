@@ -26,7 +26,7 @@ Prefijo base: `/api/pqr`. Requieren autenticación SAIA (firewall `main`), excep
 | Método | Ruta                                  | Descripción                               |
 |--------|---------------------------------------|-------------------------------------------|
 | `GET`  | `/api/pqr/form/setting`               | Configuración actual                      |
-| `GET`  | `/api/pqr/form/textFields`            | Campos de tipo texto disponibles          |
+| `GET`  | `/api/pqr/form/textFields`            | Campos de tipo Línea de texto, Numérico o E-mail (`type_saia IN ('Text','Email')`), para el selector de destinatario de la comunicación externa |
 | `GET`  | `/api/pqr/form/responseSetting`       | Config de respuesta                       |
 | `PUT`  | `/api/pqr/form/publish`               | Publica el formulario (genera webservice) |
 | `PUT`  | `/api/pqr/form/sortFields`            | Reordena los campos                       |
