@@ -113,7 +113,6 @@ final class Version20200321234633 extends AbstractMigration
         $data = [
             'ft_pqr_respuesta'     => [
                 'formato_idformato' => $idformato,
-                'fila_visible'      => 1,
                 'obligatoriedad'    => 1,
                 'orden'             => 1,
                 'nombre'            => 'ft_pqr_respuesta',
@@ -129,7 +128,6 @@ final class Version20200321234633 extends AbstractMigration
             ],
             'experiencia_gestion'  => [
                 'formato_idformato' => $idformato,
-                'fila_visible'      => 1,
                 'obligatoriedad'    => 1,
                 'orden'             => 2,
                 'nombre'            => 'experiencia_gestion',
@@ -164,7 +162,6 @@ final class Version20200321234633 extends AbstractMigration
             ],
             'experiencia_servicio' => [
                 'formato_idformato' => $idformato,
-                'fila_visible'      => 1,
                 'obligatoriedad'    => 1,
                 'orden'             => 3,
                 'nombre'            => 'experiencia_servicio',
