@@ -223,7 +223,7 @@ src/Bundles/pqr/
 
 ## 4. Instalación
 
-El módulo está incluido en el repositorio principal de SAIA. Solo se requiere ejecutar las migraciones:
+El módulo está incluido en el repositorio principal de SAIA.
 
 ```bash
 # 1. Ejecutar migraciones
@@ -235,6 +235,28 @@ php bin/console app:generate:indexesPqr
 # 3. Compilar frontend
 cd public/views/modules/pqr && npm install && npm run build
 ```
+
+### Paso manual obligatorio — Publicar el formulario desde Administración
+
+Las migraciones crean los formatos hijos `pqr_respuesta` y `pqr_calificacion`, pero **no crean el formato
+padre `pqr`** (`nombre_tabla = ft_pqr`) — ese formato no existe como `INSERT` en ninguna migración porque
+no es un dato fijo: su estructura (campos, orden, textos) la define el administrador, por diseño (ver
+§1.2).
+
+El formato `pqr` se crea/materializa en tiempo de ejecución al entrar a
+`views/modules/pqr/dist/pqr/index.html` (administración del formulario PQR), configurar los campos
+necesarios y presionar **Publicar**. Ese botón dispara `PUT /form/publish`
+(`PqrFormController::publish()` → `PqrFormService::publish()`), que:
+
+- Crea/actualiza el formato `pqr` en sí (`AddEditFtPqr::updateChange()` + `Formato::generate()`).
+- Vincula y regenera `pqr_respuesta` y `pqr_calificacion` como hijos de `pqr` (falla con
+  `formato_respuesta_pqr_no_encontrado` / `formato_calificacion_pqr_no_encontrado` si las migraciones del
+  paso 1 no corrieron antes).
+
+**Orden correcto en una instalación nueva:** migraciones (paso 1) → entrar a Administración y publicar el
+formulario PQR → recién entonces `bin/console app:format:refresh` (sin argumentos, para todos los
+formatos) puede regenerar `pqr_respuesta` sin error — antes de publicar, `pqr_respuesta` no tiene padre
+resuelto y `format:refresh` falla con `Debe definir la funcion en el campo pqr` sobre su campo `ft_pqr`.
 
 ## Documentación
 
