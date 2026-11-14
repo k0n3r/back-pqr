@@ -555,7 +555,11 @@ function filter_pqr_admin(string $nameReport): string
         return '';
     }
 
-    $Funcionario = LegacyServiceLocator::getInstance()->getCurrentUser();
+    $Funcionario = LegacyServiceLocator::getInstance()->getSecurity()->getUser()?->getUserLegacy();
+
+    if (!$Funcionario) {
+        return ' AND 1=0';
+    }
 
     $isAdmin = $Funcionario->getService()->hasFunction(FtPqrService::FUNCTION_ADMIN_PQR);
     if ($isAdmin) {
