@@ -144,8 +144,8 @@ class PqrFormFieldService
     private function clearAttributes(array $attributes): array
     {
         array_walk_recursive($attributes, static function (&$item): void {
-            if (!is_null($item) && !is_numeric($item)) {
-                $item = trim((string)$item);
+            if (is_string($item)) {
+                $item = trim($item);
             }
         });
 

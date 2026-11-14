@@ -87,4 +87,16 @@ final class PqrFormFieldServiceLogicTest extends TestCase
         self::assertSame('hola', $result['nested']['name']);
         self::assertNull($result['nulo']);
     }
+
+    public function testClearAttributesNoConvierteBooleanosEnStringVacio(): void
+    {
+        $method = new ReflectionMethod(PqrFormFieldService::class, 'clearAttributes');
+
+        $result = $method->invoke($this->service(), [
+            'setting' => ['confirmEmail' => false, 'otraOpcion' => true],
+        ]);
+
+        self::assertFalse($result['setting']['confirmEmail']);
+        self::assertTrue($result['setting']['otraOpcion']);
+    }
 }
