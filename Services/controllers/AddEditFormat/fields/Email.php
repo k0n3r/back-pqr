@@ -16,7 +16,7 @@ class Email extends Field implements IField
         $confirmEmail = $PqrFormField->getSettingDecoded()->confirmEmail ?? true;
 
         $data = array_merge($this->getDefaultValues(), [
-            'placeholder' => $PqrFormField->getSettingDecoded()->placeholder,
+            'placeholder' => $PqrFormField->getSettingDecoded()->placeholder ?? null,
             'opciones'    => json_encode([
                 // El valor viaja por un PUT/POST form-urlencoded, que convierte
                 // cualquier booleano a texto literal ("true"/"false", ambas

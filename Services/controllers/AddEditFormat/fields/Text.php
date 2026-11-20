@@ -15,7 +15,7 @@ class Text extends Field implements IField
         $typeHtml = $PqrFormField->getHtmlField()->getType();
 
         $data = array_merge($this->getDefaultValues(), [
-            'placeholder' => $PqrFormField->getSettingDecoded()->placeholder,
+            'placeholder' => $PqrFormField->getSettingDecoded()->placeholder ?? null,
             'opciones'    => '{"type":"'.$typeHtml.'"}',
         ]);
 

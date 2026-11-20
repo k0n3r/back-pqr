@@ -16,7 +16,7 @@ class Date extends Field implements IField
 
         $data = array_merge($this->getDefaultValues(), [
             'tipo_dato'   => 'datetime',
-            'placeholder' => $setting->placeholder,
+            'placeholder' => $setting->placeholder ?? null,
             'opciones'    => '{"hoy":true,"tipo":"'.$setting->dateType.'"}',
         ]);
 
