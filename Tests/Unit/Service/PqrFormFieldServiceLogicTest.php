@@ -17,18 +17,18 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /**
  * Tests de la lógica pura/determinista de PqrFormFieldService (sin tocar BD).
  * El servicio se construye con id=null → crea una entidad nueva en memoria.
- * PqrLookupRepository es final readonly: se instancia real con Connection mock.
+ * PqrLookupRepository es final readonly: se instancia real con Connection stub.
  */
 final class PqrFormFieldServiceLogicTest extends TestCase
 {
     private function service(): PqrFormFieldService
     {
         return new PqrFormFieldService(
-            $this->createMock(EntityManagerInterface::class),
-            $this->createMock(Connection::class),
-            $this->createMock(EventDispatcherInterface::class),
-            $this->createMock(TranslatorInterface::class),
-            new PqrLookupRepository($this->createMock(Connection::class)),
+            $this->createStub(EntityManagerInterface::class),
+            $this->createStub(Connection::class),
+            $this->createStub(EventDispatcherInterface::class),
+            $this->createStub(TranslatorInterface::class),
+            new PqrLookupRepository($this->createStub(Connection::class)),
             null,
         );
     }

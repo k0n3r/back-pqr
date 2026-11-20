@@ -19,13 +19,13 @@ final class PqrFormProviderTest extends TestCase
         return new PqrFormProvider(
             $formRepo,
             $fieldRepo,
-            $this->createMock(PqrNotificationRepository::class),
+            $this->createStub(PqrNotificationRepository::class),
         );
     }
 
     private function field(string $name): PqrFormField
     {
-        $field = $this->createMock(PqrFormField::class);
+        $field = $this->createStub(PqrFormField::class);
         $field->method('getName')->willReturn($name);
 
         return $field;
@@ -33,10 +33,10 @@ final class PqrFormProviderTest extends TestCase
 
     public function testGetFieldByNameDevuelveElCampoCoincidente(): void
     {
-        $form = $this->createMock(PqrForm::class);
+        $form = $this->createStub(PqrForm::class);
         $form->method('getId')->willReturn(1);
 
-        $formRepo = $this->createMock(PqrFormRepository::class);
+        $formRepo = $this->createStub(PqrFormRepository::class);
         $formRepo->method('findActiveOrFail')->willReturn($form);
 
         $dependencia = $this->field('sys_dependencia');
@@ -57,11 +57,11 @@ final class PqrFormProviderTest extends TestCase
 
     public function testGetOrNullCacheaElFormularioPorRequest(): void
     {
-        $form     = $this->createMock(PqrForm::class);
+        $form     = $this->createStub(PqrForm::class);
         $formRepo = $this->createMock(PqrFormRepository::class);
         $formRepo->expects(self::once())->method('findActive')->willReturn($form);
 
-        $provider = $this->provider($formRepo, $this->createMock(PqrFormFieldRepository::class));
+        $provider = $this->provider($formRepo, $this->createStub(PqrFormFieldRepository::class));
 
         self::assertSame($form, $provider->getOrNull());
         self::assertSame($form, $provider->getOrNull());
@@ -72,9 +72,9 @@ final class PqrFormProviderTest extends TestCase
         $formRepo = $this->createMock(PqrFormRepository::class);
         $formRepo->expects(self::exactly(2))
             ->method('findActive')
-            ->willReturn($this->createMock(PqrForm::class));
+            ->willReturn($this->createStub(PqrForm::class));
 
-        $provider = $this->provider($formRepo, $this->createMock(PqrFormFieldRepository::class));
+        $provider = $this->provider($formRepo, $this->createStub(PqrFormFieldRepository::class));
 
         $provider->getOrNull();
         $provider->refresh();

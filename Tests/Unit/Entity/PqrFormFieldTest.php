@@ -30,10 +30,10 @@ final class PqrFormFieldTest extends TestCase
 
     public function testGetFkPqrHtmlFieldYFormDeleganEnLasRelaciones(): void
     {
-        $htmlField = $this->createMock(PqrHtmlField::class);
+        $htmlField = $this->createStub(PqrHtmlField::class);
         $htmlField->method('getId')->willReturn(3);
 
-        $pqrForm = $this->createMock(PqrForm::class);
+        $pqrForm = $this->createStub(PqrForm::class);
         $pqrForm->method('getId')->willReturn(7);
 
         $field = (new PqrFormField())
@@ -46,7 +46,7 @@ final class PqrFormFieldTest extends TestCase
 
     public function testGetDataAttributesExpandeLaRelacionHtmlField(): void
     {
-        $htmlField = $this->createMock(PqrHtmlField::class);
+        $htmlField = $this->createStub(PqrHtmlField::class);
         $htmlField->method('getId')->willReturn(3);
         $htmlField->method('isUniq')->willReturn(true);
         $htmlField->method('isActive')->willReturn(true);
@@ -54,7 +54,7 @@ final class PqrFormFieldTest extends TestCase
         $htmlField->method('getType')->willReturn('select');
         $htmlField->method('getTypeSaia')->willReturn('Select');
 
-        $pqrForm = $this->createMock(PqrForm::class);
+        $pqrForm = $this->createStub(PqrForm::class);
         $pqrForm->method('getId')->willReturn(7);
 
         $field = (new PqrFormField())

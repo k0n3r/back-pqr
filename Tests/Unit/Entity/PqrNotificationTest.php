@@ -19,7 +19,7 @@ final class PqrNotificationTest extends TestCase
 
     public function testGetFkFuncionarioDelegaEnLaRelacion(): void
     {
-        $funcionario = $this->createMock(Funcionario::class);
+        $funcionario = $this->createStub(Funcionario::class);
         $funcionario->method('getId')->willReturn(99);
 
         $notification = (new PqrNotification())->setFuncionario($funcionario);

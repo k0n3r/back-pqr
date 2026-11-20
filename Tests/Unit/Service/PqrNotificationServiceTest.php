@@ -17,15 +17,15 @@ final class PqrNotificationServiceTest extends TestCase
     public function testToArrayMapeaLaEntidadConElFuncionarioExpandido(): void
     {
         $service = new PqrNotificationService(
-            $this->createMock(PqrNotificationRepository::class),
-            $this->createMock(PqrFormProvider::class),
-            $this->createMock(EntityManagerInterface::class),
+            $this->createStub(PqrNotificationRepository::class),
+            $this->createStub(PqrFormProvider::class),
+            $this->createStub(EntityManagerInterface::class),
         );
 
-        $funcionario = $this->createMock(Funcionario::class);
+        $funcionario = $this->createStub(Funcionario::class);
         $funcionario->method('getNombres')->willReturn('Juan Pérez');
 
-        $entity = $this->createMock(PqrNotification::class);
+        $entity = $this->createStub(PqrNotification::class);
         $entity->method('getId')->willReturn(5);
         $entity->method('getFkFuncionario')->willReturn(99);
         $entity->method('getFuncionario')->willReturn($funcionario);

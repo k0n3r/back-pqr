@@ -14,7 +14,7 @@ final class PqrNotyMessageServiceTest extends TestCase
 {
     public function testGetDataPqrNotyMessagesMapeaLosMensajesActivos(): void
     {
-        $msg = $this->createMock(PqrNotyMessage::class);
+        $msg = $this->createStub(PqrNotyMessage::class);
         $msg->method('getLabel')->willReturn('Radicado');
         $msg->method('getId')->willReturn(1);
         $msg->method('getDescription')->willReturn('desc');
@@ -28,7 +28,7 @@ final class PqrNotyMessageServiceTest extends TestCase
             ->with(['active' => true])
             ->willReturn([$msg]);
 
-        $service = new PqrNotyMessageService($repository, $this->createMock(TranslatorInterface::class));
+        $service = new PqrNotyMessageService($repository, $this->createStub(TranslatorInterface::class));
 
         self::assertSame([
             [

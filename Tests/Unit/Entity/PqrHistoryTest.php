@@ -19,7 +19,7 @@ final class PqrHistoryTest extends TestCase
 {
     public function testGetFkFuncionarioDelegaEnLaRelacion(): void
     {
-        $funcionario = $this->createMock(Funcionario::class);
+        $funcionario = $this->createStub(Funcionario::class);
         $funcionario->method('getId')->willReturn(42);
 
         $history = (new PqrHistory())->setFuncionario($funcionario);
