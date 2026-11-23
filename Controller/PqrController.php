@@ -36,7 +36,7 @@ class PqrController extends AbstractController
             if (empty($request->query->get('numero'))) {
                 throw new MissingParameterException($translator->trans('se_debe_indicar_numero_radicado'));
             }
-            $email = trim($request->query->get('sys_email'));
+            $email = trim((string)$request->query->get('sys_email'));
 
             $Qb = $pqrLookupRepository->buildSearchByNumberQuery((string)$request->query->get('numero'));
 
@@ -44,7 +44,7 @@ class PqrController extends AbstractController
 
             $data = [];
             foreach ($records as $FtPqr) {
-                if (mb_strtolower(trim($FtPqr->sys_email)) == mb_strtolower(trim($email))) {
+                if (mb_strtolower(trim((string)$FtPqr->sys_email)) == mb_strtolower(trim($email))) {
                     $data[] = [
                         'fecha'       => DateController::convertDate($FtPqr->getDocument()->fecha),
                         'descripcion' => array_filter(explode("<br>", $FtPqr->getDocument()->getDescription())),
@@ -130,9 +130,9 @@ class PqrController extends AbstractController
                 ENT_QUOTES,
                 'UTF-8',
             );
-            $label = htmlspecialchars((string)$pqrFormField->getLabel(), ENT_QUOTES, 'UTF-8');
-            $i18n  = "data-i18n='$keyTranslator'";
-            $html  = <<<HTML
+            $label         = htmlspecialchars((string)$pqrFormField->getLabel(), ENT_QUOTES, 'UTF-8');
+            $i18n          = "data-i18n='$keyTranslator'";
+            $html          = <<<HTML
                 <div class='form-group form-group-default form-group-default-select2'>
                     <label $i18n>$label</label>
                     <div class='form-group'>
