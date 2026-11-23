@@ -91,3 +91,10 @@ grupo define qué funcionarios reciben PQRs del tipo asignado.
 | Respuesta | Ciudadano (contenido de la respuesta + URL calificación) |
 | Asignación | Funcionario asignado |
 | Vencimiento | Funcionario responsable y supervisores |
+
+**Adjuntos del correo al ciudadano (2026-11-22).** El correo de radicación
+(`FtPqrService::notifyEmail()`) y el de respuesta (`FtPqrRespuestaService::notifyEmail()`) adjuntan
+el PDF y los anexos del documento. Si los adjuntos superan el umbral del núcleo (18 MB por defecto,
+`APP_MAIL_ATTACHMENTS_MAX_MB`), el PDF sigue adjunto (se pasa en `keepAttached`) y los anexos llegan
+como un ZIP por enlace firmado que vence (5 días por defecto). Detalle en
+`docs/funcionalidades/adjuntos-correo.md` del núcleo.

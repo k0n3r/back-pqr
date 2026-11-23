@@ -49,6 +49,8 @@ use Saia\models\tarea\Tarea;
 use Saia\models\Tercero;
 use Saia\models\vistas\VfuncionarioDc;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Part\DataPart;
+use Symfony\Component\Mime\Part\File;
 use Throwable;
 
 class FtPqrService extends ModelService
@@ -536,7 +538,10 @@ class FtPqrService extends ModelService
 
         $Documento = $this->getDocument();
         $file      = $Documento->getPdfFile();
-        $email->attachFromPath($file->getSplFileInfo()->getPathname(), $file->getSplFileInfo()->getFilename());
+        // El PDF de la PQR es esencial: sigue adjunto aunque los anexos superen el umbral y viajen
+        // por enlace (ver MailerService::send(), $keepAttached).
+        $pdfPart = new DataPart(new File($file->getSplFileInfo()->getPathname()), $file->getSplFileInfo()->getFilename());
+        $email->addPart($pdfPart);
 
         $records = $Documento->getService()->getAllFilesAnexos(true);
         foreach ($records as $Anexos) {
@@ -558,7 +563,7 @@ class FtPqrService extends ModelService
             json_encode($params),
         );
 
-        $this->serviceLocator->getMailerService()->send($email, 'pqr.radicado.solicitante');
+        $this->serviceLocator->getMailerService()->send($email, 'pqr.radicado.solicitante', keepAttached: [$pdfPart]);
 
         return true;
     }

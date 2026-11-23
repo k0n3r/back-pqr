@@ -28,6 +28,8 @@ use Saia\models\tarea\TareaEstado;
 use Saia\models\Tercero;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Part\DataPart;
+use Symfony\Component\Mime\Part\File;
 
 class FtPqrRespuestaService extends ModelService
 {
@@ -240,7 +242,10 @@ class FtPqrRespuestaService extends ModelService
 
         $DocumentoRespuesta = $FtPqrRespuesta->getDocument();
         $file               = $DocumentoRespuesta->getPdfFile();
-        $email->attachFromPath($file->getSplFileInfo()->getPathname(), $file->getSplFileInfo()->getFilename());
+        // El PDF de la respuesta es esencial: sigue adjunto aunque los anexos superen el umbral y
+        // viajen por enlace (ver MailerService::send(), $keepAttached).
+        $pdfPart = new DataPart(new File($file->getSplFileInfo()->getPathname()), $file->getSplFileInfo()->getFilename());
+        $email->addPart($pdfPart);
 
         $DocumentoService = $DocumentoRespuesta->getService();
         if ($records = $DocumentoService->getAllFilesAnexos(true)) {
@@ -280,7 +285,7 @@ class FtPqrRespuestaService extends ModelService
             json_encode($params),
         );
 
-        $this->serviceLocator->getMailerService()->send($email, 'pqr.respuesta.respuesta');
+        $this->serviceLocator->getMailerService()->send($email, 'pqr.respuesta.respuesta', keepAttached: [$pdfPart]);
 
         return true;
     }
